@@ -1,0 +1,128 @@
+<aside id="sidebar"
+    class="fixed inset-y-0 left-0 z-40 flex flex-col w-64 bg-white dark:bg-[#09090b] border-r border-slate-200 dark:border-slate-800 p-3 shrink-0 transition-transform duration-300 -translate-x-full md:translate-x-0 md:relative md:z-20 shadow-sm md:shadow-none">
+
+    <!-- Workspace Selector -->
+    <div
+        class="workspace-selector flex items-center justify-between p-2 mb-4 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg cursor-pointer transition-colors relative group">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg logo-gradient-bg flex items-center justify-center shrink-0">
+                <span class="text-white text-lg font-bold"
+                    style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">
+                    H
+                </span>
+            </div>
+            <div class="school-info overflow-hidden">
+                <h1 class="text-lg text-slate-900 dark:text-slate-50 truncate leading-normal tracking-wide"
+                    style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">
+                    SANS HRD
+                </h1>
+            </div>
+        </div>
+        <!-- Dropdown selector arrow -->
+        <i data-lucide="chevrons-up-down" class="chevron-icon w-4 h-4 text-slate-400 shrink-0 ml-1"></i>
+
+        <!-- Tooltip for collapsed view -->
+        <span
+            class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+            SANS HRD
+        </span>
+    </div>
+
+    <!-- Navigation Links -->
+    <div class="flex-1 space-y-4 overflow-y-auto px-1 py-2 no-scrollbar">
+        <div>
+            <h3
+                class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                Pusat Kontrol</h3>
+            <nav class="space-y-1">
+                <a href="{{ route('dashboard') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('dashboard') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="layout-dashboard" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Dashboard Aggregator</span>
+                    <span
+                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                        Dashboard Aggregator
+                    </span>
+                </a>
+
+                <a href="{{ route('employees.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('employees.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="users-2" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Data Pegawai</span>
+                    <span
+                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                        Data Pegawai
+                    </span>
+                </a>
+
+                <a href="{{ route('school-units.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('school-units.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="settings" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Integrasi API Unit</span>
+                    <span
+                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                        Integrasi API Unit
+                    </span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Bottom User Account Profile Menu -->
+    <div class="pt-2 border-t border-slate-200 dark:border-slate-800 relative" x-data="{ open: false }">
+        <!-- Dropdown menu -->
+        <div x-show="open" @click.outside="open = false"
+            class="absolute bottom-full left-0 w-60 mb-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-1.5 z-50 transition-all origin-bottom-left"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95" style="display: none;">
+
+            <!-- Account Info -->
+            <a href="{{ route('profile.edit') }}"
+                class="flex items-center gap-2 px-3 py-2 text-xs text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                <i data-lucide="badge-check" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                <span>Profil</span>
+            </a>
+
+            <div class="border-t border-slate-100 dark:border-slate-900 my-1"></div>
+
+            <!-- Log Out -->
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit"
+                    class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs text-red-650 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer">
+                    <i data-lucide="log-out" class="w-4 h-4 text-red-500 dark:text-red-450"></i>
+                    <span>Keluar</span>
+                </button>
+            </form>
+        </div>
+
+        <div @click="open = !open"
+            class="user-selector flex items-center justify-between p-2 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg cursor-pointer transition-colors relative group">
+            <div class="flex items-center gap-2.5 overflow-hidden">
+                <div class="w-7 h-7 rounded-lg bg-indigo-900/30 border border-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
+                    HR
+                </div>
+                <div class="user-info overflow-hidden">
+                    <h4 class="text-xs font-semibold text-slate-900 dark:text-slate-50 truncate leading-none">
+                        {{ Auth::user()->name }}
+                    </h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-1">{{ Auth::user()->email }}</p>
+                </div>
+            </div>
+            <i data-lucide="chevrons-up-down" class="chevron-icon w-4 h-4 text-slate-400 shrink-0 ml-1"></i>
+
+            <!-- Tooltip for collapsed view -->
+            <span
+                class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                {{ Auth::user()->name }}
+            </span>
+        </div>
+    </div>
+
+</aside>
