@@ -27,19 +27,79 @@
             </div>
         @endif
 
+        <!-- IMPORT ERRORS ALERT -->
+        @if(session('import_errors'))
+            <div class="bg-rose-50 dark:bg-rose-955/20 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-400 p-4 rounded-xl flex items-start gap-3 text-left w-full">
+                <i data-lucide="alert-triangle" class="w-5 h-5 mt-0.5 shrink-0 text-rose-550 dark:text-rose-400"></i>
+                <div class="space-y-1">
+                    <h5 class="text-xs font-bold">Beberapa baris data gagal diimpor:</h5>
+                    <ul class="list-disc list-inside text-[11px] leading-relaxed opacity-90 max-h-40 overflow-y-auto">
+                        @foreach(session('import_errors') as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
             <div class="flex flex-col gap-0.5">
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Pegawai Terintegrasi</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Daftar gabungan dan manajemen guru/staf dari seluruh unit sekolah yang terhubung.</p>
             </div>
-            <div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="toggleModal('import-employee-modal')" class="h-9 px-4 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-855 text-slate-700 dark:text-slate-355 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-150 cursor-pointer flex items-center gap-2">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4 text-slate-500"></i>
+                    Impor Pegawai
+                </button>
                 <a href="{{ route('employees.create') }}" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
                     <i data-lucide="user-plus" class="w-4 h-4"></i>
                     Tambah Pegawai
                 </a>
             </div>
         </header>
+
+        <!-- FILTERS & SEARCH -->
+        <section class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
+            <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                <!-- Search Box -->
+                <div class="relative w-full md:max-w-md">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 dark:text-slate-500"></i>
+                    </span>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari berdasarkan nama, email, NIP, atau jabatan..."
+                        style="padding-left: 2.25rem;"
+                        class="w-full h-9 pr-4 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
+                </div>
+
+                <!-- Filters -->
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <!-- Unit -->
+                    <select name="unit" onchange="this.form.submit()"
+                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+                        <option value="">Semua Unit Sekolah</option>
+                        @foreach($schoolUnits as $su)
+                            <option value="{{ $su->id }}" {{ request('unit') == $su->id ? 'selected' : '' }}>{{ $su->name }}</option>
+                        @endforeach
+                    </select>
+
+                    <!-- Status -->
+                    <select name="status" onchange="this.form.submit()"
+                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+                        <option value="">Semua Status</option>
+                        <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Aktif</option>
+                        <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Non-Aktif</option>
+                    </select>
+
+                    @if(request()->anyFilled(['search', 'unit', 'status']))
+                        <a href="{{ route('employees.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors" title="Reset Filter">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </section>
 
         <!-- DATA TABLE -->
         <section class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
@@ -64,8 +124,19 @@
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
                                 <td class="px-6 py-4 text-slate-500 dark:text-slate-400 font-mono">{{ $index + 1 }}</td>
                                 <td class="px-6 py-4">
-                                    <div class="font-semibold text-slate-900 dark:text-slate-50">{{ $emp['name'] }}</div>
-                                    <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $emp['subject_position'] }} • {{ $emp['gender'] == 'Male' ? 'Laki-laki' : 'Perempuan' }}</div>
+                                    <div class="flex items-center gap-3">
+                                        @if(!empty($emp['photo']))
+                                            <img src="{{ rtrim($emp['unit_url'], '/') . '/storage/' . $emp['photo'] }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
+                                        @else
+                                            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-350 shrink-0">
+                                                {{ strtoupper(substr($emp['name'], 0, 2)) }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <div class="font-semibold text-slate-900 dark:text-slate-50">{{ $emp['name'] }}</div>
+                                            <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $emp['subject_position'] }} • {{ $emp['gender'] == 'Male' ? 'Laki-laki' : 'Perempuan' }}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium">
                                     {{ $emp['employee_type']['name'] ?? 'Pegawai' }}
@@ -116,6 +187,91 @@
                     </tbody>
                 </table>
             </div>
-        </section>
+
+            <!-- PAGINATION & COUNT FOOTER -->
+            @if($employees instanceof \Illuminate\Pagination\LengthAwarePaginator && $employees->total() > 0)
+                <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-900 bg-slate-50/30 dark:bg-slate-900/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                    <div>
+                        Menampilkan
+                        <span class="font-bold text-slate-700 dark:text-slate-350">{{ $employees->firstItem() }}</span>
+                        sampai
+                        <span class="font-bold text-slate-700 dark:text-slate-350">{{ $employees->lastItem() }}</span>
+                        dari
+                        <span class="font-bold text-slate-700 dark:text-slate-350">{{ $employees->total() }}</span>
+                        pegawai
+                    </div>
+                    <div class="flex items-center gap-1.5 font-semibold">
+                        @if ($employees->onFirstPage())
+                            <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Sebelumnya</span>
+                        @else
+                            <a href="{{ $employees->previousPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-950">Sebelumnya</a>
+                        @endif
+
+                        <span class="px-3 py-1 font-medium text-slate-700 dark:text-slate-300">
+                            Halaman {{ $employees->currentPage() }} dari {{ $employees->lastPage() }}
+                        </span>
+
+                        @if ($employees->hasMorePages())
+                            <a href="{{ $employees->nextPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-950">Berikutnya</a>
+                        @else
+                            <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Berikutnya</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
+        <!-- IMPORT MODAL -->
+        <div id="import-employee-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs hidden transition-opacity">
+            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all scale-95 opacity-0 duration-200">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Impor Pegawai dari Excel</h3>
+                    <button onclick="toggleModal('import-employee-modal')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <form action="{{ route('employees.import') }}" method="POST" enctype="multipart/form-data" class="p-5 space-y-4 text-left text-xs">
+                    @csrf
+                    <div class="space-y-2 bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Format Template Pengisian</h4>
+                        <p class="text-[11px] text-slate-550 dark:text-slate-400 leading-relaxed">
+                            Unduh template Excel resmi terlebih dahulu untuk memahami susunan kolom data pegawai yang benar. Pastikan kolom "Unit Sekolah" diisi dengan tepat (paud/sd/smp).
+                        </p>
+                        <a href="{{ route('employees.download-template') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            Unduh Template Excel (.xlsx)
+                        </a>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-650 dark:text-slate-400 mb-1.5">Pilih File Excel (.xlsx)</label>
+                        <input type="file" name="file" accept=".xlsx, .xls" required class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none file:mr-4 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-300 dark:hover:file:bg-slate-700 cursor-pointer">
+                    </div>
+                    <div class="p-5 border-t border-slate-200 dark:border-slate-850 flex justify-end gap-2.5">
+                        <button type="button" onclick="toggleModal('import-employee-modal')" class="px-4 py-2 border border-slate-200 dark:border-slate-850 text-slate-700 dark:text-slate-355 bg-transparent text-xs font-bold rounded-lg cursor-pointer">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 text-xs font-bold rounded-lg cursor-pointer">Mulai Impor</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function toggleModal(modalId) {
+                const modal = document.getElementById(modalId);
+                const content = modal.firstElementChild;
+                if (modal.classList.contains('hidden')) {
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        modal.style.opacity = '1';
+                        content.style.opacity = '1';
+                        content.style.transform = 'scale(1)';
+                    }, 50);
+                } else {
+                    content.style.opacity = '0';
+                    content.style.transform = 'scale(0.95)';
+                    modal.style.opacity = '0';
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                    }, 200);
+                }
+            }
+        </script>
     </div>
 </x-admin-layout>

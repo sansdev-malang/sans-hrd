@@ -25,10 +25,18 @@ class SchoolUnitService
 
                 if ($response->successful()) {
                     $employees = $response->json('data') ?? [];
+                    
+                    $parsedUrl = parse_url($unit->api_url);
+                    $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+                    if (isset($parsedUrl['port'])) {
+                        $baseUrl .= ':' . $parsedUrl['port'];
+                    }
+
                     // We can tag each employee with their unit name
                     foreach ($employees as &$emp) {
                         $emp['unit_name'] = $unit->name;
                         $emp['unit_id'] = $unit->id;
+                        $emp['unit_url'] = $baseUrl;
                     }
                     $allEmployees = array_merge($allEmployees, $employees);
                 } else {

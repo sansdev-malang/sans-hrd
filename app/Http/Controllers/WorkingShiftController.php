@@ -1,0 +1,166 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\WorkingShift;
+use App\Models\SchoolUnit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class WorkingShiftController extends Controller
+{
+    /**
+     * Display a listing of working shifts.
+     */
+    public function index()
+    {
+        $shifts = WorkingShift::with('details')->orderBy('name')->get();
+        return view('working-shifts.index', compact('shifts'));
+    }
+
+    /**
+     * Store a newly created working shift in storage.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:255|unique:working_shifts,code',
+            'is_shift' => 'sometimes|boolean',
+            'description' => 'nullable|string',
+            'days' => 'required|array|min:7|max:7',
+            'days.*.start_time' => 'nullable|string',
+            'days.*.end_time' => 'nullable|string',
+            'days.*.is_off' => 'sometimes|boolean',
+        ]);
+
+        $isShift = $request->has('is_shift') ? (bool)$request->input('is_shift') : false;
+
+        $shift = WorkingShift::create([
+            'name' => $validated['name'],
+            'code' => $validated['code'],
+            'is_shift' => $isShift,
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        foreach ($validated['days'] as $dayOfWeek => $dayData) {
+            $isOff = isset($dayData['is_off']) ? (bool)$dayData['is_off'] : false;
+            $shift->details()->create([
+                'day_of_week' => $dayOfWeek,
+                'start_time' => $isOff ? null : ($dayData['start_time'] ?? null),
+                'end_time' => $isOff ? null : ($dayData['end_time'] ?? null),
+                'is_off' => $isOff,
+            ]);
+        }
+
+        // Auto sync to units
+        $this->syncShiftsToUnits();
+
+        return redirect()->route('working-shifts.index')
+            ->with('success', 'Shift kerja berhasil ditambahkan dan disinkronkan ke semua unit.');
+    }
+
+    /**
+     * Update the specified working shift in storage.
+     */
+    public function update(Request $request, WorkingShift $workingShift)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'is_shift' => 'sometimes|boolean',
+            'description' => 'nullable|string',
+            'days' => 'required|array|min:7|max:7',
+            'days.*.start_time' => 'nullable|string',
+            'days.*.end_time' => 'nullable|string',
+            'days.*.is_off' => 'sometimes|boolean',
+        ]);
+
+        $isShift = $request->has('is_shift');
+
+        $workingShift->update([
+            'name' => $validated['name'],
+            'is_shift' => $isShift,
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        $workingShift->details()->delete();
+
+        foreach ($validated['days'] as $dayOfWeek => $dayData) {
+            $isOff = isset($dayData['is_off']) ? (bool)$dayData['is_off'] : false;
+            $workingShift->details()->create([
+                'day_of_week' => $dayOfWeek,
+                'start_time' => $isOff ? null : ($dayData['start_time'] ?? null),
+                'end_time' => $isOff ? null : ($dayData['end_time'] ?? null),
+                'is_off' => $isOff,
+            ]);
+        }
+
+        // Auto sync to units
+        $this->syncShiftsToUnits();
+
+        return redirect()->route('working-shifts.index')
+            ->with('success', 'Shift kerja berhasil diperbarui dan disinkronkan ke semua unit.');
+    }
+
+    /**
+     * Remove the specified working shift from storage.
+     */
+    public function destroy(WorkingShift $workingShift)
+    {
+        $workingShift->delete();
+
+        // Auto sync to units
+        $this->syncShiftsToUnits();
+
+        return redirect()->route('working-shifts.index')
+            ->with('success', 'Shift kerja berhasil dihapus.');
+    }
+
+    /**
+     * Trigger manual synchronization of all shifts.
+     */
+    public function triggerSync()
+    {
+        $this->syncShiftsToUnits();
+        return redirect()->route('working-shifts.index')
+            ->with('success', 'Sinkronisasi data shift ke unit sekolah selesai.');
+    }
+
+    /**
+     * Helper to sync shifts to all active units.
+     */
+    private function syncShiftsToUnits()
+    {
+        $units = SchoolUnit::where('is_active', true)->get();
+        $shifts = WorkingShift::with('details')->get()->map(function ($shift) {
+            return [
+                'name' => $shift->name,
+                'code' => $shift->code,
+                'is_shift' => $shift->is_shift,
+                'description' => $shift->description,
+                'details' => $shift->details->map(function ($d) {
+                    return [
+                        'day_of_week' => $d->day_of_week,
+                        'start_time' => $d->start_time,
+                        'end_time' => $d->end_time,
+                        'is_off' => $d->is_off,
+                    ];
+                })->toArray()
+            ];
+        })->toArray();
+
+        foreach ($units as $unit) {
+            try {
+                Http::withHeaders([
+                    'X-API-TOKEN' => $unit->api_token,
+                    'Accept' => 'application/json',
+                ])->post(rtrim($unit->api_url, '/') . '/sync/shifts', [
+                    'shifts' => $shifts
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to sync shifts to unit {$unit->name}: " . $e->getMessage());
+            }
+        }
+    }
+}

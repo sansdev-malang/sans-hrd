@@ -67,6 +67,61 @@
                         Integrasi API Unit
                     </span>
                 </a>
+
+                <a href="{{ route('working-shifts.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('working-shifts.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="clock" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Shift Kerja</span>
+                    <span
+                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                        Shift Kerja
+                    </span>
+                </a>
+
+                <a href="{{ route('employee-working-shifts.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('employee-working-shifts.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="calendar" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Penjadwalan Shift</span>
+                    <span
+                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                        Penjadwalan Shift
+                    </span>
+                </a>
+
+                <a href="{{ route('holidays.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('holidays.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="plane" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Hari Libur</span>
+                    <span
+                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                        Hari Libur
+                    </span>
+                </a>
+
+                <a href="{{ route('bonus-schemas.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="award" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Skema Bonus</span>
+                    <span
+                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                        Skema Bonus
+                    </span>
+                </a>
+
+                <a href="{{ route('leave-approvals.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="file-check" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Persetujuan Izin</span>
+                    <span
+                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
+                        Persetujuan Izin
+                    </span>
+                </a>
             </nav>
         </div>
     </div>
