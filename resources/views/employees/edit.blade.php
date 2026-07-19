@@ -141,7 +141,7 @@
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Foto Pegawai</label>
                         @if(!empty($employee['photo']))
                             <div class="flex items-center gap-3 mb-2">
-                                <img src="{{ dirname(dirname(dirname($unit->api_url))) . '/storage/' . $employee['photo'] }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800">
+                                <img src="{{ str_contains($employee['photo'], 'photos/') ? dirname(dirname(dirname($unit->api_url))) . '/storage/' . $employee['photo'] : dirname(dirname(dirname($unit->api_url))) . '/storage/photos/' . $employee['photo'] }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800">
                                 <span class="text-[10px] text-slate-450 dark:text-slate-500">Foto saat ini</span>
                             </div>
                         @endif

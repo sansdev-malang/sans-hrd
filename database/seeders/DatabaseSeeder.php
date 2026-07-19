@@ -27,6 +27,26 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        User::firstOrCreate(
+            ['email' => 'superadmin1@sans.dev'],
+            [
+                'name' => 'Super Admin 1',
+                'password' => Hash::make('password'),
+                'role' => 'super_admin',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'superadmin2@sans.dev'],
+            [
+                'name' => 'Super Admin 2',
+                'password' => Hash::make('password'),
+                'role' => 'super_admin',
+                'email_verified_at' => now(),
+            ]
+        );
+
         \App\Models\SchoolUnit::firstOrCreate(
             ['name' => 'PAUD Unit'],
             [

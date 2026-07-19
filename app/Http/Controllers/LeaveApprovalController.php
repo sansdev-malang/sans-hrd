@@ -32,9 +32,21 @@ class LeaveApprovalController extends Controller
             if (isset($employeeMap[$key])) {
                 $leave->employee_name = $employeeMap[$key]['name'];
                 $leave->employee_nip = $employeeMap[$key]['nuptk_nip_nik'] ?? '-';
+                $leave->employee_photo = $employeeMap[$key]['photo'] ?? null;
+                $leave->employee_unit_url = $employeeMap[$key]['unit_url'] ?? null;
+                $leave->employee_gender = $employeeMap[$key]['gender'] ?? '-';
+                $leave->employee_status = $employeeMap[$key]['employment_status'] ?? '-';
+                $leave->employee_position = $employeeMap[$key]['subject_position'] ?? '-';
+                $leave->employee_email = $employeeMap[$key]['email'] ?? '-';
             } else {
                 $leave->employee_name = 'Pegawai #' . $leave->employee_id;
                 $leave->employee_nip = '-';
+                $leave->employee_photo = null;
+                $leave->employee_unit_url = null;
+                $leave->employee_gender = '-';
+                $leave->employee_status = '-';
+                $leave->employee_position = '-';
+                $leave->employee_email = '-';
             }
         }
 
@@ -122,7 +134,7 @@ class LeaveApprovalController extends Controller
     /**
      * Automatically pull all leave requests from units and save them in local database.
      */
-    private function pullLeaveRequestsFromUnits()
+    public function pullLeaveRequestsFromUnits()
     {
         $units = SchoolUnit::where('is_active', true)->get();
 
