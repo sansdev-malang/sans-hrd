@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ZktecoDevice;
+use App\Services\ZktecoService;
 use Illuminate\Http\Request;
 
 class ZktecoDeviceController extends Controller
@@ -27,6 +28,7 @@ class ZktecoDeviceController extends Controller
             'port' => 'required|integer|min:1|max:65535',
             'model_name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
+            'sync_interval' => 'required|integer|min:1',
         ]);
 
         $validated['is_online'] = false; // default false until connection verified
@@ -48,6 +50,7 @@ class ZktecoDeviceController extends Controller
             'port' => 'required|integer|min:1|max:65535',
             'model_name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
+            'sync_interval' => 'required|integer|min:1',
         ]);
 
         $zktecoDevice->update($validated);
@@ -85,5 +88,21 @@ class ZktecoDeviceController extends Controller
             'is_online' => $isOnline,
             'message' => $isOnline ? 'Koneksi Berhasil (Online)' : 'Koneksi Gagal (Offline)'
         ]);
+    }
+
+    /**
+     * Pull logs from the device manually.
+     */
+    public function pullLogs(ZktecoDevice $zktecoDevice, ZktecoService $zktecoService)
+    {
+        $result = $zktecoService->pullLogs($zktecoDevice);
+
+        if ($result['success']) {
+            return redirect()->back()
+                ->with('success', $result['message']);
+        }
+
+        return redirect()->back()
+            ->with('error', $result['message']);
     }
 }

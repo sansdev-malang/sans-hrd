@@ -16,6 +16,8 @@ class ZktecoDevice extends Model
         'model_name',
         'location',
         'is_online',
+        'sync_interval',
+        'last_sync_at',
     ];
 
     protected $casts = [

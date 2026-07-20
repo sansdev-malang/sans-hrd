@@ -26,6 +26,31 @@ class DashboardController extends Controller
         $sdEmployees = $this->schoolService->getSdEmployees();
         $sdAttendances = $this->schoolService->getSdAttendances($date);
 
+        // Fetch logs from local ZKTeco records for this date
+        $logs = \App\Models\AttendanceLog::whereDate('timestamp', $date)->get();
+        $zktecoLogs = [];
+        foreach ($logs as $log) {
+            $uid = (string)$log->uid;
+            $ts = Carbon::parse($log->timestamp);
+            if (!isset($zktecoLogs[$uid])) {
+                $zktecoLogs[$uid] = [
+                    'clock_in' => $ts->format('H:i:s'),
+                    'clock_out' => clone $ts, // store temporarily for comparison
+                    '_min' => $ts->timestamp,
+                    '_max' => $ts->timestamp,
+                ];
+            } else {
+                if ($ts->timestamp < $zktecoLogs[$uid]['_min']) {
+                    $zktecoLogs[$uid]['_min'] = $ts->timestamp;
+                    $zktecoLogs[$uid]['clock_in'] = $ts->format('H:i:s');
+                }
+                if ($ts->timestamp > $zktecoLogs[$uid]['_max']) {
+                    $zktecoLogs[$uid]['_max'] = $ts->timestamp;
+                    $zktecoLogs[$uid]['clock_out'] = clone $ts;
+                }
+            }
+        }
+
         // We can group the data for display
         $employeesCount = count($sdEmployees);
         
@@ -33,24 +58,51 @@ class DashboardController extends Controller
         $izin = 0;
         $sakit = 0;
         $alpa = 0;
+        $belumAbsen = 0;
 
-        // Build a mapping of employee_id => attendance details
-        $attendanceMap = [];
+        // Build a mapping of employee_id => API attendance details
+        $apiAttMap = [];
         foreach ($sdAttendances as $att) {
             $empId = $att['employee_id'] ?? null;
             if ($empId) {
-                $attendanceMap[$empId] = $att;
+                $apiAttMap[$empId] = $att;
             }
-
-            $status = $att['status'] ?? '';
-            if ($status === 'Present') $hadir++;
-            elseif ($status === 'Permit') $izin++;
-            elseif ($status === 'Sick') $sakit++;
-            elseif ($status === 'Absent') $alpa++;
         }
 
-        // For employees who have no attendance record yet on this date, we treat them as "Belum Absen"
-        $belumAbsen = max(0, $employeesCount - count($sdAttendances));
+        $attendanceMap = [];
+        
+        foreach ($sdEmployees as $emp) {
+            $empId = $emp['id'];
+            $uid = isset($emp['zkteco_uid']) ? (string)$emp['zkteco_uid'] : null;
+
+            if ($uid && isset($zktecoLogs[$uid])) {
+                $clockIn = $zktecoLogs[$uid]['clock_in'];
+                $clockOut = null;
+                if ($zktecoLogs[$uid]['_max'] > $zktecoLogs[$uid]['_min']) {
+                    $clockOut = $zktecoLogs[$uid]['clock_out']->format('H:i:s');
+                }
+
+                $attendanceMap[$empId] = [
+                    'status' => 'Present',
+                    'clock_in' => $clockIn,
+                    'clock_out' => $clockOut,
+                ];
+                $hadir++;
+            } else {
+                if (isset($apiAttMap[$empId])) {
+                    $att = $apiAttMap[$empId];
+                    $attendanceMap[$empId] = $att;
+                    $status = $att['status'] ?? '';
+                    if ($status === 'Present') $hadir++;
+                    elseif ($status === 'Permit') $izin++;
+                    elseif ($status === 'Sick') $sakit++;
+                    elseif ($status === 'Absent') $alpa++;
+                    else $belumAbsen++;
+                } else {
+                    $belumAbsen++;
+                }
+            }
+        }
 
         return view('dashboard', compact(
             'date',

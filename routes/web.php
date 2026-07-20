@@ -44,7 +44,13 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
 
     // ZKTeco Device Management
     Route::post('zkteco-devices/{zktecoDevice}/ping', [\App\Http\Controllers\ZktecoDeviceController::class, 'ping'])->name('zkteco-devices.ping');
+    Route::post('zkteco-devices/{zktecoDevice}/pull', [\App\Http\Controllers\ZktecoDeviceController::class, 'pullLogs'])->name('zkteco-devices.pull');
     Route::resource('zkteco-devices', \App\Http\Controllers\ZktecoDeviceController::class);
+
+    // Attendance Logs
+    Route::delete('attendance-logs/clear', [\App\Http\Controllers\AttendanceLogController::class, 'clear'])->name('attendance-logs.clear');
+    Route::get('attendance-logs/export', [\App\Http\Controllers\AttendanceLogController::class, 'export'])->name('attendance-logs.export');
+    Route::get('attendance-logs', [\App\Http\Controllers\AttendanceLogController::class, 'index'])->name('attendance-logs.index');
 });
 
 Route::redirect('/dashboard', '/');

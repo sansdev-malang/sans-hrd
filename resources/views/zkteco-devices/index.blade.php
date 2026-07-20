@@ -8,6 +8,7 @@
         editPort: '4370',
         editModelName: 'ZKTeco K40',
         editLocation: '',
+        editSyncInterval: 5,
         openEditModal(device) {
             this.editId = device.id;
             this.editName = device.name;
@@ -15,6 +16,7 @@
             this.editPort = device.port;
             this.editModelName = device.model_name;
             this.editLocation = device.location || '';
+            this.editSyncInterval = device.sync_interval || 5;
             this.showEditModal = true;
         },
         pingDevice(id, event) {
@@ -154,8 +156,9 @@
                             <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-24">Port</th>
                             <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-36">Tipe Mesin</th>
                             <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider">Lokasi / Area</th>
+                            <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider">Sync Info</th>
                             <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-28">Status</th>
-                            <th class="px-6 py-4 text-center font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-48 font-bold">Aksi</th>
+                            <th class="px-6 py-4 text-center font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-64 font-bold">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -172,6 +175,12 @@
                                 <td class="px-6 py-4 text-slate-650 dark:text-slate-400 font-mono">{{ $device->port }}</td>
                                 <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">{{ $device->model_name }}</td>
                                 <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ $device->location ?? '-' }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-[10px] text-slate-500">Interval: {{ $device->sync_interval }} menit</span>
+                                        <span class="text-[10px] text-slate-500">Terakhir: {{ $device->last_sync_at ? \Carbon\Carbon::parse($device->last_sync_at)->diffForHumans() : 'Belum pernah' }}</span>
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4">
                                     @if($device->is_online)
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900/30">
@@ -267,6 +276,13 @@
                         </div>
                     </div>
 
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Interval Sinkronisasi Otomatis (Menit)</label>
+                        <input type="number" name="sync_interval" required value="5" min="1"
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                        <p class="text-[10px] text-slate-500 mt-1">Berapa menit sekali mesin ini akan ditarik log datanya secara otomatis di background.</p>
+                    </div>
+
                     <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-900 justify-end">
                         <button type="button" @click="showAddModal = false" class="h-9 px-4 bg-slate-55 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-750 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer">Batal</button>
                         <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold rounded-lg cursor-pointer">Simpan Perangkat</button>
@@ -322,6 +338,12 @@
                             <input type="text" name="location" x-model="editLocation"
                                 class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Interval Sinkronisasi Otomatis (Menit)</label>
+                        <input type="number" name="sync_interval" required min="1" x-model="editSyncInterval"
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
 
                     <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-900 justify-end">
