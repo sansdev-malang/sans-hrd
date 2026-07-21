@@ -53,7 +53,21 @@ class EmployeeWorkingShiftController extends Controller
             }
         }
 
-        return view('employee-working-shifts.index', compact('assignments', 'units', 'shifts', 'selectedUnitId'));
+        $groupedAssignments = $assignments->groupBy(function ($item) {
+            return $item->workingShift ? $item->workingShift->name . ' (' . $item->workingShift->code . ')' : 'Tanpa Shift';
+        });
+
+        return view('employee-working-shifts.index', compact('groupedAssignments', 'units', 'shifts', 'selectedUnitId'));
+    }
+
+    /**
+     * Show the form for assigning new shifts (Bulk).
+     */
+    public function create()
+    {
+        $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
+        $shifts = WorkingShift::orderBy('name')->get();
+        return view('employee-working-shifts.create', compact('units', 'shifts'));
     }
 
     /**
@@ -83,31 +97,40 @@ class EmployeeWorkingShiftController extends Controller
     }
 
     /**
-     * Store a newly created assignment in storage.
+     * Store newly created assignments in storage (Bulk).
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'school_unit_id' => 'required|exists:school_units,id',
-            'employee_id' => 'required|integer',
+            'employee_ids' => 'required|array|min:1',
+            'employee_ids.*' => 'integer',
             'working_shift_id' => 'required|exists:working_shifts,id',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        // If there's an active shift assignment overlap, close it
-        EmployeeWorkingShift::where('school_unit_id', $validated['school_unit_id'])
-            ->where('employee_id', $validated['employee_id'])
-            ->whereNull('end_date')
-            ->update(['end_date' => date('Y-m-d', strtotime($validated['start_date'] . ' -1 day'))]);
+        foreach ($validated['employee_ids'] as $employeeId) {
+            // If there's an active shift assignment overlap, close it
+            EmployeeWorkingShift::where('school_unit_id', $validated['school_unit_id'])
+                ->where('employee_id', $employeeId)
+                ->whereNull('end_date')
+                ->update(['end_date' => date('Y-m-d', strtotime($validated['start_date'] . ' -1 day'))]);
 
-        $assignment = EmployeeWorkingShift::create($validated);
+            EmployeeWorkingShift::create([
+                'school_unit_id' => $validated['school_unit_id'],
+                'employee_id' => $employeeId,
+                'working_shift_id' => $validated['working_shift_id'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'] ?? null,
+            ]);
+        }
 
-        // Sync to the specific unit
+        // Sync to the specific unit ONCE for all updated assignments
         $this->syncSchedulesToUnit($validated['school_unit_id']);
 
         return redirect()->route('employee-working-shifts.index')
-            ->with('success', 'Jadwal shift pegawai berhasil ditambahkan dan disinkronkan.');
+            ->with('success', 'Jadwal shift pegawai berhasil ditugaskan dan disinkronkan secara massal.');
     }
 
     /**

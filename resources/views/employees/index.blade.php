@@ -112,6 +112,7 @@
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
                             <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-16">No</th>
                             <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nama Lengkap</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">UID</th>
                             <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">Tipe Pegawai</th>
                             <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">NUPTK/NIP/NIK</th>
                             <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">Unit Sekolah</th>
@@ -146,6 +147,9 @@
                                             <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $emp['subject_position'] }} • {{ $emp['gender'] == 'Male' ? 'Laki-laki' : 'Perempuan' }}</div>
                                         </div>
                                     </div>
+                                </td>
+                                <td class="px-6 py-4 text-slate-500 dark:text-slate-400 font-mono">
+                                    {{ $emp['zkteco_uid'] ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium">
                                     {{ $emp['employee_type']['name'] ?? 'Pegawai' }}
@@ -185,7 +189,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+                                <td colspan="8" class="px-6 py-12 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <i data-lucide="users-2" class="w-8 h-8 text-slate-300 dark:text-slate-700"></i>
                                         <p class="text-xs">Tidak ada data pegawai yang dapat ditampilkan.</p>
