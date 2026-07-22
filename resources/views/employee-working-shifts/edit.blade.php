@@ -33,13 +33,14 @@
         }
     </style>
     <div class="p-6 max-w-4xl mx-auto space-y-6" x-data="{ 
-        selectedUnit: '',
+        selectedUnit: '{{ $unit_id }}',
         employees: [],
         searchQuery: '',
         isLoadingEmployees: false,
         selectAll: false,
+        initialEmployeeIds: {{ json_encode($employeeIds) }},
         
-        async fetchEmployees() {
+        async fetchEmployees(isInitial = false) {
             if (!this.selectedUnit) {
                 this.employees = [];
                 return;
@@ -48,7 +49,20 @@
             try {
                 let response = await fetch(`/employee-working-shifts/unit/${this.selectedUnit}/employees`);
                 this.employees = await response.json();
-                this.selectAll = false;
+                
+                if (isInitial) {
+                    // We wait for the DOM to update to check the boxes
+                    this.$nextTick(() => {
+                        let checkboxes = document.querySelectorAll('.employee-checkbox');
+                        checkboxes.forEach(cb => {
+                            if (this.initialEmployeeIds.includes(parseInt(cb.value))) {
+                                cb.checked = true;
+                            }
+                        });
+                    });
+                } else {
+                    this.selectAll = false;
+                }
                 this.searchQuery = '';
             } catch (e) {
                 console.error(e);
@@ -76,6 +90,12 @@
                     cb.checked = this.selectAll;
                 }
             });
+        },
+
+        init() {
+            if (this.selectedUnit) {
+                this.fetchEmployees(true);
+            }
         }
     }">
 
@@ -85,22 +105,28 @@
                 <a href="{{ route('employee-working-shifts.index') }}" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 </a>
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Tugaskan Shift Pegawai</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Edit Batch Penugasan Shift</h2>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 ml-11">Pilih unit, cari dan tandai pegawai yang ingin ditugaskan, lalu pilih shift.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 ml-11">Ubah tanggal, shift, atau tambah/kurangi pegawai dalam grup jadwal ini.</p>
         </header>
 
         <!-- FORM -->
         <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
-            <form method="POST" action="{{ route('employee-working-shifts.store') }}" class="p-6 space-y-6">
+            <form method="POST" action="{{ route('employee-working-shifts.update-batch') }}" class="p-6 space-y-6">
                 @csrf
+                @method('PUT')
                 
+                <input type="hidden" name="old_school_unit_id" value="{{ $unit_id }}">
+                <input type="hidden" name="old_working_shift_id" value="{{ $shift_id }}">
+                <input type="hidden" name="old_start_date" value="{{ $start }}">
+                <input type="hidden" name="old_end_date" value="{{ $end }}">
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
                     <div class="space-y-6">
                         <!-- Unit Sekolah -->
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Unit Sekolah</label>
-                            <select name="school_unit_id" required x-model="selectedUnit" @change="fetchEmployees()" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                            <select name="school_unit_id" required x-model="selectedUnit" @change="fetchEmployees(false)" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                 <option value="">-- Pilih Unit Sekolah --</option>
                                 @foreach($units as $unit)
                                     <option value="{{ $unit->id }}">{{ $unit->name }}</option>
@@ -114,7 +140,7 @@
                             <select name="working_shift_id" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                 <option value="">-- Pilih Template Shift --</option>
                                 @foreach($shifts as $shift)
-                                    <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
+                                    <option value="{{ $shift->id }}" {{ $shift_id == $shift->id ? 'selected' : '' }}>{{ $shift->name }} ({{ $shift->code }})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -123,11 +149,11 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal Mulai</label>
-                                <input type="date" name="start_date" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
+                                <input type="date" name="start_date" value="{{ $start }}" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                             </div>
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal Selesai (Opsional)</label>
-                                <input type="date" name="end_date" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
+                                <input type="date" name="end_date" value="{{ $end !== 'null' ? $end : '' }}" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                             </div>
                         </div>
                     </div>
@@ -185,7 +211,7 @@
                         Batal
                     </a>
                     <button type="submit" class="h-10 px-6 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all cursor-pointer">
-                        Simpan Penugasan Shift
+                        Simpan Perubahan
                     </button>
                 </div>
             </form>

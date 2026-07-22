@@ -31,130 +31,117 @@
     <!-- Navigation Links -->
     <div class="flex-1 space-y-4 overflow-y-auto px-1 py-2 no-scrollbar">
         <div>
-            <h3
-                class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
-                Pusat Kontrol</h3>
-            <nav class="space-y-1">
+            <nav class="space-y-1 mb-4">
                 <a href="{{ route('dashboard') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('dashboard') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="layout-dashboard" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Dashboard Aggregator</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Dashboard Aggregator
-                    </span>
+                    <span class="menu-text">Dashboard</span>
                 </a>
+            </nav>
 
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN PEGAWAI</h3>
+            <nav class="space-y-1 mb-4">
                 <a href="{{ route('employees.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('employees.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="users-2" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Data Pegawai</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Data Pegawai
-                    </span>
                 </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
+                    <i data-lucide="award" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Sertifikat Pegawai</span>
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
+                    <i data-lucide="star" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Prestasi Pegawai</span>
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
+                    <i data-lucide="bar-chart-2" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Rapor Kinerja</span>
+                </a>
+            </nav>
 
-                <a href="{{ route('school-units.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('school-units.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN ABSENSI</h3>
+            <nav class="space-y-1 mb-4">
+                <a href="{{ route('attendance-logs.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <i data-lucide="settings" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Integrasi API Unit</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Integrasi API Unit
-                    </span>
+                    <i data-lucide="fingerprint" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Data Absensi</span>
                 </a>
-
+                <a href="{{ route('leave-approvals.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="file-check" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Persetujuan Izin</span>
+                </a>
                 <a href="{{ route('working-shifts.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('working-shifts.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="clock" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Shift Kerja</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Shift Kerja
-                    </span>
                 </a>
-
                 <a href="{{ route('employee-working-shifts.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('employee-working-shifts.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="calendar" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Penjadwalan Shift</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Penjadwalan Shift
-                    </span>
                 </a>
-
                 <a href="{{ route('holidays.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('holidays.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="plane" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Hari Libur</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Hari Libur
-                    </span>
                 </a>
+            </nav>
 
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN GAJI</h3>
+            <nav class="space-y-1 mb-4">
+                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
+                    <i data-lucide="banknote" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Bayar Gaji</span>
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
+                    <i data-lucide="history" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Riwayat Gaji</span>
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
+                    <i data-lucide="file-text" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Laporan</span>
+                </a>
                 <a href="{{ route('bonus-schemas.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <i data-lucide="award" class="menu-icon w-4 h-4"></i>
+                    <i data-lucide="coins" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Skema Bonus</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Skema Bonus
-                    </span>
                 </a>
+            </nav>
 
-                <a href="{{ route('leave-approvals.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-655 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN SISTEM</h3>
+            <nav class="space-y-1 mb-4">
+                <a href="{{ route('school-units.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('school-units.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <i data-lucide="file-check" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Persetujuan Izin</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Persetujuan Izin
-                    </span>
+                    <i data-lucide="network" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Integrasi API Unit</span>
                 </a>
-
                 <a href="{{ route('zkteco-devices.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('zkteco-devices.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-655 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    {{ Request::routeIs('zkteco-devices.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="cpu" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Mesin & Perangkat</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-955 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Mesin & Perangkat
-                    </span>
+                    <span class="menu-text">Device Absensi</span>
                 </a>
-
-                <a href="{{ route('attendance-logs.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-655 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="fingerprint" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Log Absensi</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-955 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Log Absensi
-                    </span>
+                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
+                    <i data-lucide="settings" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Setting Aplikasi</span>
                 </a>
-
                 @if(auth()->user()->hasRole('super_admin'))
                 <a href="{{ route('users.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('users.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-655 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    {{ Request::routeIs('users.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="user-cog" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Manajemen User</span>
-                    <span
-                        class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50">
-                        Manajemen User
-                    </span>
                 </a>
                 @endif
             </nav>

@@ -25,6 +25,9 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
 
     // Employee Working Shift Scheduling
     Route::get('employee-working-shifts/unit/{unitId}/employees', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'getEmployeesByUnit']);
+    Route::get('employee-working-shifts/batch-edit', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'editBatch'])->name('employee-working-shifts.edit-batch');
+    Route::put('employee-working-shifts/batch-update', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'updateBatch'])->name('employee-working-shifts.update-batch');
+    Route::delete('employee-working-shifts/batch-destroy', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'destroyBatch'])->name('employee-working-shifts.destroy-batch');
     Route::resource('employee-working-shifts', \App\Http\Controllers\EmployeeWorkingShiftController::class);
 
     // Holidays & Reschedules (Adjustments)

@@ -42,22 +42,128 @@ class EmployeeWorkingShiftController extends Controller
             return $item['unit_id'] . '-' . $item['id'];
         })->toArray();
 
-        foreach ($assignments as &$assignment) {
-            $key = $assignment->school_unit_id . '-' . $assignment->employee_id;
-            if (isset($employeeMap[$key])) {
-                $assignment->employee_name = $employeeMap[$key]['name'];
-                $assignment->employee_nip = $employeeMap[$key]['nuptk_nip_nik'] ?? '-';
-            } else {
-                $assignment->employee_name = 'Pegawai #' . $assignment->employee_id;
-                $assignment->employee_nip = '-';
+        $batches = [];
+        foreach ($assignments as $assignment) {
+            $key = $assignment->school_unit_id . '|' . $assignment->working_shift_id . '|' . $assignment->start_date->format('Y-m-d') . '|' . ($assignment->end_date ? $assignment->end_date->format('Y-m-d') : 'null');
+            
+            if (!isset($batches[$key])) {
+                $batches[$key] = [
+                    'school_unit_id' => $assignment->school_unit_id,
+                    'working_shift_id' => $assignment->working_shift_id,
+                    'start_date' => $assignment->start_date,
+                    'end_date' => $assignment->end_date,
+                    'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
+                    'shift_name' => $assignment->workingShift->name ?? 'Unknown',
+                    'shift_code' => $assignment->workingShift->code ?? '-',
+                    'employees' => []
+                ];
             }
+
+            $empKey = $assignment->school_unit_id . '-' . $assignment->employee_id;
+            $batches[$key]['employees'][] = [
+                'id' => $assignment->employee_id,
+                'name' => $employeeMap[$empKey]['name'] ?? 'Pegawai #' . $assignment->employee_id,
+                'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-'
+            ];
         }
 
-        $groupedAssignments = $assignments->groupBy(function ($item) {
-            return $item->workingShift ? $item->workingShift->name . ' (' . $item->workingShift->code . ')' : 'Tanpa Shift';
-        });
+        return view('employee-working-shifts.index', compact('batches', 'units', 'shifts', 'selectedUnitId'));
+    }
 
-        return view('employee-working-shifts.index', compact('groupedAssignments', 'units', 'shifts', 'selectedUnitId'));
+    public function editBatch(Request $request)
+    {
+        $unit_id = $request->query('unit_id');
+        $shift_id = $request->query('shift_id');
+        $start = $request->query('start_date');
+        $end = $request->query('end_date');
+
+        if (!$unit_id || !$shift_id || !$start) {
+            abort(404);
+        }
+
+        $endVal = $end === 'null' ? null : $end;
+
+        $assignments = EmployeeWorkingShift::where('school_unit_id', $unit_id)
+            ->where('working_shift_id', $shift_id)
+            ->where('start_date', $start)
+            ->when($endVal !== null, function($q) use ($endVal) {
+                return $q->where('end_date', $endVal);
+            }, function($q) {
+                return $q->whereNull('end_date');
+            })->get();
+
+        $employeeIds = $assignments->pluck('employee_id')->toArray();
+        $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
+        $shifts = WorkingShift::orderBy('name')->get();
+
+        return view('employee-working-shifts.edit', compact('unit_id', 'shift_id', 'start', 'end', 'employeeIds', 'units', 'shifts'));
+    }
+
+    public function updateBatch(Request $request)
+    {
+        $validated = $request->validate([
+            'old_school_unit_id' => 'required',
+            'old_working_shift_id' => 'required',
+            'old_start_date' => 'required',
+            'old_end_date' => 'nullable',
+            
+            'school_unit_id' => 'required|exists:school_units,id',
+            'employee_ids' => 'required|array|min:1',
+            'employee_ids.*' => 'integer',
+            'working_shift_id' => 'required|exists:working_shifts,id',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $oldEnd = $validated['old_end_date'] === 'null' ? null : $validated['old_end_date'];
+
+        EmployeeWorkingShift::where('school_unit_id', $validated['old_school_unit_id'])
+            ->where('working_shift_id', $validated['old_working_shift_id'])
+            ->where('start_date', $validated['old_start_date'])
+            ->when($oldEnd !== null, function($q) use ($oldEnd) {
+                return $q->where('end_date', $oldEnd);
+            }, function($q) {
+                return $q->whereNull('end_date');
+            })->delete();
+
+        foreach ($validated['employee_ids'] as $employeeId) {
+            EmployeeWorkingShift::create([
+                'school_unit_id' => $validated['school_unit_id'],
+                'employee_id' => $employeeId,
+                'working_shift_id' => $validated['working_shift_id'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'] ?? null,
+            ]);
+        }
+
+        $this->syncSchedulesToUnit($validated['old_school_unit_id']);
+        if ($validated['old_school_unit_id'] != $validated['school_unit_id']) {
+            $this->syncSchedulesToUnit($validated['school_unit_id']);
+        }
+
+        return redirect()->route('employee-working-shifts.index')->with('success', 'Batch jadwal shift berhasil diperbarui.');
+    }
+
+    public function destroyBatch(Request $request)
+    {
+        $unit_id = $request->input('unit_id');
+        $shift_id = $request->input('shift_id');
+        $start = $request->input('start_date');
+        $end = $request->input('end_date');
+        $end = $end === 'null' ? null : $end;
+
+        EmployeeWorkingShift::where('school_unit_id', $unit_id)
+            ->where('working_shift_id', $shift_id)
+            ->where('start_date', $start)
+            ->when($end !== null, function($q) use ($end) {
+                return $q->where('end_date', $end);
+            }, function($q) {
+                return $q->whereNull('end_date');
+            })->delete();
+
+        $this->syncSchedulesToUnit($unit_id);
+
+        return redirect()->route('employee-working-shifts.index')->with('success', 'Batch jadwal shift berhasil dihapus.');
     }
 
     /**

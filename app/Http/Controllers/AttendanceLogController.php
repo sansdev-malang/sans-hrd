@@ -20,34 +20,97 @@ class AttendanceLogController extends Controller
     {
         $query = AttendanceLog::with('device')->orderBy('timestamp', 'desc');
 
-        if ($request->filled('device_id')) {
-            $query->where('zkteco_device_id', $request->device_id);
+        $rawEmployees = $this->service->getSdEmployees();
+        $employeeMap = [];
+        $validUids = []; // For filtering by unit or search
+
+        $search = $request->search;
+        $unitId = $request->unit_id;
+
+        foreach ($rawEmployees as $emp) {
+            if (!empty($emp['zkteco_uid'])) {
+                $uidStr = (string)$emp['zkteco_uid'];
+                $employeeMap[$uidStr] = $emp['name'] ?? 'Unknown';
+
+                $matchUnit = empty($unitId) || (isset($emp['unit_id']) && $emp['unit_id'] == $unitId);
+                $matchSearch = empty($search) || stripos($emp['name'], $search) !== false || stripos($uidStr, $search) !== false;
+
+                if ($matchUnit && $matchSearch) {
+                    $validUids[] = $uidStr;
+                }
+            }
         }
+
+        // If filtering by unit or searching, restrict UIDs
+        if (!empty($unitId) || !empty($search)) {
+            // Also allow exact match on uid if searching, in case not in API
+            if (!empty($search)) {
+                $query->where(function($q) use ($validUids, $search) {
+                    $q->whereIn('uid', $validUids)
+                      ->orWhere('uid', 'like', "%{$search}%");
+                });
+            } else {
+                $query->whereIn('uid', $validUids);
+            }
+        }
+
 
         if ($request->filled('date')) {
             $query->whereDate('timestamp', $request->date);
         }
 
-        $logs = $query->paginate(50)->withQueryString();
-        $devices = ZktecoDevice::orderBy('name')->get();
-
-        // Ambil data pegawai dari API unit untuk mapping nama berdasarkan UID
-        $rawEmployees = $this->service->getSdEmployees();
-        $employeeMap = [];
-        foreach ($rawEmployees as $emp) {
-            if (!empty($emp['zkteco_uid'])) {
-                // UID dari zkteco mungkin bertipe string, pastikan mapping aman
-                $employeeMap[(string)$emp['zkteco_uid']] = $emp['name'] ?? 'Unknown';
-            }
+        if ($request->filled('state')) {
+            $query->where('state', $request->state);
         }
 
-        return view('attendance-logs.index', compact('logs', 'devices', 'employeeMap'));
+        $perPage = $request->input('per_page', 50);
+        if ($perPage === 'all') {
+            $logs = $query->paginate(100000)->withQueryString(); // practically all
+        } else {
+            $logs = $query->paginate((int)$perPage)->withQueryString();
+        }
+
+        $units = \App\Models\SchoolUnit::where('is_active', true)->orderBy('name')->get();
+
+        return view('attendance-logs.index', compact('logs', 'employeeMap', 'units'));
     }
 
     public function export(Request $request)
     {
         $query = AttendanceLog::with('device')->orderBy('timestamp', 'desc');
 
+        $rawEmployees = $this->service->getSdEmployees();
+        $employeeMap = [];
+        $validUids = [];
+
+        $search = $request->search;
+        $unitId = $request->unit_id;
+
+        foreach ($rawEmployees as $emp) {
+            if (!empty($emp['zkteco_uid'])) {
+                $uidStr = (string)$emp['zkteco_uid'];
+                $employeeMap[$uidStr] = $emp['name'] ?? 'Unknown';
+
+                $matchUnit = empty($unitId) || (isset($emp['unit_id']) && $emp['unit_id'] == $unitId);
+                $matchSearch = empty($search) || stripos($emp['name'], $search) !== false || stripos($uidStr, $search) !== false;
+
+                if ($matchUnit && $matchSearch) {
+                    $validUids[] = $uidStr;
+                }
+            }
+        }
+
+        if (!empty($unitId) || !empty($search)) {
+            if (!empty($search)) {
+                $query->where(function($q) use ($validUids, $search) {
+                    $q->whereIn('uid', $validUids)
+                      ->orWhere('uid', 'like', "%{$search}%");
+                });
+            } else {
+                $query->whereIn('uid', $validUids);
+            }
+        }
+
         if ($request->filled('device_id')) {
             $query->where('zkteco_device_id', $request->device_id);
         }
@@ -56,15 +119,13 @@ class AttendanceLogController extends Controller
             $query->whereDate('timestamp', $request->date);
         }
 
+        if ($request->filled('state')) {
+            $query->where('state', $request->state);
+        }
+
         $logs = $query->get();
 
-        $rawEmployees = $this->service->getSdEmployees();
-        $employeeMap = [];
-        foreach ($rawEmployees as $emp) {
-            if (!empty($emp['zkteco_uid'])) {
-                $employeeMap[(string)$emp['zkteco_uid']] = $emp['name'] ?? 'Unknown';
-            }
-        }
+
 
         $stateMap = [
             0 => 'Masuk (Check-In)',
