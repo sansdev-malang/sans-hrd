@@ -94,13 +94,31 @@
                     <i data-lucide="plane" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Hari Libur</span>
                 </a>
+                <a href="{{ route('bonus-schemas.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="coins" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Skema Bonus</span>
+                </a>
+                <a href="{{ route('bonus-reports.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('bonus-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="calculator" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Rekapan Bonus</span>
+                </a>
             </nav>
 
             <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN GAJI</h3>
             <nav class="space-y-1 mb-4">
+                <a href="{{ route('settings.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('settings.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="scissors" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Pengaturan Cut-off</span>
+                </a>
                 <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
-                    <i data-lucide="banknote" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Bayar Gaji</span>
+                    <i data-lucide="calculator" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Hitung Gaji</span>
                 </a>
                 <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
                     <i data-lucide="history" class="menu-icon w-4 h-4"></i>
@@ -109,12 +127,6 @@
                 <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
                     <i data-lucide="file-text" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Laporan</span>
-                </a>
-                <a href="{{ route('bonus-schemas.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="coins" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Skema Bonus</span>
                 </a>
             </nav>
 

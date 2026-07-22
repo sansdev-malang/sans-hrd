@@ -40,6 +40,13 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('bonus-schemas/sync', [\App\Http\Controllers\BonusSchemaController::class, 'triggerSync'])->name('bonus-schemas.sync');
     Route::resource('bonus-schemas', \App\Http\Controllers\BonusSchemaController::class);
 
+    // Bonus Reports
+    Route::get('bonus-reports', [\App\Http\Controllers\AttendanceBonusReportController::class, 'index'])->name('bonus-reports.index');
+
+    // Settings
+    Route::get('settings', [\App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
+    Route::put('settings', [\App\Http\Controllers\SettingController::class, 'update'])->name('settings.update');
+
     // Leave Request Approvals
     Route::get('leave-approvals', [\App\Http\Controllers\LeaveApprovalController::class, 'index'])->name('leave-approvals.index');
     Route::post('leave-approvals/{id}/approve', [\App\Http\Controllers\LeaveApprovalController::class, 'approve'])->name('leave-approvals.approve');
