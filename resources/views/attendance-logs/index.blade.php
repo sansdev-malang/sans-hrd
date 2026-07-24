@@ -32,6 +32,13 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Melihat daftar seluruh log absensi yang telah ditarik dari mesin ZKTeco.</p>
             </div>
             <div class="flex items-center gap-2.5 shrink-0">
+                <form action="{{ route('attendance-logs.sync') }}" method="POST" class="m-0" onsubmit="return confirm('Proses penarikan data log absensi dari seluruh mesin ZKTeco akan memakan waktu beberapa saat. Lanjutkan?');">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-150 cursor-pointer">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        Sinkron Mesin ZK
+                    </button>
+                </form>
                 <a href="{{ route('attendance-logs.export', request()->all()) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-150 cursor-pointer" style="background-color: #16a34a; color: white;">
                     <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
                     Export Excel

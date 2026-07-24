@@ -196,28 +196,26 @@
                         
                         <div class="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-900">
                             <template x-for="(tier, index) in tiers" :key="index">
-                                <div class="grid grid-cols-12 items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-900 last:border-0 last:pb-0">
-                                    <div class="col-span-1 text-center font-bold text-slate-500" x-text="tier.tier_level"></div>
-                                    <input type="hidden" :name="`tiers[${index}][tier_level]`" x-model="tier.tier_level">
+                                <div class="grid grid-cols-12 items-end gap-3 pb-3 border-b border-slate-100 dark:border-slate-900 last:border-0 last:pb-0">
+                                    <div class="col-span-1 flex flex-col items-center justify-center pb-2">
+                                        <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-400" x-text="tier.tier_level"></div>
+                                        <input type="hidden" :name="`tiers[${index}][tier_level]`" x-model="tier.tier_level">
+                                    </div>
                                     
-                                    <div class="col-span-4">
-                                        <label class="block text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Nominal (Rp)</label>
-                                        <input type="number" :name="`tiers[${index}][nominal]`" x-model="tier.nominal" required class="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-right font-mono font-semibold">
+                                    <div class="col-span-5">
+                                        <label class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nominal (Rp)</label>
+                                        <input type="number" :name="`tiers[${index}][nominal]`" x-model="tier.nominal" required class="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-right font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                                     </div>
                                     
                                     <div class="col-span-4">
-                                        <label class="block text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Batas Keterlambatan (Menit)</label>
-                                        <input type="number" :name="`tiers[${index}][max_late_minutes]`" x-model="tier.max_late_minutes" required class="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-center font-mono">
+                                        <label class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Batas Keterlambatan (Menit)</label>
+                                        <input type="number" :name="`tiers[${index}][max_late_minutes]`" x-model="tier.max_late_minutes" required class="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                                     </div>
-
+                                    
                                     <div class="col-span-2">
-                                        <label class="block text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Max Alpha (Hari)</label>
-                                        <input type="number" :name="`tiers[${index}][max_absent_days]`" x-model="tier.max_absent_days" class="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-center font-mono">
-                                    </div>
-                                    
-                                    <div class="col-span-1 text-right pt-4">
-                                        <button type="button" @click="removeTier(index)" class="text-rose-500 hover:text-rose-700 cursor-pointer">
-                                            <i data-lucide="minus-circle" class="w-4 h-4"></i>
+                                        <button type="button" @click="removeTier(index)" class="inline-flex items-center justify-center gap-1.5 w-full px-2 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-955/20 border border-rose-200/50 dark:border-rose-900/30 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-955/40 transition-colors cursor-pointer mb-0.5">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                            Hapus
                                         </button>
                                     </div>
                                 </div>
@@ -272,28 +270,26 @@
                         
                         <div class="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-900">
                             <template x-for="(tier, index) in tiers" :key="index">
-                                <div class="grid grid-cols-12 items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-900 last:border-0 last:pb-0">
-                                    <div class="col-span-1 text-center font-bold text-slate-500" x-text="tier.tier_level"></div>
-                                    <input type="hidden" :name="`tiers[${index}][tier_level]`" x-model="tier.tier_level">
+                                <div class="grid grid-cols-12 items-end gap-3 pb-3 border-b border-slate-100 dark:border-slate-900 last:border-0 last:pb-0">
+                                    <div class="col-span-1 flex flex-col items-center justify-center pb-2">
+                                        <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-400" x-text="tier.tier_level"></div>
+                                        <input type="hidden" :name="`tiers[${index}][tier_level]`" x-model="tier.tier_level">
+                                    </div>
                                     
-                                    <div class="col-span-4">
-                                        <label class="block text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Nominal (Rp)</label>
-                                        <input type="number" :name="`tiers[${index}][nominal]`" x-model="tier.nominal" required class="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-right font-mono font-semibold">
+                                    <div class="col-span-5">
+                                        <label class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nominal (Rp)</label>
+                                        <input type="number" :name="`tiers[${index}][nominal]`" x-model="tier.nominal" required class="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-right font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                                     </div>
                                     
                                     <div class="col-span-4">
-                                        <label class="block text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Batas Keterlambatan (Menit)</label>
-                                        <input type="number" :name="`tiers[${index}][max_late_minutes]`" x-model="tier.max_late_minutes" required class="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-center font-mono">
+                                        <label class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Batas Keterlambatan (Menit)</label>
+                                        <input type="number" :name="`tiers[${index}][max_late_minutes]`" x-model="tier.max_late_minutes" required class="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                                     </div>
-
+                                    
                                     <div class="col-span-2">
-                                        <label class="block text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Max Alpha (Hari)</label>
-                                        <input type="number" :name="`tiers[${index}][max_absent_days]`" x-model="tier.max_absent_days" class="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-center font-mono">
-                                    </div>
-                                    
-                                    <div class="col-span-1 text-right pt-4">
-                                        <button type="button" @click="removeTier(index)" class="text-rose-500 hover:text-rose-700 cursor-pointer">
-                                            <i data-lucide="minus-circle" class="w-4 h-4"></i>
+                                        <button type="button" @click="removeTier(index)" class="inline-flex items-center justify-center gap-1.5 w-full px-2 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-955/20 border border-rose-200/50 dark:border-rose-900/30 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-955/40 transition-colors cursor-pointer mb-0.5">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                            Hapus
                                         </button>
                                     </div>
                                 </div>

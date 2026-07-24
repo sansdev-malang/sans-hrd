@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <div class="p-6 max-w-4xl mx-auto space-y-6">
+    <div class="p-6 max-w-6xl mx-auto space-y-6">
 
         <!-- ERROR ALERT -->
         @if($errors->any())
@@ -26,135 +26,168 @@
                 @csrf
                 @method('PUT')
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    <!-- Unit Sekolah (Readonly) -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Unit Sekolah Asal</label>
-                        <div class="h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-350 flex items-center font-semibold">
-                            {{ $unit->name }} (Terproteksi)
-                        </div>
-                    </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+
 
                     <!-- Nama Lengkap -->
                     <div>
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Lengkap</label>
-                        <input type="text" name="name" value="{{ old('name', $employee['name']) }}" required placeholder="Contoh: Drs. Eko Wibowo, M.Pd"
-                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('name') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror">
-                        @error('name')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
+                        <input type="text" name="name" value="{{ old('name', $employee['name'] ?? '') }}" required placeholder="Contoh: Drs. Eko Wibowo, M.Pd"
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
                     </div>
 
                     <!-- Email -->
                     <div>
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Alamat Email</label>
-                        <input type="email" name="email" value="{{ old('email', $employee['email']) }}" required placeholder="Contoh: nama@sans.dev"
-                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('email') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror">
-                        @error('email')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <!-- NIP / NUPTK / NIK -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">NIP / NUPTK / NIK</label>
-                        <input type="text" name="nuptk_nip_nik" value="{{ old('nuptk_nip_nik', $employee['nuptk_nip_nik']) }}" placeholder="Masukkan nomor identitas"
-                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('nuptk_nip_nik') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror">
-                        @error('nuptk_nip_nik')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
+                        <input type="email" name="email" value="{{ old('email', $employee['email'] ?? '') }}" required placeholder="Contoh: nama@sans.dev"
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
                     </div>
 
                     <!-- Tipe Pegawai -->
                     <div>
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Tipe Pegawai</label>
-                        <select name="employee_type_code" id="employee_type_code" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('employee_type_code') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror cursor-pointer">
-                            <option value="">Memuat tipe pegawai...</option>
+                        <select name="employee_type_code" id="employee_type_code" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800 cursor-pointer">
+                            <!-- Populated by JS based on unit_id, we keep a fallback or preset -->
                         </select>
-                        @error('employee_type_code')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
                     </div>
 
-                    <!-- Jabatan / Mapel -->
+                    <!-- DATA DIRI -->
+                    <div class="md:col-span-2 mt-4 mb-2 border-b pb-2"><h4 class="font-bold text-slate-700 dark:text-slate-300">Data Diri</h4></div>
+                    
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Jabatan / Bidang Studi</label>
-                        <input type="text" name="subject_position" value="{{ old('subject_position', $employee['subject_position']) }}" placeholder="Contoh: Matematika, Pustakawan, Security"
-                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('subject_position') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror">
-                        @error('subject_position')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Tempat Lahir</label>
+                        <input type="text" name="birth_place" value="{{ old('birth_place', $employee['birth_place'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
                     </div>
-
-                    <!-- Jenis Kelamin -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Tanggal Lahir</label>
+                        <input type="date" name="birth_date" value="{{ old('birth_date', $employee['birth_date'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Jenis Kelamin</label>
-                        <select name="gender" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('gender') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror cursor-pointer">
-                            <option value="Male" {{ old('gender', $employee['gender']) == 'Male' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="Female" {{ old('gender', $employee['gender']) == 'Female' ? 'selected' : '' }}>Perempuan</option>
+                        <select name="gender" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800 cursor-pointer">
+                            <option value="Male" {{ old('gender', $employee['gender'] ?? '') == 'Male' ? 'selected' : '' }}>Laki-laki</option>
+                            <option value="Female" {{ old('gender', $employee['gender'] ?? '') == 'Female' ? 'selected' : '' }}>Perempuan</option>
                         </select>
-                        @error('gender')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Alamat</label>
+                        <input type="text" name="address" value="{{ old('address', $employee['address'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">No. HP / WA</label>
+                        <input type="text" name="phone" value="{{ old('phone', $employee['phone'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
                     </div>
 
-                    <!-- Status Kepegawaian -->
+                    <!-- DATA KEPEGAWAIAN -->
+                    <div class="md:col-span-2 mt-4 mb-2 border-b pb-2"><h4 class="font-bold text-slate-700 dark:text-slate-300">Data Kepegawaian & Identitas</h4></div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">NIK</label>
+                        <input type="text" name="nik" value="{{ old('nik', $employee['nik'] ?? '') }}" 
+                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">NIY</label>
+                        <input type="text" name="niy" value="{{ old('niy', $employee['niy'] ?? '') }}" 
+                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">NUPTK</label>
+                        <input type="text" name="nuptk" value="{{ old('nuptk', $employee['nuptk'] ?? '') }}" 
+                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">NO UKG</label>
+                        <input type="text" name="no_ukg" value="{{ old('no_ukg', $employee['no_ukg'] ?? '') }}" 
+                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">NRG</label>
+                        <input type="text" name="nrg" value="{{ old('nrg', $employee['nrg'] ?? '') }}" 
+                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Pangkat / Golongan</label>
+                        <input type="text" name="pangkat_golongan" value="{{ old('pangkat_golongan', $employee['pangkat_golongan'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Pendidikan Terakhir</label>
+                        <input type="text" name="last_education" value="{{ old('last_education', $employee['last_education'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Jurusan</label>
+                        <input type="text" name="major" value="{{ old('major', $employee['major'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Jabatan Utama</label>
+                        <input type="text" name="position" value="{{ old('position', $employee['position'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Jabatan Tambahan</label>
+                        <input type="text" name="additional_position" value="{{ old('additional_position', $employee['additional_position'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Status Kepegawaian</label>
-                        <select name="employment_status" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('employment_status') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror cursor-pointer">
-                            <option value="PNS" {{ old('employment_status', $employee['employment_status']) == 'PNS' ? 'selected' : '' }}>PNS (Pegawai Negeri Sipil)</option>
-                            <option value="Tetap Yayasan" {{ old('employment_status', $employee['employment_status']) == 'Tetap Yayasan' ? 'selected' : '' }}>Tetap Yayasan</option>
-                            <option value="Honorer" {{ old('employment_status', $employee['employment_status']) == 'Honorer' ? 'selected' : '' }}>Honorer</option>
-                            <option value="Kontrak" {{ old('employment_status', $employee['employment_status']) == 'Kontrak' ? 'selected' : '' }}>Kontrak</option>
-                        </select>
-                        @error('employment_status')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
+                        <input type="text" name="employment_status" value="{{ old('employment_status', $employee['employment_status'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
                     </div>
-
-                    <!-- UID ZKTeco -->
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">UID Fingerprint (ZKTeco)</label>
-                        <input type="text" name="zkteco_uid" value="{{ old('zkteco_uid', $employee['zkteco_uid']) }}" placeholder="Contoh: 101, 102"
-                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('zkteco_uid') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror">
-                        <p class="text-[10px] text-slate-450 dark:text-slate-500 mt-1 leading-normal">Opsional: Rekomendasi biarkan kosong. Admin unit sekolah akan mengisi ini setelah mendaftarkan sidik jari di mesin fisik.</p>
-                        @error('zkteco_uid')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Tanggal Mulai Tugas</label>
+                        <input type="date" name="task_start_date" value="{{ old('task_start_date', $employee['task_start_date'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Tanggal Diangkat</label>
+                        <input type="date" name="appointment_date" value="{{ old('appointment_date', $employee['appointment_date'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Tanggal SK Terakhir</label>
+                        <input type="date" name="last_sk_date" value="{{ old('last_sk_date', $employee['last_sk_date'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Nomor SK Terakhir</label>
+                        <input type="text" name="last_sk_number" value="{{ old('last_sk_number', $employee['last_sk_number'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Masa Kerja Golongan</label>
+                        <input type="text" name="work_period" value="{{ old('work_period', $employee['work_period'] ?? '') }}" 
+                            class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
                     </div>
 
-                    <!-- Status -->
+                    <!-- SISTEM ABSENSI -->
+                    <div class="md:col-span-2 mt-4 mb-2 border-b pb-2"><h4 class="font-bold text-slate-700 dark:text-slate-300">Sistem Absensi & Foto</h4></div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">ID ZKTeco / PIN Fingerprint</label>
+                        <input type="text" name="zkteco_uid" value="{{ old('zkteco_uid', $employee['zkteco_uid'] ?? '') }}" 
+                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                    </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Status Keaktifan</label>
-                        <select name="status" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 @error('status') border-rose-500 dark:border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 focus:ring-slate-100 dark:focus:ring-slate-800 @enderror cursor-pointer">
-                            <option value="Active" {{ old('status', $employee['status']) == 'Active' ? 'selected' : '' }}>Aktif (Dapat Melakukan Absen)</option>
-                            <option value="Inactive" {{ old('status', $employee['status']) == 'Inactive' ? 'selected' : '' }}>Non-Aktif (Ditangguhkan)</option>
+                        <select name="status" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800 cursor-pointer">
+                            <option value="Active" {{ old('status', $employee['status'] ?? 'Active') == 'Active' ? 'selected' : '' }}>Aktif</option>
+                            <option value="Leave" {{ old('status', $employee['status'] ?? '') == 'Leave' ? 'selected' : '' }}>Cuti</option>
+                            <option value="Inactive" {{ old('status', $employee['status'] ?? '') == 'Inactive' ? 'selected' : '' }}>Nonaktif</option>
                         </select>
-                        @error('status')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
                     </div>
-
-                    <!-- Foto Pegawai -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Foto Pegawai</label>
-                        @if(!empty($employee['photo']))
-                            <div class="flex items-center gap-3 mb-2">
-                                <img src="{{ str_contains($employee['photo'], 'photos/') ? dirname(dirname(dirname($unit->api_url))) . '/storage/' . $employee['photo'] : dirname(dirname(dirname($unit->api_url))) . '/storage/photos/' . $employee['photo'] }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800">
-                                <span class="text-[10px] text-slate-450 dark:text-slate-500">Foto saat ini</span>
-                            </div>
-                        @endif
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Foto Profil</label>
                         <input type="file" name="photo" accept="image/*"
-                            class="w-full text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 border rounded-lg file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-slate-100 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-200 focus:outline-none @error('photo') border-rose-500 dark:border-rose-500 @else border-slate-200 dark:border-slate-800 @enderror">
-                        <p class="text-[10px] text-slate-450 dark:text-slate-500 mt-1">Opsional: Format JPEG, PNG, JPG, GIF (Max. 2MB)</p>
-                        @error('photo')
-                            <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
-                        @enderror
+                            class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none file:mr-4 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-300 dark:hover:file:bg-slate-700 cursor-pointer">
                     </div>
-
                 </div>
-
                 <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-900 justify-end">
                     <a href="{{ route('employees.index') }}" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-750 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all flex items-center justify-center cursor-pointer">Batal</a>
                     <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer">Simpan Perubahan</button>

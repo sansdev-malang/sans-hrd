@@ -64,7 +64,7 @@
         <section class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Search Box -->
-                <div class="relative w-full md:max-w-md">
+                <div class="relative w-full md:max-w-2xl">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <i data-lucide="search" class="w-4 h-4 text-slate-400 dark:text-slate-500"></i>
                     </span>
@@ -75,6 +75,16 @@
 
                 <!-- Filters -->
                 <div class="flex items-center gap-2 w-full md:w-auto">
+                    <!-- Per Page -->
+                    <select name="per_page" onchange="this.form.submit()"
+                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                        <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
+                    </select>
+
                     <!-- Unit -->
                     <select name="unit" onchange="this.form.submit()"
                         class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
@@ -92,7 +102,7 @@
                         <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Non-Aktif</option>
                     </select>
 
-                    @if(request()->anyFilled(['search', 'unit', 'status']))
+                    @if(request()->anyFilled(['search', 'unit', 'status']) || request()->filled('per_page') && request('per_page') != 50)
                         <a href="{{ route('employees.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors" title="Reset Filter">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </a>
@@ -106,24 +116,24 @@
             <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Daftar Pegawai Gabungan</h3>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 240px);">
                 <table class="w-full text-xs border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-16">No</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nama Lengkap</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">UID</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">Tipe Pegawai</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">NUPTK/NIP/NIK</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">Unit Sekolah</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40 text-right">Aksi</th>
+                                        <thead class="sticky top-0 z-10 shadow-sm">
+                        <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-14">No</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider min-w-[200px]">Nama Lengkap</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-28">Unit</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-40">Tipe Pegawai</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-56">Jabatan</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-32">ZK ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
+                            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-24">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
                         @forelse($employees as $index => $emp)
-                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
-                                <td class="px-6 py-4 text-slate-500 dark:text-slate-400 font-mono">{{ $index + 1 }}</td>
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors text-left">
+                                <td class="px-6 py-4 text-slate-900 dark:text-slate-50 font-medium">{{ $index + 1 }}</td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         @if(!empty($emp['photo']))
@@ -133,41 +143,51 @@
                                                 {{ strtoupper(substr($emp['name'], 0, 2)) }}
                                             </div>
                                         @endif
-                                        <div>
-                                            <div @click="selectedEmp = {
-                                                name: '{{ $emp['name'] }}',
-                                                nuptk_nip_nik: '{{ $emp['nuptk_nip_nik'] ?? '-' }}',
-                                                subject_position: '{{ $emp['subject_position'] ?? '-' }}',
-                                                unit: '{{ strtoupper($emp['unit_name'] ?? '-') }}',
-                                                email: '{{ $emp['email'] ?? '-' }}',
-                                                gender: '{{ $emp['gender'] ?? '-' }}',
-                                                employment_status: '{{ $emp['employment_status'] ?? '-' }}',
-                                                photo_url: '{{ !empty($emp['photo']) ? rtrim($emp['unit_url'], '/') . '/storage/' . (str_contains($emp['photo'], 'photos/') ? $emp['photo'] : 'photos/' . $emp['photo']) : '' }}'
-                                            }; showEmpDetailModal = true" class="font-semibold text-slate-900 dark:text-slate-50 cursor-pointer hover:underline hover:text-indigo-650 dark:hover:text-indigo-400">{{ $emp['name'] }}</div>
-                                            <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $emp['subject_position'] }} • {{ $emp['gender'] == 'Male' ? 'Laki-laki' : 'Perempuan' }}</div>
+                                        <div class="flex flex-col text-left">
+                                            @php
+                                                $emp['photo_url'] = !empty($emp['photo']) ? rtrim($emp['unit_url'], '/') . '/storage/' . (str_contains($emp['photo'], 'photos/') ? $emp['photo'] : 'photos/' . $emp['photo']) : '';
+                                                $emp['nik_nuptk'] = $emp['nik'] ?? $emp['nuptk'] ?? '-';
+                                                $emp['unit_name'] = strtoupper($emp['unit_name'] ?? '-');
+                                            @endphp
+                                            <div @click='selectedEmp = @json($emp); showEmpDetailModal = true' class="font-semibold text-slate-900 dark:text-slate-50 cursor-pointer hover:underline hover:text-indigo-650 dark:hover:text-indigo-400">{{ $emp['name'] }}</div>
+                                            <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $emp['email'] ?? 'Tidak ada email' }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-slate-500 dark:text-slate-400 font-mono">
-                                    {{ $emp['zkteco_uid'] ?? '-' }}
+                                <td class="px-6 py-4">
+                                    @if(str_contains(strtolower($emp['unit_name']), 'paud'))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-400 border border-teal-200/50 dark:border-teal-800/40 uppercase">PAUD & TK</span>
+                                    @elseif(str_contains(strtolower($emp['unit_name']), 'sd'))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/40 uppercase">SD</span>
+                                    @elseif(str_contains(strtolower($emp['unit_name']), 'smp'))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/40 uppercase">SMP</span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 uppercase tracking-wider">{{ $emp['unit_name'] }}</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium">
                                     {{ $emp['employee_type']['name'] ?? 'Pegawai' }}
                                 </td>
-                                <td class="px-6 py-4 text-slate-500 dark:text-slate-400 font-mono">
-                                    {{ $emp['nuptk_nip_nik'] ?? '-' }}
+                                <td class="px-6 py-4">
+                                    <span class="block text-slate-700 dark:text-slate-300 font-medium">{{ $emp['position'] ?? '-' }}</span>
+                                    @if(!empty($emp['additional_position']))
+                                        <span class="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{{ $emp['additional_position'] }}</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 uppercase tracking-wider">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                                        {{ $emp['unit_name'] }}
-                                    </span>
+                                    @if(!empty($emp['zkteco_uid']))
+                                        <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono text-[10px]">ID: {{ $emp['zkteco_uid'] }}</span>
+                                    @else
+                                        <span class="text-slate-400 dark:text-slate-600">-</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     @if(($emp['status'] ?? '') == 'Active')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/40 dark:border-emerald-800/40 uppercase">Aktif</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40">Aktif</span>
+                                    @elseif(($emp['status'] ?? '') == 'Leave')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">Cuti</span>
                                     @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/40 dark:border-rose-800/40 uppercase">Non-Aktif</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 dark:bg-red-955/20 text-red-700 dark:text-red-400 border border-red-200/50 dark:border-red-800/40">Nonaktif</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -288,7 +308,7 @@
         </script>
         <!-- MODAL DETAIL PEGAWAI -->
         <div x-show="showEmpDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-955/60 backdrop-blur-xs text-left" style="display: none;">
-            <div @click.outside="showEmpDetailModal = false" class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
+            <div @click.outside="showEmpDetailModal = false" class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-4xl w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-150 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-55 font-nasalization flex items-center gap-2">
                         <i data-lucide="user" class="w-4 h-4 text-indigo-650 dark:text-indigo-400"></i>
@@ -313,26 +333,114 @@
                         </div>
                         <div class="space-y-1">
                             <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization" x-text="selectedEmp ? selectedEmp.name : ''"></h4>
-                            <p class="text-slate-450 dark:text-slate-500 font-mono" x-text="selectedEmp ? 'NIP/NUPTK: ' + (selectedEmp.nuptk_nip_nik || '-') : ''"></p>
-                            <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-455 border border-indigo-200 dark:border-indigo-800 uppercase" x-text="selectedEmp ? selectedEmp.subject_position : ''"></span>
+                            <p class="text-slate-450 dark:text-slate-500 font-mono" x-text="selectedEmp ? 'NIP/NUPTK: ' + (selectedEmp.nik_nuptk || '-') : ''"></p>
+                            <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-455 border border-indigo-200 dark:border-indigo-800 uppercase" x-text="selectedEmp ? selectedEmp.position : ''"></span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 text-[11px] pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-3 text-[11px] pt-4 border-t border-slate-100 dark:border-slate-800 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                        <div class="col-span-full mb-1">
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-1 mb-2">Informasi Umum</h5>
+                        </div>
                         <div>
                             <span class="block text-slate-400 text-[9px] uppercase font-semibold">Unit Kerja</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 uppercase" x-text="selectedEmp ? selectedEmp.unit : ''"></span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200 uppercase" x-text="selectedEmp ? selectedEmp.unit_name : '-'"></span>
                         </div>
                         <div>
                             <span class="block text-slate-400 text-[9px] uppercase font-semibold">Email</span>
-                            <span class="font-medium text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.email : ''"></span>
+                            <span class="font-medium text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.email || '-') : '-'"></span>
                         </div>
                         <div>
                             <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jenis Kelamin</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.gender === 'Male' ? 'Laki-laki' : 'Perempuan') : ''"></span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.gender === 'Male' ? 'Laki-laki' : (selectedEmp.gender === 'Female' ? 'Perempuan' : '-')) : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Tempat, Tgl Lahir</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? ((selectedEmp.birth_place || '-') + ', ' + (selectedEmp.birth_date || '-')) : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Alamat</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.address || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">No. HP</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.phone || '-') : '-'"></span>
+                        </div>
+
+                        <div class="col-span-full mt-2 mb-1">
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-1 mb-2">Data Kepegawaian</h5>
                         </div>
                         <div>
                             <span class="block text-slate-400 text-[9px] uppercase font-semibold">Status Pegawai</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.employment_status : ''"></span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.employment_status || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jabatan</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.position || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Tugas Tambahan</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.additional_position || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Masa Kerja</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.work_period || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Pangkat/Golongan</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.pangkat_golongan || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">ID ZKTeco</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.zkteco_uid || '-') : '-'"></span>
+                        </div>
+
+                        <div class="col-span-full mt-2 mb-1">
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-1 mb-2">Identitas Pendukung (NUPTK, NIK, dll)</h5>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">NIK</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.nik || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">NUPTK</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.nuptk || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">NIY</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.niy || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">No. UKG</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.no_ukg || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">NRG</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.nrg || '-') : '-'"></span>
+                        </div>
+                        
+                        <div class="col-span-full mt-2 mb-1">
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-1 mb-2">Pendidikan & SK</h5>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Pendidikan Terakhir</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.last_education || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jurusan</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.major || '-') : '-'"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Tgl Mulai Tugas</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.task_start_date || '-') : '-'"></span>
+                        </div>
+                        <div class="col-span-full">
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Info SK</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? ((selectedEmp.last_sk_number || 'Tidak Ada SK') + (selectedEmp.last_sk_date ? ' (' + selectedEmp.last_sk_date + ')' : '')) : '-'"></span>
+                        </div>
+                        
+                        <div class="col-span-full mt-2">
+                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Catatan</span>
+                            <div class="p-2 bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 mt-1" x-text="selectedEmp && selectedEmp.notes ? selectedEmp.notes : 'Tidak ada catatan tambahan.'"></div>
                         </div>
                     </div>
                 </div>
@@ -342,4 +450,20 @@
             </div>
         </div>
     </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #334155;
+    }
+</style>
 </x-admin-layout>

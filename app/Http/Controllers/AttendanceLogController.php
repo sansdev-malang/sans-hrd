@@ -16,6 +16,22 @@ class AttendanceLogController extends Controller
         $this->service = $service;
     }
 
+    public function sync()
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('zkteco:pull');
+            $output = \Illuminate\Support\Facades\Artisan::output();
+            
+            if (str_contains(strtolower($output), 'error') || str_contains(strtolower($output), 'failed')) {
+                return redirect()->route('attendance-logs.index')->with('error', 'Gagal menarik data dari mesin ZKTeco. Silakan cek koneksi mesin.');
+            }
+            
+            return redirect()->route('attendance-logs.index')->with('success', 'Berhasil melakukan sinkronisasi dengan mesin ZKTeco!');
+        } catch (\Exception $e) {
+            return redirect()->route('attendance-logs.index')->with('error', 'Terjadi kesalahan saat sinkronisasi: ' . $e->getMessage());
+        }
+    }
+
     public function index(Request $request)
     {
         $query = AttendanceLog::with('device')->orderBy('timestamp', 'desc');

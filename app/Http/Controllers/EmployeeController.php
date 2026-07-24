@@ -58,7 +58,10 @@ class EmployeeController extends Controller
         }
 
         // Paginate
-        $perPage = 10;
+        $perPage = (int) $request->query('per_page', 50); // Defaulting to 50 is better for scrolling
+        if (!in_array($perPage, [10, 25, 50, 100, 500])) {
+            $perPage = 50;
+        }
         $page = $request->query('page', 1);
         $total = $employeesCollection->count();
         
@@ -102,18 +105,36 @@ class EmployeeController extends Controller
             'status.required' => 'Status keaktifan wajib dipilih.',
         ];
 
-        $request->validate([
+                $request->validate([
             'school_unit_id' => 'required|exists:school_units,id',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'nuptk_nip_nik' => 'nullable|string|max:255',
             'employee_type_code' => 'required|string',
-            'subject_position' => 'nullable|string|max:255',
-            'gender' => 'required|string|in:Male,Female',
-            'employment_status' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'gender' => 'required|in:Male,Female,L,P',
+            'birth_place' => 'nullable|string|max:255',
+            'birth_date' => 'nullable|date',
+            'nik' => 'nullable|string|max:255',
+            'niy' => 'nullable|string|max:255',
+            'nuptk' => 'nullable|string|max:255',
+            'no_ukg' => 'nullable|string|max:255',
+            'nrg' => 'nullable|string|max:255',
+            'pangkat_golongan' => 'nullable|string|max:255',
+            'last_education' => 'nullable|string|max:255',
+            'major' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:255',
+            'additional_position' => 'nullable|string|max:255',
+            'task_start_date' => 'nullable|date',
+            'employment_status' => 'nullable|string|max:255',
+            'appointment_date' => 'nullable|date',
+            'last_sk_date' => 'nullable|date',
+            'last_sk_number' => 'nullable|string|max:255',
+            'work_period' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'phone' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
             'zkteco_uid' => 'nullable|string|max:255',
-            'status' => 'required|string|in:Active,Inactive',
             'photo' => 'nullable|image|max:2048',
+            'status' => 'required|in:Active,Leave,Inactive',
         ], $messages);
 
         $unit = SchoolUnit::findOrFail($request->input('school_unit_id'));
@@ -130,9 +151,12 @@ class EmployeeController extends Controller
             $unitCode = 'sd';
         }
 
-        $apiData = $request->only([
-            'name', 'email', 'nuptk_nip_nik', 'employee_type_code',
-            'subject_position', 'gender', 'employment_status', 'zkteco_uid', 'status'
+                $apiData = $request->only([
+            'employee_type_code', 'name', 'email', 'gender', 'birth_place', 'birth_date',
+            'nik', 'niy', 'nuptk', 'no_ukg', 'nrg', 'pangkat_golongan', 'last_education', 'major',
+            'position', 'additional_position', 'task_start_date', 'employment_status',
+            'appointment_date', 'last_sk_date', 'last_sk_number', 'work_period', 'address', 'phone', 'notes',
+            'zkteco_uid', 'status'
         ]);
         $apiData['unit'] = $unitCode;
 
@@ -214,17 +238,35 @@ class EmployeeController extends Controller
             'status.required' => 'Status keaktifan wajib dipilih.',
         ];
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'nuptk_nip_nik' => 'nullable|string|max:255',
+                $request->validate([
             'employee_type_code' => 'required|string',
-            'subject_position' => 'nullable|string|max:255',
-            'gender' => 'required|string|in:Male,Female',
-            'employment_status' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'gender' => 'required|in:Male,Female,L,P',
+            'birth_place' => 'nullable|string|max:255',
+            'birth_date' => 'nullable|date',
+            'nik' => 'nullable|string|max:255',
+            'niy' => 'nullable|string|max:255',
+            'nuptk' => 'nullable|string|max:255',
+            'no_ukg' => 'nullable|string|max:255',
+            'nrg' => 'nullable|string|max:255',
+            'pangkat_golongan' => 'nullable|string|max:255',
+            'last_education' => 'nullable|string|max:255',
+            'major' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:255',
+            'additional_position' => 'nullable|string|max:255',
+            'task_start_date' => 'nullable|date',
+            'employment_status' => 'nullable|string|max:255',
+            'appointment_date' => 'nullable|date',
+            'last_sk_date' => 'nullable|date',
+            'last_sk_number' => 'nullable|string|max:255',
+            'work_period' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'phone' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
             'zkteco_uid' => 'nullable|string|max:255',
-            'status' => 'required|string|in:Active,Inactive',
             'photo' => 'nullable|image|max:2048',
+            'status' => 'required|in:Active,Leave,Inactive',
         ], $messages);
 
         $unit = SchoolUnit::findOrFail($unitId);
@@ -239,9 +281,12 @@ class EmployeeController extends Controller
             $unitCode = 'sd';
         }
 
-        $apiData = $request->only([
-            'name', 'email', 'nuptk_nip_nik', 'employee_type_code',
-            'subject_position', 'gender', 'employment_status', 'zkteco_uid', 'status'
+                $apiData = $request->only([
+            'employee_type_code', 'name', 'email', 'gender', 'birth_place', 'birth_date',
+            'nik', 'niy', 'nuptk', 'no_ukg', 'nrg', 'pangkat_golongan', 'last_education', 'major',
+            'position', 'additional_position', 'task_start_date', 'employment_status',
+            'appointment_date', 'last_sk_date', 'last_sk_number', 'work_period', 'address', 'phone', 'notes',
+            'zkteco_uid', 'status'
         ]);
         $apiData['unit'] = $unitCode;
 
@@ -307,60 +352,50 @@ class EmployeeController extends Controller
     /**
      * Download XLSX format template for employees import.
      */
-    public function downloadTemplate()
+        public function downloadTemplate()
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Headers
+        // Headers for 28 fields + unit
         $headers = [
-            'Nama Lengkap',
-            'Email',
-            'NUPTK/NIP/NIK',
-            'Kode Tipe Pegawai (contoh: teacher, employee)',
-            'Unit Sekolah (paud/sd/smp)',
-            'Jabatan / Mapel',
-            'Jenis Kelamin (Male/Female)',
-            'Status Kepegawaian',
-            'ID ZKTeco (Alfanumerik)',
-            'Status (Active/Leave/Inactive)'
+            'Nama Lengkap', 'Email', 'Kode Tipe Pegawai (teacher/employee)', 'Unit Sekolah (paud/sd/smp)',
+            'Jenis Kelamin (Male/Female)', 'Tempat Lahir', 'Tanggal Lahir (YYYY-MM-DD)', 
+            'NIK', 'NIY', 'NUPTK', 'No UKG', 'NRG', 'Pangkat/Golongan', 
+            'Pendidikan Terakhir', 'Jurusan', 'Jabatan Utama', 'Jabatan Tambahan', 
+            'Tanggal Mulai Tugas (YYYY-MM-DD)', 'Status Kepegawaian', 'Tanggal Diangkat (YYYY-MM-DD)', 
+            'Tanggal SK Terakhir (YYYY-MM-DD)', 'Nomor SK Terakhir', 'Masa Kerja Golongan', 
+            'Alamat', 'No. HP/WA', 'Catatan Tambahan', 'ID ZKTeco (Alfanumerik)', 'Status (Active/Leave/Inactive)'
         ];
 
-        // Example data row
         $example = [
-            'Budi Santoso',
-            'budi@example.com',
-            '198501012010121002',
-            'teacher',
-            'sd',
-            'Guru Matematika',
-            'Male',
-            'PNS',
-            '1001',
-            'Active'
+            'Budi Santoso', 'budi@example.com', 'teacher', 'sd',
+            'Male', 'Malang', '1985-01-01',
+            '3573010101850001', '12345678', '198501012010121002', '201501234567', '-', 'Penata Muda / III.a',
+            'S1 Pendidikan Matematika', 'Matematika', 'Guru Kelas', 'Wali Kelas',
+            '2010-07-01', 'GTY', '2010-07-01',
+            '2020-01-01', '012/SK/SANS/2020', '10 Tahun 6 Bulan',
+            'Jl. Veteran No. 123, Malang', '081234567890', 'Guru berprestasi tingkat provinsi', '1001', 'Active'
         ];
 
-        // Put headers in row 1
         foreach ($headers as $colIndex => $header) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
             $sheet->setCellValue($colLetter . '1', $header);
         }
 
-        // Put example in row 2
         foreach ($example as $colIndex => $val) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
             $sheet->setCellValue($colLetter . '2', $val);
         }
 
-        // Format headers (bold text & light gray background fill)
-        $headerRange = 'A1:J1';
+        $lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers));
+        $headerRange = 'A1:' . $lastCol . '1';
         $sheet->getStyle($headerRange)->getFont()->setBold(true);
         $sheet->getStyle($headerRange)->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FFE0E0E0');
 
-        // Auto-size columns
-        foreach (range(1, 10) as $colIndex) {
+        foreach (range(1, count($headers)) as $colIndex) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
@@ -378,7 +413,7 @@ class EmployeeController extends Controller
     /**
      * Import employees from uploaded XLSX file.
      */
-    public function import(Request $request)
+        public function import(Request $request)
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls',
@@ -392,7 +427,7 @@ class EmployeeController extends Controller
         $rows = $sheet->toArray();
 
         // Remove header row
-        $header = array_shift($rows);
+        array_shift($rows);
 
         $importedCount = 0;
         $errors = [];
@@ -405,19 +440,7 @@ class EmployeeController extends Controller
                 continue;
             }
 
-            // Map variables
-            $name = trim($row[0]);
-            $email = !empty($row[1]) ? trim($row[1]) : null;
-            $nuptk_nip_nik = !empty($row[2]) ? trim($row[2]) : null;
-            $type = strtolower(trim($row[3]));
-            $unitCode = strtolower(trim($row[4]));
-            $subject_position = !empty($row[5]) ? trim($row[5]) : null;
-            $gender = trim($row[6]);
-            $employment_status = !empty($row[7]) ? trim($row[7]) : null;
-            $zkteco_uid = !empty($row[8]) ? trim($row[8]) : null;
-            $status = !empty($row[9]) ? trim($row[9]) : 'Active';
-
-            // Find the school unit matching the unit code
+            $unitCode = strtolower(trim($row[3] ?? ''));
             $unit = $activeUnits->first(function ($u) use ($unitCode) {
                 $name = strtolower($u->name);
                 if ($unitCode === 'paud' && str_contains($name, 'paud')) return true;
@@ -431,48 +454,72 @@ class EmployeeController extends Controller
                 continue;
             }
 
-            // Call the unit's REST API to store the employee
+            // Map variables based on new 28 columns template
             $apiData = [
-                'name' => $name,
-                'email' => $email,
-                'nuptk_nip_nik' => $nuptk_nip_nik,
-                'employee_type_code' => $type,
+                'name' => trim($row[0]),
+                'email' => !empty($row[1]) ? trim($row[1]) : null,
+                'employee_type_code' => !empty($row[2]) ? strtolower(trim($row[2])) : 'employee',
                 'unit' => $unitCode,
-                'subject_position' => $subject_position,
-                'gender' => $gender,
-                'employment_status' => $employment_status,
-                'zkteco_uid' => $zkteco_uid,
-                'status' => $status,
+                'gender' => !empty($row[4]) ? trim($row[4]) : 'Male',
+                'birth_place' => !empty($row[5]) ? trim($row[5]) : null,
+                'birth_date' => !empty($row[6]) ? trim($row[6]) : null,
+                'nik' => !empty($row[7]) ? trim($row[7]) : null,
+                'niy' => !empty($row[8]) ? trim($row[8]) : null,
+                'nuptk' => !empty($row[9]) ? trim($row[9]) : null,
+                'no_ukg' => !empty($row[10]) ? trim($row[10]) : null,
+                'nrg' => !empty($row[11]) ? trim($row[11]) : null,
+                'pangkat_golongan' => !empty($row[12]) ? trim($row[12]) : null,
+                'last_education' => !empty($row[13]) ? trim($row[13]) : null,
+                'major' => !empty($row[14]) ? trim($row[14]) : null,
+                'position' => !empty($row[15]) ? trim($row[15]) : null,
+                'additional_position' => !empty($row[16]) ? trim($row[16]) : null,
+                'task_start_date' => !empty($row[17]) ? trim($row[17]) : null,
+                'employment_status' => !empty($row[18]) ? trim($row[18]) : null,
+                'appointment_date' => !empty($row[19]) ? trim($row[19]) : null,
+                'last_sk_date' => !empty($row[20]) ? trim($row[20]) : null,
+                'last_sk_number' => !empty($row[21]) ? trim($row[21]) : null,
+                'work_period' => !empty($row[22]) ? trim($row[22]) : null,
+                'address' => !empty($row[23]) ? trim($row[23]) : null,
+                'phone' => !empty($row[24]) ? trim($row[24]) : null,
+                'notes' => !empty($row[25]) ? trim($row[25]) : null,
+                'zkteco_uid' => !empty($row[26]) ? trim($row[26]) : null,
+                'status' => !empty($row[27]) ? trim($row[27]) : 'Active',
             ];
 
-            $response = Http::withHeaders([
+            $req = Http::withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
-            ])->post(rtrim($unit->api_url, '/') . '/employees', $apiData);
-
+            ]);
+            
+            $response = $req->post(rtrim($unit->api_url, '/') . '/employees', $apiData);
+            
             if ($response->successful()) {
                 $importedCount++;
             } else {
+                $errorMessage = 'Gagal menyimpan ke server unit.';
                 if ($response->status() === 422) {
-                    $apiErrors = $response->json('errors') ?? [];
-                    $errorDetails = [];
-                    foreach ($apiErrors as $field => $messages) {
-                        $errorDetails[] = implode(', ', (array)$messages);
+                    $resData = $response->json();
+                    if (isset($resData['errors'])) {
+                        $errs = [];
+                        foreach ($resData['errors'] as $fieldErrs) {
+                            $errs = array_merge($errs, $fieldErrs);
+                        }
+                        $errorMessage = implode(', ', $errs);
                     }
-                    $errors[] = "Baris " . ($index + 2) . " (Unit {$unit->name}): " . implode('; ', $errorDetails);
-                } else {
-                    $errors[] = "Baris " . ($index + 2) . " (Unit {$unit->name}): Gagal menyimpan. Detail: " . ($response->json('message') ?? 'Internal Server Error');
                 }
+                $errors[] = "Baris " . ($index + 2) . " ({$apiData['name']}): " . $errorMessage;
             }
         }
 
-        if (count($errors) > 0) {
-            return redirect()->route('employees.index')
-                ->with('success', "Impor selesai. Berhasil mengimpor {$importedCount} data pegawai.")
-                ->with('import_errors', $errors);
+        if ($importedCount > 0) {
+            $msg = "$importedCount pegawai berhasil diimpor.";
+            if (count($errors) > 0) {
+                return redirect()->route('employees.index')->with('success', $msg)->with('import_errors', $errors);
+            }
+            return redirect()->route('employees.index')->with('success', $msg);
+        } else {
+            return redirect()->route('employees.index')->with('error', 'Tidak ada data yang berhasil diimpor.')->with('import_errors', $errors);
         }
-
-        return redirect()->route('employees.index')->with('success', "Berhasil mengimpor {$importedCount} data pegawai!");
     }
 
     /**

@@ -51,6 +51,16 @@ class PullZktecoLogs extends Command
         // Cache devices by serial number or alias
         // Assuming the device in our DB matches ZKBio Time either by IP, name or we just use a default
         $defaultDevice = ZktecoDevice::first(); 
+        if (!$defaultDevice) {
+            $defaultDevice = ZktecoDevice::create([
+                'name' => 'ZKBioTime Default API',
+                'ip_address' => 'api.biotime',
+                'port' => 80,
+                'model_name' => 'API',
+                'is_online' => true,
+                'sync_interval' => 5
+            ]);
+        }
         
         foreach ($transactions as $txn) {
             // ZKBioTime API transaction format might vary, often:
