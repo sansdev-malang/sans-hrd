@@ -169,11 +169,32 @@
                     <!-- SISTEM ABSENSI -->
                     <div class="md:col-span-2 mt-4 mb-2 border-b pb-2"><h4 class="font-bold text-slate-700 dark:text-slate-300">Sistem Absensi & Foto</h4></div>
                     
+                    @if(auth()->user()->role === 'super_admin')
                     <div>
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">ID ZKTeco / PIN Fingerprint</label>
-                        <input type="text" name="zkteco_uid" value="{{ old('zkteco_uid', $employee['zkteco_uid'] ?? '') }}" 
-                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" name="zkteco_uid" id="zkteco_uid" value="{{ old('zkteco_uid', $employee['zkteco_uid'] ?? '') }}" 
+                                class="flex-1 h-9 px-3 font-mono bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800">
+                            <button type="button" id="btn-generate-uid" 
+                                class="px-3 h-9 text-white text-xs font-medium rounded-lg transition-colors {{ !empty($employee['zkteco_uid']) ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700' }}"
+                                {{ !empty($employee['zkteco_uid']) ? 'disabled' : '' }}>
+                                Buat ID Otomatis
+                            </button>
+                        </div>
                     </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-2">Sinkronisasi Mesin ZKTeco (Opsional)</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                            @foreach($devices as $dev)
+                            <label class="flex items-center space-x-2 p-2 border rounded-lg dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+                                <input type="checkbox" name="zkteco_device_ids[]" value="{{ $dev->id }}" {{ in_array($dev->id, old('zkteco_device_ids', $mappedDeviceIds ?? [])) ? 'checked' : '' }} class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <span class="text-xs font-medium text-slate-700 dark:text-slate-300">{{ $dev->name }} <span class="text-slate-400">({{ $dev->sn }})</span></span>
+                            </label>
+                            @endforeach
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1">Centang mesin jika Anda ingin memperbarui profil/nama pegawai ini di mesin-mesin tersebut.</p>
+                    </div>
+                    @endif
                     <div>
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Status Keaktifan</label>
                         <select name="status" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 border-slate-200 dark:border-slate-800 cursor-pointer">
@@ -231,6 +252,41 @@
             }
 
             loadEmployeeTypes();
+            
+            // Generate UID logic
+            const btnGenerateUid = document.getElementById('btn-generate-uid');
+            const inputUid = document.getElementById('zkteco_uid');
+            if (btnGenerateUid && inputUid) {
+                btnGenerateUid.addEventListener('click', function() {
+                    const unitId = "{{ $unit->id }}";
+                    if (!unitId) {
+                        alert('Unit Sekolah tidak terdeteksi!');
+                        return;
+                    }
+                    
+                    const originalText = btnGenerateUid.innerText;
+                    btnGenerateUid.innerText = 'Memuat...';
+                    btnGenerateUid.disabled = true;
+                    
+                    fetch(`/employees/generate-uid/${unitId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                inputUid.value = data.next_uid;
+                            } else {
+                                alert('Gagal memuat UID');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Terjadi kesalahan jaringan.');
+                        })
+                        .finally(() => {
+                            btnGenerateUid.innerText = originalText;
+                            btnGenerateUid.disabled = false;
+                        });
+                });
+            }
         });
     </script>
 </x-admin-layout>

@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\SchoolUnit;
 use App\Services\SchoolUnitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Models\ZktecoDevice;
+use App\Models\AdmsCommand;
+use App\Models\EmployeeDeviceMapping;
 use Illuminate\Support\Arr;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -85,7 +87,51 @@ class EmployeeController extends Controller
     public function create()
     {
         $units = SchoolUnit::where('is_active', true)->get();
-        return view('employees.create', compact('units'));
+        $devices = ZktecoDevice::all();
+        return view('employees.create', compact('units', 'devices'));
+    }
+
+    public function generateUid($unitId)
+    {
+        $unit = SchoolUnit::findOrFail($unitId);
+        
+        $unitNameLower = strtolower($unit->name);
+        $prefix = 1000;
+        if (str_contains($unitNameLower, 'paud')) {
+            $prefix = 3000;
+        } elseif (str_contains($unitNameLower, 'smp')) {
+            $prefix = 2000;
+        }
+
+        $response = Http::withHeaders([
+            'X-API-TOKEN' => $unit->api_token,
+            'Accept' => 'application/json',
+        ])->get(rtrim($unit->api_url, '/') . '/employees');
+        
+        $maxUid = $prefix;
+        
+        if ($response->successful()) {
+            $employees = $response->json('data') ?? [];
+            foreach ($employees as $emp) {
+                if (!empty($emp['zkteco_uid'])) {
+                    $uid = intval($emp['zkteco_uid']);
+                    // Check if uid is in the prefix block (e.g. 1000-1999)
+                    if ($uid >= $prefix && $uid < ($prefix + 1000)) {
+                        if ($uid > $maxUid) {
+                            $maxUid = $uid;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Next available UID
+        $nextUid = $maxUid === $prefix ? $prefix + 1 : $maxUid + 1;
+        
+        return response()->json([
+            'status' => 'success',
+            'next_uid' => $nextUid
+        ]);
     }
 
     /**
@@ -135,6 +181,8 @@ class EmployeeController extends Controller
             'zkteco_uid' => 'nullable|string|max:255',
             'photo' => 'nullable|image|max:2048',
             'status' => 'required|in:Active,Leave,Inactive',
+            'zkteco_device_ids' => 'nullable|array',
+            'zkteco_device_ids.*' => 'exists:zkteco_devices,id',
         ], $messages);
 
         $unit = SchoolUnit::findOrFail($request->input('school_unit_id'));
@@ -177,6 +225,28 @@ class EmployeeController extends Controller
         $response = $req->post(rtrim($unit->api_url, '/') . '/employees', $apiData);
 
         if ($response->successful()) {
+            // If zkteco_uid is provided, queue ADMS commands for selected devices
+            $zkteco_uid = $request->input('zkteco_uid');
+            $device_ids = $request->input('zkteco_device_ids', []);
+            if (!empty($zkteco_uid)) {
+                // Update mapping memori sinkronisasi
+                EmployeeDeviceMapping::where('zkteco_uid', $zkteco_uid)->delete();
+                
+                if (!empty($device_ids)) {
+                    foreach ($device_ids as $deviceId) {
+                        EmployeeDeviceMapping::create([
+                            'zkteco_uid' => $zkteco_uid,
+                            'zkteco_device_id' => $deviceId
+                        ]);
+                        
+                        AdmsCommand::create([
+                            'zkteco_device_id' => $deviceId,
+                            'command_string' => "DATA UPDATE USERINFO PIN={$zkteco_uid}\tName={$apiData['name']}"
+                        ]);
+                    }
+                }
+            }
+
             return redirect()->route('employees.index')
                 ->with('success', "Pegawai berhasil ditambahkan ke unit {$unit->name}.");
         }
@@ -220,7 +290,17 @@ class EmployeeController extends Controller
                 ->withErrors(['error' => 'Pegawai tidak ditemukan pada unit sekolah terkait.']);
         }
 
-        return view('employees.edit', compact('employee', 'unit', 'id'));
+        $units = SchoolUnit::where('is_active', true)->get();
+        $devices = ZktecoDevice::all();
+        
+        $mappedDeviceIds = [];
+        if (!empty($employee['zkteco_uid'])) {
+            $mappedDeviceIds = EmployeeDeviceMapping::where('zkteco_uid', $employee['zkteco_uid'])
+                ->pluck('zkteco_device_id')
+                ->toArray();
+        }
+        
+        return view('employees.edit', compact('employee', 'unit', 'id', 'units', 'devices', 'mappedDeviceIds'));
     }
 
     /**
@@ -267,6 +347,8 @@ class EmployeeController extends Controller
             'zkteco_uid' => 'nullable|string|max:255',
             'photo' => 'nullable|image|max:2048',
             'status' => 'required|in:Active,Leave,Inactive',
+            'zkteco_device_ids' => 'nullable|array',
+            'zkteco_device_ids.*' => 'exists:zkteco_devices,id',
         ], $messages);
 
         $unit = SchoolUnit::findOrFail($unitId);
@@ -310,8 +392,31 @@ class EmployeeController extends Controller
         }
 
         if ($response->successful()) {
+            // If zkteco_uid is provided, queue ADMS commands for selected devices
+            $zkteco_uid = $request->input('zkteco_uid');
+            $device_ids = $request->input('zkteco_device_ids', []);
+            
+            if (!empty($zkteco_uid)) {
+                // Update mapping memori sinkronisasi
+                EmployeeDeviceMapping::where('zkteco_uid', $zkteco_uid)->delete();
+                
+                if (!empty($device_ids)) {
+                    foreach ($device_ids as $deviceId) {
+                        EmployeeDeviceMapping::create([
+                            'zkteco_uid' => $zkteco_uid,
+                            'zkteco_device_id' => $deviceId
+                        ]);
+                        
+                        AdmsCommand::create([
+                            'zkteco_device_id' => $deviceId,
+                            'command_string' => "DATA UPDATE USERINFO PIN={$zkteco_uid}\tName={$apiData['name']}"
+                        ]);
+                    }
+                }
+            }
+
             return redirect()->route('employees.index')
-                ->with('success', "Data pegawai di unit {$unit->name} berhasil diperbarui.");
+                ->with('success', "Data pegawai berhasil diperbarui di unit {$unit->name}.");
         }
 
         if ($response->status() === 422) {
@@ -334,13 +439,41 @@ class EmployeeController extends Controller
     {
         $unit = SchoolUnit::findOrFail($unitId);
 
-        // Call the unit's API
+        // Fetch employee data first to get zkteco_uid
         $response = Http::withHeaders([
+            'X-API-TOKEN' => $unit->api_token,
+            'Accept' => 'application/json',
+        ])->get(rtrim($unit->api_url, '/') . '/employees');
+        
+        $zkteco_uid = null;
+        if ($response->successful()) {
+            $employees = $response->json('data') ?? [];
+            $employee = collect($employees)->firstWhere('id', $id);
+            if ($employee && !empty($employee['zkteco_uid'])) {
+                $zkteco_uid = $employee['zkteco_uid'];
+            }
+        }
+
+        // Call the unit's API to delete the employee
+        $deleteResponse = Http::withHeaders([
             'X-API-TOKEN' => $unit->api_token,
             'Accept' => 'application/json',
         ])->delete(rtrim($unit->api_url, '/') . '/employees/' . $id);
 
-        if ($response->successful()) {
+        if ($deleteResponse->successful()) {
+            // Jika berhasil dihapus di aplikasi, antrekan perintah hapus ke mesin
+            if ($zkteco_uid) {
+                $mappings = EmployeeDeviceMapping::where('zkteco_uid', $zkteco_uid)->get();
+                foreach ($mappings as $mapping) {
+                    AdmsCommand::create([
+                        'zkteco_device_id' => $mapping->zkteco_device_id,
+                        'command_string' => "DATA DELETE USERINFO PIN={$zkteco_uid}"
+                    ]);
+                }
+                // Hapus memori mapping
+                EmployeeDeviceMapping::where('zkteco_uid', $zkteco_uid)->delete();
+            }
+
             return redirect()->route('employees.index')
                 ->with('success', "Pegawai berhasil dihapus dari unit {$unit->name}.");
         }

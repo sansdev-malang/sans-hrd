@@ -5,6 +5,7 @@
         editId: null,
         editName: '',
         editCode: '',
+        editShortCode: '',
         editIsShift: false,
         editDescription: '',
         days: [
@@ -20,6 +21,7 @@
             this.editId = shift.id;
             this.editName = shift.name;
             this.editCode = shift.code;
+            this.editShortCode = shift.short_code || '';
             this.editIsShift = !!shift.is_shift;
             this.editDescription = shift.description || '';
             
@@ -59,18 +61,7 @@
         }
     }">
 
-        <!-- SUCCESS ALERT -->
-        @if(session('success'))
-            <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                </div>
-                <div class="text-left">
-                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Sukses!</h5>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ session('success') }}</p>
-                </div>
-            </div>
-        @endif
+
 
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
@@ -98,7 +89,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">{{ $shift->name }}</h4>
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">CODE: {{ $shift->code }}</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono border border-slate-200 dark:border-slate-800 px-1.5 py-0.5 rounded bg-slate-50 dark:bg-slate-900/50">CODE: <strong class="text-slate-700 dark:text-slate-300">{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</strong></span>
                             </div>
                             @if($shift->is_shift)
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30 uppercase">Shift</span>
@@ -156,7 +147,8 @@
         </section>
 
         <!-- ADD MODAL -->
-        <div x-show="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" style="display: none;">
+        <template x-teleport="body">
+            <div x-show="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" style="display: none;">
             <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 text-left">
                 <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                     <h3 class="text-sm font-bold text-slate-950 dark:text-slate-50">Tambah Template Shift Baru</h3>
@@ -173,11 +165,15 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
+                        <div class="col-span-2 md:col-span-1">
                             <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Kode Unik Shift</label>
                             <input type="text" name="code" required placeholder="Contoh: salehmart_s1" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                         </div>
-                        <div class="flex items-center pt-6">
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Kode Singkat (Max 5)</label>
+                            <input type="text" name="short_code" maxlength="5" placeholder="Cth: S1, P, M" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono uppercase">
+                        </div>
+                        <div class="flex items-center pt-2 col-span-2">
                             <input type="checkbox" id="is_shift" name="is_shift" value="1" class="rounded border-slate-300 text-indigo-650 focus:ring-indigo-500 w-4 h-4">
                             <label for="is_shift" class="ml-2 font-semibold text-slate-750 dark:text-slate-300">Merupakan Shift Bergulir (Gantian)</label>
                         </div>
@@ -223,10 +219,11 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </template>
 
         <!-- EDIT MODAL -->
-        <div x-show="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" style="display: none;">
+        <template x-teleport="body">
+            <div x-show="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" style="display: none;">
             <div @click.outside="showEditModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 text-left">
                 <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                     <h3 class="text-sm font-bold text-slate-950 dark:text-slate-50">Edit Template Shift</h3>
@@ -244,11 +241,15 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
+                        <div class="col-span-2 md:col-span-1">
                             <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Kode Unik Shift</label>
                             <input type="text" name="code" required x-model="editCode" disabled class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-500 dark:text-slate-400 focus:outline-none font-mono cursor-not-allowed">
                         </div>
-                        <div class="flex items-center pt-6">
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Kode Singkat (Max 5)</label>
+                            <input type="text" name="short_code" maxlength="5" x-model="editShortCode" placeholder="Cth: S1, P, M" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono uppercase">
+                        </div>
+                        <div class="flex items-center pt-2 col-span-2">
                             <input type="checkbox" id="edit_is_shift" name="is_shift" value="1" x-model="editIsShift" class="rounded border-slate-300 text-indigo-650 focus:ring-indigo-500 w-4 h-4">
                             <label for="edit_is_shift" class="ml-2 font-semibold text-slate-750 dark:text-slate-300">Merupakan Shift Bergulir (Gantian)</label>
                         </div>
@@ -296,7 +297,7 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </template>
 
     </div>
 </x-admin-layout>

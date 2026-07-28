@@ -83,6 +83,7 @@
                         <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
                         <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
                         <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
                     </select>
 
                     <!-- Unit -->

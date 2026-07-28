@@ -52,18 +52,7 @@
         }
     }">
 
-        <!-- SUCCESS ALERT -->
-        @if(session('success'))
-            <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                </div>
-                <div class="text-left">
-                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Sukses!</h5>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ session('success') }}</p>
-                </div>
-            </div>
-        @endif
+
 
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
@@ -71,9 +60,13 @@
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Penjadwalan Shift Pegawai</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Atur penugasan dan rotasi shift kerja secara kolektif per unit sekolah.</p>
             </div>
-            <div>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('employee-working-shifts.roster') }}" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Roster Bulanan (Grid)
+                </a>
                 <a href="{{ route('employee-working-shifts.create') }}" class="h-9 px-4 inline-flex items-center justify-center bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer gap-2">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Tugaskan Shift Baru
                 </a>
             </div>
@@ -111,61 +104,116 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300 font-medium">
                         @forelse($batches as $batch)
-                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
-                                <td class="px-6 py-4 text-left">
-                                    <div class="flex flex-col gap-1">
-                                        <span class="font-bold text-slate-900 dark:text-slate-100 text-sm">{{ $batch['shift_name'] }}</span>
-                                        <span class="inline-flex w-max px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-500">Kode: {{ $batch['shift_code'] }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-left">
-                                    <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $batch['unit_name'] }}</span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex flex-col items-center justify-center gap-1">
-                                        <span class="text-xs font-semibold text-slate-900 dark:text-slate-100">{{ \Carbon\Carbon::parse($batch['start_date'])->format('d M Y') }}</span>
-                                        <i data-lucide="arrow-down" class="w-3 h-3 text-slate-400"></i>
-                                        @if($batch['end_date'])
-                                            <span class="text-xs font-semibold text-slate-900 dark:text-slate-100">{{ \Carbon\Carbon::parse($batch['end_date'])->format('d M Y') }}</span>
-                                        @else
-                                            <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">Seterusnya</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <button @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors font-bold text-xs border border-indigo-100 dark:border-indigo-800 cursor-pointer">
-                                        <i data-lucide="users" class="w-3.5 h-3.5"></i>
-                                        {{ count($batch['employees']) }} Orang
-                                    </button>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('employee-working-shifts.edit-batch', [
-                                            'unit_id' => $batch['school_unit_id'],
-                                            'shift_id' => $batch['working_shift_id'],
-                                            'start_date' => \Carbon\Carbon::parse($batch['start_date'])->format('Y-m-d'),
-                                            'end_date' => $batch['end_date'] ? \Carbon\Carbon::parse($batch['end_date'])->format('Y-m-d') : 'null'
-                                        ]) }}" class="h-8 px-3 inline-flex items-center justify-center bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-lg border border-amber-200/50 dark:border-amber-800/50 transition-all cursor-pointer gap-1.5">
-                                            <i data-lucide="edit" class="w-3.5 h-3.5"></i>
-                                            Edit
-                                        </a>
+                            @if(isset($batch['type']) && $batch['type'] == 'roster')
+                                <tr class="hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-colors bg-slate-50/30 dark:bg-slate-900/10">
+                                    <td class="px-6 py-4 text-left">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="font-bold text-indigo-700 dark:text-indigo-400 text-sm">{{ !empty($batch['roster_name']) ? $batch['roster_name'] : 'Roster Shift Bulanan' }}</span>
+                                            <span class="inline-flex w-max px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">Bulanan</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-left">
+                                        <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $batch['unit_name'] }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex flex-col items-center justify-center gap-1">
+                                            <span class="text-xs font-semibold text-slate-900 dark:text-slate-100">{{ \Carbon\Carbon::create($batch['year'], $batch['month'], 1)->format('M Y') }}</span>
+                                            <span class="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-800">Satu Bulan Penuh</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <button @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors font-bold text-xs border border-indigo-100 dark:border-indigo-800 cursor-pointer">
+                                            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                                            {{ count($batch['employees']) }} Orang
+                                        </button>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('employee-working-shifts.detail-roster', [
+                                                'unit_id' => $batch['school_unit_id'],
+                                                'month' => $batch['month'],
+                                                'year' => $batch['year']
+                                            ]) }}" class="h-8 px-4 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 gap-1.5">
+                                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                                Lihat Detail
+                                            </a>
+                                            <a href="{{ route('employee-working-shifts.roster', [
+                                                'unit_id' => $batch['school_unit_id'],
+                                                'month' => $batch['month'],
+                                                'year' => $batch['year']
+                                            ]) }}" class="h-8 px-3 inline-flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 gap-1.5" title="Edit Roster">
+                                                <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                                            </a>
+                                            <form action="{{ route('employee-working-shifts.destroy-roster') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus roster bulanan ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="unit_id" value="{{ $batch['school_unit_id'] }}">
+                                                <input type="hidden" name="month" value="{{ $batch['month'] }}">
+                                                <input type="hidden" name="year" value="{{ $batch['year'] }}">
+                                                <button type="submit" class="h-8 px-3 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/50 dark:border-rose-900/30 transition-all cursor-pointer gap-1.5">
+                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @else
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
+                                    <td class="px-6 py-4 text-left">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="font-bold text-slate-900 dark:text-slate-100 text-sm">{{ $batch['shift_name'] }}</span>
+                                            <span class="inline-flex w-max px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-500">Kode: {{ $batch['shift_code'] }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-left">
+                                        <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $batch['unit_name'] }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex flex-col items-center justify-center gap-1">
+                                            <span class="text-xs font-semibold text-slate-900 dark:text-slate-100">{{ \Carbon\Carbon::parse($batch['start_date'])->format('d M Y') }}</span>
+                                            <i data-lucide="arrow-down" class="w-3 h-3 text-slate-400"></i>
+                                            @if($batch['end_date'])
+                                                <span class="text-xs font-semibold text-slate-900 dark:text-slate-100">{{ \Carbon\Carbon::parse($batch['end_date'])->format('d M Y') }}</span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">Seterusnya</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <button @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors font-bold text-xs border border-indigo-100 dark:border-indigo-800 cursor-pointer">
+                                            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                                            {{ count($batch['employees']) }} Orang
+                                        </button>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('employee-working-shifts.edit-batch', [
+                                                'unit_id' => $batch['school_unit_id'],
+                                                'shift_id' => $batch['working_shift_id'],
+                                                'start_date' => \Carbon\Carbon::parse($batch['start_date'])->format('Y-m-d'),
+                                                'end_date' => $batch['end_date'] ? \Carbon\Carbon::parse($batch['end_date'])->format('Y-m-d') : 'null'
+                                            ]) }}" class="h-8 px-3 inline-flex items-center justify-center bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-lg border border-amber-200/50 dark:border-amber-800/50 transition-all cursor-pointer gap-1.5">
+                                                <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                                                Edit
+                                            </a>
 
-                                        <form action="{{ route('employee-working-shifts.destroy-batch') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan/menghapus seluruh penugasan shift pada grup ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <input type="hidden" name="unit_id" value="{{ $batch['school_unit_id'] }}">
-                                            <input type="hidden" name="shift_id" value="{{ $batch['working_shift_id'] }}">
-                                            <input type="hidden" name="start_date" value="{{ \Carbon\Carbon::parse($batch['start_date'])->format('Y-m-d') }}">
-                                            <input type="hidden" name="end_date" value="{{ $batch['end_date'] ? \Carbon\Carbon::parse($batch['end_date'])->format('Y-m-d') : 'null' }}">
-                                            
-                                            <button type="submit" class="h-8 px-3 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/50 dark:border-rose-900/30 transition-all cursor-pointer gap-1.5">
-                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
+                                            <form action="{{ route('employee-working-shifts.destroy-batch') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan/menghapus seluruh penugasan shift pada grup ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="unit_id" value="{{ $batch['school_unit_id'] }}">
+                                                <input type="hidden" name="shift_id" value="{{ $batch['working_shift_id'] }}">
+                                                <input type="hidden" name="start_date" value="{{ \Carbon\Carbon::parse($batch['start_date'])->format('Y-m-d') }}">
+                                                <input type="hidden" name="end_date" value="{{ $batch['end_date'] ? \Carbon\Carbon::parse($batch['end_date'])->format('Y-m-d') : 'null' }}">
+                                                
+                                                <button type="submit" class="h-8 px-3 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/50 dark:border-rose-900/30 transition-all cursor-pointer gap-1.5">
+                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                         @empty
                             <tr>
                                 <td colspan="5" class="px-6 py-16 text-center">

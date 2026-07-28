@@ -8,15 +8,10 @@
             </div>
         </section>
 
-        @if(session('success'))
-            <div class="p-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 rounded-xl border border-emerald-200 dark:border-emerald-800 text-sm font-medium">
-                {{ session('success') }}
-            </div>
-        @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full">
-                <form action="{{ route('settings.update') }}" method="POST" class="space-y-4">
+                <form action="{{ route('cutoff-settings.update') }}" method="POST" class="space-y-4">
                     @csrf
                     @method('PUT')
                     <div>

@@ -108,15 +108,30 @@
                             </select>
                         </div>
 
-                        <!-- Template Shift -->
-                        <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Template Shift Kerja</label>
-                            <select name="working_shift_id" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
-                                <option value="">-- Pilih Template Shift --</option>
-                                @foreach($shifts as $shift)
-                                    <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
-                                @endforeach
-                            </select>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Template Shift -->
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Template Shift Kerja</label>
+                                <select name="working_shift_id" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Pilih Template Shift --</option>
+                                    @foreach($shifts as $shift)
+                                        <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Bonus Schema -->
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Skema Bonus (Opsional)</label>
+                                <select name="bonus_schema_id" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Ikuti Default/Aktif --</option>
+                                    @if(isset($bonusSchemas))
+                                        @foreach($bonusSchemas as $schema)
+                                            <option value="{{ $schema->id }}">{{ $schema->name }} {{ $schema->is_active ? '(Aktif)' : '' }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
                         </div>
 
                         <!-- Dates -->

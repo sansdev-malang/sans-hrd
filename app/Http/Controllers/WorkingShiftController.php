@@ -27,6 +27,7 @@ class WorkingShiftController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255|unique:working_shifts,code',
+            'short_code' => 'nullable|string|max:10',
             'is_shift' => 'sometimes|boolean',
             'description' => 'nullable|string',
             'days' => 'required|array|min:7|max:7',
@@ -40,6 +41,7 @@ class WorkingShiftController extends Controller
         $shift = WorkingShift::create([
             'name' => $validated['name'],
             'code' => $validated['code'],
+            'short_code' => $validated['short_code'] ?? null,
             'is_shift' => $isShift,
             'description' => $validated['description'] ?? null,
         ]);
@@ -68,6 +70,7 @@ class WorkingShiftController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'short_code' => 'nullable|string|max:10',
             'is_shift' => 'sometimes|boolean',
             'description' => 'nullable|string',
             'days' => 'required|array|min:7|max:7',
@@ -80,6 +83,7 @@ class WorkingShiftController extends Controller
 
         $workingShift->update([
             'name' => $validated['name'],
+            'short_code' => $validated['short_code'] ?? null,
             'is_shift' => $isShift,
             'description' => $validated['description'] ?? null,
         ]);
@@ -137,6 +141,7 @@ class WorkingShiftController extends Controller
             return [
                 'name' => $shift->name,
                 'code' => $shift->code,
+                'short_code' => $shift->short_code,
                 'is_shift' => $shift->is_shift,
                 'description' => $shift->description,
                 'details' => $shift->details->map(function ($d) {

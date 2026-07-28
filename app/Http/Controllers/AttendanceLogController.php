@@ -32,171 +32,512 @@ class AttendanceLogController extends Controller
         }
     }
 
-    public function index(Request $request)
+        public function index(Request $request)
     {
-        $query = AttendanceLog::with('device')->orderBy('timestamp', 'desc');
+        $month = $request->query('month', now()->format('Y-m'));
+        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+        $monthCarbon = \Carbon\Carbon::createFromFormat('Y-m', $month);
+        
+        $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
+        $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
 
-        $rawEmployees = $this->service->getSdEmployees();
-        $employeeMap = [];
-        $validUids = []; // For filtering by unit or search
+        $rawEmployees = collect($this->service->getSdEmployees());
 
-        $search = $request->search;
-        $unitId = $request->unit_id;
+        // Apply filters
+        $search = $request->query('search');
+        $unitId = $request->query('unit_id');
 
-        foreach ($rawEmployees as $emp) {
-            if (!empty($emp['zkteco_uid'])) {
-                $uidStr = (string)$emp['zkteco_uid'];
-                $employeeMap[$uidStr] = $emp['name'] ?? 'Unknown';
+        if (!empty($unitId)) {
+            $rawEmployees = $rawEmployees->filter(fn($e) => isset($e['unit_id']) && $e['unit_id'] == $unitId);
+        }
+        if (!empty($search)) {
+            $rawEmployees = $rawEmployees->filter(function($e) use ($search) {
+                return stripos($e['name'], $search) !== false || (isset($e['zkteco_uid']) && stripos((string)$e['zkteco_uid'], $search) !== false) || (isset($e['nuptk']) && stripos($e['nuptk'], $search) !== false);
+            });
+        }
 
-                $matchUnit = empty($unitId) || (isset($emp['unit_id']) && $emp['unit_id'] == $unitId);
-                $matchSearch = empty($search) || stripos($emp['name'], $search) !== false || stripos($uidStr, $search) !== false;
+        $employeesCollection = $rawEmployees->values();
 
-                if ($matchUnit && $matchSearch) {
-                    $validUids[] = $uidStr;
+        // Load dependencies
+        $holidays = \App\Models\Holiday::with('adjustments')
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                  ->orWhereHas('adjustments', function ($q2) use ($startDate, $endDate) {
+                      $q2->whereBetween('adjusted_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+                  });
+            })->get();
+        $holidayDates = $holidays->pluck('original_date')->toArray();
+
+        $leavesData = \App\Models\LeaveRequest::where(function($q) use ($startDate, $endDate) {
+            $q->whereBetween('start_date', [$startDate, $endDate])
+              ->orWhereBetween('end_date', [$startDate, $endDate]);
+        })->where('status', 'approved')->get();
+
+        $leaves = [];
+        foreach ($leavesData as $l) {
+            $key = $l->school_unit_id . '_' . $l->employee_id;
+            $leaves[$key][] = $l;
+        }
+
+        $shiftsData = \App\Models\EmployeeWorkingShift::with('workingShift.details')
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->where('start_date', '<=', $endDate->format('Y-m-d'))
+                  ->where(function($sq) use ($startDate) {
+                      $sq->whereNull('end_date')
+                         ->orWhere('end_date', '>=', $startDate->format('Y-m-d'));
+                  });
+            })->get();
+
+        $assignedShifts = [];
+        foreach ($shiftsData as $s) {
+            $key = $s->school_unit_id . '_' . $s->employee_id;
+            $assignedShifts[$key][] = $s;
+        }
+
+        $logsData = \App\Models\AttendanceLog::whereBetween('timestamp', [
+            $startDate->format('Y-m-d 00:00:00'),
+            $endDate->format('Y-m-d 23:59:59')
+        ])->get();
+
+        $attendanceLogs = [];
+        foreach ($logsData as $log) {
+            $date = substr($log->timestamp, 0, 10);
+            $key = $log->uid . '_' . $date;
+            $attendanceLogs[$key][] = $log;
+        }
+
+        $reports = [];
+
+        foreach ($employeesCollection as $emp) {
+            $uid = $emp['zkteco_uid'] ?? null;
+            $empId = $emp['id'] ?? null;
+            $unit = $emp['unit_id'] ?? null;
+
+            if (!$uid || !$empId) continue;
+
+            $dailyDetails = [];
+            
+            $lastDay = $endDate > now() ? now()->endOfDay() : $endDate;
+            $currentDate = $startDate->copy();
+            
+            while ($currentDate <= $lastDay) {
+                $dateStr = $currentDate->format('Y-m-d');
+                $dayOfWeek = $currentDate->dayOfWeekIso;
+
+                if (in_array($dateStr, $holidayDates)) {
+                    $dailyDetails[$dateStr] = ['status' => 'Libur'];
+                    $currentDate->addDay();
+                    continue;
                 }
+
+                $isOnLeave = false;
+                $leaveType = 'IZIN'; // Default
+                $leaveKey = $unit . '_' . $empId;
+                if (isset($leaves[$leaveKey])) {
+                    foreach ($leaves[$leaveKey] as $leave) {
+                        $leaveStart = substr($leave->start_date, 0, 10);
+                        $leaveEnd = substr($leave->end_date, 0, 10);
+                        if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
+                            $isOnLeave = true;
+                            $leaveType = strtoupper($leave->type ?? 'IZIN');
+                            break;
+                        }
+                    }
+                }
+                if ($isOnLeave) {
+                    // Limit text length for small cells
+                    $displayType = strlen($leaveType) > 6 ? substr($leaveType, 0, 5) . '.' : $leaveType;
+                    $dailyDetails[$dateStr] = ['status' => 'Cuti/Izin', 'leave_type' => $displayType];
+                    $currentDate->addDay();
+                    continue;
+                }
+
+                $hasShiftToday = false;
+                $shiftStartTime = null;
+                $shiftEndTime = null;
+                $shiftKey = $unit . '_' . $empId;
+
+                if (isset($assignedShifts[$shiftKey])) {
+                    foreach ($assignedShifts[$shiftKey] as $assignment) {
+                        $assignStartDate = substr($assignment->start_date, 0, 10);
+                        $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                        if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                            $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
+                            if ($detail && !$detail->is_off) {
+                                $hasShiftToday = true;
+                                $shiftStartTime = $detail->start_time;
+                                $shiftEndTime = $detail->end_time;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if ($hasShiftToday) {
+                    $logKey = $uid . '_' . $dateStr;
+                    if (isset($attendanceLogs[$logKey])) {
+                        $logsForDay = collect($attendanceLogs[$logKey])->sortBy('timestamp')->values();
+                        $firstCheckIn = $logsForDay->first();
+                        $lastCheckOut = $logsForDay->last();
+                        
+                        $checkInTime = substr($firstCheckIn->timestamp, 11, 5);
+                        $checkOutTime = null;
+                        
+                        $isLate = false;
+                        if ($shiftStartTime) {
+                            $checkInCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
+                            $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
+                            if ($checkInCarbon > $expectedStart) {
+                                $isLate = true;
+                            }
+                        }
+
+                        if ($logsForDay->count() > 1) {
+                            $firstCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
+                            $lastCarbon = \Carbon\Carbon::parse($lastCheckOut->timestamp);
+                            
+                            // Valid check-out if more than 3 hours diff OR it's after 12:00 PM
+                            if ($firstCarbon->diffInHours($lastCarbon) >= 3 || (int)$lastCarbon->format('H') >= 12) {
+                                $checkOutTime = substr($lastCheckOut->timestamp, 11, 5);
+                            }
+                        }
+                        
+                        $dailyDetails[$dateStr] = [
+                            'status' => 'Hadir',
+                            'check_in' => $checkInTime,
+                            'check_out' => $checkOutTime,
+                            'is_late' => $isLate
+                        ];
+                    } else {
+                        $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                    }
+                }
+
+                $currentDate->addDay();
             }
+
+            $reports[] = [
+                'employee' => $emp,
+                'daily_details' => $dailyDetails,
+            ];
         }
 
-        // If filtering by unit or searching, restrict UIDs
-        if (!empty($unitId) || !empty($search)) {
-            // Also allow exact match on uid if searching, in case not in API
-            if (!empty($search)) {
-                $query->where(function($q) use ($validUids, $search) {
-                    $q->whereIn('uid', $validUids)
-                      ->orWhere('uid', 'like', "%{$search}%");
-                });
-            } else {
-                $query->whereIn('uid', $validUids);
-            }
-        }
+        // Paginator
+        $total = count($reports);
+        $perPageReq = $request->query('per_page', 15);
+        $perPage = $perPageReq === 'all' ? ($total > 0 ? $total : 1) : (int) $perPageReq;
+        $page = $request->query('page', 1);
+        
+        $paginatedReports = new \Illuminate\Pagination\LengthAwarePaginator(
+            array_slice($reports, ($page - 1) * $perPage, $perPage),
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
+        $schoolUnits = \App\Models\SchoolUnit::where('is_active', true)->orderBy('name')->get();
+        $startDateReq = $startDate->format('Y-m-d');
+        $endDateReq = $endDate->format('Y-m-d');
 
-        if ($request->filled('date')) {
-            $query->whereDate('timestamp', $request->date);
-        }
-
-        if ($request->filled('state')) {
-            $query->where('state', $request->state);
-        }
-
-        $perPage = $request->input('per_page', 50);
-        if ($perPage === 'all') {
-            $logs = $query->paginate(100000)->withQueryString(); // practically all
-        } else {
-            $logs = $query->paginate((int)$perPage)->withQueryString();
-        }
-
-        $units = \App\Models\SchoolUnit::where('is_active', true)->orderBy('name')->get();
-
-        return view('attendance-logs.index', compact('logs', 'employeeMap', 'units'));
+        return view('attendance-logs.index', compact('paginatedReports', 'schoolUnits', 'month', 'startDateReq', 'endDateReq'));
     }
 
-    public function export(Request $request)
+        public function export(Request $request)
     {
-        $query = AttendanceLog::with('device')->orderBy('timestamp', 'desc');
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', 300);
+        
+        $month = $request->query('month', now()->format('Y-m'));
+        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+        $monthCarbon = \Carbon\Carbon::createFromFormat('Y-m', $month);
+        
+        $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
+        $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
 
-        $rawEmployees = $this->service->getSdEmployees();
-        $employeeMap = [];
-        $validUids = [];
+        $rawEmployees = collect($this->service->getSdEmployees());
 
-        $search = $request->search;
-        $unitId = $request->unit_id;
+        $search = $request->query('search');
+        $unitId = $request->query('unit_id');
 
-        foreach ($rawEmployees as $emp) {
-            if (!empty($emp['zkteco_uid'])) {
-                $uidStr = (string)$emp['zkteco_uid'];
-                $employeeMap[$uidStr] = $emp['name'] ?? 'Unknown';
+        if (!empty($unitId)) {
+            $rawEmployees = $rawEmployees->filter(fn($e) => isset($e['unit_id']) && $e['unit_id'] == $unitId);
+        }
+        if (!empty($search)) {
+            $rawEmployees = $rawEmployees->filter(function($e) use ($search) {
+                return stripos($e['name'], $search) !== false || (isset($e['zkteco_uid']) && stripos((string)$e['zkteco_uid'], $search) !== false) || (isset($e['nuptk']) && stripos($e['nuptk'], $search) !== false);
+            });
+        }
 
-                $matchUnit = empty($unitId) || (isset($emp['unit_id']) && $emp['unit_id'] == $unitId);
-                $matchSearch = empty($search) || stripos($emp['name'], $search) !== false || stripos($uidStr, $search) !== false;
+        $employeesCollection = $rawEmployees->values();
 
-                if ($matchUnit && $matchSearch) {
-                    $validUids[] = $uidStr;
+        $holidays = \App\Models\Holiday::with('adjustments')
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                  ->orWhereHas('adjustments', function ($q2) use ($startDate, $endDate) {
+                      $q2->whereBetween('adjusted_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+                  });
+            })->get();
+        $holidayDates = $holidays->pluck('original_date')->toArray();
+
+        $leavesData = \App\Models\LeaveRequest::where(function($q) use ($startDate, $endDate) {
+            $q->whereBetween('start_date', [$startDate, $endDate])
+              ->orWhereBetween('end_date', [$startDate, $endDate]);
+        })->where('status', 'approved')->get();
+
+        $leaves = [];
+        foreach ($leavesData as $l) {
+            $key = $l->school_unit_id . '_' . $l->employee_id;
+            $leaves[$key][] = $l;
+        }
+
+        $shiftsData = \App\Models\EmployeeWorkingShift::with('workingShift.details')
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->where('start_date', '<=', $endDate->format('Y-m-d'))
+                  ->where(function($sq) use ($startDate) {
+                      $sq->whereNull('end_date')
+                         ->orWhere('end_date', '>=', $startDate->format('Y-m-d'));
+                  });
+            })->get();
+
+        $assignedShifts = [];
+        foreach ($shiftsData as $s) {
+            $key = $s->school_unit_id . '_' . $s->employee_id;
+            $assignedShifts[$key][] = $s;
+        }
+
+        $logsData = \App\Models\AttendanceLog::whereBetween('timestamp', [
+            $startDate->format('Y-m-d 00:00:00'),
+            $endDate->format('Y-m-d 23:59:59')
+        ])->get();
+
+        $attendanceLogs = [];
+        foreach ($logsData as $log) {
+            $date = substr($log->timestamp, 0, 10);
+            $key = $log->uid . '_' . $date;
+            $attendanceLogs[$key][] = $log;
+        }
+
+        $reports = [];
+
+        foreach ($employeesCollection as $emp) {
+            $uid = $emp['zkteco_uid'] ?? null;
+            $empId = $emp['id'] ?? null;
+            $unit = $emp['unit_id'] ?? null;
+
+            if (!$uid || !$empId) continue;
+
+            $dailyDetails = [];
+            
+            $lastDay = $endDate > now() ? now()->endOfDay() : $endDate;
+            $currentDate = $startDate->copy();
+            
+            while ($currentDate <= $lastDay) {
+                $dateStr = $currentDate->format('Y-m-d');
+                $dayOfWeek = $currentDate->dayOfWeekIso;
+
+                if (in_array($dateStr, $holidayDates)) {
+                    $dailyDetails[$dateStr] = ['status' => 'Libur'];
+                    $currentDate->addDay();
+                    continue;
                 }
+
+                $isOnLeave = false;
+                $leaveType = 'IZIN';
+                $leaveKey = $unit . '_' . $empId;
+                if (isset($leaves[$leaveKey])) {
+                    foreach ($leaves[$leaveKey] as $leave) {
+                        $leaveStart = substr($leave->start_date, 0, 10);
+                        $leaveEnd = substr($leave->end_date, 0, 10);
+                        if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
+                            $isOnLeave = true;
+                            $leaveType = strtoupper($leave->type ?? 'IZIN');
+                            break;
+                        }
+                    }
+                }
+                if ($isOnLeave) {
+                    $displayType = strlen($leaveType) > 6 ? substr($leaveType, 0, 5) . '.' : $leaveType;
+                    $dailyDetails[$dateStr] = ['status' => 'Cuti/Izin', 'leave_type' => $displayType];
+                    $currentDate->addDay();
+                    continue;
+                }
+
+                $hasShiftToday = false;
+                $shiftStartTime = null;
+                $shiftKey = $unit . '_' . $empId;
+
+                if (isset($assignedShifts[$shiftKey])) {
+                    foreach ($assignedShifts[$shiftKey] as $assignment) {
+                        $assignStartDate = substr($assignment->start_date, 0, 10);
+                        $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                        if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                            $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
+                            if ($detail && !$detail->is_off) {
+                                $hasShiftToday = true;
+                                $shiftStartTime = $detail->start_time;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if ($hasShiftToday) {
+                    $logKey = $uid . '_' . $dateStr;
+                    if (isset($attendanceLogs[$logKey])) {
+                        $logsForDay = collect($attendanceLogs[$logKey])->sortBy('timestamp')->values();
+                        $firstCheckIn = $logsForDay->first();
+                        $lastCheckOut = $logsForDay->last();
+                        
+                        $checkInTime = substr($firstCheckIn->timestamp, 11, 5);
+                        $checkOutTime = null;
+                        
+                        if ($logsForDay->count() > 1) {
+                            $firstCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
+                            $lastCarbon = \Carbon\Carbon::parse($lastCheckOut->timestamp);
+                            if ($firstCarbon->diffInHours($lastCarbon) >= 3 || (int)$lastCarbon->format('H') >= 12) {
+                                $checkOutTime = substr($lastCheckOut->timestamp, 11, 5);
+                            }
+                        }
+                        
+                        $dailyDetails[$dateStr] = [
+                            'status' => 'Hadir',
+                            'check_in' => $checkInTime,
+                            'check_out' => $checkOutTime
+                        ];
+                    } else {
+                        $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                    }
+                }
+
+                $currentDate->addDay();
             }
+
+            $reports[] = [
+                'employee' => $emp,
+                'daily_details' => $dailyDetails,
+            ];
         }
 
-        if (!empty($unitId) || !empty($search)) {
-            if (!empty($search)) {
-                $query->where(function($q) use ($validUids, $search) {
-                    $q->whereIn('uid', $validUids)
-                      ->orWhere('uid', 'like', "%{$search}%");
-                });
-            } else {
-                $query->whereIn('uid', $validUids);
-            }
+        $format = $request->query('format', 'excel');
+        
+        $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
+        $unitName = "Semua_Unit";
+        if (!empty($unitId)) {
+            $schoolUnit = \App\Models\SchoolUnit::find($unitId);
+            if ($schoolUnit) $unitName = str_replace(' ', '_', $schoolUnit->name);
+        }
+        $searchStr = !empty($search) ? '_Pencarian_' . preg_replace('/[^A-Za-z0-9]/', '', $search) : '';
+        $baseFileName = 'Matriks_Absensi_' . $unitName . '_' . $month . $searchStr;
+        
+        $start = $startDate->copy();
+        $end = clone $endDate;
+        $dates = [];
+        while($start <= $end) {
+            $dates[] = $start->copy();
+            $start->addDay();
         }
 
-        if ($request->filled('device_id')) {
-            $query->where('zkteco_device_id', $request->device_id);
+        if ($format === 'pdf') {
+            ini_set('memory_limit', '512M');
+            set_time_limit(300);
+            
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('attendance-logs.export-pdf', compact('reports', 'periodeStr', 'unitId', 'dates'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download($baseFileName . ".pdf");
         }
 
-        if ($request->filled('date')) {
-            $query->whereDate('timestamp', $request->date);
-        }
-
-        if ($request->filled('state')) {
-            $query->where('state', $request->state);
-        }
-
-        $logs = $query->get();
-
-
-
-        $stateMap = [
-            0 => 'Masuk (Check-In)',
-            1 => 'Pulang (Check-Out)',
-            2 => 'Mulai Istirahat',
-            3 => 'Selesai Istirahat',
-            4 => 'Lembur Masuk',
-            5 => 'Lembur Pulang',
-            15 => 'Absen Normal'
-        ];
-        $typeMap = [
-            0 => 'Password',
-            1 => 'Sidik Jari',
-            4 => 'Kartu RFID',
-            15 => 'Wajah',
-            255 => 'Biometrik / Auto'
-        ];
-
+        // Generate Excel
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Log Absensi');
+        $sheet->setTitle('Matriks Absensi');
 
-        // Set Headers
-        $headers = ['No', 'Nama Mesin', 'Karyawan', 'UID', 'Waktu Absen', 'Status', 'Mode Verifikasi', 'Waktu Ditarik'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '1', $header);
-            $sheet->getStyle($col . '1')->getFont()->setBold(true);
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-            $col++;
+        // Headers
+        $sheet->setCellValue('A1', 'NO');
+        $sheet->setCellValue('B1', 'NAMA PEGAWAI');
+        
+        $sheet->getColumnDimension('A')->setWidth(5);
+        $sheet->getColumnDimension('B')->setWidth(30);
+        
+        $colIndex = 3; // C
+        foreach ($dates as $dateObj) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+            $sheet->setCellValue($colLetter . '1', $dateObj->format('d/M'));
+            $sheet->getColumnDimension($colLetter)->setWidth(12);
+            $colIndex++;
         }
 
+        // Header Styling
+        $lastColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex - 1);
+        $headerRange = 'A1:' . $lastColLetter . '1';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+              ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+              ->getStartColor()->setARGB('FFD9E1F2');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal('center');
+        $sheet->getStyle('B1')->getAlignment()->setHorizontal('left');
+
+        // Freeze pane
+        $sheet->freezePane('C2');
+
+        // Populate Data
         $row = 2;
         $no = 1;
-        foreach ($logs as $log) {
-            $karyawan = $employeeMap[(string)$log->uid] ?? ($log->local_name ? $log->local_name . ' (Data Mesin)' : 'Tidak Dikenal');
-            $stateLabel = $stateMap[$log->state] ?? 'Status '.$log->state;
-            $typeLabel = $typeMap[$log->type] ?? 'Mode '.$log->type;
-
+        foreach ($reports as $report) {
             $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $log->device->name ?? 'Mesin Terhapus');
-            $sheet->setCellValue('C' . $row, $karyawan);
-            // Prefix UID with ' to prevent scientific notation in Excel
-            $sheet->setCellValue('D' . $row, "'" . $log->uid); 
-            $sheet->setCellValue('E' . $row, \Carbon\Carbon::parse($log->timestamp)->format('Y-m-d H:i:s'));
-            $sheet->setCellValue('F' . $row, $stateLabel);
-            $sheet->setCellValue('G' . $row, $typeLabel);
-            $sheet->setCellValue('H' . $row, $log->created_at->format('Y-m-d H:i:s'));
+            $sheet->setCellValue('B' . $row, $report['employee']['name'] ?? '-');
+            
+            $colIndex = 3;
+            foreach ($dates as $date) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+                $dateStr = $date->format('Y-m-d');
+                $detail = $report['daily_details'][$dateStr] ?? null;
+                
+                $cellValue = '-';
+                if ($detail) {
+                    if ($detail['status'] === 'Hadir') {
+                        $in = $detail['check_in'] ?? '-';
+                        $out = $detail['check_out'] ?? '-';
+                        $cellValue = $in . "\n" . $out;
+                        // Center align and wrap text
+                        $sheet->getStyle($colLetter . $row)->getAlignment()
+                              ->setWrapText(true)
+                              ->setHorizontal('center')
+                              ->setVertical('center');
+                    } elseif ($detail['status'] === 'Alfa') {
+                        $cellValue = 'A';
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
+                    } elseif ($detail['status'] === 'Cuti/Izin') {
+                        $cellValue = $detail['leave_type'] ?? 'IZIN';
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE));
+                    } elseif ($detail['status'] === 'Libur') {
+                        $cellValue = 'L';
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
+                    }
+                } else {
+                    if ($date->isWeekend()) {
+                        $cellValue = 'L';
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
+                    }
+                }
+                
+                $sheet->setCellValue($colLetter . $row, $cellValue);
+                if ($cellValue === 'A' || $cellValue === 'L' || $cellValue === '-' || $detail['status'] ?? '' === 'Cuti/Izin') {
+                    $sheet->getStyle($colLetter . $row)->getAlignment()->setHorizontal('center')->setVertical('center');
+                }
+                $colIndex++;
+            }
             $row++;
         }
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        // Borders
+        $dataRange = 'A1:' . $lastColLetter . ($row - 1);
+        $sheet->getStyle($dataRange)->getBorders()->getAllBorders()
+              ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
 
-        $filename = 'log_absensi_' . date('Y-m-d_His') . '.xlsx';
+        $filename = $baseFileName . '.xlsx';
         
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $responseHeaders = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',

@@ -12,6 +12,7 @@ class WorkingShift extends Model
     protected $fillable = [
         'name',
         'code',
+        'short_code',
         'is_shift',
         'description',
     ];

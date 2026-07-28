@@ -24,7 +24,8 @@ class ZktecoDeviceController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'ip_address' => 'required|ip',
+            'sn' => 'nullable|string|max:255|unique:zkteco_devices,sn',
+            'ip_address' => 'required|string|max:255',
             'port' => 'required|integer|min:1|max:65535',
             'model_name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
@@ -46,7 +47,8 @@ class ZktecoDeviceController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'ip_address' => 'required|ip',
+            'sn' => 'nullable|string|max:255|unique:zkteco_devices,sn,' . $zktecoDevice->id,
+            'ip_address' => 'required|string|max:255',
             'port' => 'required|integer|min:1|max:65535',
             'model_name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',

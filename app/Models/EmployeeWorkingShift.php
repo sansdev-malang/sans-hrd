@@ -13,8 +13,10 @@ class EmployeeWorkingShift extends Model
         'employee_id',
         'school_unit_id',
         'working_shift_id',
+        'bonus_schema_id',
         'start_date',
         'end_date',
+        'roster_name',
     ];
 
     protected $casts = [
@@ -30,5 +32,10 @@ class EmployeeWorkingShift extends Model
     public function workingShift()
     {
         return $this->belongsTo(WorkingShift::class);
+    }
+
+    public function bonusSchema()
+    {
+        return $this->belongsTo(BonusSchema::class);
     }
 }

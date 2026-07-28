@@ -35,45 +35,66 @@
         </header>
 
         <!-- FILTERS -->
-        <div class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left">
-            <form method="GET" action="{{ route('users.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end text-xs">
+        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left">
+                                                                        <form method="GET" action="{{ route('users.index') }}" class="flex flex-col md:flex-row flex-wrap items-end gap-4 text-xs w-full">
                 <!-- Search Name/Email -->
-                <div class="space-y-1">
-                    <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">Cari Pengguna</label>
+                <div style="flex: 0 0 250px;">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Cari Pengguna</label>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama atau email..." 
                         class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                 </div>
 
                 <!-- Filter Role -->
-                <div class="space-y-1">
-                    <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">Hak Akses / Role</label>
+                <div style="flex: 0 0 180px;">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Hak Akses / Role</label>
                     <select name="role" class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                         <option value="">Semua Role</option>
                         <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                        <option value="hrd" {{ request('role') === 'hrd' ? 'selected' : '' }}>Staf HRD</option>
+                        <option value="admin_sd" {{ request('role') === 'admin_sd' ? 'selected' : '' }}>Admin SD</option>
+                        <option value="admin_smp" {{ request('role') === 'admin_smp' ? 'selected' : '' }}>Admin SMP</option>
+                        <option value="admin_paud" {{ request('role') === 'admin_paud' ? 'selected' : '' }}>Admin PAUD</option>
+                        <option value="kepala_sekolah" {{ request('role') === 'kepala_sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
+                        <option value="waka" {{ request('role') === 'waka' ? 'selected' : '' }}>Waka</option>
+                        <option value="employee" {{ request('role') === 'employee' ? 'selected' : '' }}>Pegawai (Employee)</option>
                     </select>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex gap-2">
-                    <button type="submit" class="flex-1 h-9 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                        <i data-lucide="search" class="w-3.5 h-3.5"></i>
-                        Filter
-                    </button>
-                    @if(request()->anyFilled(['search', 'role']))
-                        <a href="{{ route('users.index') }}" class="h-9 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-750 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center transition-all cursor-pointer" title="Reset Filter">
-                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                        </a>
-                    @endif
+                <div style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+                    <div class="flex gap-2 w-full h-9">
+                        <button type="submit" class="px-5 h-full bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                            <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                            Filter
+                        </button>
+                        @if(request()->anyFilled(['search', 'role']))
+                            <a href="{{ route('users.index') }}" class="h-full px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center transition-all cursor-pointer" title="Reset Filter">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            </a>
+                        @endif
+                    </div>
                 </div>
+            
+                <!-- Per Page -->
+                <div style="margin-left: auto; flex: 0 0 110px;">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
+                    <select name="per_page" onchange="this.form.submit()" class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                        <option value="10" {{ request('per_page', '10') == '10' ? 'selected' : '' }}>10 baris</option>
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                    </select>
+                </div>
+
+                
             </form>
         </div>
 
         <!-- USERS TABLE -->
-        <div class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
-            <div class="overflow-x-auto">
+        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
+            <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700" style="max-height: calc(100vh - 280px); overflow-y: auto;">
                 <table class="w-full text-xs">
-                    <thead class="bg-slate-50/70 dark:bg-slate-900/50 border-b border-slate-150 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                    <thead class="sticky top-0 z-40 bg-slate-50/70 dark:bg-slate-900/50 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="px-6 py-3.5 text-left">Pengguna</th>
                             <th class="px-6 py-3.5 text-left">Email</th>
@@ -81,12 +102,12 @@
                             <th class="px-6 py-3.5 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-850/60 text-slate-700 dark:text-slate-300 font-medium">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300 font-medium">
                         @forelse($users as $user)
                             <tr class="hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors">
                                 <td class="px-6 py-4 text-left">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold flex items-center justify-center uppercase">
+                                        <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center uppercase">
                                             {{ substr($user->name, 0, 2) }}
                                         </div>
                                         <div>
@@ -99,14 +120,14 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-left font-mono text-slate-655 dark:text-slate-400">
+                                <td class="px-6 py-4 text-left font-mono text-slate-600 dark:text-slate-400">
                                     {{ $user->email }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($user->role === 'super_admin')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-955/20 text-rose-700 dark:text-rose-400 border border-rose-150 dark:border-rose-900/30 uppercase">Super Admin</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-150 dark:border-rose-900/30 uppercase">Super Admin</span>
                                     @elseif($user->role === 'hrd')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-955/20 text-indigo-700 dark:text-indigo-400 border border-indigo-150 dark:border-indigo-900/30 uppercase">Staf HRD</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400 border border-indigo-150 dark:border-indigo-900/30 uppercase">Staf HRD</span>
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 uppercase">{{ $user->role }}</span>
                                     @endif
@@ -119,10 +140,10 @@
                                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="w-8 h-8 rounded-lg bg-rose-50/40 hover:bg-rose-50 dark:bg-rose-955/10 dark:hover:bg-rose-955/20 border border-rose-150/40 dark:border-rose-900/30 text-rose-600 dark:text-rose-450 flex items-center justify-center transition-colors cursor-pointer" title="Hapus Akun">
+                                            <button type="submit" class="w-8 h-8 rounded-lg bg-rose-50/40 hover:bg-rose-50 dark:bg-rose-950/10 dark:hover:bg-rose-950/20 border border-rose-150/40 dark:border-rose-900/30 text-rose-600 dark:text-rose-450 flex items-center justify-center transition-colors cursor-pointer" title="Hapus Akun">
                                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                             </button>
-                                        </form>
+            </form>
                                     @endif
                                 </td>
                             </tr>
@@ -138,19 +159,25 @@
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
+                                </table>
             </div>
+            
+            @if(method_exists($users, 'hasPages') && $users->hasPages())
+                <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+                    {{ $users->links('pagination::tailwind') }}
+                </div>
+            @endif
         </div>
 
         <!-- MODAL 1: ADD USER -->
-        <div x-show="showAddModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-955/60 backdrop-blur-xs text-left" style="display: none;">
-            <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
-                <div class="p-5 border-b border-slate-150 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+        <div x-show="showAddModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none;">
+            <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
                         <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
                         Tambah Akun User Baru
                     </h3>
-                    <button @click="showAddModal = false" class="text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">
+                    <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -188,23 +215,23 @@
                             </select>
                         </div>
                     </div>
-                    <div class="p-5 border-t border-slate-150 dark:border-slate-850 flex gap-2 justify-end">
-                        <button type="button" @click="showAddModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-770 dark:text-slate-300 font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">Batal</button>
-                        <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Simpan</button>
+                    <div class="p-5 border-t border-slate-200 dark:border-slate-800 flex gap-2 justify-end">
+                        <button type="button" @click="showAddModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">Batal</button>
+                        <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Simpan</button>
                     </div>
-                </form>
+            </form>
             </div>
         </div>
 
         <!-- MODAL 2: EDIT USER -->
-        <div x-show="showEditModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-955/60 backdrop-blur-xs text-left" style="display: none;">
-            <div @click.outside="showEditModal = false" class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
-                <div class="p-5 border-b border-slate-150 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+        <div x-show="showEditModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none;">
+            <div @click.outside="showEditModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
                         <i data-lucide="edit-3" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
                         Edit Akun Pengguna
                     </h3>
-                    <button @click="showEditModal = false" class="text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">
+                    <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -242,23 +269,23 @@
                             </select>
                         </div>
                     </div>
-                    <div class="p-5 border-t border-slate-150 dark:border-slate-850 flex gap-2 justify-end">
-                        <button type="button" @click="showEditModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-770 dark:text-slate-300 font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">Batal</button>
-                        <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Simpan Perubahan</button>
+                    <div class="p-5 border-t border-slate-200 dark:border-slate-800 flex gap-2 justify-end">
+                        <button type="button" @click="showEditModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">Batal</button>
+                        <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Simpan Perubahan</button>
                     </div>
-                </form>
+            </form>
             </div>
         </div>
 
         <!-- MODAL 3: PROFILE DETAIL CARD -->
-        <div x-show="showDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-955/60 backdrop-blur-xs text-left" style="display: none;">
-            <div @click.outside="showDetailModal = false" class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
-                <div class="p-5 border-b border-slate-150 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+        <div x-show="showDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none;">
+            <div @click.outside="showDetailModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
                         <i data-lucide="user-check" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
                         Profil Pengguna
                     </h3>
-                    <button @click="showDetailModal = false" class="text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">
+                    <button @click="showDetailModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -266,19 +293,19 @@
                 <div class="p-5 space-y-6">
                     <!-- User Account Card -->
                     <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-xl bg-indigo-50 dark:bg-indigo-955/40 text-indigo-650 dark:text-indigo-400 font-bold flex items-center justify-center text-2xl uppercase shadow-sm">
+                        <div class="w-16 h-16 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center text-2xl uppercase shadow-sm">
                             <span x-text="selectedUser ? selectedUser.name.substring(0,2) : ''"></span>
                         </div>
                         <div class="space-y-1">
                             <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization" x-text="selectedUser ? selectedUser.name : ''"></h4>
-                            <p class="text-slate-450 dark:text-slate-500 font-mono" x-text="selectedUser ? selectedUser.email : ''"></p>
+                            <p class="text-slate-400 dark:text-slate-500 font-mono" x-text="selectedUser ? selectedUser.email : ''"></p>
                             <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 uppercase" x-text="selectedUser ? (selectedUser.role === 'super_admin' ? 'Super Admin' : 'Staf HRD') : ''"></span>
                         </div>
                     </div>
                 </div>
 
-                <div class="p-5 border-t border-slate-150 dark:border-slate-850 flex justify-end">
-                    <button @click="showDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Tutup</button>
+                <div class="p-5 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+                    <button @click="showDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Tutup</button>
                 </div>
             </div>
         </div>

@@ -8,6 +8,7 @@
         editPort: '4370',
         editModelName: 'ZKTeco K40',
         editLocation: '',
+        editSn: '',
         editSyncInterval: 5,
         openEditModal(device) {
             this.editId = device.id;
@@ -16,6 +17,7 @@
             this.editPort = device.port;
             this.editModelName = device.model_name;
             this.editLocation = device.location || '';
+            this.editSn = device.sn || '';
             this.editSyncInterval = device.sync_interval || 5;
             this.showEditModal = true;
         },
@@ -86,6 +88,23 @@
             </div>
         @endif
 
+        <!-- ERROR ALERT -->
+        @if($errors->any())
+            <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl p-4 flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Terjadi Kesalahan!</h5>
+                    <ul class="text-xs text-slate-500 dark:text-slate-400 list-disc pl-4 mt-1 space-y-0.5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
         <!-- GREETING / PAGE TITLE -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
             <div class="flex flex-col gap-0.5">
@@ -152,6 +171,7 @@
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
                             <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-16">No</th>
                             <th class="px-6 py-4 text-left font-semibold text-slate-555 dark:text-slate-400 uppercase tracking-wider">Nama Mesin</th>
+                            <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-32">SN (ADMS)</th>
                             <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-40">IP Address</th>
                             <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-24">Port</th>
                             <th class="px-6 py-4 text-left font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-36">Tipe Mesin</th>
@@ -171,6 +191,7 @@
                                         <span class="font-bold text-slate-850 dark:text-slate-100">{{ $device->name }}</span>
                                     </div>
                                 </td>
+                                <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 font-mono">{{ $device->sn ?? '-' }}</td>
                                 <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 font-mono">{{ $device->ip_address }}</td>
                                 <td class="px-6 py-4 text-slate-650 dark:text-slate-400 font-mono">{{ $device->port }}</td>
                                 <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">{{ $device->model_name }}</td>
@@ -247,6 +268,12 @@
                             class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
 
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Serial Number (SN) - <span class="text-[9px] font-normal normal-case">Wajib untuk ADMS</span></label>
+                        <input type="text" name="sn" placeholder="Contoh: C123456789" 
+                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1">
                             <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">IP Address</label>
@@ -309,6 +336,12 @@
                         <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Perangkat</label>
                         <input type="text" name="name" required x-model="editName"
                             class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Serial Number (SN) - <span class="text-[9px] font-normal normal-case">Wajib untuk ADMS</span></label>
+                        <input type="text" name="sn" x-model="editSn" placeholder="Contoh: C123456789" 
+                            class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">

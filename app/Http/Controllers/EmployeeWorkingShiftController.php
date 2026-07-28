@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EmployeeWorkingShift;
 use App\Models\WorkingShift;
+use App\Models\BonusSchema;
 use App\Models\SchoolUnit;
 use App\Services\SchoolUnitService;
 use Illuminate\Http\Request;
@@ -43,31 +44,81 @@ class EmployeeWorkingShiftController extends Controller
         })->toArray();
 
         $batches = [];
-        foreach ($assignments as $assignment) {
-            $key = $assignment->school_unit_id . '|' . $assignment->working_shift_id . '|' . $assignment->start_date->format('Y-m-d') . '|' . ($assignment->end_date ? $assignment->end_date->format('Y-m-d') : 'null');
-            
-            if (!isset($batches[$key])) {
-                $batches[$key] = [
-                    'school_unit_id' => $assignment->school_unit_id,
-                    'working_shift_id' => $assignment->working_shift_id,
-                    'start_date' => $assignment->start_date,
-                    'end_date' => $assignment->end_date,
-                    'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
-                    'shift_name' => $assignment->workingShift->name ?? 'Unknown',
-                    'shift_code' => $assignment->workingShift->code ?? '-',
-                    'employees' => []
-                ];
-            }
+        $rosterBatches = [];
 
-            $empKey = $assignment->school_unit_id . '-' . $assignment->employee_id;
-            $batches[$key]['employees'][] = [
-                'id' => $assignment->employee_id,
-                'name' => $employeeMap[$empKey]['name'] ?? 'Pegawai #' . $assignment->employee_id,
-                'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-'
-            ];
+        foreach ($assignments as $assignment) {
+            if ($assignment->end_date === null) {
+                // Permanent Shifts
+                $key = 'perm|' . $assignment->school_unit_id . '|' . $assignment->working_shift_id . '|' . $assignment->start_date->format('Y-m-d');
+                
+                if (!isset($batches[$key])) {
+                    $batches[$key] = [
+                        'type' => 'permanent',
+                        'school_unit_id' => $assignment->school_unit_id,
+                        'working_shift_id' => $assignment->working_shift_id,
+                        'start_date' => $assignment->start_date,
+                        'end_date' => null,
+                        'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
+                        'shift_name' => $assignment->workingShift->name ?? 'Unknown',
+                        'shift_code' => $assignment->workingShift->code ?? '-',
+                        'employees' => [],
+                        'sort_date' => $assignment->start_date->format('Y-m-d')
+                    ];
+                }
+
+                $empKey = $assignment->school_unit_id . '-' . $assignment->employee_id;
+                $batches[$key]['employees'][] = [
+                    'id' => $assignment->employee_id,
+                    'name' => $employeeMap[$empKey]['name'] ?? 'Pegawai #' . $assignment->employee_id,
+                    'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-'
+                ];
+            } else {
+                // Roster Shifts
+                $month = $assignment->start_date->format('m');
+                $year = $assignment->start_date->format('Y');
+                $key = 'roster|' . $assignment->school_unit_id . '|' . $year . '|' . $month;
+
+                if (!isset($rosterBatches[$key])) {
+                    $rosterBatches[$key] = [
+                        'type' => 'roster',
+                        'school_unit_id' => $assignment->school_unit_id,
+                        'month' => $month,
+                        'year' => $year,
+                        'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
+                        'roster_name' => $assignment->roster_name,
+                        'employees_map' => [],
+                        'sort_date' => $year . '-' . $month . '-01'
+                    ];
+                }
+                if ($assignment->roster_name) {
+                    $rosterBatches[$key]['roster_name'] = $assignment->roster_name;
+                }
+                
+                $empKey = $assignment->school_unit_id . '-' . $assignment->employee_id;
+                if (!isset($rosterBatches[$key]['employees_map'][$assignment->employee_id])) {
+                    $rosterBatches[$key]['employees_map'][$assignment->employee_id] = [
+                        'id' => $assignment->employee_id,
+                        'name' => $employeeMap[$empKey]['name'] ?? 'Pegawai #' . $assignment->employee_id,
+                        'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-'
+                    ];
+                }
+            }
         }
 
-        return view('employee-working-shifts.index', compact('batches', 'units', 'shifts', 'selectedUnitId'));
+        // Convert roster employees map to array
+        foreach ($rosterBatches as &$rBatch) {
+            $rBatch['employees'] = array_values($rBatch['employees_map']);
+            unset($rBatch['employees_map']);
+        }
+
+        $allBatches = array_merge(array_values($batches), array_values($rosterBatches));
+        
+        // Sort descending by date
+        usort($allBatches, function($a, $b) {
+            return strcmp($b['sort_date'], $a['sort_date']);
+        });
+
+        return view('employee-working-shifts.index', ['batches' => $allBatches, 'units' => $units, 'shifts' => $shifts, 'selectedUnitId' => $selectedUnitId]);
     }
 
     public function editBatch(Request $request)
@@ -96,7 +147,10 @@ class EmployeeWorkingShiftController extends Controller
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
         $shifts = WorkingShift::orderBy('name')->get();
 
-        return view('employee-working-shifts.edit', compact('unit_id', 'shift_id', 'start', 'end', 'employeeIds', 'units', 'shifts'));
+        $bonusSchemas = \App\Models\BonusSchema::all();
+        $bonus_schema_id = $assignments->first()->bonus_schema_id ?? null;
+
+        return view('employee-working-shifts.edit', compact('unit_id', 'shift_id', 'start', 'end', 'employeeIds', 'units', 'shifts', 'bonusSchemas', 'bonus_schema_id'));
     }
 
     public function updateBatch(Request $request)
@@ -111,6 +165,7 @@ class EmployeeWorkingShiftController extends Controller
             'employee_ids' => 'required|array|min:1',
             'employee_ids.*' => 'integer',
             'working_shift_id' => 'required|exists:working_shifts,id',
+            'bonus_schema_id' => 'nullable|exists:bonus_schemas,id',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -131,6 +186,7 @@ class EmployeeWorkingShiftController extends Controller
                 'school_unit_id' => $validated['school_unit_id'],
                 'employee_id' => $employeeId,
                 'working_shift_id' => $validated['working_shift_id'],
+                'bonus_schema_id' => $validated['bonus_schema_id'] ?? null,
                 'start_date' => $validated['start_date'],
                 'end_date' => $validated['end_date'] ?? null,
             ]);
@@ -166,6 +222,31 @@ class EmployeeWorkingShiftController extends Controller
         return redirect()->route('employee-working-shifts.index')->with('success', 'Batch jadwal shift berhasil dihapus.');
     }
 
+    public function destroyRoster(Request $request)
+    {
+        $unit_id = $request->input('unit_id');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+        $lastDay = $firstDay->copy()->endOfMonth();
+
+        EmployeeWorkingShift::where('school_unit_id', $unit_id)
+            ->whereNotNull('end_date')
+            ->where(function($query) use ($firstDay, $lastDay) {
+                $query->whereBetween('start_date', [$firstDay, $lastDay])
+                      ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                      ->orWhere(function($q) use ($firstDay, $lastDay) {
+                          $q->where('start_date', '<', $firstDay)
+                            ->where('end_date', '>', $lastDay);
+                      });
+            })->delete();
+
+        $this->syncSchedulesToUnit($unit_id);
+
+        return redirect()->route('employee-working-shifts.index')->with('success', 'Roster shift bulanan berhasil dihapus.');
+    }
+
     /**
      * Show the form for assigning new shifts (Bulk).
      */
@@ -173,7 +254,7 @@ class EmployeeWorkingShiftController extends Controller
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
         $shifts = WorkingShift::orderBy('name')->get();
-        return view('employee-working-shifts.create', compact('units', 'shifts'));
+        $bonusSchemas = BonusSchema::all(); return view('employee-working-shifts.create', compact('units', 'shifts', 'bonusSchemas'));
     }
 
     /**
@@ -212,6 +293,7 @@ class EmployeeWorkingShiftController extends Controller
             'employee_ids' => 'required|array|min:1',
             'employee_ids.*' => 'integer',
             'working_shift_id' => 'required|exists:working_shifts,id',
+            'bonus_schema_id' => 'nullable|exists:bonus_schemas,id',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -227,6 +309,7 @@ class EmployeeWorkingShiftController extends Controller
                 'school_unit_id' => $validated['school_unit_id'],
                 'employee_id' => $employeeId,
                 'working_shift_id' => $validated['working_shift_id'],
+                'bonus_schema_id' => $validated['bonus_schema_id'] ?? null,
                 'start_date' => $validated['start_date'],
                 'end_date' => $validated['end_date'] ?? null,
             ]);
@@ -305,5 +388,669 @@ class EmployeeWorkingShiftController extends Controller
         } catch (\Exception $e) {
             Log::error("Failed to sync schedules to unit {$unit->name}: " . $e->getMessage());
         }
+    }
+
+    public function detailRoster(Request $request)
+    {
+        $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
+        $selectedUnitId = $request->query('unit_id');
+        $year = $request->query('year');
+        $month = $request->query('month');
+
+        if (!$selectedUnitId || !$year || !$month) {
+            return redirect()->route('employee-working-shifts.index')->with('error', 'Parameter tidak lengkap.');
+        }
+
+        $shifts = WorkingShift::orderBy('name')->get();
+        
+        $colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-sky-100 text-sky-700', 'bg-purple-100 text-purple-700'];
+        $hexBg = ['#e0e7ff', '#d1fae5', '#fef3c7', '#e0f2fe', '#f3e8ff'];
+        $hexText = ['#4338ca', '#047857', '#b45309', '#0369a1', '#7e22ce'];
+        foreach ($shifts as $index => $shift) {
+            $shift->color = 'shift-color-' . $shift->id;
+            $shift->hex_bg = $hexBg[$index % count($hexBg)];
+            $shift->hex_text = $hexText[$index % count($hexText)];
+        }
+        $bonusSchemas = \App\Models\BonusSchema::where('is_active', true)->orderBy('name')->get();
+        $employees = [];
+        $rosterData = [];
+        $daysInMonth = \Carbon\Carbon::create($year, $month, 1)->daysInMonth;
+
+        $unitService = app(\App\Services\SchoolUnitService::class);
+        $allEmployees = $unitService->getSdEmployees();
+        $rawEmployees = array_filter($allEmployees, function($emp) use ($selectedUnitId) {
+            return $emp['unit_id'] == $selectedUnitId;
+        });
+
+        $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+        $lastDay = $firstDay->copy()->endOfMonth();
+
+        $assignments = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
+            ->whereNotNull('roster_name')
+            ->where(function($query) use ($firstDay, $lastDay) {
+                $query->whereBetween('start_date', [$firstDay, $lastDay])
+                      ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                      ->orWhere(function($q) use ($firstDay, $lastDay) {
+                          $q->where('start_date', '<', $firstDay)
+                            ->where(function($q2) use ($lastDay) {
+                                $q2->where('end_date', '>', $lastDay)->orWhereNull('end_date');
+                            });
+                      });
+            })->get();
+
+        $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? 'Roster Shift Bulanan';
+        
+        $assignedEmployeeIds = $assignments->pluck('employee_id')->unique()->toArray();
+        
+        // Filter employees to ONLY those who have assignments in this month
+        $employees = array_filter($rawEmployees, function($emp) use ($assignedEmployeeIds) {
+            return in_array($emp['id'], $assignedEmployeeIds);
+        });
+        $employees = array_values($employees);
+
+        foreach ($employees as $emp) {
+            $empId = $emp['id'];
+            $rosterData[$empId] = [
+                'bonus_schema_id' => null,
+                'days' => array_fill(1, $daysInMonth, null)
+            ];
+        }
+
+        foreach ($assignments as $assignment) {
+            $empId = $assignment->employee_id;
+            if (!isset($rosterData[$empId])) continue;
+
+            if (!$rosterData[$empId]['bonus_schema_id']) {
+                $rosterData[$empId]['bonus_schema_id'] = $assignment->bonus_schema_id;
+            }
+
+            $start = \Carbon\Carbon::parse($assignment->start_date);
+            $end = $assignment->end_date ? \Carbon\Carbon::parse($assignment->end_date) : $lastDay;
+            
+            if ($start < $firstDay) $start = $firstDay->copy();
+            if ($end > $lastDay) $end = $lastDay->copy();
+
+            for ($d = $start->day; $d <= $end->day; $d++) {
+                $rosterData[$empId]['days'][$d] = $assignment->working_shift_id;
+            }
+        }
+
+        return view('employee-working-shifts.detail-roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'bonusSchemas', 'employees', 'rosterData', 'daysInMonth', 'rosterName'));
+    }
+
+    /**
+     * Show the roster grid view.
+     */
+    public function roster(Request $request)
+    {
+        $units = \App\Models\SchoolUnit::where('is_active', true)->orderBy('name')->get();
+        $selectedUnitId = $request->query('unit_id', $units->first()->id ?? null);
+        $year = $request->query('year', date('Y'));
+        $month = $request->query('month', date('m'));
+        
+        $selectedShiftIds = $request->query('shift_ids');
+        $allShifts = \App\Models\WorkingShift::orderBy('name')->get();
+        $colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-sky-100 text-sky-700', 'bg-purple-100 text-purple-700'];
+        $hexBg = ['#e0e7ff', '#d1fae5', '#fef3c7', '#e0f2fe', '#f3e8ff'];
+        $hexText = ['#4338ca', '#047857', '#b45309', '#0369a1', '#7e22ce'];
+        foreach ($allShifts as $index => $shift) {
+            $shift->color = 'shift-color-' . $shift->id;
+            $shift->hex_bg = $hexBg[$index % count($hexBg)] ?? '#e0e7ff';
+            $shift->hex_text = $hexText[$index % count($hexText)] ?? '#4338ca';
+        }
+        
+        $bonusSchemas = \App\Models\BonusSchema::all();
+
+        $employees = [];
+        $rosterData = [];
+
+        if ($selectedUnitId) {
+            $unit = \App\Models\SchoolUnit::find($selectedUnitId);
+            if ($unit) {
+                try {
+                    $resp = \Illuminate\Support\Facades\Http::withHeaders([
+                        'X-API-TOKEN' => $unit->api_token,
+                        'Accept' => 'application/json',
+                    ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/employees');
+                    
+                    if ($resp->successful()) {
+                        $rawEmployees = $resp->json('data') ?? [];
+                        
+                        // Get all employees who have a permanent schedule (end_date IS NULL)
+                        $permanentEmployees = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
+                            ->whereNull('end_date')
+                            ->pluck('employee_id')
+                            ->toArray();
+
+                        // Filter out permanent employees
+                        $employees = array_filter($rawEmployees, function($emp) use ($permanentEmployees) {
+                            return !in_array($emp['id'], $permanentEmployees);
+                        });
+                        
+                        // Re-index array for blade
+                        $employees = array_values($employees);
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Failed to fetch employees for roster: " . $e->getMessage());
+                }
+
+                // Fetch assignments overlapping this month
+                $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+                $lastDay = $firstDay->copy()->endOfMonth();
+                $daysInMonth = $lastDay->day;
+
+                $assignments = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
+                    ->where(function($query) use ($firstDay, $lastDay) {
+                        $query->whereBetween('start_date', [$firstDay, $lastDay])
+                              ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                              ->orWhere(function($q) use ($firstDay, $lastDay) {
+                                  $q->where('start_date', '<', $firstDay)
+                                    ->where(function($q2) use ($lastDay) {
+                                        $q2->where('end_date', '>', $lastDay)->orWhereNull('end_date');
+                                    });
+                              });
+                    })->get();
+
+                // Build roster array
+                foreach ($employees as $emp) {
+                    $empId = $emp['id'];
+                    $rosterData[$empId] = [
+                        'bonus_schema_id' => null,
+                        'days' => array_fill(1, $daysInMonth, null)
+                    ];
+                }
+
+                foreach ($assignments as $assignment) {
+                    $empId = $assignment->employee_id;
+                    if (!isset($rosterData[$empId])) continue;
+
+                    // Set default bonus schema from the first assignment found
+                    if (!$rosterData[$empId]['bonus_schema_id']) {
+                        $rosterData[$empId]['bonus_schema_id'] = $assignment->bonus_schema_id;
+                    }
+
+                    $start = \Carbon\Carbon::parse($assignment->start_date);
+                    $end = $assignment->end_date ? \Carbon\Carbon::parse($assignment->end_date) : $lastDay;
+                    
+                    // Constrain to current month bounds
+                    if ($start < $firstDay) $start = $firstDay->copy();
+                    if ($end > $lastDay) $end = $lastDay->copy();
+
+                    for ($d = $start->day; $d <= $end->day; $d++) {
+                        $rosterData[$empId]['days'][$d] = $assignment->working_shift_id;
+                    }
+                }
+                
+                if ($selectedShiftIds === null) {
+                    $selectedShiftIds = $assignments->whereNotNull('end_date')->pluck('working_shift_id')->filter()->unique()->toArray();
+                }
+            }
+        }
+
+        $selectedShiftIds = $selectedShiftIds ?? [];
+        if (is_array($selectedShiftIds) && count($selectedShiftIds) > 0) {
+            $shifts = $allShifts->whereIn('id', $selectedShiftIds)->values();
+        } else {
+            $shifts = $allShifts;
+        }
+
+        $daysInMonth = \Carbon\Carbon::create($year, $month, 1)->daysInMonth;
+        
+        $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? '';
+
+        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'employees', 'rosterData', 'daysInMonth', 'rosterName'));
+    }
+
+    /**
+     * Save the roster grid.
+     */
+    public function updateRoster(Request $request)
+    {
+        $validated = $request->validate([
+            'school_unit_id' => 'required|exists:school_units,id',
+            'year' => 'required|numeric',
+            'month' => 'required|numeric|min:1|max:12',
+            'roster' => 'array',
+            'roster_name' => 'nullable|string|max:255',
+        ]);
+
+        $unitId = $validated['school_unit_id'];
+        $year = $validated['year'];
+        $month = $validated['month'];
+        $rosterInput = $validated['roster'] ?? [];
+        $rosterName = $validated['roster_name'] ?? null;
+
+        $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+        $lastDay = $firstDay->copy()->endOfMonth();
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            foreach ($rosterInput as $empId => $data) {
+                $bonusSchemaId = $data['bonus_schema_id'] ?? null;
+                $days = $data['days'] ?? [];
+
+                // 1. Splitting logic for existing shifts
+                $overlappingShifts = \App\Models\EmployeeWorkingShift::where('employee_id', $empId)
+                    ->where('school_unit_id', $unitId)
+                    ->where(function($query) use ($firstDay, $lastDay) {
+                        $query->whereBetween('start_date', [$firstDay, $lastDay])
+                              ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                              ->orWhere(function($q) use ($firstDay, $lastDay) {
+                                  $q->where('start_date', '<', $firstDay)
+                                    ->where(function($q2) use ($lastDay) {
+                                        $q2->where('end_date', '>', $lastDay)->orWhereNull('end_date');
+                                    });
+                              });
+                    })->get();
+
+                foreach ($overlappingShifts as $shift) {
+                    $shiftStartDateStr = $shift->start_date ? $shift->start_date->format('Y-m-d') : null;
+                    $shiftEndDateStr = $shift->end_date ? $shift->end_date->format('Y-m-d') : null;
+                    $firstDayStr = $firstDay->format('Y-m-d');
+                    $lastDayStr = $lastDay->format('Y-m-d');
+
+                    if ($shiftStartDateStr < $firstDayStr && ($shiftEndDateStr > $lastDayStr || is_null($shiftEndDateStr))) {
+                        // Encompasses whole month -> Split into two
+                        $newShift = $shift->replicate();
+                        $newShift->start_date = $lastDay->copy()->addDay()->format('Y-m-d');
+                        $newShift->save();
+                        
+                        $shift->end_date = $firstDay->copy()->subDay()->format('Y-m-d');
+                        $shift->save();
+                    } elseif ($shiftStartDateStr < $firstDayStr) {
+                        // Starts before, ends within -> Trim end
+                        $shift->end_date = $firstDay->copy()->subDay()->format('Y-m-d');
+                        $shift->save();
+                    } elseif ($shiftEndDateStr > $lastDayStr || is_null($shiftEndDateStr)) {
+                        // Starts within, ends after -> Trim start
+                        $shift->start_date = $lastDay->copy()->addDay()->format('Y-m-d');
+                        $shift->save();
+                    } else {
+                        // Entirely within -> Delete
+                        $shift->delete();
+                    }
+                }
+
+                // 2. Merging logic for new shifts
+                $currentShiftId = null;
+                $rangeStart = null;
+                $rangeEnd = null;
+
+                for ($d = 1; $d <= $lastDay->day; $d++) {
+                    $shiftId = $days[$d] ?? null;
+                    
+                    if ($shiftId != $currentShiftId) {
+                        // Save previous range
+                        if ($currentShiftId !== null && $currentShiftId !== '') {
+                            \App\Models\EmployeeWorkingShift::create([
+                                'employee_id' => $empId,
+                                'school_unit_id' => $unitId,
+                                'working_shift_id' => $currentShiftId,
+                                'bonus_schema_id' => $bonusSchemaId,
+                                'start_date' => $firstDay->copy()->day($rangeStart)->format('Y-m-d'),
+                                'end_date' => $firstDay->copy()->day($rangeEnd)->format('Y-m-d'),
+                                'roster_name' => $rosterName,
+                            ]);
+                        }
+                        
+                        // Start new range
+                        $currentShiftId = $shiftId;
+                        $rangeStart = $d;
+                        $rangeEnd = $d;
+                    } else {
+                        $rangeEnd = $d;
+                    }
+                }
+
+                // Save the last range if exists
+                if ($currentShiftId !== null && $currentShiftId !== '') {
+                    // Check if they want to make this ongoing (we'll assume no for now, unless explicitly requested, 
+                    // but usually rosters are strictly bound to the month unless it's the last day and we want it to flow.
+                    // Actually, setting end_date to last day of month is safest for a monthly roster.)
+                    \App\Models\EmployeeWorkingShift::create([
+                        'employee_id' => $empId,
+                        'school_unit_id' => $unitId,
+                        'working_shift_id' => $currentShiftId,
+                        'bonus_schema_id' => $bonusSchemaId,
+                        'start_date' => $firstDay->copy()->day($rangeStart)->format('Y-m-d'),
+                        'end_date' => $firstDay->copy()->day($rangeEnd)->format('Y-m-d'),
+                        'roster_name' => $rosterName,
+                    ]);
+                }
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            \Illuminate\Support\Facades\Log::error("Failed to update roster: " . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan Roster Shift.');
+        }
+
+        $this->syncSchedulesToUnit($unitId);
+
+        return redirect()->route('employee-working-shifts.index')->with('success', 'Roster Shift Bulanan berhasil disimpan dan disinkronkan.');
+    }
+
+    public function exportRoster(Request $request)
+    {
+        $unitId = $request->query('unit_id');
+        $month = (int)$request->query('month');
+        $year = (int)$request->query('year');
+        $type = $request->query('type', 'pdf');
+        $notes = $request->query('notes', '');
+        
+        if (!$unitId || !$month || !$year) {
+            return redirect()->back()->with('error', 'Parameter tidak lengkap untuk ekspor.');
+        }
+        
+        $unit = SchoolUnit::findOrFail($unitId);
+        $shifts = WorkingShift::with('details')->orderBy('name')->get();
+        
+        $colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-sky-100 text-sky-700', 'bg-purple-100 text-purple-700'];
+        $hexBg = ['#e0e7ff', '#d1fae5', '#fef3c7', '#e0f2fe', '#f3e8ff'];
+        $hexText = ['#4338ca', '#047857', '#b45309', '#0369a1', '#7e22ce'];
+        foreach ($shifts as $index => $shift) {
+            $shift->color = $colors[$index % count($colors)];
+            $shift->hex_bg = $hexBg[$index % count($hexBg)];
+            $shift->hex_text = $hexText[$index % count($hexText)];
+        }
+        $daysInMonth = \Carbon\Carbon::create($year, $month)->daysInMonth;
+        
+        $allEmployees = $this->unitService->getSdEmployees();
+        $rawEmployees = array_filter($allEmployees, function($emp) use ($unitId) {
+            return $emp['unit_id'] == $unitId;
+        });
+        
+        
+        $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+        $lastDay = \Carbon\Carbon::create($year, $month, $daysInMonth)->endOfDay();
+        
+        $assignments = EmployeeWorkingShift::with('workingShift')
+            ->where('school_unit_id', $unitId)
+            ->whereNotNull('roster_name')
+            ->where(function($query) use ($firstDay, $lastDay) {
+                $query->whereBetween('start_date', [$firstDay, $lastDay])
+                      ->orWhere(function($q) use ($firstDay, $lastDay) {
+                          $q->where('start_date', '<', $firstDay)
+                            ->where(function($q2) use ($lastDay) {
+                                $q2->whereNull('end_date')
+                                   ->orWhere('end_date', '>=', $lastDay);
+                            });
+                      });
+            })->get();
+
+        $assignedEmployeeIds = $assignments->pluck('employee_id')->unique()->toArray();
+        $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? 'Roster Shift Bulanan';
+        
+        // Match the same logic as detailRoster, only include employees with assignments
+        $employees = array_filter($rawEmployees, function($emp) use ($assignedEmployeeIds) {
+            return in_array($emp['id'], $assignedEmployeeIds);
+        });
+        $employees = array_values($employees);
+            
+        $rosterData = [];
+        foreach ($assignments as $assignment) {
+            $empId = $assignment->employee_id;
+            if (!isset($rosterData[$empId])) {
+                $rosterData[$empId] = [
+                    'bonus_schema_id' => $assignment->bonus_schema_id,
+                    'days' => []
+                ];
+            }
+            
+            $start = \Carbon\Carbon::parse($assignment->start_date)->max($firstDay);
+            $end = $assignment->end_date ? \Carbon\Carbon::parse($assignment->end_date)->min($lastDay) : $lastDay;
+            
+            for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+                $rosterData[$empId]['days'][$d->day] = $assignment->working_shift_id;
+            }
+        }
+        
+        $bonusSchemas = \App\Models\BonusSchema::where('is_active', true)->orderBy('name')->get();
+        
+        $data = compact('unit', 'year', 'month', 'shifts', 'employees', 'rosterData', 'daysInMonth', 'notes', 'rosterName');
+        
+        if ($type === 'excel') {
+            return $this->generateExcel($data);
+        }
+        
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+        // PDF Export
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('employee-working-shifts.export-roster-pdf', $data);
+        $pdf->setPaper('a4', 'landscape');
+        
+        return $pdf->download("Roster_Shift_{$unit->name}_{$month}_{$year}.pdf");
+    }
+
+    private function generateExcel($data)
+    {
+        extract($data);
+        
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Title
+        $monthName = \Carbon\Carbon::create($year, $month, 1)->translatedFormat('F Y');
+        $lastColHeader = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(2 + $daysInMonth);
+        $sheet->setCellValue('A1', 'JADWAL ' . strtoupper($rosterName) . ' ' . strtoupper($monthName));
+        $sheet->mergeCells("A1:{$lastColHeader}1");
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        
+        // Header
+        $sheet->setCellValue('A4', 'No');
+        $sheet->mergeCells('A4:A5');
+        $sheet->setCellValue('B4', 'Nama Pegawai');
+        $sheet->mergeCells('B4:B5');
+        
+        $col = 'C';
+        for ($d = 1; $d <= $daysInMonth; $d++) {
+            $timestamp = mktime(0,0,0,$month,$d,$year);
+            $dayName = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'][date('w', $timestamp)];
+            $sheet->setCellValue($col . '4', $dayName);
+            $sheet->setCellValue($col . '5', $d);
+            
+            // Set fixed width for dates so they don't stretch
+            $sheet->getColumnDimension($col)->setWidth(5.7);
+            
+            $col++;
+        }
+        
+        // Freeze Panes
+        $sheet->freezePane('C6');
+        
+        // Apply Header Style
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FFE2EFDA'],
+            ],
+        ];
+        $sheet->getStyle("A4:$lastColHeader" . "5")->applyFromArray($headerStyle);
+        
+        // Extract Used Shifts
+        $usedShiftIds = [];
+        foreach ($rosterData as $rd) {
+            foreach ($rd['days'] as $sid) {
+                if ($sid) $usedShiftIds[$sid] = true;
+            }
+        }
+        
+        // Data Rows
+        $row = 6;
+        foreach ($employees as $index => $emp) {
+            $empId = $emp['id'];
+            $rowData = $rosterData[$empId] ?? null;
+            
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $emp['name']);
+            
+            $colIdx = 3;
+            for ($d = 1; $d <= $daysInMonth; $d++) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
+                $shiftId = $rowData['days'][$d] ?? '';
+                $shiftCode = '';
+                $bgHex = 'FFFFFFFF';
+                $textHex = 'FF000000';
+                
+                $timestamp = mktime(0,0,0,$month,$d,$year);
+                $isWeekend = (date('D', $timestamp) == 'Sun');
+                
+                if ($shiftId) {
+                    $shift = collect($shifts)->firstWhere('id', $shiftId);
+                    if ($shift) {
+                        $shiftCode = $shift->short_code ?: strtoupper(last(explode('_', $shift->code)));
+                        $bgHex = str_replace('#', 'FF', $shift->hex_bg);
+                        $textHex = str_replace('#', 'FF', $shift->hex_text);
+                    }
+                }
+                
+                if ($isWeekend && !$shiftCode) {
+                    $bgHex = 'FFFEE2E2'; // rose-50
+                    $textHex = 'FFE11D48'; // rose-600
+                }
+                
+                $sheet->setCellValue($colLetter . $row, $shiftCode);
+                if ($shiftCode || $isWeekend) {
+                    $sheet->getStyle($colLetter . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($bgHex);
+                    $sheet->getStyle($colLetter . $row)->getFont()->getColor()->setARGB($textHex);
+                }
+                $sheet->getStyle($colLetter . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $colIdx++;
+            }
+            $row++;
+        }
+        
+        // Apply Data Borders
+        $dataStyle = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        $sheet->getStyle("A6:$lastColHeader" . ($row - 1))->applyFromArray($dataStyle);
+        
+        // Notes and Legend
+        $row = $row + 2;
+        $sheet->setCellValue('B' . $row, 'Keterangan Shift:');
+        $sheet->getStyle('B' . $row)->getFont()->setBold(true);
+        
+        $legendRow = $row + 1;
+        $sheet->setCellValue('B' . $legendRow, 'Kode');
+        $sheet->setCellValue('C' . $legendRow, 'Nama Shift');
+        $sheet->mergeCells("C{$legendRow}:E{$legendRow}");
+        
+        $daysOfWeek = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+        $cIdx = 6; // F
+        foreach ($daysOfWeek as $dayStr) {
+            $colL1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($cIdx);
+            $colL2 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($cIdx + 1); // Merge 2 columns
+            $sheet->setCellValue($colL1 . $legendRow, $dayStr);
+            $sheet->mergeCells("{$colL1}{$legendRow}:{$colL2}{$legendRow}");
+            $cIdx += 2;
+        }
+        
+        $lastLegendCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($cIdx - 1);
+        $sheet->getStyle("B$legendRow:$lastLegendCol$legendRow")->getFont()->setBold(true);
+        $sheet->getStyle("B$legendRow:$lastLegendCol$legendRow")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("B$legendRow:$lastLegendCol$legendRow")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        
+        // Position Catatan dynamically based on where Legend ends
+        $noteStartIdx = $cIdx + 1; 
+        $noteStartCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($noteStartIdx);
+        $noteEndCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($noteStartIdx + 4);
+        
+        if (!empty($notes)) {
+            $sheet->setCellValue($noteStartCol . $row, 'Catatan:');
+            $sheet->getStyle($noteStartCol . $row)->getFont()->setBold(true);
+            $sheet->setCellValue($noteStartCol . ($row + 1), $notes);
+            $sheet->mergeCells("{$noteStartCol}" . ($row + 1) . ":{$noteEndCol}" . ($row + 4));
+            $sheet->getStyle("{$noteStartCol}" . ($row + 1) . ":{$noteEndCol}" . ($row + 4))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFF8FAFC');
+            $sheet->getStyle("{$noteStartCol}" . ($row + 1) . ":{$noteEndCol}" . ($row + 4))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle("{$noteStartCol}" . ($row + 1))->getAlignment()->setWrapText(true)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+        }
+        
+        $legendRow++;
+        foreach ($shifts as $shift) {
+            if (!isset($usedShiftIds[$shift->id])) continue;
+            
+            $bgHex = str_replace('#', 'FF', $shift->hex_bg);
+            $textHex = str_replace('#', 'FF', $shift->hex_text);
+            $code = $shift->short_code ?: strtoupper(last(explode('_', $shift->code)));
+            
+            $sheet->setCellValue('B' . $legendRow, $code);
+            $sheet->getStyle('B' . $legendRow)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($bgHex);
+            $sheet->getStyle('B' . $legendRow)->getFont()->getColor()->setARGB($textHex);
+            $sheet->getStyle('B' . $legendRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            
+            $sheet->setCellValue('C' . $legendRow, $shift->name);
+            $sheet->mergeCells("C{$legendRow}:E{$legendRow}");
+            $sheet->getStyle("C{$legendRow}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            
+            $cIdx = 6;
+            for ($i = 1; $i <= 7; $i++) {
+                $detail = $shift->details->firstWhere('day_of_week', $i);
+                $timeStr = $detail && !$detail->is_off ? substr($detail->start_time, 0, 5) . '-' . substr($detail->end_time, 0, 5) : 'Libur';
+                
+                $colL1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($cIdx);
+                $colL2 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($cIdx + 1);
+                
+                $sheet->setCellValue($colL1 . $legendRow, $timeStr);
+                $sheet->mergeCells("{$colL1}{$legendRow}:{$colL2}{$legendRow}");
+                $sheet->getStyle($colL1 . $legendRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                
+                $cIdx += 2;
+            }
+            $sheet->getStyle("B$legendRow:$lastLegendCol$legendRow")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            
+            $legendRow++;
+        }
+        
+        // HRD Signature
+        // Calculate Signature position dynamically based on last date column or notes
+        $sigRow = $legendRow + 2;
+        $sigStartColIdx = max((2 + $daysInMonth) - 4, $noteStartIdx);
+        $sigStartCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($sigStartColIdx);
+        $sigEndCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($sigStartColIdx + 4);
+        
+        $sheet->setCellValue($sigStartCol . $sigRow, 'Mengetahui,');
+        $sheet->mergeCells("{$sigStartCol}{$sigRow}:{$sigEndCol}{$sigRow}");
+        $sheet->getStyle($sigStartCol . $sigRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        
+        $sheet->setCellValue($sigStartCol . ($sigRow + 1), 'HRD');
+        $sheet->mergeCells("{$sigStartCol}" . ($sigRow + 1) . ":{$sigEndCol}" . ($sigRow + 1));
+        $sheet->getStyle("{$sigStartCol}" . ($sigRow + 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        
+        $sheet->setCellValue($sigStartCol . ($sigRow + 5), '_______________________');
+        $sheet->mergeCells("{$sigStartCol}" . ($sigRow + 5) . ":{$sigEndCol}" . ($sigRow + 5));
+        $sheet->getStyle("{$sigStartCol}" . ($sigRow + 5))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        
+        // Auto size columns for Name and Kode only
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+        $sheet->getColumnDimension('B')->setAutoSize(true);
+        
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = "Roster_Shift_Excel_{$month}_{$year}.xlsx";
+        if ($unit) {
+            $fileName = "Roster_Shift_{$unit->name}_{$month}_{$year}.xlsx";
+        }
+        $tempFile = tempnam(sys_get_temp_dir(), 'roster_excel');
+        $writer->save($tempFile);
+        
+        return response()->download($tempFile, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
     }
 }

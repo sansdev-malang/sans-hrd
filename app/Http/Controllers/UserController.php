@@ -25,7 +25,9 @@ class UserController extends Controller
             $query->where('role', $request->input('role'));
         }
 
-        $users = $query->latest()->get();
+                $perPage = $request->input('per_page', 10);
+        $perPageNum = $perPage === 'all' ? 1000000 : (int)$perPage;
+        $users = $query->latest()->paginate($perPageNum)->appends($request->query());
 
         return view('admin.users.index', compact('users'));
     }

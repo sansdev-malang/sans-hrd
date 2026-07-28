@@ -157,6 +157,7 @@ class LeaveApprovalController extends Controller
                             ],
                             [
                                 'employee_id' => $rL['employee_id'],
+                                'employee_name' => $rL['employee_name'] ?? null,
                                 'start_date' => $rL['start_date'],
                                 'end_date' => $rL['end_date'],
                                 'type' => $rL['type'],

@@ -203,28 +203,28 @@ class HrdDemoSeeder extends Seeder
 
         // 4. Seed Mock Employee Working Shift Schedules
         // Assumes remote employee_id 1 and 2 from SchoolUnit 1 (e.g. PAUD or SD)
-        EmployeeWorkingShift::updateOrCreate(
-            [
-                'employee_id' => 1,
-                'school_unit_id' => 1,
-                'working_shift_id' => WorkingShift::where('code', 'default')->first()->id,
-                'start_date' => '2026-07-01'
-            ],
-            [
-                'end_date' => null
-            ]
-        );
+        // EmployeeWorkingShift::updateOrCreate(
+        //     [
+        //         'employee_id' => 1,
+        //         'school_unit_id' => 1,
+        //         'working_shift_id' => WorkingShift::where('code', 'default')->first()->id,
+        //         'start_date' => '2026-07-01'
+        //     ],
+        //     [
+        //         'end_date' => null
+        //     ]
+        // );
 
-        EmployeeWorkingShift::updateOrCreate(
-            [
-                'employee_id' => 2,
-                'school_unit_id' => 1,
-                'working_shift_id' => WorkingShift::where('code', 'gpk_gpq')->first()->id,
-                'start_date' => '2026-07-01'
-            ],
-            [
-                'end_date' => null
-            ]
-        );
+        // EmployeeWorkingShift::updateOrCreate(
+        //     [
+        //         'employee_id' => 2,
+        //         'school_unit_id' => 1,
+        //         'working_shift_id' => WorkingShift::where('code', 'gpk_gpq')->first()->id,
+        //         'start_date' => '2026-07-01'
+        //     ],
+        //     [
+        //         'end_date' => null
+        //     ]
+        // );
     }
 }

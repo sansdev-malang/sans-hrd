@@ -5,16 +5,18 @@
     <div
         class="workspace-selector flex items-center justify-between p-2 mb-4 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg cursor-pointer transition-colors relative group">
         <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg logo-gradient-bg flex items-center justify-center shrink-0">
-                <span class="text-white text-lg font-bold"
-                    style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">
-                    H
-                </span>
-            </div>
+            @if (setting('app_logo'))
+                <img src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo" class="w-8 h-8 rounded-lg object-cover shrink-0 shadow-sm">
+            @else
+                <div class="w-8 h-8 rounded-lg logo-gradient-bg flex items-center justify-center shrink-0 shadow-sm">
+                    <span class="text-white text-lg font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">
+                        {{ substr(setting('app_name', 'SANS HRD'), 0, 1) }}
+                    </span>
+                </div>
+            @endif
             <div class="school-info overflow-hidden">
-                <h1 class="text-lg text-slate-900 dark:text-slate-50 truncate leading-normal tracking-wide"
-                    style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">
-                    SANS HRD
+                <h1 class="text-lg text-slate-900 dark:text-slate-50 truncate leading-normal tracking-wide" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">
+                    {{ setting('app_name', 'SANS HRD') }}
                 </h1>
             </div>
         </div>
@@ -67,7 +69,7 @@
                 <a href="{{ route('attendance-logs.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <i data-lucide="fingerprint" class="menu-icon w-4 h-4"></i>
+                    <i data-lucide="scan-face" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Data Absensi</span>
                 </a>
                 <a href="{{ route('leave-approvals.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
@@ -104,49 +106,54 @@
                     {{ Request::routeIs('bonus-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="calculator" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Rekapan Bonus</span>
+                    <span class="menu-text">Rekap Bonus</span>
                 </a>
             </nav>
 
-            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN GAJI</h3>
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">PENGGAJIAN</h3>
             <nav class="space-y-1 mb-4">
-                <a href="{{ route('settings.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('settings.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                <a href="{{ route('cutoff-settings.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('cutoff-settings.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="scissors" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Pengaturan Cut-off</span>
                 </a>
-                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
-                    <i data-lucide="calculator" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Hitung Gaji</span>
-                </a>
-                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
-                    <i data-lucide="history" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Riwayat Gaji</span>
-                </a>
-                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
+                <a href="{{ route('payslips.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('payslips.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
                     <i data-lucide="file-text" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Laporan</span>
+                    <span class="menu-text">Slip Gaji</span>
                 </a>
             </nav>
 
             <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN SISTEM</h3>
             <nav class="space-y-1 mb-4">
+                @if(auth()->user()->hasRole('super_admin'))
                 <a href="{{ route('school-units.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('school-units.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="network" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Integrasi API Unit</span>
                 </a>
+                @endif
+                
+                <a href="{{ route('settings.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('settings.index') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="settings" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Setting Aplikasi</span>
+                </a>
                 <a href="{{ route('zkteco-devices.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('zkteco-devices.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <i data-lucide="cpu" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Device Absensi</span>
+                    <i data-lucide="fingerprint" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Mesin Absensi</span>
                 </a>
-                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
-                    <i data-lucide="settings" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Setting Aplikasi</span>
+                <a href="{{ route('settings.adms') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('settings.adms') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="radio" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Sinkronisasi ADMS</span>
                 </a>
                 @if(auth()->user()->hasRole('super_admin'))
                 <a href="{{ route('users.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg

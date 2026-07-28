@@ -10,6 +10,7 @@ class ZktecoDevice extends Model
     use HasFactory;
 
     protected $fillable = [
+        'sn',
         'name',
         'ip_address',
         'port',
