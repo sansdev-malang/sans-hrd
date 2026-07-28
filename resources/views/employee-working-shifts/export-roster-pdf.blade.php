@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Export PDF - {{ $unit->name }} - {{ $month }}/{{ $year }}</title>
+    <title>Export PDF - {{ $rosterName }} - {{ $month }}/{{ $year }}</title>
     <style>
         body { font-family: sans-serif; font-size: 10px; margin: 0; padding: 10px; }
         h2 { text-align: center; margin-bottom: 5px; font-size: 16px; }

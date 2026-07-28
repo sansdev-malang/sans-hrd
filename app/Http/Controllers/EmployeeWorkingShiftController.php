@@ -76,7 +76,8 @@ class EmployeeWorkingShiftController extends Controller
                 // Roster Shifts
                 $month = $assignment->start_date->format('m');
                 $year = $assignment->start_date->format('Y');
-                $key = 'roster|' . $assignment->school_unit_id . '|' . $year . '|' . $month;
+                $rosterNameKey = $assignment->roster_name ?: 'Roster Shift Bulanan';
+                $key = 'roster|' . $assignment->school_unit_id . '|' . $year . '|' . $month . '|' . $rosterNameKey;
 
                 if (!isset($rosterBatches[$key])) {
                     $rosterBatches[$key] = [
@@ -226,12 +227,12 @@ class EmployeeWorkingShiftController extends Controller
     {
         $unit_id = $request->input('unit_id');
         $month = $request->input('month');
-        $year = $request->input('year');
+        $rosterName = $request->input('roster_name');
 
         $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
         $lastDay = $firstDay->copy()->endOfMonth();
 
-        EmployeeWorkingShift::where('school_unit_id', $unit_id)
+        $query = EmployeeWorkingShift::where('school_unit_id', $unit_id)
             ->whereNotNull('end_date')
             ->where(function($query) use ($firstDay, $lastDay) {
                 $query->whereBetween('start_date', [$firstDay, $lastDay])
@@ -240,7 +241,13 @@ class EmployeeWorkingShiftController extends Controller
                           $q->where('start_date', '<', $firstDay)
                             ->where('end_date', '>', $lastDay);
                       });
-            })->delete();
+            });
+
+        if ($rosterName) {
+            $query->where('roster_name', $rosterName);
+        }
+
+        $query->delete();
 
         $this->syncSchedulesToUnit($unit_id);
 
@@ -396,6 +403,7 @@ class EmployeeWorkingShiftController extends Controller
         $selectedUnitId = $request->query('unit_id');
         $year = $request->query('year');
         $month = $request->query('month');
+        $rosterNameParam = $request->query('roster_name');
 
         if (!$selectedUnitId || !$year || !$month) {
             return redirect()->route('employee-working-shifts.index')->with('error', 'Parameter tidak lengkap.');
@@ -425,7 +433,7 @@ class EmployeeWorkingShiftController extends Controller
         $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
         $lastDay = $firstDay->copy()->endOfMonth();
 
-        $assignments = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
+        $assignmentsQuery = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
             ->whereNotNull('roster_name')
             ->where(function($query) use ($firstDay, $lastDay) {
                 $query->whereBetween('start_date', [$firstDay, $lastDay])
@@ -436,9 +444,15 @@ class EmployeeWorkingShiftController extends Controller
                                 $q2->where('end_date', '>', $lastDay)->orWhereNull('end_date');
                             });
                       });
-            })->get();
+            });
+            
+        if ($rosterNameParam) {
+            $assignmentsQuery->where('roster_name', $rosterNameParam);
+        }
+        
+        $assignments = $assignmentsQuery->get();
 
-        $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? 'Roster Shift Bulanan';
+        $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? ($rosterNameParam ?: 'Roster Shift Bulanan');
         
         $assignedEmployeeIds = $assignments->pluck('employee_id')->unique()->toArray();
         
@@ -487,6 +501,8 @@ class EmployeeWorkingShiftController extends Controller
         $selectedUnitId = $request->query('unit_id', $units->first()->id ?? null);
         $year = $request->query('year', date('Y'));
         $month = $request->query('month', date('m'));
+        $rosterNameParam = $request->query('roster_name');
+        $empIdsParam = $request->query('emp_ids', []);
         
         $selectedShiftIds = $request->query('shift_ids');
         $allShifts = \App\Models\WorkingShift::orderBy('name')->get();
@@ -527,6 +543,16 @@ class EmployeeWorkingShiftController extends Controller
                             return !in_array($emp['id'], $permanentEmployees);
                         });
                         
+                        if (!empty($empIdsParam) && is_array($empIdsParam)) {
+                            // Only include selected employees
+                            $employees = array_filter($employees, function($emp) use ($empIdsParam) {
+                                return in_array($emp['id'], $empIdsParam);
+                            });
+                        } elseif ($rosterNameParam) {
+                            // If editing an existing roster, only include employees who already have assignments in this roster
+                            // We will fetch the assignments first to know which employees belong to this roster
+                        }
+                        
                         // Re-index array for blade
                         $employees = array_values($employees);
                     }
@@ -539,17 +565,34 @@ class EmployeeWorkingShiftController extends Controller
                 $lastDay = $firstDay->copy()->endOfMonth();
                 $daysInMonth = $lastDay->day;
 
-                $assignments = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
+                $assignmentsQuery = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
                     ->where(function($query) use ($firstDay, $lastDay) {
                         $query->whereBetween('start_date', [$firstDay, $lastDay])
                               ->orWhereBetween('end_date', [$firstDay, $lastDay])
                               ->orWhere(function($q) use ($firstDay, $lastDay) {
                                   $q->where('start_date', '<', $firstDay)
                                     ->where(function($q2) use ($lastDay) {
-                                        $q2->where('end_date', '>', $lastDay)->orWhereNull('end_date');
+                                        $q2->whereNull('end_date')
+                                           ->orWhere('end_date', '>=', $lastDay);
                                     });
                               });
-                    })->get();
+                    });
+                    
+                if ($rosterNameParam) {
+                    $assignmentsQuery->where('roster_name', $rosterNameParam);
+                }
+                
+                $assignments = $assignmentsQuery->get();
+                
+                $assignedEmployeeIds = $assignments->pluck('employee_id')->unique()->toArray();
+                $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? ($rosterNameParam ?: 'Roster Shift Bulanan');
+
+                if ($rosterNameParam && empty($empIdsParam)) {
+                    $employees = array_filter($employees, function($emp) use ($assignedEmployeeIds) {
+                        return in_array($emp['id'], $assignedEmployeeIds);
+                    });
+                    $employees = array_values($employees);
+                }
 
                 // Build roster array
                 foreach ($employees as $emp) {
@@ -596,9 +639,9 @@ class EmployeeWorkingShiftController extends Controller
 
         $daysInMonth = \Carbon\Carbon::create($year, $month, 1)->daysInMonth;
         
-        $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? '';
+        $oldRosterName = $rosterNameParam; // To know which roster to update
 
-        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'employees', 'rosterData', 'daysInMonth', 'rosterName'));
+        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName'));
     }
 
     /**
@@ -611,14 +654,16 @@ class EmployeeWorkingShiftController extends Controller
             'year' => 'required|numeric',
             'month' => 'required|numeric|min:1|max:12',
             'roster' => 'array',
-            'roster_name' => 'nullable|string|max:255',
+            'roster_name' => 'required|string|max:255',
+            'old_roster_name' => 'nullable|string|max:255',
         ]);
 
         $unitId = $validated['school_unit_id'];
         $year = $validated['year'];
         $month = $validated['month'];
         $rosterInput = $validated['roster'] ?? [];
-        $rosterName = $validated['roster_name'] ?? null;
+        $rosterName = $validated['roster_name'];
+        $oldRosterName = $validated['old_roster_name'] ?? $rosterName;
 
         $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
         $lastDay = $firstDay->copy()->endOfMonth();
@@ -630,7 +675,7 @@ class EmployeeWorkingShiftController extends Controller
                 $days = $data['days'] ?? [];
 
                 // 1. Splitting logic for existing shifts
-                $overlappingShifts = \App\Models\EmployeeWorkingShift::where('employee_id', $empId)
+                $overlappingShiftsQuery = \App\Models\EmployeeWorkingShift::where('employee_id', $empId)
                     ->where('school_unit_id', $unitId)
                     ->where(function($query) use ($firstDay, $lastDay) {
                         $query->whereBetween('start_date', [$firstDay, $lastDay])
@@ -641,7 +686,13 @@ class EmployeeWorkingShiftController extends Controller
                                         $q2->where('end_date', '>', $lastDay)->orWhereNull('end_date');
                                     });
                               });
-                    })->get();
+                    });
+                    
+                if ($oldRosterName) {
+                    $overlappingShiftsQuery->where('roster_name', $oldRosterName);
+                }
+                
+                $overlappingShifts = $overlappingShiftsQuery->get();
 
                 foreach ($overlappingShifts as $shift) {
                     $shiftStartDateStr = $shift->start_date ? $shift->start_date->format('Y-m-d') : null;
@@ -736,6 +787,7 @@ class EmployeeWorkingShiftController extends Controller
         $unitId = $request->query('unit_id');
         $month = (int)$request->query('month');
         $year = (int)$request->query('year');
+        $rosterNameParam = $request->query('roster_name');
         $type = $request->query('type', 'pdf');
         $notes = $request->query('notes', '');
         
@@ -765,7 +817,7 @@ class EmployeeWorkingShiftController extends Controller
         $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
         $lastDay = \Carbon\Carbon::create($year, $month, $daysInMonth)->endOfDay();
         
-        $assignments = EmployeeWorkingShift::with('workingShift')
+        $assignmentsQuery = EmployeeWorkingShift::with('workingShift')
             ->where('school_unit_id', $unitId)
             ->whereNotNull('roster_name')
             ->where(function($query) use ($firstDay, $lastDay) {
@@ -777,10 +829,16 @@ class EmployeeWorkingShiftController extends Controller
                                    ->orWhere('end_date', '>=', $lastDay);
                             });
                       });
-            })->get();
+            });
+            
+        if ($rosterNameParam) {
+            $assignmentsQuery->where('roster_name', $rosterNameParam);
+        }
+        
+        $assignments = $assignmentsQuery->get();
 
         $assignedEmployeeIds = $assignments->pluck('employee_id')->unique()->toArray();
-        $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? 'Roster Shift Bulanan';
+        $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? ($rosterNameParam ?: 'Roster Shift Bulanan');
         
         // Match the same logic as detailRoster, only include employees with assignments
         $employees = array_filter($rawEmployees, function($emp) use ($assignedEmployeeIds) {
@@ -820,7 +878,8 @@ class EmployeeWorkingShiftController extends Controller
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('employee-working-shifts.export-roster-pdf', $data);
         $pdf->setPaper('a4', 'landscape');
         
-        return $pdf->download("Roster_Shift_{$unit->name}_{$month}_{$year}.pdf");
+        $safeRosterName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $rosterName);
+        return $pdf->download("{$safeRosterName}_{$unit->name}_{$month}_{$year}.pdf");
     }
 
     private function generateExcel($data)
@@ -1042,9 +1101,10 @@ class EmployeeWorkingShiftController extends Controller
         $sheet->getColumnDimension('B')->setAutoSize(true);
         
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $fileName = "Roster_Shift_Excel_{$month}_{$year}.xlsx";
+        $safeRosterName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $rosterName);
+        $fileName = "{$safeRosterName}_Excel_{$month}_{$year}.xlsx";
         if ($unit) {
-            $fileName = "Roster_Shift_{$unit->name}_{$month}_{$year}.xlsx";
+            $fileName = "{$safeRosterName}_{$unit->name}_{$month}_{$year}.xlsx";
         }
         $tempFile = tempnam(sys_get_temp_dir(), 'roster_excel');
         $writer->save($tempFile);

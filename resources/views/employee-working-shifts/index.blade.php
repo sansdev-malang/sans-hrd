@@ -36,9 +36,34 @@
         showModal: false, 
         selectedBatch: null,
         
+        showCreateModal: false,
+        createUnitId: '{{ $units->first()->id ?? '' }}',
+        empList: [],
+        loadingEmp: false,
+        empSearch: '',
+        selectedEmps: [],
+        selectAllEmp: false,
+        
         openModal(batch) {
             this.selectedBatch = batch;
             this.showModal = true;
+        },
+        
+        async loadEmployeesForUnit() {
+            if (!this.createUnitId) return;
+            this.loadingEmp = true;
+            try {
+                const response = await fetch(`/employee-working-shifts/unit/${this.createUnitId}/employees`);
+                if (response.ok) {
+                    this.empList = await response.json();
+                } else {
+                    this.empList = [];
+                }
+            } catch (e) {
+                console.error(e);
+                this.empList = [];
+            }
+            this.loadingEmp = false;
         },
 
         init() {
@@ -47,6 +72,20 @@
                     document.body.style.overflow = 'hidden';
                 } else {
                     document.body.style.overflow = '';
+                }
+            });
+            this.$watch('showCreateModal', value => {
+                if (value) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            });
+            this.$watch('selectAllEmp', value => {
+                if (value) {
+                    this.selectedEmps = this.empList.map(e => e.id);
+                } else {
+                    this.selectedEmps = [];
                 }
             });
         }
@@ -61,10 +100,11 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Atur penugasan dan rotasi shift kerja secara kolektif per unit sekolah.</p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('employee-working-shifts.roster') }}" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
+            <div class="flex items-center gap-2">
+                <button type="button" @click="showCreateModal = true; loadEmployeesForUnit()" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Roster Bulanan (Grid)
-                </a>
+                    Buat Roster Bulanan (Grid)
+                </button>
                 <a href="{{ route('employee-working-shifts.create') }}" class="h-9 px-4 inline-flex items-center justify-center bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Tugaskan Shift Baru
@@ -132,7 +172,8 @@
                                             <a href="{{ route('employee-working-shifts.detail-roster', [
                                                 'unit_id' => $batch['school_unit_id'],
                                                 'month' => $batch['month'],
-                                                'year' => $batch['year']
+                                                'year' => $batch['year'],
+                                                'roster_name' => $batch['roster_name'] ?? ''
                                             ]) }}" class="h-8 px-4 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 gap-1.5">
                                                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                                 Lihat Detail
@@ -140,7 +181,8 @@
                                             <a href="{{ route('employee-working-shifts.roster', [
                                                 'unit_id' => $batch['school_unit_id'],
                                                 'month' => $batch['month'],
-                                                'year' => $batch['year']
+                                                'year' => $batch['year'],
+                                                'roster_name' => $batch['roster_name'] ?? ''
                                             ]) }}" class="h-8 px-3 inline-flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 gap-1.5" title="Edit Roster">
                                                 <i data-lucide="edit" class="w-3.5 h-3.5"></i>
                                             </a>
@@ -150,6 +192,7 @@
                                                 <input type="hidden" name="unit_id" value="{{ $batch['school_unit_id'] }}">
                                                 <input type="hidden" name="month" value="{{ $batch['month'] }}">
                                                 <input type="hidden" name="year" value="{{ $batch['year'] }}">
+                                                <input type="hidden" name="roster_name" value="{{ $batch['roster_name'] ?? '' }}">
                                                 <button type="submit" class="h-8 px-3 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/50 dark:border-rose-900/30 transition-all cursor-pointer gap-1.5">
                                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                 </button>
@@ -313,6 +356,118 @@
                             Tutup
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL BUAT ROSTER BARU -->
+        <div x-show="showCreateModal" 
+             style="display: none;"
+             class="fixed inset-0 z-50 overflow-y-auto"
+             aria-labelledby="modal-create-title" 
+             role="dialog" 
+             aria-modal="true">
+             
+            <div x-show="showCreateModal" 
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
+                 @click="showCreateModal = false"></div>
+
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div x-show="showCreateModal"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-950 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl border border-slate-200 dark:border-slate-800">
+                    
+                    <form action="{{ route('employee-working-shifts.roster') }}" method="GET">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-slate-800 pb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-slate-50" id="modal-create-title">Buat Roster Bulanan Baru</h3>
+                                    <p class="text-xs text-slate-500 mt-1">Pilih grup pegawai yang akan dibuatkan jadwal.</p>
+                                </div>
+                                <button type="button" @click="showCreateModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-500 cursor-pointer transition-colors">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4 mb-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Unit Sekolah</label>
+                                        <select x-model="createUnitId" name="unit_id" @change="loadEmployeesForUnit()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            @foreach($units as $unit)
+                                                <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Nama Roster <span class="text-rose-500">*</span></label>
+                                        <input type="text" name="roster_name" required placeholder="Misal: Roster Satpam" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Bulan</label>
+                                        <select name="month" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            @php
+                                                $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                                            @endphp
+                                            @for($i=1; $i<=12; $i++)
+                                                <option value="{{ $i }}" {{ date('m') == $i ? 'selected' : '' }}>{{ $bulanIndo[$i] }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Tahun</label>
+                                        <input type="number" name="year" value="{{ date('Y') }}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between items-end mb-1.5">
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350">Pilih Pegawai</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="text" x-model="empSearch" placeholder="Cari..." class="w-32 px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500">
+                                            <button type="button" @click="selectAllEmp = !selectAllEmp" class="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline">Pilih Semua</button>
+                                        </div>
+                                    </div>
+                                    <div class="border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900 h-48 overflow-y-auto p-2 custom-scrollbar">
+                                        <div x-show="loadingEmp" class="text-center py-4 text-xs text-slate-500">
+                                            Memuat data pegawai...
+                                        </div>
+                                        <div x-show="!loadingEmp && empList.length === 0" class="text-center py-4 text-xs text-slate-500">
+                                            Tidak ada pegawai di unit ini.
+                                        </div>
+                                        <template x-for="emp in empList.filter(e => e.name.toLowerCase().includes(empSearch.toLowerCase()))" :key="emp.id">
+                                            <label class="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer transition-colors">
+                                                <input type="checkbox" name="emp_ids[]" :value="emp.id" x-model="selectedEmps" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 dark:focus:ring-offset-slate-900">
+                                                <span class="text-sm text-slate-700 dark:text-slate-300" x-text="emp.name"></span>
+                                            </label>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800">
+                            <button type="button" class="h-9 px-4 inline-flex items-center justify-center rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer" @click="showCreateModal = false">
+                                Batal
+                            </button>
+                            <button type="submit" class="h-9 px-4 inline-flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-semibold shadow-sm hover:bg-indigo-700 transition-colors cursor-pointer">
+                                Lanjutkan ke Grid
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

@@ -63,6 +63,12 @@
     <!-- Controls -->
     <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4">
         <form method="GET" action="{{ route('employee-working-shifts.roster') }}" id="filterForm">
+            @if(request('emp_ids'))
+                @foreach(request('emp_ids') as $empId)
+                    <input type="hidden" name="emp_ids[]" value="{{ $empId }}">
+                @endforeach
+            @endif
+            <input type="hidden" name="roster_name" value="{{ $rosterName ?? request('roster_name') }}">
             <div class="flex flex-wrap items-end gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Unit Sekolah</label>
@@ -159,6 +165,7 @@
         <input type="hidden" name="school_unit_id" value="{{ $selectedUnitId }}">
         <input type="hidden" name="year" value="{{ $year }}">
         <input type="hidden" name="month" value="{{ $month }}">
+        <input type="hidden" name="old_roster_name" value="{{ $oldRosterName ?? '' }}">
         
         <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
             <!-- Table Tools -->
@@ -253,8 +260,8 @@
             </div>
             <div class="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center gap-4">
                 <div class="flex-1 max-w-sm">
-                    <label for="roster_name" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Jadwal (Opsional)</label>
-                    <input type="text" name="roster_name" id="roster_name" value="{{ $rosterName ?? '' }}" placeholder="Contoh: Jadwal Reguler Juli" class="w-full h-10 px-3 text-sm bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-sm">
+                    <label for="roster_name" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Roster <span class="text-rose-500">*</span></label>
+                    <input type="text" name="roster_name" id="roster_name" value="{{ $rosterName ?? '' }}" required placeholder="Contoh: Roster Satpam" class="w-full h-10 px-3 text-sm bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-sm">
                 </div>
                 <div class="flex items-end gap-3 h-full pt-5">
                     <a href="{{ route('employee-working-shifts.index') }}" onclick="return confirm('Apakah Anda yakin ingin membatalkan? Semua perubahan jadwal yang belum disimpan akan hilang.');" class="h-10 px-6 inline-flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 gap-2">

@@ -161,6 +161,7 @@
                         <input type="hidden" name="unit_id" value="{{ $selectedUnitId }}">
                         <input type="hidden" name="month" value="{{ $month }}">
                         <input type="hidden" name="year" value="{{ $year }}">
+                        <input type="hidden" name="roster_name" value="{{ $rosterName }}">
                         <input type="hidden" name="type" x-model="exportType">
 
                         <div class="bg-white dark:bg-slate-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
