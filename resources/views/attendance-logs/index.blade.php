@@ -1,29 +1,5 @@
 <x-admin-layout>
     <div class="p-6 space-y-6">
-        <!-- SUCCESS/ERROR ALERT -->
-        @if(session('success'))
-            <div class="bg-emerald-50 dark:bg-emerald-955/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                </div>
-                <div>
-                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Sukses!</h5>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ session('success') }}</p>
-                </div>
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="bg-rose-50 dark:bg-rose-955/40 border border-rose-200 dark:border-rose-900/60 rounded-xl p-4 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                </div>
-                <div>
-                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Gagal</h5>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ session('error') }}</p>
-                </div>
-            </div>
-        @endif
-        
         <!-- HEADER -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div class="flex flex-col gap-0.5">
@@ -40,11 +16,6 @@
                 <div class="space-y-1 w-full sm:w-40">
                     <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
                     <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
-                </div>
-
-                <!-- Cut-off -->
-                <div class="flex flex-col justify-end sm:pb-1.5 sm:pr-2">
-                    <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">Siklus: <br><strong class="text-slate-700 dark:text-slate-300 text-xs">{{ \Carbon\Carbon::parse($startDateReq)->format('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->format('d M') }}</strong></span>
                 </div>
 
                 <!-- Filter Unit -->
@@ -101,18 +72,18 @@
                     
                     <!-- EXPORT DROPDOWN -->
                     <div x-data="{ open: false }" class="relative w-32 sm:w-auto">
-                        <button type="button" @click="open = !open" @click.outside="open = false" class="w-full sm:w-auto justify-center h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
+                        <button type="button" @click="open = !open" @click.outside="open = false" class="w-full sm:w-auto justify-center h-9 px-4 bg-lime-50 dark:bg-lime-950/30 text-lime-700 dark:text-lime-400 border border-lime-200/50 dark:border-lime-800/40 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
                             <i data-lucide="download" class="w-4 h-4"></i>
                             <span>Ekspor</span>
                             <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                         </button>
                         
                         <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
-                            <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
+                            <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                                 <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                                 Excel (.xlsx)
                             </a>
-                            <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
+                            <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
                                 <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
                                 PDF (.pdf)
                             </a>
@@ -155,6 +126,7 @@
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
                             <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 text-left sticky top-0 left-0 z-40 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
                                 <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
+                                <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">Siklus: <br><strong class="text-slate-700 dark:text-slate-300 text-xs">{{ \Carbon\Carbon::parse($startDateReq)->format('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->format('d M') }}</strong></span>
                             </th>
 
                             @foreach($dates as $date)
