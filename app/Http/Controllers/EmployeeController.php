@@ -75,9 +75,12 @@ class EmployeeController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
+        $devices = ZktecoDevice::all();
+
         return view('employees.index', [
             'employees' => $paginatedEmployees,
             'schoolUnits' => $schoolUnits,
+            'devices' => $devices,
         ]);
     }
 
