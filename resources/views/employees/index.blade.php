@@ -91,6 +91,9 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                        @php
+                            $colors = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#14b8a6', '#f43f5e', '#0ea5e9', '#d946ef'];
+                        @endphp
                         @forelse($employees as $index => $emp)
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors text-left">
                                 <td class="px-6 py-4 text-slate-900 dark:text-slate-50 font-medium">{{ $index + 1 }}</td>
@@ -99,7 +102,8 @@
                                         @if(!empty($emp['photo']))
                                             <img @click='selectedEmp = @json($emp); toggleModal("detail-employee-modal")' src="{{ str_contains($emp['photo'], 'photos/') ? rtrim($emp['unit_url'], '/') . '/storage/' . $emp['photo'] : rtrim($emp['unit_url'], '/') . '/storage/photos/' . $emp['photo'] }}" class="w-8 h-8 cursor-pointer rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
                                         @else
-                                            <div @click='selectedEmp = @json($emp); toggleModal("detail-employee-modal")' class="w-8 h-8 cursor-pointer rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-350 shrink-0">
+                                            @php $avatarColor = $colors[$index % count($colors)]; @endphp
+                                            <div @click='selectedEmp = @json($emp); toggleModal("detail-employee-modal")' class="w-8 h-8 cursor-pointer rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $avatarColor }}">
                                                 {{ strtoupper(substr($emp['name'], 0, 2)) }}
                                             </div>
                                         @endif
@@ -109,6 +113,7 @@
                                                 $emp['nik_nuptk'] = $emp['nik'] ?? $emp['nuptk'] ?? '-';
                                                 $emp['unit_name'] = strtoupper($emp['unit_name'] ?? '-');
                                                 $emp['zkteco_device_ids'] = !empty($emp['zkteco_uid']) ? \App\Models\EmployeeDeviceMapping::where('zkteco_uid', $emp['zkteco_uid'])->pluck('zkteco_device_id')->toArray() : [];
+                                                $color = $colors[$index % count($colors)];
                                             @endphp
                                             <div @click='selectedEmp = @json($emp); toggleModal("detail-employee-modal")' class="font-semibold text-slate-900 dark:text-slate-50 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">{{ $emp['name'] }}</div>
                                             <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $emp['email'] ?? 'Tidak ada email' }}</div>
