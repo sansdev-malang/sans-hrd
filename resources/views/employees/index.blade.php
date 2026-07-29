@@ -123,10 +123,10 @@
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
                             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-14">No</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider min-w-[200px]">Nama Lengkap</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-28">Unit</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-40">Unit</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-40">Tipe Pegawai</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-56">Jabatan</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-32">ZK ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-40">ZK ID</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
                             <th class="px-6 py-4 text-right text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-24">Aksi</th>
                         </tr>
@@ -138,9 +138,9 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         @if(!empty($emp['photo']))
-                                            <img src="{{ str_contains($emp['photo'], 'photos/') ? rtrim($emp['unit_url'], '/') . '/storage/' . $emp['photo'] : rtrim($emp['unit_url'], '/') . '/storage/photos/' . $emp['photo'] }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
+                                            <img @click='selectedEmp = @json($emp); toggleModal("detail-employee-modal")' src="{{ str_contains($emp['photo'], 'photos/') ? rtrim($emp['unit_url'], '/') . '/storage/' . $emp['photo'] : rtrim($emp['unit_url'], '/') . '/storage/photos/' . $emp['photo'] }}" class="w-8 h-8 cursor-pointer rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
                                         @else
-                                            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-350 shrink-0">
+                                            <div @click='selectedEmp = @json($emp); toggleModal("detail-employee-modal")' class="w-8 h-8 cursor-pointer rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-350 shrink-0">
                                                 {{ strtoupper(substr($emp['name'], 0, 2)) }}
                                             </div>
                                         @endif
@@ -150,7 +150,7 @@
                                                 $emp['nik_nuptk'] = $emp['nik'] ?? $emp['nuptk'] ?? '-';
                                                 $emp['unit_name'] = strtoupper($emp['unit_name'] ?? '-');
                                             @endphp
-                                            <div @click='selectedEmp = @json($emp); showEmpDetailModal = true' class="font-semibold text-slate-900 dark:text-slate-50 cursor-pointer hover:underline hover:text-indigo-650 dark:hover:text-indigo-400">{{ $emp['name'] }}</div>
+                                            <div @click='selectedEmp = @json($emp); toggleModal("detail-employee-modal")' class="font-semibold text-slate-900 dark:text-slate-50 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">{{ $emp['name'] }}</div>
                                             <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $emp['email'] ?? 'Tidak ada email' }}</div>
                                         </div>
                                     </div>
@@ -177,14 +177,14 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if(!empty($emp['zkteco_uid']))
-                                        <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono text-[10px]">ID: {{ $emp['zkteco_uid'] }}</span>
+                                        <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono text-xs">ID: {{ $emp['zkteco_uid'] }}</span>
                                     @else
                                         <span class="text-slate-400 dark:text-slate-600">-</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     @if(($emp['status'] ?? '') == 'Active')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40">Aktif</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-lime-50 dark:bg-lime-950/30 text-lime-700 dark:text-lime-400 border border-lime-200/50 dark:border-lime-800/40">Aktif</span>
                                     @elseif(($emp['status'] ?? '') == 'Leave')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">Cuti</span>
                                     @else
@@ -254,7 +254,7 @@
                 </div>
             @endif
         <!-- IMPORT MODAL -->
-        <div id="import-employee-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs hidden transition-opacity">
+        <div id="import-employee-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity">
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all scale-95 opacity-0 duration-200">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Impor Pegawai dari Excel</h3>
@@ -308,17 +308,18 @@
             }
         </script>
         <!-- MODAL DETAIL PEGAWAI -->
-        <div x-show="showEmpDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-955/60 backdrop-blur-xs text-left" style="display: none;">
-            <div @click.outside="showEmpDetailModal = false" class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-4xl w-full overflow-hidden text-xs">
-                <div class="p-5 border-b border-slate-150 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-55 font-nasalization flex items-center gap-2">
-                        <i data-lucide="user" class="w-4 h-4 text-indigo-650 dark:text-indigo-400"></i>
-                        Profil Pegawai
-                    </h3>
-                    <button @click="showEmpDetailModal = false" class="text-slate-455 hover:text-slate-700 dark:hover:text-slate-355">
+        <div id="detail-employee-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
+            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-xl w-full overflow-hidden transform transition-all scale-95 opacity-0 duration-200 text-xs">
+                
+                <!-- Header -->
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Profil Pegawai</h3>
+                    <button type="button" onclick="toggleModal('detail-employee-modal')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
+
+                <!-- Body -->
                 <div class="p-5 space-y-6">
                     <div class="flex items-center gap-4">
                         <!-- Photo / Initials -->
@@ -327,116 +328,125 @@
                                 <img :src="selectedEmp.photo_url" class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm">
                             </template>
                             <template x-if="!selectedEmp || !selectedEmp.photo_url">
-                                <div class="w-16 h-16 rounded-xl bg-indigo-50 dark:bg-indigo-955/40 text-indigo-650 dark:text-indigo-400 font-bold flex items-center justify-center text-2xl uppercase shadow-sm">
+                                <div class="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-2xl uppercase border border-slate-200 dark:border-slate-800 shadow-sm">
                                     <span x-text="selectedEmp ? selectedEmp.name.substring(0,2) : ''"></span>
                                 </div>
                             </template>
                         </div>
                         <div class="space-y-1">
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization" x-text="selectedEmp ? selectedEmp.name : ''"></h4>
-                            <p class="text-slate-450 dark:text-slate-500 font-mono" x-text="selectedEmp ? 'NIP/NUPTK: ' + (selectedEmp.nik_nuptk || '-') : ''"></p>
-                            <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-455 border border-indigo-200 dark:border-indigo-800 uppercase" x-text="selectedEmp ? selectedEmp.position : ''"></span>
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50" x-text="selectedEmp ? selectedEmp.name : ''"></h4>
+                            <p class="text-slate-500 dark:text-slate-400 font-mono text-[11px]" x-text="selectedEmp ? 'NIP/NUPTK: ' + (selectedEmp.nik_nuptk || '-') : ''"></p>
+                            <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 uppercase" x-text="selectedEmp ? selectedEmp.position : ''"></span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-3 text-[11px] pt-4 border-t border-slate-100 dark:border-slate-800 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                        <div class="col-span-full mb-1">
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-1 mb-2">Informasi Umum</h5>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Unit Kerja</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 uppercase" x-text="selectedEmp ? selectedEmp.unit_name : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Email</span>
-                            <span class="font-medium text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.email || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jenis Kelamin</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.gender === 'Male' ? 'Laki-laki' : (selectedEmp.gender === 'Female' ? 'Perempuan' : '-')) : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Tempat, Tgl Lahir</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? ((selectedEmp.birth_place || '-') + ', ' + (selectedEmp.birth_date || '-')) : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Alamat</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.address || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">No. HP</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.phone || '-') : '-'"></span>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-3 text-[11px] pt-4 border-canvas-soft dark:border-ink-deep max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                        <div class="col-span-full bg-negative/10 dark:bg-negative-bg/40 p-4 rounded-xl border border-negative/30 dark:border-negative-deep/40 space-y-3">
+                            <h5 class="text-xs font-bold text-negative-deep dark:text-negative border-b border-negative/30 dark:border-negative-deep/40 pb-1.5">Informasi Umum</h5>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-3 text-[11px]">
+                                <div>
+                                    <span class="block text-negative-deep/60 dark:text-negative/60 text-[9px] uppercase font-semibold">Unit Kerja</span>
+                                    <span class="font-bold text-ink dark:text-canvas uppercase" x-text="selectedEmp ? selectedEmp.unit_name : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-negative-deep/60 dark:text-negative/60 text-[9px] uppercase font-semibold">Email</span>
+                                    <span class="font-bold text-ink dark:text-canvas" x-text="selectedEmp ? (selectedEmp.email || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-negative-deep/60 dark:text-negative/60 text-[9px] uppercase font-semibold">Jenis Kelamin</span>
+                                    <span class="font-bold text-ink dark:text-canvas" x-text="selectedEmp ? (selectedEmp.gender === 'Male' ? 'Laki-laki' : (selectedEmp.gender === 'Female' ? 'Perempuan' : '-')) : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-negative-deep/60 dark:text-negative/60 text-[9px] uppercase font-semibold">Tempat, Tgl Lahir</span>
+                                    <span class="font-bold text-ink dark:text-canvas" x-text="selectedEmp ? ((selectedEmp.birth_place || '-') + ', ' + (selectedEmp.birth_date || '-')) : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-negative-deep/60 dark:text-negative/60 text-[9px] uppercase font-semibold">Alamat</span>
+                                    <span class="font-bold text-ink dark:text-canvas" x-text="selectedEmp ? (selectedEmp.address || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-negative-deep/60 dark:text-negative/60 text-[9px] uppercase font-semibold">No. HP</span>
+                                    <span class="font-bold text-ink dark:text-canvas" x-text="selectedEmp ? (selectedEmp.phone || '-') : '-'"></span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-span-full mt-2 mb-1">
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-1 mb-2">Data Kepegawaian</h5>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Status Pegawai</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.employment_status || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jabatan</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.position || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Tugas Tambahan</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.additional_position || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Masa Kerja</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.work_period || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Pangkat/Golongan</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.pangkat_golongan || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">ID ZKTeco</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.zkteco_uid || '-') : '-'"></span>
+                        <div class="col-span-full bg-warning/10 dark:bg-warning-deep/20 p-4 rounded-xl border border-warning/40 dark:border-warning-deep/40 space-y-3">
+                            <h5 class="text-xs font-bold text-warning-content dark:text-warning border-b border-warning/40 dark:border-warning-deep/40 pb-1.5">Informasi Status Pegawai</h5>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-3 text-[11px]">
+                                <div>
+                                    <span class="block text-warning-content/60 dark:text-warning/60 text-[9px] uppercase font-semibold">Status Pegawai</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? (selectedEmp.employment_status || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-warning-content/60 dark:text-warning/60 text-[9px] uppercase font-semibold">Jabatan</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? (selectedEmp.position || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-warning-content/60 dark:text-warning/60 text-[9px] uppercase font-semibold">Tugas Tambahan</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? (selectedEmp.additional_position || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-warning-content/60 dark:text-warning/60 text-[9px] uppercase font-semibold">Masa Kerja</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? (selectedEmp.work_period || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-warning-content/60 dark:text-warning/60 text-[9px] uppercase font-semibold">Pangkat/Golongan</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? (selectedEmp.pangkat_golongan || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-warning-content/60 dark:text-warning/60 text-[9px] uppercase font-semibold">ID ZKTeco</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft font-mono" x-text="selectedEmp ? (selectedEmp.zkteco_uid || '-') : '-'"></span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-span-full mt-2 mb-1">
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-1 mb-2">Identitas Pendukung (NUPTK, NIK, dll)</h5>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">NIK</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.nik || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">NUPTK</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.nuptk || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">NIY</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.niy || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">No. UKG</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.no_ukg || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">NRG</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 font-mono" x-text="selectedEmp ? (selectedEmp.nrg || '-') : '-'"></span>
+                        <div class="col-span-full bg-primary/10 dark:bg-ink-deep/40 p-4 rounded-xl border border-primary/30 dark:border-primary-neutral/20 space-y-3">
+                            <h5 class="text-xs font-bold text-ink-deep dark:text-primary-neutral border-b border-primary/30 dark:border-primary-neutral/20 pb-1.5">Informasi Pegawai</h5>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-3 text-[11px]">
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">NIK</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft font-mono" x-text="selectedEmp ? (selectedEmp.nik || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">NUPTK</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft font-mono" x-text="selectedEmp ? (selectedEmp.nuptk || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">NIY</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft font-mono" x-text="selectedEmp ? (selectedEmp.niy || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">No. UKG</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft font-mono" x-text="selectedEmp ? (selectedEmp.no_ukg || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">NRG</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft font-mono" x-text="selectedEmp ? (selectedEmp.nrg || '-') : '-'"></span>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="col-span-full mt-2 mb-1">
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800 pb-1 mb-2">Pendidikan & SK</h5>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Pendidikan Terakhir</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.last_education || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jurusan</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.major || '-') : '-'"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Tgl Mulai Tugas</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.task_start_date || '-') : '-'"></span>
-                        </div>
-                        <div class="col-span-full">
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Info SK</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? ((selectedEmp.last_sk_number || 'Tidak Ada SK') + (selectedEmp.last_sk_date ? ' (' + selectedEmp.last_sk_date + ')' : '')) : '-'"></span>
+                        <div class="col-span-full bg-positive/10 dark:bg-ink-deep/40 p-4 rounded-xl border border-positive/30 dark:border-positive-deep/20 space-y-3">
+                            <h5 class="text-xs font-bold text-ink-deep dark:text-positive-deep border-b border-positive/30 dark:border-positive-deep/20 pb-1.5">Pendidikan & SK</h5>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-3 text-[11px]">
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">Pendidikan Terakhir</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? (selectedEmp.last_education || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">Jurusan</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? (selectedEmp.major || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">Tgl Mulai Tugas</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? (selectedEmp.task_start_date || '-') : '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-mute text-[9px] uppercase font-semibold">Info SK</span>
+                                    <span class="font-bold text-body dark:text-canvas-soft" x-text="selectedEmp ? ((selectedEmp.last_sk_number || 'Tidak Ada SK') + (selectedEmp.last_sk_date ? ' (' + selectedEmp.last_sk_date + ')' : '')) : '-'"></span>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="col-span-full mt-2">
@@ -445,8 +455,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-5 border-t border-slate-150 dark:border-slate-850 flex justify-end">
-                    <button @click="showEmpDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Tutup</button>
+
+                <!-- Footer -->
+                <div class="p-5 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+                    <button type="button" onclick="toggleModal('detail-employee-modal')" class="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-transparent text-xs font-bold rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">Tutup</button>
                 </div>
             </div>
         </div>

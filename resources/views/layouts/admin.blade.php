@@ -17,7 +17,8 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+        <link href="https://fonts.cdnfonts.com/css/nasalization" rel="stylesheet">
+        
         <!-- Load Tailwind v4 styling compiled by Vite / CDN Fallback -->
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
             @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -114,16 +115,8 @@
                 scrollbar-width: none;  /* Firefox */
             }
 
-            /* Animated gradient logo background */
-            @keyframes gradient-bg {
-                0% { background-position: 0% 50%; }
-                50% { background-position: 100% 50%; }
-                100% { background-position: 0% 50%; }
-            }
-            .logo-gradient-bg {
-                background: linear-gradient(135deg, #e91d1d, #f3e40fff, #33ee0dee, #070be2ff, #8a18c5ff);
-                background-size: 400% 400%;
-                animation: gradient-bg 16s ease-in-out infinite;
+            .logo-bg {
+                background-color: #9fe870;
             }
         </style>
     </head>

@@ -41,24 +41,8 @@
         }
 
         /* Animated gradient logo background */
-        @keyframes gradient-bg {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        .logo-gradient-bg {
-            background: linear-gradient(135deg, #e91d1d, #f3e40fff, #33ee0dee, #070be2ff, #8a18c5ff);
-            background-size: 400% 400%;
-            animation: gradient-bg 16s ease-in-out infinite;
+        .logo-bg {
+            background-color: #9fe870
         }
     </style>
 </head>
@@ -68,14 +52,35 @@
 
     <div class="grid min-h-screen lg:grid-cols-2">
         <!-- FORM COLUMN -->
-        <div class="flex flex-col justify-between p-8 lg:p-12">
+        <div class="relative flex flex-col justify-between p-8 lg:p-12 overflow-hidden">
+            <!-- Aesthetic "SANS DEV" watermark background -->
+            <div aria-hidden="true" style="
+                position: absolute;
+                bottom: 60px;
+                left: 90px;
+                font-family: 'Nasalization Rg', sans-serif;
+                font-size: clamp(64px, 22vw, 160px);
+                font-weight: 600;
+                line-height: 1;
+                white-space: nowrap;
+                pointer-events: none;
+                user-select: none;
+                transform: rotate(-8deg);
+                transform-origin: bottom right;
+                background: linear-gradient(135deg, #9fe870 0%, #c5edab 40%, transparent 90%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                opacity: 0.3;
+                z-index: 0;
+            ">SANS DEV</div>
             <!-- Header section (Logo and Theme Toggle) -->
             <div class="flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2.5">
                     <!-- Logo badge with animated gradient -->
                     <div
-                        class="w-8 h-8 rounded-lg logo-gradient-bg flex items-center justify-center shrink-0 shadow-sm">
-                        <span class="text-white text-lg font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">H</span>
+                        class="w-8 h-8 rounded-lg logo-bg flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="text-white text-lg font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">A</span>
                     </div>
                     <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">SANS HRD</span>
                 </a>
@@ -93,7 +98,7 @@
 
             <!-- Footer links -->
             <div class="text-center lg:text-left text-[10px] font-semibold text-slate-400">
-                {{ setting('app_copyright', '© 2026 SANS HRD. All rights reserved.') }}
+                {{ setting('app_copyright', '© 2026 SANS Dev. All rights reserved.') }}
             </div>
         </div>
 
@@ -110,7 +115,7 @@
             <!-- Graphic layout content overlay -->
             <div class="absolute inset-0 flex flex-col justify-between p-12 text-white">
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400">SANS Portal</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400">SANS Dev</span>
                 </div>
 
                 <div class="space-y-4 max-w-md">
@@ -119,7 +124,7 @@
                         kolaborasi di sekolah."
                     </blockquote>
                     <div>
-                        <cite class="text-sm font-bold not-italic text-slate-200">SANS School System</cite>
+                        <cite class="text-sm font-bold not-italic text-slate-200">SANS Dev</cite>
                         <p class="text-xs text-slate-450 mt-1">Platform Informasi Sekolah Terintegrasi</p>
                     </div>
                 </div>
