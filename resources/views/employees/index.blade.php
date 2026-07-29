@@ -33,10 +33,10 @@
                 </div>
 
                 <!-- Filters -->
-                <div class="flex items-center gap-2 w-full md:w-auto">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <!-- Per Page -->
                     <select name="per_page" onchange="this.form.submit()"
-                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
                         <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
@@ -47,7 +47,7 @@
 
                     <!-- Unit -->
                     <select name="unit" onchange="this.form.submit()"
-                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Unit Sekolah</option>
                         @foreach($schoolUnits as $su)
                             <option value="{{ $su->id }}" {{ request('unit') == $su->id ? 'selected' : '' }}>{{ $su->name }}</option>
@@ -56,7 +56,7 @@
 
                     <!-- Status -->
                     <select name="status" onchange="this.form.submit()"
-                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Status</option>
                         <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Aktif</option>
                         <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Non-Aktif</option>
