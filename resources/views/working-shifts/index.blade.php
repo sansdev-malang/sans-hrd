@@ -168,7 +168,7 @@
         <!-- ADD MODAL -->
         <template x-teleport="body">
             <div id="add-shift-modal" onclick="if(event.target === this) toggleModal('add-shift-modal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
-                <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 text-left transform transition-all scale-95 opacity-0 duration-200 text-xs">
+                <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-xl max-h-auto overflow-y-auto p-6 text-left transform transition-all scale-95 opacity-0 duration-200 text-xs">
                     <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                         <h3 class="text-sm font-bold text-slate-950 dark:text-slate-50">Tambah Template Shift Baru</h3>
                         <button type="button" onclick="toggleModal('add-shift-modal')" class="text-slate-400 hover:text-slate-650 cursor-pointer">
@@ -244,7 +244,7 @@
         <!-- EDIT MODAL -->
         <template x-teleport="body">
             <div id="edit-shift-modal" onclick="if(event.target === this) toggleModal('edit-shift-modal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
-                <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 text-left transform transition-all scale-95 opacity-0 duration-200 text-xs">
+                <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-xl max-h-auto overflow-y-auto p-6 text-left transform transition-all scale-95 opacity-0 duration-200 text-xs">
                     <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                         <h3 class="text-sm font-bold text-slate-950 dark:text-slate-50">Edit Template Shift</h3>
                         <button type="button" onclick="toggleModal('edit-shift-modal')" class="text-slate-400 hover:text-slate-650 cursor-pointer">
