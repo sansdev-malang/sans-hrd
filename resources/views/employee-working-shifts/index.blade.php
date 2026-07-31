@@ -126,7 +126,7 @@
                         Filter Data
                     </button>
                     @if($selectedUnitId)
-                        <a href="{{ route('employee-working-shifts.index') }}" class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline">Reset</a>
+                        <a href="{{ route('employee-working-shifts.index') }}" class="h-8 px-4 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200 dark:border-rose-800 transition-all cursor-pointer">Reset</a>
                     @endif
                 </form>
             </div>
@@ -404,7 +404,7 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Unit Sekolah</label>
-                                        <select x-model="createUnitId" name="unit_id" @change="loadEmployeesForUnit()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <select x-model="createUnitId" name="unit_id" @change="loadEmployeesForUnit()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs focus:border-indigo-500 focus:ring-indigo-500">
                                             @foreach($units as $unit)
                                                 <option value="{{ $unit->id }}">{{ $unit->name }}</option>
                                             @endforeach
@@ -412,13 +412,13 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Nama Roster <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="roster_name" required placeholder="Misal: Roster Satpam" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <input type="text" name="roster_name" required placeholder="Misal: Roster Satpam" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Bulan</label>
-                                        <select name="month" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <select name="month" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs focus:border-indigo-500 focus:ring-indigo-500">
                                             @php
                                                 $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
                                             @endphp
@@ -429,7 +429,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Tahun</label>
-                                        <input type="number" name="year" value="{{ date('Y') }}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <input type="number" name="year" value="{{ date('Y') }}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                 </div>
                                 
@@ -451,7 +451,7 @@
                                         <template x-for="emp in empList.filter(e => e.name.toLowerCase().includes(empSearch.toLowerCase()))" :key="emp.id">
                                             <label class="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer transition-colors">
                                                 <input type="checkbox" name="emp_ids[]" :value="emp.id" x-model="selectedEmps" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 dark:focus:ring-offset-slate-900">
-                                                <span class="text-sm text-slate-700 dark:text-slate-300" x-text="emp.name"></span>
+                                                <span class="text-xs text-slate-700 dark:text-slate-300" x-text="emp.name"></span>
                                             </label>
                                         </template>
                                     </div>
