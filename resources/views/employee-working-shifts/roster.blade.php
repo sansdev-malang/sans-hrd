@@ -72,7 +72,7 @@
             <div class="flex flex-wrap items-end gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Unit Sekolah</label>
-                    <select name="unit_id" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="document.getElementById('filterForm').submit()">
+                    <select name="unit_id" class="pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer" onchange="document.getElementById('filterForm').submit()">
                         @foreach($units as $unit)
                             <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>{{ $unit->name }}</option>
                         @endforeach
@@ -80,7 +80,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Bulan</label>
-                    <select name="month" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="document.getElementById('filterForm').submit()">
+                    <select name="month" class="pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer" onchange="document.getElementById('filterForm').submit()">
                         @php
                             $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
                         @endphp

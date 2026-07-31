@@ -269,7 +269,7 @@
             }
         </script>
         <!-- MODAL DETAIL PEGAWAI -->
-        <div id="detail-employee-modal" onclick="toggleModal('detail-employee-modal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
+        <div id="detail-employee-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-xl w-full overflow-hidden transform transition-all scale-95 opacity-0 duration-200 text-xs">
                 
                 <!-- Header -->
@@ -425,7 +425,7 @@
         </div>
 
         <!-- ===== MODAL TAMBAH PEGAWAI (SLIDE PANEL) ===== -->
-        <div id="create-employee-modal" onclick="toggleModal('create-employee-modal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
+        <div id="create-employee-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all scale-95 opacity-0 duration-200 text-xs">
 
                 <!-- Header -->
@@ -449,7 +449,7 @@
                             <!-- Unit Sekolah -->
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Unit Sekolah Tujuan <span class="text-rose-500">*</span></label>
-                                <select name="school_unit_id" id="modal_school_unit_id" required class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                                <select name="school_unit_id" id="modal_school_unit_id" required class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                                     <option value="">-- Pilih Unit Sekolah --</option>
                                     @foreach($schoolUnits as $unit)
                                         <option value="{{ $unit->id }}">{{ $unit->name }}</option>
@@ -461,20 +461,20 @@
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
                                 <input type="text" name="name" required placeholder="Contoh: Drs. Eko Wibowo, M.Pd"
-                                    class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                    class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
 
                             <!-- Email -->
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Alamat Email <span class="text-rose-500">*</span></label>
                                 <input type="email" name="email" required placeholder="Contoh: nama@sans.dev"
-                                    class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                    class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
 
                             <!-- Tipe Pegawai -->
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Tipe Pegawai <span class="text-rose-500">*</span></label>
-                                <select name="employee_type_code" id="modal_employee_type_code" required disabled class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                                <select name="employee_type_code" id="modal_employee_type_code" required disabled class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                                     <option value="">-- Pilih Unit Sekolah Dahulu --</option>
                                 </select>
                             </div>
@@ -486,26 +486,26 @@
 
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Tempat Lahir</label>
-                                <input type="text" name="birth_place" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="birth_place" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Tanggal Lahir</label>
-                                <input type="date" name="birth_date" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="date" name="birth_date" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Jenis Kelamin</label>
-                                <select name="gender" required class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                                <select name="gender" required class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                                     <option value="Male">Laki-laki</option>
                                     <option value="Female">Perempuan</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Alamat</label>
-                                <input type="text" name="address" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="address" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">No. HP / WA</label>
-                                <input type="text" name="phone" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="phone" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
 
                             <!-- SECTION: DATA KEPEGAWAIAN -->
@@ -515,67 +515,67 @@
 
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">NIK</label>
-                                <input type="text" name="nik" class="w-full text-sm h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="nik" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">NIY</label>
-                                <input type="text" name="niy" class="w-full text-sm h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="niy" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">NUPTK</label>
-                                <input type="text" name="nuptk" class="w-full text-sm h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="nuptk" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">NO UKG</label>
-                                <input type="text" name="no_ukg" class="w-full text-sm h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="no_ukg" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">NRG</label>
-                                <input type="text" name="nrg" class="w-full text-sm h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="nrg" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Pangkat / Golongan</label>
-                                <input type="text" name="pangkat_golongan" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="pangkat_golongan" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Pendidikan Terakhir</label>
-                                <input type="text" name="last_education" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="last_education" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Jurusan</label>
-                                <input type="text" name="major" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="major" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Jabatan Utama</label>
-                                <input type="text" name="position" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="position" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Jabatan Tambahan</label>
-                                <input type="text" name="additional_position" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="additional_position" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Status Kepegawaian</label>
-                                <input type="text" name="employment_status" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="employment_status" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Tanggal Mulai Tugas</label>
-                                <input type="date" name="task_start_date" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="date" name="task_start_date" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Tanggal Diangkat</label>
-                                <input type="date" name="appointment_date" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="date" name="appointment_date" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Tanggal SK Terakhir</label>
-                                <input type="date" name="last_sk_date" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="date" name="last_sk_date" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Nomor SK Terakhir</label>
-                                <input type="text" name="last_sk_number" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="last_sk_number" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Masa Kerja Golongan</label>
-                                <input type="text" name="work_period" class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                <input type="text" name="work_period" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                             </div>
 
                             <!-- SECTION: SISTEM ABSENSI -->
@@ -587,7 +587,7 @@
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">ID ZKTeco / PIN Fingerprint</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="text" name="zkteco_uid" id="modal_zkteco_uid" class="w-full text-sm h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                    <input type="text" name="zkteco_uid" id="modal_zkteco_uid" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                                     <button type="button" id="modal_btn_generate_uid" class="px-3 h-9 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap">Buat ID Otomatis</button>
                                 </div>
                             </div>
@@ -606,7 +606,7 @@
 
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-1">Status Keaktifan <span class="text-rose-500">*</span></label>
-                                <select name="status" required class="w-full text-sm h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                                <select name="status" required class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                                     <option value="Active" selected>Aktif</option>
                                     <option value="Leave">Cuti</option>
                                     <option value="Inactive">Nonaktif</option>
@@ -631,7 +631,7 @@
         </div>
 
         <!-- ===== MODAL EDIT PEGAWAI ===== -->
-        <div id="edit-employee-modal" onclick="toggleModal('edit-employee-modal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
+        <div id="edit-employee-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm hidden transition-opacity text-left">
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all scale-95 opacity-0 duration-200 text-xs">
 
                 <!-- Header -->

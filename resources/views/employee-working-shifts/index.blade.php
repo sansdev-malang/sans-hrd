@@ -116,7 +116,7 @@
         <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
             <div class="p-4 border-b border-slate-100 dark:border-slate-900 flex flex-col sm:flex-row justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/30">
                 <form method="GET" action="{{ route('employee-working-shifts.index') }}" class="flex items-center gap-3">
-                    <select name="unit_id" class="px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select name="unit_id" class="pl-3 pr-8 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                         <option value="">Semua Unit Sekolah</option>
                         @foreach($units as $unit)
                             <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>{{ $unit->name }}</option>
