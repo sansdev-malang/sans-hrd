@@ -62,7 +62,7 @@ class EmployeeWorkingShiftController extends Controller
                         'shift_name' => $assignment->workingShift->name ?? 'Unknown',
                         'shift_code' => $assignment->workingShift->code ?? '-',
                         'employees' => [],
-                        'sort_date' => '9999-12-31_' . $assignment->start_date->format('Y-m-d')
+                        'sort_date' => $assignment->start_date->format('Y-m-d')
                     ];
                 }
 
@@ -114,12 +114,17 @@ class EmployeeWorkingShiftController extends Controller
 
         $allBatches = array_merge(array_values($batches), array_values($rosterBatches));
         
-        // Sort by Unit Name ASC, then sort_date DESC
+        // Sort by Unit Name ASC, then Type (roster > permanent), then sort_date DESC
         usort($allBatches, function($a, $b) {
             $unitCompare = strcmp($a['unit_name'], $b['unit_name']);
             if ($unitCompare !== 0) {
                 return $unitCompare;
             }
+            
+            if ($a['type'] !== $b['type']) {
+                return $a['type'] === 'roster' ? -1 : 1;
+            }
+
             return strcmp($b['sort_date'], $a['sort_date']);
         });
 
