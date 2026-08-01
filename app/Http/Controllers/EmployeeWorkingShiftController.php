@@ -62,7 +62,7 @@ class EmployeeWorkingShiftController extends Controller
                         'shift_name' => $assignment->workingShift->name ?? 'Unknown',
                         'shift_code' => $assignment->workingShift->code ?? '-',
                         'employees' => [],
-                        'sort_date' => $assignment->start_date->format('Y-m-d')
+                        'sort_date' => '9999-12-31_' . $assignment->start_date->format('Y-m-d')
                     ];
                 }
 
@@ -88,7 +88,7 @@ class EmployeeWorkingShiftController extends Controller
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'roster_name' => $assignment->roster_name,
                         'employees_map' => [],
-                        'sort_date' => $year . '-' . $month . '-01'
+                        'sort_date' => $year . '-' . $month . '-31'
                     ];
                 }
                 if ($assignment->roster_name) {
@@ -114,8 +114,12 @@ class EmployeeWorkingShiftController extends Controller
 
         $allBatches = array_merge(array_values($batches), array_values($rosterBatches));
         
-        // Sort descending by date
+        // Sort by Unit Name ASC, then sort_date DESC
         usort($allBatches, function($a, $b) {
+            $unitCompare = strcmp($a['unit_name'], $b['unit_name']);
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
             return strcmp($b['sort_date'], $a['sort_date']);
         });
 
