@@ -227,6 +227,7 @@ class EmployeeWorkingShiftController extends Controller
     {
         $unit_id = $request->input('unit_id');
         $month = $request->input('month');
+        $year = $request->input('year');
         $rosterName = $request->input('roster_name');
 
         $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
@@ -243,8 +244,12 @@ class EmployeeWorkingShiftController extends Controller
                       });
             });
 
-        if ($rosterName) {
+        if (!empty($rosterName)) {
             $query->where('roster_name', $rosterName);
+        } else {
+            $query->where(function($q) {
+                $q->whereNull('roster_name')->orWhere('roster_name', '');
+            });
         }
 
         $query->delete();
