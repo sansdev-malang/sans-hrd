@@ -61,6 +61,7 @@ class EmployeeWorkingShiftController extends Controller
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'shift_name' => $assignment->workingShift->name ?? 'Unknown',
                         'shift_code' => $assignment->workingShift->code ?? '-',
+                        
                         'employees' => [],
                         'sort_date' => $assignment->start_date->format('Y-m-d')
                     ];
@@ -119,7 +120,7 @@ class EmployeeWorkingShiftController extends Controller
             return strcmp($b['sort_date'], $a['sort_date']);
         });
 
-        return view('employee-working-shifts.index', ['batches' => $allBatches, 'units' => $units, 'shifts' => $shifts, 'selectedUnitId' => $selectedUnitId]);
+        return view('employee-working-shifts.index', ['batches' => $allBatches, 'units' => $units, 'shifts' => $shifts, 'bonusSchemas' => $bonusSchemas, 'selectedUnitId' => $selectedUnitId]);
     }
 
     public function editBatch(Request $request)

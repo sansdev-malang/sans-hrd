@@ -461,7 +461,7 @@
                             <p class="text-xs text-slate-500 mt-1">Pilih unit, pegawai, dan shift yang akan ditugaskan.
                             </p>
                         </div><button type="button" @click="showAssignmentModal=false"
-                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-500 cursor-pointer transition-colors"><i data-lucide="x"
+                            class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-900"><i data-lucide="x"
                                 class="w-4 h-4"></i></button>
                     </div>
                     <form method="POST" action="{{ route('employee-working-shifts.store') }}"
@@ -618,7 +618,6 @@
                 </div>
             </div>
         </div>
-
         <!-- MODAL BUAT ROSTER BARU -->
         <div x-show="showCreateModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto"
             aria-labelledby="modal-create-title" role="dialog" aria-modal="true">

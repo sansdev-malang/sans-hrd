@@ -126,7 +126,7 @@
                         <!-- Unit Sekolah -->
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Unit Sekolah</label>
-                            <select name="school_unit_id" required x-model="selectedUnit" @change="fetchEmployees(false)" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                            <select name="school_unit_id" required x-model="selectedUnit" @change="fetchEmployees(false)" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                 <option value="">-- Pilih Unit Sekolah --</option>
                                 @foreach($units as $unit)
                                     <option value="{{ $unit->id }}">{{ $unit->name }}</option>
@@ -197,11 +197,11 @@
 
                             <!-- List -->
                             <div class="p-3 space-y-2 custom-scrollbar" style="height: 350px; overflow-y: scroll; overscroll-behavior: contain;">
-                                <div x-show="employees.length === 0 && !isLoadingEmployees" class="flex items-center justify-center h-full text-slate-400 italic text-sm">
+                                <div x-show="employees.length === 0 && !isLoadingEmployees" class="flex items-center justify-center h-full text-slate-400 italic text-xs">
                                     Silakan pilih unit sekolah terlebih dahulu.
                                 </div>
                                 
-                                <div x-show="employees.length > 0 && filteredEmployees.length === 0" class="flex items-center justify-center h-full text-slate-400 italic text-sm">
+                                <div x-show="employees.length > 0 && filteredEmployees.length === 0" class="flex items-center justify-center h-full text-slate-400 italic text-xs">
                                     Pegawai tidak ditemukan.
                                 </div>
 
@@ -209,9 +209,9 @@
                                     <label 
                                         x-show="searchQuery === '' || emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || (emp.nuptk_nip_nik && String(emp.nuptk_nip_nik).toLowerCase().includes(searchQuery.toLowerCase()))"
                                         class="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg transition-colors shadow-sm">
-                                        <input type="checkbox" name="employee_ids[]" :value="emp.id" class="employee-checkbox w-4 h-4 rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 shrink-0">
+                                        <input type="checkbox" name="employee_ids[]" :value="emp.id" class="text-xs employee-checkbox w-4 h-4 rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 shrink-0">
                                         <div class="flex flex-col">
-                                            <span class="text-slate-900 dark:text-slate-100 font-semibold leading-snug" x-text="emp.name"></span>
+                                            <span class="text-xs text-slate-900 dark:text-slate-100 font-semibold leading-snug" x-text="emp.name"></span>
                                             <span class="text-xs text-slate-500 mt-0.5" x-text="`NIP/NIK: ${emp.nuptk_nip_nik || '-'}`"></span>
                                         </div>
                                     </label>
