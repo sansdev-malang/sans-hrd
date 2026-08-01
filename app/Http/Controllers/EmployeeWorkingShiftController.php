@@ -89,7 +89,7 @@ class EmployeeWorkingShiftController extends Controller
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'roster_name' => $assignment->roster_name,
                         'employees_map' => [],
-                        'sort_date' => $year . '-' . $month . '-01'
+                        'sort_date' => $year . '-' . $month . '-31'
                     ];
                 }
                 if ($assignment->roster_name) {
@@ -115,8 +115,17 @@ class EmployeeWorkingShiftController extends Controller
 
         $allBatches = array_merge(array_values($batches), array_values($rosterBatches));
         
-        // Sort descending by date
+        // Sort by Unit Name ASC, then Type (roster > permanent), then sort_date DESC
         usort($allBatches, function($a, $b) {
+            $unitCompare = strcmp($a['unit_name'], $b['unit_name']);
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
+            
+            if ($a['type'] !== $b['type']) {
+                return $a['type'] === 'roster' ? -1 : 1;
+            }
+
             return strcmp($b['sort_date'], $a['sort_date']);
         });
 

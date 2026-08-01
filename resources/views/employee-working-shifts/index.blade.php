@@ -583,7 +583,6 @@
                                             class="flex items-center justify-center h-full text-slate-400 italic text-xs">
                                             Pegawai tidak ditemukan.
                                         </div>
-
                                         <template x-for="emp in employees" :key="emp.id">
                                             <label
                                                 x-show="searchQuery === '' || emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || (emp.nuptk_nip_nik && String(emp.nuptk_nip_nik).toLowerCase().includes(searchQuery.toLowerCase()))"
@@ -737,10 +736,8 @@
                                             class="text-center py-4 text-xs text-slate-500">
                                             Tidak ada pegawai di unit ini.
                                         </div>
-                                        <template
-                                            x-for="emp in empList.filter(e => e.name.toLowerCase().includes(empSearch.toLowerCase()))"
-                                            :key="emp.id">
-                                            <label
+                                        <template x-for="emp in empList" :key="emp.id">
+                                            <label x-show="empSearch === '' || emp.name.toLowerCase().includes(empSearch.toLowerCase())"
                                                 class="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer transition-colors">
                                                 <input type="checkbox" name="emp_ids[]" :value="emp.id"
                                                     x-model="selectedEmps"
