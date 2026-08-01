@@ -129,7 +129,7 @@ class EmployeeWorkingShiftController extends Controller
             return strcmp($b['sort_date'], $a['sort_date']);
         });
 
-        return view('employee-working-shifts.index', ['batches' => $allBatches, 'units' => $units, 'shifts' => $shifts, 'bonusSchemas' => $bonusSchemas, 'selectedUnitId' => $selectedUnitId]);
+        return view('employee-working-shifts.index', ['batches' => $allBatches, 'units' => $units, 'shifts' => $shifts, 'selectedUnitId' => $selectedUnitId]);
     }
 
     public function editBatch(Request $request)
