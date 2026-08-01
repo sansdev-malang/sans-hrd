@@ -112,7 +112,8 @@
         </section>
 
         <!-- ADD MODAL -->
-        <div x-show="showAddModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs" style="display: none;" x-transition>
+        <template x-teleport="body">
+            <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
                 <h3 class="text-base font-bold text-slate-900 dark:text-slate-50">Tambah Unit Sekolah Baru</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Hubungkan unit sekolah baru ke dalam portal aggregator.</p>
@@ -141,15 +142,17 @@
                     </div>
 
                     <div class="flex gap-2.5 pt-4 justify-end">
-                        <button type="button" @click="showAddModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-750 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer">Batal</button>
+                        <button type="button" @click="showAddModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer">Batal</button>
                         <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold rounded-lg cursor-pointer">Simpan Unit</button>
                     </div>
                 </form>
             </div>
         </div>
+        </template>
 
         <!-- EDIT MODAL -->
-        <div x-show="showEditModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs" style="display: none;" x-transition>
+        <template x-teleport="body">
+            <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
                 <h3 class="text-base font-bold text-slate-900 dark:text-slate-50">Edit Unit Sekolah</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Modifikasi parameter REST API unit sekolah yang terhubung.</p>
@@ -179,12 +182,13 @@
                     </div>
 
                     <div class="flex gap-2.5 pt-4 justify-end">
-                        <button type="button" @click="showEditModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-750 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer">Batal</button>
+                        <button type="button" @click="showEditModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer">Batal</button>
                         <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold rounded-lg cursor-pointer">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>
         </div>
+        </template>
 
     </div>
 </x-admin-layout>

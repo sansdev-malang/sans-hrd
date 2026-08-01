@@ -170,7 +170,8 @@
         </div>
 
         <!-- MODAL 1: ADD USER -->
-        <div x-show="showAddModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none;">
+        <template x-teleport="body">
+            <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
             <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
@@ -222,9 +223,11 @@
             </form>
             </div>
         </div>
+        </template>
 
         <!-- MODAL 2: EDIT USER -->
-        <div x-show="showEditModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none;">
+        <template x-teleport="body">
+            <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
             <div @click.outside="showEditModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
@@ -276,9 +279,11 @@
             </form>
             </div>
         </div>
+        </template>
 
         <!-- MODAL 3: PROFILE DETAIL CARD -->
-        <div x-show="showDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none;">
+        <template x-teleport="body">
+            <div x-show="showDetailModal" @click.self="showDetailModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
             <div @click.outside="showDetailModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
@@ -309,6 +314,7 @@
                 </div>
             </div>
         </div>
+        </template>
 
     </div>
 </x-admin-layout>

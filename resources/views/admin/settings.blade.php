@@ -25,10 +25,10 @@
                 </div>
             @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 <!-- LEFT SIDE: GENERAL SETTINGS -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="space-y-6">
                     <!-- General Settings Card -->
                     <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
                         <div class="p-6 border-b border-slate-200 dark:border-slate-800">
@@ -84,9 +84,7 @@
                         </div>
                     </div>
                 </div>
-
-                </div>
-
+                
             <!-- RIGHT SIDE: BRANDING (LOGO & FAVICON) -->
                 <div class="space-y-6">
                     <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
@@ -101,14 +99,14 @@
                                 <label class="block text-xs font-semibold text-slate-650 dark:text-slate-400">Logo Aplikasi</label>
                                 <div class="flex items-center gap-4">
                                     <!-- Logo Preview Box -->
-                                    <div class="relative w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-center overflow-hidden shrink-0">
+                                    <div class="relative w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-800 logo-bg flex items-center justify-center overflow-hidden shrink-0 p-1">
                                         @if (setting('app_logo'))
-                                            <img id="logo-preview" src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo Preview" class="w-full h-full object-cover">
+                                            <img id="logo-preview" src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo Preview" class="w-full h-full object-contain">
                                         @else
-                                            <div id="logo-placeholder" class="w-10 h-10 rounded-lg logo-gradient-bg flex items-center justify-center">
+                                            <div id="logo-placeholder" class="w-full h-full flex items-center justify-center">
                                                 <span class="text-white text-base font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">{{ substr(setting('app_name', 'SANS'), 0, 1) }}</span>
                                             </div>
-                                            <img id="logo-preview" src="" alt="Logo Preview" class="w-full h-full object-cover hidden">
+                                            <img id="logo-preview" src="" alt="Logo Preview" class="w-full h-full object-contain hidden">
                                         @endif
                                     </div>
                                     <div class="flex-1 space-y-1">
@@ -127,14 +125,14 @@
                                 <label class="block text-xs font-semibold text-slate-650 dark:text-slate-400">Ikon Favicon</label>
                                 <div class="flex items-center gap-4">
                                     <!-- Favicon Preview Box -->
-                                    <div class="relative w-12 h-12 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-center overflow-hidden shrink-0">
+                                    <div class="relative w-12 h-12 rounded-lg border border-slate-200 dark:border-slate-800 logo-bg flex items-center justify-center overflow-hidden shrink-0 p-1">
                                         @if (setting('app_favicon'))
-                                            <img id="favicon-preview" src="{{ asset('storage/' . setting('app_favicon')) }}" alt="Favicon Preview" class="w-6 h-6 object-contain">
+                                            <img id="favicon-preview" src="{{ asset('storage/' . setting('app_favicon')) }}" alt="Favicon Preview" class="w-full h-full object-contain">
                                         @else
-                                            <div id="favicon-placeholder" class="w-8 h-8 rounded bg-slate-100 dark:bg-slate-800 logo-gradient-bg flex items-center justify-center shrink-0 shadow-sm">
+                                            <div id="favicon-placeholder" class="w-full h-full flex items-center justify-center shrink-0">
                                                 <span class="text-white text-xs font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">{{ substr(setting('app_name', 'SANS'), 0, 1) }}</span>
                                             </div>
-                                            <img id="favicon-preview" src="" alt="Favicon Preview" class="w-6 h-6 object-contain hidden">
+                                            <img id="favicon-preview" src="" alt="Favicon Preview" class="w-full h-full object-contain hidden">
                                         @endif
                                     </div>
                                     <div class="flex-1 space-y-1">

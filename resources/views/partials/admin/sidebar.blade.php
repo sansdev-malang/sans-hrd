@@ -143,6 +143,7 @@
                     <i data-lucide="settings" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Setting Aplikasi</span>
                 </a>
+                @if(auth()->user()->hasRole('super_admin'))
                 <a href="{{ route('zkteco-devices.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('zkteco-devices.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
@@ -155,7 +156,6 @@
                     <i data-lucide="radio" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Sinkronisasi ADMS</span>
                 </a>
-                @if(auth()->user()->hasRole('super_admin'))
                 <a href="{{ route('users.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('users.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">

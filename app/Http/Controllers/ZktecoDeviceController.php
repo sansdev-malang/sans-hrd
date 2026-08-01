@@ -72,25 +72,6 @@ class ZktecoDeviceController extends Controller
             ->with('success', 'Perangkat ZKTeco berhasil dihapus.');
     }
 
-    /**
-     * Perform socket connection test (ping) on the device.
-     */
-    public function ping(ZktecoDevice $zktecoDevice)
-    {
-        $connection = @fsockopen($zktecoDevice->ip_address, $zktecoDevice->port, $errno, $errstr, 1.0);
-        $isOnline = is_resource($connection);
-        if ($isOnline) {
-            fclose($connection);
-        }
-
-        $zktecoDevice->update(['is_online' => $isOnline]);
-
-        return response()->json([
-            'success' => true,
-            'is_online' => $isOnline,
-            'message' => $isOnline ? 'Koneksi Berhasil (Online)' : 'Koneksi Gagal (Offline)'
-        ]);
-    }
 
     /**
      * Pull logs from the device manually.
