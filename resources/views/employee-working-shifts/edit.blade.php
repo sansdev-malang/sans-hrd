@@ -138,7 +138,7 @@
                             <!-- Template Shift -->
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Template Shift Kerja</label>
-                                <select name="working_shift_id" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                <select name="working_shift_id" required class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                     <option value="">-- Pilih Template Shift --</option>
                                     @foreach($shifts as $shift)
                                         <option value="{{ $shift->id }}" {{ $shift_id == $shift->id ? 'selected' : '' }}>{{ $shift->name }} ({{ $shift->code }})</option>
@@ -149,7 +149,7 @@
                             <!-- Bonus Schema -->
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Skema Bonus (Opsional)</label>
-                                <select name="bonus_schema_id" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                <select name="bonus_schema_id" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                     <option value="">-- Ikuti Default/Aktif --</option>
                                     @if(isset($bonusSchemas))
                                         @foreach($bonusSchemas as $schema)
@@ -164,11 +164,11 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal Mulai</label>
-                                <input type="date" name="start_date" value="{{ $start }}" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
+                                <input type="date" name="start_date" value="{{ $start }}" required class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                             </div>
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal Selesai (Opsional)</label>
-                                <input type="date" name="end_date" value="{{ $end !== 'null' ? $end : '' }}" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
+                                <input type="date" name="end_date" value="{{ $end !== 'null' ? $end : '' }}" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                             </div>
                         </div>
                     </div>
@@ -191,7 +191,7 @@
                             <div class="p-2 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-950">
                                 <div class="relative flex items-center">
                                     <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none"></i>
-                                    <input type="text" x-model="searchQuery" :disabled="employees.length === 0" placeholder="Cari nama atau NIK..." style="padding-left: 2.25rem;" class="w-full pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 disabled:opacity-50">
+                                    <input type="text" x-model="searchQuery" :disabled="employees.length === 0" placeholder="Cari nama atau NIK..." style="padding-left: 2.25rem;" class="text-xs w-full pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 disabled:opacity-50">
                                 </div>
                             </div>
 
