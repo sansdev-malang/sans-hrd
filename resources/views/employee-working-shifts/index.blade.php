@@ -42,7 +42,7 @@
         loadingEmp: false,
         empSearch: '',
         selectedEmps: [],
-        selectAllEmp: false,
+        selectAllEmp: false, showAssignmentModal: false,
         
         openModal(batch) {
             this.selectedBatch = batch;
@@ -74,6 +74,7 @@
                     document.body.style.overflow = '';
                 }
             });
+            this.$watch('showAssignmentModal', value => { document.body.style.overflow = value ? 'hidden' : ''; });
             this.$watch('showCreateModal', value => {
                 if (value) {
                     document.body.style.overflow = 'hidden';
@@ -100,15 +101,14 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Atur penugasan dan rotasi shift kerja secara kolektif per unit sekolah.</p>
             </div>
             <div class="flex items-center gap-2">
-            <div class="flex items-center gap-2">
                 <button type="button" @click="showCreateModal = true; loadEmployeesForUnit()" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Buat Roster Bulanan (Grid)
                 </button>
-                <a href="{{ route('employee-working-shifts.create') }}" class="h-9 px-4 inline-flex items-center justify-center bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer gap-2">
+                <button type="button" @click="showAssignmentModal = true" class="h-9 px-4 inline-flex items-center justify-center bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Tugaskan Shift Baru
-                </a>
+                </button>
             </div>
         </header>
 
@@ -360,6 +360,125 @@
             </div>
         </div>
 
+        <!-- MODAL TUGASKAN SHIFT BARU -->
+        <div x-show="showAssignmentModal" style="display:none" class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showAssignmentModal=false">
+            <div x-show="showAssignmentModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="showAssignmentModal=false"></div>
+            <div class="flex min-h-full items-center justify-center p-4"><div x-show="showAssignmentModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative w-full sm:max-w-4xl rounded-xl bg-white dark:bg-slate-950 shadow-2xl border border-slate-200 dark:border-slate-800" x-data="{selectedUnit:'',employees:[],searchQuery:'',isLoadingEmployees:false,selectAll:false,async fetchEmployees(){if(!this.selectedUnit){this.employees=[];return}this.isLoadingEmployees=true;try{let r=await fetch('/employee-working-shifts/unit/'+this.selectedUnit+'/employees');this.employees=await r.json();this.selectAll=false;this.searchQuery=''}finally{this.isLoadingEmployees=false}},get filteredEmployees(){return this.employees.filter(e=>!this.searchQuery||e.name.toLowerCase().includes(this.searchQuery.toLowerCase())||(e.nuptk_nip_nik&&String(e.nuptk_nip_nik).toLowerCase().includes(this.searchQuery.toLowerCase())))},toggleAll(){document.querySelectorAll('.employee-checkbox').forEach(c=>c.checked=this.selectAll)}}">
+                <div class="px-6 pt-5 flex justify-between"><div><h3 class="text-lg font-bold text-slate-900 dark:text-slate-50">Tugaskan Shift Pegawai</h3><p class="text-xs text-slate-500 mt-1">Pilih unit, pegawai, dan shift yang akan ditugaskan.</p></div><button type="button" @click="showAssignmentModal=false" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-900"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+<form method="POST" action="{{ route('employee-working-shifts.store') }}" class="p-6 space-y-6">
+                @csrf
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+                    <div class="space-y-6">
+                        <!-- Unit Sekolah -->
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Unit Sekolah</label>
+                            <select name="school_unit_id" required x-model="selectedUnit" @change="fetchEmployees()" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                <option value="">-- Pilih Unit Sekolah --</option>
+                                @foreach($units as $unit)
+                                    <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Template Shift -->
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Template Shift Kerja</label>
+                                <select name="working_shift_id" required class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Pilih Template Shift --</option>
+                                    @foreach($shifts as $shift)
+                                        <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Bonus Schema -->
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Skema Bonus (Opsional)</label>
+                                <select name="bonus_schema_id" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Ikuti Default/Aktif --</option>
+                                    @if(isset($bonusSchemas))
+                                        @foreach($bonusSchemas as $schema)
+                                            <option value="{{ $schema->id }}">{{ $schema->name }} {{ $schema->is_active ? '(Aktif)' : '' }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal Mulai</label>
+                                <input type="date" name="start_date" required class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal Selesai (Opsional)</label>
+                                <input type="date" name="end_date" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pegawai List -->
+                    <div class="flex flex-col h-full">
+                        <label class="font-semibold text-slate-700 dark:text-slate-350 mb-1.5 flex justify-between items-center text-sm shrink-0">
+                            <span>
+                                Pilih Pegawai 
+                                <span x-show="isLoadingEmployees" class="text-xs text-indigo-500 ml-2 animate-pulse font-normal">Memuat data...</span>
+                            </span>
+                            <label x-show="employees.length > 0" class="flex items-center gap-1.5 cursor-pointer text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+                                <input type="checkbox" x-model="selectAll" @change="toggleAll()" class="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                Pilih Semua
+                            </label>
+                        </label>
+                        
+                        <div class="flex flex-col bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+                            <!-- Search Bar -->
+                            <div class="p-2 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-950">
+                                <div class="relative flex items-center">
+                                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none"></i>
+                                    <input type="text" x-model="searchQuery" :disabled="employees.length === 0" placeholder="Cari nama atau NIK..." style="padding-left: 2.25rem;" class="text-xs w-full pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 disabled:opacity-50">
+                                </div>
+                            </div>
+
+                            <!-- List -->
+                            <div class="p-3 space-y-2 custom-scrollbar" style="height: 350px; overflow-y: scroll; overscroll-behavior: contain;">
+                                <div x-show="employees.length === 0 && !isLoadingEmployees" class="flex items-center justify-center h-full text-slate-400 italic text-xs">
+                                    Silakan pilih unit sekolah terlebih dahulu.
+                                </div>
+                                
+                                <div x-show="employees.length > 0 && filteredEmployees.length === 0" class="flex items-center justify-center h-full text-slate-400 italic text-xs">
+                                    Pegawai tidak ditemukan.
+                                </div>
+
+                                <template x-for="emp in employees" :key="emp.id">
+                                    <label 
+                                        x-show="searchQuery === '' || emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || (emp.nuptk_nip_nik && String(emp.nuptk_nip_nik).toLowerCase().includes(searchQuery.toLowerCase()))"
+                                        class="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg transition-colors shadow-sm">
+                                        <input type="checkbox" name="employee_ids[]" :value="emp.id" class="text-xs employee-checkbox w-4 h-4 rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 shrink-0">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs text-slate-900 dark:text-slate-100 font-semibold leading-snug" x-text="emp.name"></span>
+                                            <span class="text-xs text-slate-500 mt-0.5" x-text="`NIP/NIK: ${emp.nuptk_nip_nik || '-'}`"></span>
+                                        </div>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-6 border-t border-slate-100 dark:border-slate-900 justify-end">
+                    <button type="button" @click="showAssignmentModal = false" class="h-10 px-5 inline-flex items-center justify-center bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 transition-all cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" class="h-10 px-6 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer">
+                        Simpan Penugasan Shift
+                    </button>
+                </div>
+            </form>
+            </div></div>
+        </div>
         <!-- MODAL BUAT ROSTER BARU -->
         <div x-show="showCreateModal" 
              style="display: none;"
