@@ -747,7 +747,7 @@ class EmployeeWorkingShiftController extends Controller
                     
                     if ($shiftId != $currentShiftId) {
                         // Save previous range
-                        if ($currentShiftId !== null && $currentShiftId !== '') {
+                        if ($currentShiftId !== null && $currentShiftId !== '' && $currentShiftId !== 'OFF') {
                             \App\Models\EmployeeWorkingShift::create([
                                 'employee_id' => $empId,
                                 'school_unit_id' => $unitId,
@@ -769,7 +769,7 @@ class EmployeeWorkingShiftController extends Controller
                 }
 
                 // Save the last range if exists
-                if ($currentShiftId !== null && $currentShiftId !== '') {
+                if ($currentShiftId !== null && $currentShiftId !== '' && $currentShiftId !== 'OFF') {
                     // Check if they want to make this ongoing (we'll assume no for now, unless explicitly requested, 
                     // but usually rosters are strictly bound to the month unless it's the last day and we want it to flow.
                     // Actually, setting end_date to last day of month is safest for a monthly roster.)
