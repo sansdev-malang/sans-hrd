@@ -500,7 +500,7 @@ class EmployeeController extends Controller
         // Headers for 28 fields + unit
         $headers = [
             'Gelar Depan', 'Nama Lengkap', 'Gelar Belakang', 'Email', 'Kode Tipe Pegawai (teacher/employee)', 'Unit Sekolah (paud/sd/smp)',
-            'Jenis Kelamin (Male/Female)', 'Tempat Lahir', 'Tanggal Lahir (YYYY-MM-DD)', 
+            'Jenis Kelamin (L/P)', 'Tempat Lahir', 'Tanggal Lahir (YYYY-MM-DD)', 
             'NIK', 'NIY', 'NUPTK', 'No UKG', 'NRG', 'Pangkat/Golongan', 
             'Pendidikan Terakhir', 'Jurusan', 'Jabatan Utama', 'Jabatan Tambahan', 
             'Tanggal Mulai Tugas (YYYY-MM-DD)', 'Status Kepegawaian', 'Tanggal Diangkat (YYYY-MM-DD)', 
@@ -510,7 +510,7 @@ class EmployeeController extends Controller
 
         $example = [
             'Dr.', 'Budi Santoso', 'S.Pd.', 'budi@example.com', 'teacher', 'sd',
-            'Male', 'Malang', '1985-01-01',
+            'L', 'Malang', '1985-01-01',
             '3573010101850001', '12345678', '198501012010121002', '201501234567', '-', 'Penata Muda / III.a',
             'S1 Pendidikan Matematika', 'Matematika', 'Guru Kelas', 'Wali Kelas',
             '2010-07-01', 'GTY', '2010-07-01',
@@ -688,6 +688,7 @@ class EmployeeController extends Controller
         ]);
     }
 }
+
 
 
 
