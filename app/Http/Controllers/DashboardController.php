@@ -169,6 +169,11 @@ class DashboardController extends Controller
                 }
             }
         }
+        // Fetch pending leave requests for the widget
+        $pendingLeaves = \App\Models\LeaveRequest::where('status', 'Pending')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
 
         return view('dashboard', compact(
             'date',
@@ -179,7 +184,8 @@ class DashboardController extends Controller
             'izin',
             'sakit',
             'alpa',
-            'belumAbsen'
+            'belumAbsen',
+            'pendingLeaves'
         ));
     }
 }
