@@ -423,7 +423,7 @@ class AttendanceLogController extends Controller
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
                     }
                 } else {
-                    if ($date->isWeekend()) {
+                    if ($date->isSunday()) {
                         $cellValue = 'L';
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
                     }
