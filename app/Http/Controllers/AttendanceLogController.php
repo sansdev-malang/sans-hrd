@@ -251,7 +251,15 @@ class AttendanceLogController extends Controller
                             'is_late' => $isLate
                         ];
                     } else {
-                        $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                        // Determine if it is actually Alfa or if the shift hasn't started yet
+                        $now = \Carbon\Carbon::now('Asia/Jakarta');
+                        $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                        
+                        if ($now->lessThan($shiftStartDateTime)) {
+                            $dailyDetails[$dateStr] = ['status' => 'Pending'];
+                        } else {
+                            $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                        }
                     }
                 } elseif ($isOffShift) {
                     $dailyDetails[$dateStr] = ['status' => 'Off'];

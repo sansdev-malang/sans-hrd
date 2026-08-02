@@ -4,4 +4,4 @@ $app = require_once __DIR__.'/bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
-echo now();
+echo \Carbon\Carbon::now() . "\n";
