@@ -522,9 +522,14 @@ class AttendanceBonusReportController extends Controller
 
         // Build dynamic date headers starting from column F (Index 6)
         $colIndex = 6;
+        $hari = [0 => 'MIN', 1 => 'SEN', 2 => 'SEL', 3 => 'RAB', 4 => 'KAM', 5 => 'JUM', 6 => 'SAB'];
         foreach($dates as $date) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
-            $sheet->setCellValue($colLetter . '1', $date->format('d/m'));
+            $dayName = $hari[$date->dayOfWeek];
+            $sheet->setCellValue($colLetter . '1', $dayName . "\n" . $date->format('d/m'));
+            if ($date->dayOfWeek == 0) {
+                $sheet->getStyle($colLetter . '1')->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
+            }
             $colIndex++;
         }
 
@@ -533,6 +538,10 @@ class AttendanceBonusReportController extends Controller
         $sheet->getStyle('A1:' . $lastColLetter . '1')->getFont()->setBold(true);
         $sheet->getStyle('A1:' . $lastColLetter . '1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FFEFEFEF');
+        $sheet->getRowDimension(1)->setRowHeight(30);
+        $sheet->getStyle('A1:' . $lastColLetter . '1')->getAlignment()->setWrapText(true)
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
             
         $row = 2;
         $no = 1;

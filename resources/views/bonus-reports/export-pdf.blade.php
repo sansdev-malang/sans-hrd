@@ -72,15 +72,16 @@
                 <th class="col-name">Pegawai</th>
                 <th class="col-unit">Unit</th>
                 <th class="col-total">Total Bonus (Rp)</th>
-                @foreach($dates as $date)
-                    @php
-                        $isWeekend = $date->isWeekend();
-                        $colorClass = $isWeekend ? 'text-red' : '';
-                    @endphp
-                    <th class="col-date {{ $colorClass }}">
-                        {{ $date->format('d/m') }}
-                    </th>
-                @endforeach
+                  @foreach($dates as $date)
+                      @php
+                          $colorClass = $date->dayOfWeek == 0 ? 'text-red' : '';
+                          $hari = [0 => 'MIN', 1 => 'SEN', 2 => 'SEL', 3 => 'RAB', 4 => 'KAM', 5 => 'JUM', 6 => 'SAB'];
+                          $dayName = $hari[$date->dayOfWeek];
+                      @endphp
+                      <th class="col-date {{ $colorClass }}">
+                          {{ $dayName }}<br>{{ $date->format('d/m') }}
+                      </th>
+                  @endforeach
             </tr>
         </thead>
         <tbody>
