@@ -128,14 +128,13 @@
                         <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">Aktivitas Kehadiran Terkini</h3>
                     </div>
                 </div>
-                <div class="p-5 flex-1">
-                    <div class="border-l-2 border-slate-200 dark:border-slate-800 ml-2 space-y-5">
+                <div class="p-5 flex-1 overflow-hidden flex flex-col">
+                    <div class="border-l-2 border-slate-200 dark:border-slate-800 ml-2 space-y-5 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar flex-1">
                         
                         @php
                             $recentAtts = collect($attendanceMap)
                                 ->filter(fn($att) => isset($att['status']) && $att['status'] == 'Present' && isset($att['clock_in']))
-                                ->sortByDesc(fn($att) => $att['last_activity'] ?? $att['clock_in'])
-                                ->take(5);
+                                ->sortByDesc(fn($att) => $att['last_activity'] ?? $att['clock_in']);
                         @endphp
 
                         @forelse($recentAtts as $uniqueKey => $att)
