@@ -126,11 +126,9 @@ class AttendanceBonusReportController extends Controller
             $totalBonusNominal = 0;
             $dailyDetails = [];
 
-            // Loop through each day of the month (up to today if in current month)
-            $lastDay = $endDate > now() ? now()->endOfDay() : $endDate;
-            
+            // Loop through each day of the month
             $currentDate = $startDate->copy();
-            while ($currentDate <= $lastDay) {
+            while ($currentDate <= $endDate) {
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
@@ -370,10 +368,9 @@ class AttendanceBonusReportController extends Controller
             $totalBonusNominal = 0;
             $dailyDetails = [];
 
-            $lastDay = $endDate > now() ? now()->endOfDay() : $endDate;
             $currentDate = $startDate->copy();
             
-            while ($currentDate <= $lastDay) {
+            while ($currentDate <= $endDate) {
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek;
 
