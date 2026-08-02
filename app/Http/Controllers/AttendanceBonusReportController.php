@@ -132,7 +132,7 @@ class AttendanceBonusReportController extends Controller
             $currentDate = $startDate->copy();
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeekIso; // 1 (Mon) - 7 (Sun)
+                $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
                 // Skip Holidays
                 if (in_array($dateStr, $holidayDates)) {
@@ -219,7 +219,14 @@ class AttendanceBonusReportController extends Controller
 
                         $totalBonusNominal += $dailyBonus;
                     } else {
-                        $totalAbsent++;
+                        $now = \Carbon\Carbon::now('Asia/Jakarta');
+                        $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                        
+                        if ($now->lessThan($shiftStartDateTime)) {
+                            $dailyStatus = 'Pending';
+                        } else {
+                            $totalAbsent++;
+                        }
                     }
 
                     $dailyDetails[$dateStr] = [
@@ -368,7 +375,7 @@ class AttendanceBonusReportController extends Controller
             
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeekIso;
+                $dayOfWeek = $currentDate->dayOfWeek;
 
                 if (in_array($dateStr, $holidayDates)) {
                     $currentDate->addDay();
@@ -441,7 +448,14 @@ class AttendanceBonusReportController extends Controller
                         }
                         $totalBonusNominal += $dailyBonus;
                     } else {
-                        $totalAbsent++;
+                        $now = \Carbon\Carbon::now('Asia/Jakarta');
+                        $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                        
+                        if ($now->lessThan($shiftStartDateTime)) {
+                            // still pending
+                        } else {
+                            $totalAbsent++;
+                        }
                     }
 
                     $dailyDetails[$dateStr] = [

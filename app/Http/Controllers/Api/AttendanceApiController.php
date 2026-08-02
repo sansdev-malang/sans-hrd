@@ -466,7 +466,14 @@ class AttendanceApiController extends Controller
 
                         $totalBonusNominal += $dailyBonus;
                     } else {
-                        $totalAbsent++;
+                        $now = \Carbon\Carbon::now('Asia/Jakarta');
+                        $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                        
+                        if ($now->lessThan($shiftStartDateTime)) {
+                            $dailyStatus = 'Pending';
+                        } else {
+                            $totalAbsent++;
+                        }
                     }
 
                     $dailyDetails[$dateStr] = [
