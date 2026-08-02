@@ -27,7 +27,7 @@ class DashboardController extends Controller
         $sdAttendances = $this->schoolService->getSdAttendances($date);
 
         // Fetch logs from local ZKTeco records for this date
-        $logs = \App\Models\AttendanceLog::whereDate('timestamp', $date)->get();
+        $logs = \App\Models\AttendanceLog::with('device')->whereDate('timestamp', $date)->get();
         $zktecoLogs = [];
         foreach ($logs as $log) {
             $uid = (string)$log->uid;
@@ -35,7 +35,9 @@ class DashboardController extends Controller
             if (!isset($zktecoLogs[$uid])) {
                 $zktecoLogs[$uid] = [
                     'clock_in' => $ts->format('H:i:s'),
+                    'clock_in_device' => $log->device->name ?? 'Mesin Absen',
                     'clock_out' => clone $ts, // store temporarily for comparison
+                    'clock_out_device' => $log->device->name ?? 'Mesin Absen',
                     '_min' => $ts->timestamp,
                     '_max' => $ts->timestamp,
                 ];
@@ -43,10 +45,12 @@ class DashboardController extends Controller
                 if ($ts->timestamp < $zktecoLogs[$uid]['_min']) {
                     $zktecoLogs[$uid]['_min'] = $ts->timestamp;
                     $zktecoLogs[$uid]['clock_in'] = $ts->format('H:i:s');
+                    $zktecoLogs[$uid]['clock_in_device'] = $log->device->name ?? 'Mesin Absen';
                 }
                 if ($ts->timestamp > $zktecoLogs[$uid]['_max']) {
                     $zktecoLogs[$uid]['_max'] = $ts->timestamp;
                     $zktecoLogs[$uid]['clock_out'] = clone $ts;
+                    $zktecoLogs[$uid]['clock_out_device'] = $log->device->name ?? 'Mesin Absen';
                 }
             }
         }
@@ -88,7 +92,9 @@ class DashboardController extends Controller
                 $attendanceMap[$uniqueKey] = [
                     'status' => 'Present',
                     'clock_in' => $clockIn,
+                    'clock_in_device' => $zktecoLogs[$uid]['clock_in_device'],
                     'clock_out' => $clockOut,
+                    'clock_out_device' => $clockOut ? $zktecoLogs[$uid]['clock_out_device'] : null,
                     'last_activity' => $clockOut ?: $clockIn,
                 ];
                 $hadir++;

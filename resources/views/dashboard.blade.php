@@ -151,9 +151,16 @@
                                 <p class="font-semibold text-sm text-slate-900 dark:text-slate-100">{{ $empName }}</p>
                                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                     Hadir pukul <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $att['clock_in'] }}</span>
+                                    @if(isset($att['clock_in_device']))
+                                        <span class="text-slate-400 ml-1">({{ $att['clock_in_device'] }})</span>
+                                    @endif
+                                    
                                     @if(isset($att['clock_out']))
                                         <span class="mx-1">&bull;</span>
                                         Pulang pukul <span class="font-bold text-blue-600 dark:text-blue-400">{{ $att['clock_out'] }}</span>
+                                        @if(isset($att['clock_out_device']))
+                                            <span class="text-slate-400 ml-1">({{ $att['clock_out_device'] }})</span>
+                                        @endif
                                     @endif
                                 </p>
                             </div>
