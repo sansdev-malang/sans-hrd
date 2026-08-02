@@ -140,29 +140,47 @@
 
                         @forelse($recentAtts as $uniqueKey => $att)
                             @php
-                                $empName = collect($sdEmployees)->first(function($e) use ($uniqueKey) {
+                                $empObj = collect($sdEmployees)->first(function($e) use ($uniqueKey) {
                                     $u = $e['unit_id'] ?? 0;
                                     $id = $e['id'];
                                     return "{$u}_{$id}" === $uniqueKey;
-                                })['name'] ?? 'Pegawai';
+                                });
+                                $empName = $empObj['name'] ?? 'Pegawai';
+                                $empPhoto = $empObj['photo'] ?? null;
+                                $empUrl = $empObj['unit_url'] ?? '';
+                                $photoSrc = null;
+                                if ($empPhoto) {
+                                    $photoSrc = str_contains($empPhoto, 'photos/') ? rtrim($empUrl, '/') . '/storage/' . $empPhoto : rtrim($empUrl, '/') . '/storage/photos/' . $empPhoto;
+                                }
                             @endphp
                             <div class="relative pl-5">
-                                <span class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-950"></span>
-                                <p class="font-semibold text-sm text-slate-900 dark:text-slate-100">{{ $empName }}</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                    Hadir pukul <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $att['clock_in'] }}</span>
-                                    @if(isset($att['clock_in_device']))
-                                        <span class="text-slate-400 ml-1">({{ $att['clock_in_device'] }})</span>
+                                <span class="absolute -left-[9px] top-2.5 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-950"></span>
+                                <div class="flex items-center gap-3">
+                                    @if($photoSrc)
+                                        <img src="{{ $photoSrc }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700">
+                                    @else
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-800 shrink-0">
+                                            {{ strtoupper(substr($empName, 0, 2)) }}
+                                        </div>
                                     @endif
-                                    
-                                    @if(isset($att['clock_out']))
-                                        <span class="mx-1">&bull;</span>
-                                        Pulang pukul <span class="font-bold text-blue-600 dark:text-blue-400">{{ $att['clock_out'] }}</span>
-                                        @if(isset($att['clock_out_device']))
-                                            <span class="text-slate-400 ml-1">({{ $att['clock_out_device'] }})</span>
-                                        @endif
-                                    @endif
-                                </p>
+                                    <div class="min-w-0">
+                                        <p class="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate">{{ $empName }}</p>
+                                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                                            Hadir <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $att['clock_in'] }}</span>
+                                            @if(isset($att['clock_in_device']))
+                                                <span class="text-slate-400">({{ $att['clock_in_device'] }})</span>
+                                            @endif
+                                            
+                                            @if(isset($att['clock_out']))
+                                                <span class="mx-1">&bull;</span>
+                                                Pulang <span class="font-bold text-blue-600 dark:text-blue-400">{{ $att['clock_out'] }}</span>
+                                                @if(isset($att['clock_out_device']))
+                                                    <span class="text-slate-400">({{ $att['clock_out_device'] }})</span>
+                                                @endif
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         @empty
                             <div class="text-center py-4">
