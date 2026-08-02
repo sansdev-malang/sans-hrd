@@ -96,7 +96,7 @@ class ZktecoDeviceController extends Controller
     {
         \App\Models\AdmsCommand::create([
             'zkteco_device_id' => $zktecoDevice->id,
-            'command_string' => 'DATA UPDATE ATTLOG',
+            'command_string' => 'DATA QUERY ATTLOG StartTime=2024-01-01 00:00:00	EndTime=2026-12-31 23:59:59',
             'status' => 'pending'
         ]);
 
