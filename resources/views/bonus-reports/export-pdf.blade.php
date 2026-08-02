@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Rekapan Bonus Kehadiran</title>
+    <title>Rekap Bonus Kehadiran</title>
     <style>
         body {
             font-family: Arial, sans-serif;
