@@ -153,9 +153,15 @@ class AttendanceLogController extends Controller
                 $shiftStartTime = null;
                 $shiftEndTime = null;
                 $shiftKey = $unit . '_' . $empId;
+                
+                $isShiftWorker = false;
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
+                        if ($assignment->workingShift->is_shift) {
+                            $isShiftWorker = true;
+                        }
+                        
                         $assignStartDate = substr($assignment->start_date, 0, 10);
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
@@ -172,6 +178,10 @@ class AttendanceLogController extends Controller
                             break;
                         }
                     }
+                }
+                
+                if ($isShiftWorker && !$hasShiftToday && !$isOffShift) {
+                    $isOffShift = true;
                 }
 
                 if ($hasShiftToday) {
