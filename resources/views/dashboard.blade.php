@@ -138,9 +138,13 @@
                                 ->take(5);
                         @endphp
 
-                        @forelse($recentAtts as $empId => $att)
+                        @forelse($recentAtts as $uniqueKey => $att)
                             @php
-                                $empName = collect($sdEmployees)->firstWhere('id', $empId)['name'] ?? 'Pegawai';
+                                $empName = collect($sdEmployees)->first(function($e) use ($uniqueKey) {
+                                    $u = $e['unit_id'] ?? 0;
+                                    $id = $e['id'];
+                                    return "{$u}_{$id}" === $uniqueKey;
+                                })['name'] ?? 'Pegawai';
                             @endphp
                             <div class="relative pl-5">
                                 <span class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-950"></span>

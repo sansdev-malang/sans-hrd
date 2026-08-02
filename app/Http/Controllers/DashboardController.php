@@ -64,8 +64,9 @@ class DashboardController extends Controller
         $apiAttMap = [];
         foreach ($sdAttendances as $att) {
             $empId = $att['employee_id'] ?? null;
-            if ($empId) {
-                $apiAttMap[$empId] = $att;
+            $unitId = $att['unit_id'] ?? null;
+            if ($empId && $unitId) {
+                $apiAttMap["{$unitId}_{$empId}"] = $att;
             }
         }
 
@@ -73,6 +74,8 @@ class DashboardController extends Controller
         
         foreach ($sdEmployees as $emp) {
             $empId = $emp['id'];
+            $unitId = $emp['unit_id'] ?? 0;
+            $uniqueKey = "{$unitId}_{$empId}";
             $uid = isset($emp['zkteco_uid']) ? (string)$emp['zkteco_uid'] : null;
 
             if ($uid && isset($zktecoLogs[$uid])) {
@@ -82,7 +85,7 @@ class DashboardController extends Controller
                     $clockOut = $zktecoLogs[$uid]['clock_out']->format('H:i:s');
                 }
 
-                $attendanceMap[$empId] = [
+                $attendanceMap[$uniqueKey] = [
                     'status' => 'Present',
                     'clock_in' => $clockIn,
                     'clock_out' => $clockOut,
@@ -90,9 +93,9 @@ class DashboardController extends Controller
                 ];
                 $hadir++;
             } else {
-                if (isset($apiAttMap[$empId])) {
-                    $att = $apiAttMap[$empId];
-                    $attendanceMap[$empId] = $att;
+                if (isset($apiAttMap[$uniqueKey])) {
+                    $att = $apiAttMap[$uniqueKey];
+                    $attendanceMap[$uniqueKey] = $att;
                     $status = $att['status'] ?? '';
                     if ($status === 'Present') $hadir++;
                     elseif ($status === 'Permit') $izin++;

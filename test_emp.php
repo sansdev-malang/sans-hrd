@@ -6,5 +6,5 @@ $kernel->bootstrap();
 
 $svc = app(\App\Services\SchoolUnitService::class);
 $emps = $svc->getSdEmployees();
-$ihwan = collect($emps)->firstWhere('name', 'Muhamad Ihwan');
-var_dump($ihwan);
+$name = collect($emps)->firstWhere('id', 13)['name'] ?? 'Pegawai';
+echo $name;
