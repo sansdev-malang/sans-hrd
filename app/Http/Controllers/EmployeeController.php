@@ -12,6 +12,7 @@ use Illuminate\Support\Arr;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmployeeController extends Controller
 {
@@ -60,12 +61,19 @@ class EmployeeController extends Controller
         }
 
         // Paginate
-        $perPage = (int) $request->query('per_page', 50); // Defaulting to 50 is better for scrolling
-        if (!in_array($perPage, [10, 25, 50, 100, 500])) {
-            $perPage = 50;
-        }
-        $page = $request->query('page', 1);
+        $perPageRaw = $request->query('per_page', 50);
         $total = $employeesCollection->count();
+        
+        if ($perPageRaw === 'all') {
+            $perPage = $total > 0 ? $total : 1;
+        } else {
+            $perPage = (int) $perPageRaw;
+            if (!in_array($perPage, [10, 25, 50, 100, 500])) {
+                $perPage = 50;
+            }
+        }
+        
+        $page = $request->query('page', 1);
         
         $paginatedEmployees = new \Illuminate\Pagination\LengthAwarePaginator(
             $employeesCollection->forPage($page, $perPage)->values(),
@@ -82,6 +90,128 @@ class EmployeeController extends Controller
             'schoolUnits' => $schoolUnits,
             'devices' => $devices,
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $rawEmployees = $this->service->getSdEmployees();
+        $employeesCollection = collect($rawEmployees);
+
+        $search = $request->query('search');
+        if (!empty($search)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($search) {
+                return str_contains(strtolower($emp['name'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['email'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['nuptk_nip_nik'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['subject_position'] ?? ''), strtolower($search));
+            });
+        }
+
+        $unitId = $request->query('unit');
+        $unitName = 'Semua Unit';
+        if (!empty($unitId)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
+                return ($emp['unit_id'] ?? '') == $unitId;
+            });
+            $unitModel = SchoolUnit::find($unitId);
+            if ($unitModel) {
+                $unitName = $unitModel->name;
+            }
+        }
+
+        $status = $request->query('status');
+        if (!empty($status)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($status) {
+                return ($emp['status'] ?? '') == $status;
+            });
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Unit');
+        $sheet->setCellValue('C1', 'Nama Lengkap');
+        $sheet->setCellValue('D1', 'Email');
+        $sheet->setCellValue('E1', 'Tipe Pegawai');
+        $sheet->setCellValue('F1', 'Jabatan');
+        $sheet->setCellValue('G1', 'Status');
+
+        $row = 2;
+        $no = 1;
+        foreach ($employeesCollection as $emp) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $emp['unit_name'] ?? '');
+            $sheet->setCellValue('C' . $row, $emp['name'] ?? '');
+            $sheet->setCellValue('D' . $row, $emp['email'] ?? '');
+            $sheet->setCellValue('E' . $row, $emp['employee_type']['name'] ?? '');
+            $sheet->setCellValue('F' . $row, $emp['position'] ?? '');
+            
+            $statusText = 'Aktif';
+            if (($emp['status'] ?? '') == 'Leave') $statusText = 'Cuti';
+            if (($emp['status'] ?? '') == 'Inactive') $statusText = 'Nonaktif';
+            
+            $sheet->setCellValue('G' . $row, $statusText);
+            $row++;
+        }
+
+        foreach(range('A','G') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $fileName = 'Data Pegawai - ' . $unitName . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="'. $fileName .'"');
+        header('Cache-Control: max-age=0');
+        
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $rawEmployees = $this->service->getSdEmployees();
+        $employeesCollection = collect($rawEmployees);
+
+        $search = $request->query('search');
+        if (!empty($search)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($search) {
+                return str_contains(strtolower($emp['name'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['email'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['nuptk_nip_nik'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['subject_position'] ?? ''), strtolower($search));
+            });
+        }
+
+        $unitId = $request->query('unit');
+        $unitName = 'Semua Unit';
+        if (!empty($unitId)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
+                return ($emp['unit_id'] ?? '') == $unitId;
+            });
+            $unitModel = SchoolUnit::find($unitId);
+            if ($unitModel) {
+                $unitName = $unitModel->name;
+            }
+        }
+
+        $status = $request->query('status');
+        if (!empty($status)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($status) {
+                return ($emp['status'] ?? '') == $status;
+            });
+        }
+
+        $fileName = 'Data Pegawai - ' . $unitName . '.pdf';
+        
+        $pdf = Pdf::loadView('employees.pdf', [
+            'employees' => $employeesCollection,
+            'unitName' => $unitName
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($fileName);
     }
 
     /**
@@ -157,9 +287,9 @@ class EmployeeController extends Controller
                 $request->validate([
             'school_unit_id' => 'required|exists:school_units,id',
             'employee_type_code' => 'required|string',
-            'front_title' => 'nullable|string|max:255',
+            'front_title' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
-            'back_title' => 'nullable|string|max:255',
+            'back_title' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'gender' => 'required|in:Male,Female,L,P',
             'birth_place' => 'nullable|string|max:255',
@@ -205,7 +335,7 @@ class EmployeeController extends Controller
         }
 
                 $apiData = $request->only([
-            'employee_type_code', 'name', 'email', 'gender', 'birth_place', 'birth_date',
+            'front_title', 'back_title', 'employee_type_code', 'name', 'email', 'gender', 'birth_place', 'birth_date',
             'nik', 'niy', 'nuptk', 'no_ukg', 'nrg', 'pangkat_golongan', 'last_education', 'major',
             'position', 'additional_position', 'task_start_date', 'employment_status',
             'appointment_date', 'last_sk_date', 'last_sk_number', 'work_period', 'address', 'phone', 'notes',
@@ -323,11 +453,11 @@ class EmployeeController extends Controller
             'status.required' => 'Status keaktifan wajib dipilih.',
         ];
 
-                $request->validate([
+        $request->validate([
             'employee_type_code' => 'required|string',
-            'front_title' => 'nullable|string|max:255',
+            'front_title' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
-            'back_title' => 'nullable|string|max:255',
+            'back_title' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'gender' => 'required|in:Male,Female,L,P',
             'birth_place' => 'nullable|string|max:255',
@@ -371,7 +501,7 @@ class EmployeeController extends Controller
         }
 
                 $apiData = $request->only([
-            'employee_type_code', 'name', 'email', 'gender', 'birth_place', 'birth_date',
+            'front_title', 'back_title', 'employee_type_code', 'name', 'email', 'gender', 'birth_place', 'birth_date',
             'nik', 'niy', 'nuptk', 'no_ukg', 'nrg', 'pangkat_golongan', 'last_education', 'major',
             'position', 'additional_position', 'task_start_date', 'employment_status',
             'appointment_date', 'last_sk_date', 'last_sk_number', 'work_period', 'address', 'phone', 'notes',
@@ -576,11 +706,11 @@ class EmployeeController extends Controller
 
         foreach ($rows as $index => $row) {
             // Skip empty rows (must have name)
-            if (empty($row[0])) {
+            if (empty($row[1])) {
                 continue;
             }
 
-            $unitCode = strtolower(trim($row[3] ?? ''));
+            $unitCode = strtolower(trim($row[5] ?? ''));
             $unit = $activeUnits->first(function ($u) use ($unitCode) {
                 $name = strtolower($u->name);
                 if ($unitCode === 'paud' && str_contains($name, 'paud')) return true;
@@ -595,35 +725,55 @@ class EmployeeController extends Controller
             }
 
             // Map variables based on new 28 columns template
+            $gender_raw = !empty($row[6]) ? trim($row[6]) : 'Male';
+            if (strtoupper($gender_raw) === 'L' || strtolower($gender_raw) === 'laki-laki' || strtolower($gender_raw) === 'male') {
+                $gender = 'Male';
+            } elseif (strtoupper($gender_raw) === 'P' || strtolower($gender_raw) === 'perempuan' || strtolower($gender_raw) === 'female') {
+                $gender = 'Female';
+            } else {
+                $gender = 'Male';
+            }
+
+            $status_raw = !empty($row[29]) ? trim($row[29]) : 'Active';
+            if (strtolower($status_raw) == 'active') {
+                $status = 'Active';
+            } elseif (strtolower($status_raw) == 'leave') {
+                $status = 'Leave';
+            } else {
+                $status = 'Inactive';
+            }
+
             $apiData = [
-                'name' => trim($row[0]),
-                'email' => !empty($row[1]) ? trim($row[1]) : null,
-                'employee_type_code' => !empty($row[2]) ? strtolower(trim($row[2])) : 'employee',
+                'front_title' => !empty($row[0]) ? trim($row[0]) : null,
+                'name' => trim($row[1]),
+                'back_title' => !empty($row[2]) ? trim($row[2]) : null,
+                'email' => !empty($row[3]) ? trim($row[3]) : null,
+                'employee_type_code' => !empty($row[4]) ? strtolower(trim($row[4])) : 'employee',
                 'unit' => $unitCode,
-                'gender' => !empty($row[4]) ? trim($row[4]) : 'Male',
-                'birth_place' => !empty($row[5]) ? trim($row[5]) : null,
-                'birth_date' => !empty($row[6]) ? trim($row[6]) : null,
-                'nik' => !empty($row[7]) ? trim($row[7]) : null,
-                'niy' => !empty($row[8]) ? trim($row[8]) : null,
-                'nuptk' => !empty($row[9]) ? trim($row[9]) : null,
-                'no_ukg' => !empty($row[10]) ? trim($row[10]) : null,
-                'nrg' => !empty($row[11]) ? trim($row[11]) : null,
-                'pangkat_golongan' => !empty($row[12]) ? trim($row[12]) : null,
-                'last_education' => !empty($row[13]) ? trim($row[13]) : null,
-                'major' => !empty($row[14]) ? trim($row[14]) : null,
-                'position' => !empty($row[15]) ? trim($row[15]) : null,
-                'additional_position' => !empty($row[16]) ? trim($row[16]) : null,
-                'task_start_date' => !empty($row[17]) ? trim($row[17]) : null,
-                'employment_status' => !empty($row[18]) ? trim($row[18]) : null,
-                'appointment_date' => !empty($row[19]) ? trim($row[19]) : null,
-                'last_sk_date' => !empty($row[20]) ? trim($row[20]) : null,
-                'last_sk_number' => !empty($row[21]) ? trim($row[21]) : null,
-                'work_period' => !empty($row[22]) ? trim($row[22]) : null,
-                'address' => !empty($row[23]) ? trim($row[23]) : null,
-                'phone' => !empty($row[24]) ? trim($row[24]) : null,
-                'notes' => !empty($row[25]) ? trim($row[25]) : null,
-                'zkteco_uid' => !empty($row[26]) ? trim($row[26]) : null,
-                'status' => !empty($row[27]) ? trim($row[27]) : 'Active',
+                'gender' => $gender,
+                'birth_place' => !empty($row[7]) ? trim($row[7]) : null,
+                'birth_date' => !empty($row[8]) ? (date('Y-m-d', strtotime(trim($row[8]))) ?: null) : null,
+                'nik' => !empty($row[9]) ? trim($row[9]) : null,
+                'niy' => !empty($row[10]) ? trim($row[10]) : null,
+                'nuptk' => !empty($row[11]) ? trim($row[11]) : null,
+                'no_ukg' => !empty($row[12]) ? trim($row[12]) : null,
+                'nrg' => !empty($row[13]) ? trim($row[13]) : null,
+                'pangkat_golongan' => !empty($row[14]) ? trim($row[14]) : null,
+                'last_education' => !empty($row[15]) ? trim($row[15]) : null,
+                'major' => !empty($row[16]) ? trim($row[16]) : null,
+                'position' => !empty($row[17]) ? trim($row[17]) : null,
+                'additional_position' => !empty($row[18]) ? trim($row[18]) : null,
+                'task_start_date' => !empty($row[19]) ? (date('Y-m-d', strtotime(trim($row[19]))) ?: null) : null,
+                'employment_status' => !empty($row[20]) ? trim($row[20]) : null,
+                'appointment_date' => !empty($row[21]) ? (date('Y-m-d', strtotime(trim($row[21]))) ?: null) : null,
+                'last_sk_date' => !empty($row[22]) ? (date('Y-m-d', strtotime(trim($row[22]))) ?: null) : null,
+                'last_sk_number' => !empty($row[23]) ? trim($row[23]) : null,
+                'work_period' => !empty($row[24]) ? trim($row[24]) : null,
+                'address' => !empty($row[25]) ? trim($row[25]) : null,
+                'phone' => !empty($row[26]) ? trim($row[26]) : null,
+                'notes' => !empty($row[27]) ? trim($row[27]) : null,
+                'zkteco_uid' => !empty($row[28]) ? trim($row[28]) : null,
+                'status' => $status,
             ];
 
             $req = Http::withHeaders([

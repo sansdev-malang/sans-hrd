@@ -134,7 +134,7 @@
                 <h5 class="font-bold mb-1">Panduan Pengisian Jadwal (Roster)</h5>
                 <ul class="list-disc pl-4 space-y-1">
                     <li><strong>Mengisi Shift:</strong> Klik pada sel tanggal yang ingin diisi. Sel akan berganti shift secara berurutan sesuai dengan daftar di "Tampilkan Shift".</li>
-                    <li><strong>Meliburkan Hari (X):</strong> Klik terus pada sel hingga muncul tanda <strong>"X"</strong>. Saat disimpan, hari tersebut akan dicatat sebagai libur/kosong.</li>
+                    <li><strong>Meliburkan Hari (OFF):</strong> Klik terus pada sel hingga muncul tanda <strong>"OFF"</strong>. Saat disimpan, hari tersebut akan dicatat sebagai libur/kosong.</li>
                     <li><strong>Hari Minggu:</strong> Sudah otomatis berwarna merah muda sebagai penanda hari libur, Anda tidak perlu mengisinya kecuali jika ada shift khusus.</li>
                 </ul>
             </div>
@@ -154,7 +154,7 @@
                 
                 <!-- Legend Libur / Kosong -->
                 <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800">
-                    <div class="px-1.5 rounded-sm bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700 text-[10px] font-bold shadow-sm">X</div>
+                    <div class="px-1.5 rounded-sm bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700 text-[10px] font-bold shadow-sm">OFF</div>
                     <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Libur / Kosong</span>
                 </div>
             </div>
@@ -240,7 +240,7 @@
                                                 @foreach($shifts as $shift)
                                                     <option value="{{ $shift->id }}" {{ $shiftId == $shift->id ? 'selected' : '' }}>{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</option>
                                                 @endforeach
-                                                <option value="OFF">X</option>
+                                                <option value="OFF">OFF</option>
                                             </select>
                                             
                                             <span x-text="getCellCode('{{ $empId }}', {{ $d }}, '{{ $shiftId }}')" class="text-[10px] font-bold"></span>
@@ -334,15 +334,13 @@
             getCellCode(empId, day, initialVal) {
                 // Reactive dependency
                 const val = this.cellsData[empId + '_' + day] !== undefined ? this.cellsData[empId + '_' + day] : initialVal;
-                if (!val) return '-';
-                if (val === 'OFF') return 'X';
+                if (!val || val === 'OFF') return 'OFF';
                 return shiftsData[val]?.code || '-';
             },
 
             getCellColor(empId, day, initialVal, isWeekend) {
                 const val = this.cellsData[empId + '_' + day] !== undefined ? this.cellsData[empId + '_' + day] : initialVal;
-                if (!val) return isWeekend ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600' : 'bg-transparent hover:bg-slate-50 dark:hover:bg-slate-900';
-                if (val === 'OFF') return 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+                if (!val || val === 'OFF') return 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
                 return shiftsData[val]?.color || '';
             },
 

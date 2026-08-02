@@ -990,16 +990,20 @@ class EmployeeWorkingShiftController extends Controller
                     }
                 }
                 
-                if ($isWeekend && !$shiftCode) {
+                if (!$shiftCode) {
+                    $shiftCode = 'OFF';
+                    $bgHex = 'FFE2E8F0'; // slate-200
+                    $textHex = 'FF334155'; // slate-700
+                }
+                
+                if ($isWeekend && $shiftCode === 'OFF') {
                     $bgHex = 'FFFEE2E2'; // rose-50
                     $textHex = 'FFE11D48'; // rose-600
                 }
                 
                 $sheet->setCellValue($colLetter . $row, $shiftCode);
-                if ($shiftCode || $isWeekend) {
-                    $sheet->getStyle($colLetter . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($bgHex);
-                    $sheet->getStyle($colLetter . $row)->getFont()->getColor()->setARGB($textHex);
-                }
+                $sheet->getStyle($colLetter . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($bgHex);
+                $sheet->getStyle($colLetter . $row)->getFont()->getColor()->setARGB($textHex);
                 $sheet->getStyle($colLetter . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $colIdx++;
             }

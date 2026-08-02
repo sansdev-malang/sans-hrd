@@ -142,16 +142,27 @@ class BonusSchemaController extends Controller
             ];
         })->toArray();
 
+        if ($units->isEmpty()) {
+            return;
+        }
+
+        $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($units, $schemas) {
+            return $units->map(function ($unit) use ($pool, $schemas) {
+                return $pool->as($unit->id)
+                    ->withHeaders([
+                        'X-API-TOKEN' => $unit->api_token,
+                        'Accept' => 'application/json',
+                    ])->timeout(5)->post(rtrim($unit->api_url, '/') . '/sync/bonus-schemas', [
+                        'schemas' => $schemas
+                    ]);
+            });
+        });
+
         foreach ($units as $unit) {
-            try {
-                Http::withHeaders([
-                    'X-API-TOKEN' => $unit->api_token,
-                    'Accept' => 'application/json',
-                ])->post(rtrim($unit->api_url, '/') . '/sync/bonus-schemas', [
-                    'schemas' => $schemas
-                ]);
-            } catch (\Exception $e) {
-                Log::error("Failed to sync bonus schemas to unit {$unit->name}: " . $e->getMessage());
+            $response = $responses[$unit->id] ?? null;
+            if (!$response || !$response->successful()) {
+                $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
+                Log::error("Failed to sync bonus schemas to unit {$unit->name}. Status: {$status}");
             }
         }
     }

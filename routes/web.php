@@ -11,6 +11,8 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     // Distributed Employee CRUD
     Route::get('employees/download-template', [\App\Http\Controllers\EmployeeController::class, 'downloadTemplate'])->name('employees.download-template');
     Route::post('employees/import', [\App\Http\Controllers\EmployeeController::class, 'import'])->name('employees.import');
+    Route::get('employees/export/excel', [\App\Http\Controllers\EmployeeController::class, 'exportExcel'])->name('employees.export.excel');
+    Route::get('employees/export/pdf', [\App\Http\Controllers\EmployeeController::class, 'exportPdf'])->name('employees.export.pdf');
     Route::get('employees', [\App\Http\Controllers\EmployeeController::class, 'index'])->name('employees.index');
     Route::get('employees/create', [\App\Http\Controllers\EmployeeController::class, 'create'])->name('employees.create');
     Route::get('employees/generate-uid/{unitId}', [\App\Http\Controllers\EmployeeController::class, 'generateUid'])->name('employees.generate-uid');

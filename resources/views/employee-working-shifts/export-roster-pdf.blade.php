@@ -95,8 +95,14 @@
                             }
                             $timestamp = mktime(0,0,0,$month,$d,$year);
                             $isWeekend = (date('D', $timestamp) == 'Sun');
+                            
+                            if(!$shiftCode) {
+                                $shiftCode = 'OFF';
+                                $shiftBg = $isWeekend ? '#fee2e2' : '#e2e8f0';
+                                $shiftText = $isWeekend ? '#e11d48' : '#334155';
+                            }
                         @endphp
-                        <td class="{{ $isWeekend && !$shiftCode ? 'bg-weekend' : '' }}" {!! $shiftBg ? 'style="background-color: '.$shiftBg.'; color: '.$shiftText.'; border-color: #333;"' : '' !!}>
+                        <td class="{{ $isWeekend && $shiftCode === 'OFF' ? 'bg-weekend' : '' }}" {!! $shiftBg ? 'style="background-color: '.$shiftBg.'; color: '.$shiftText.'; border-color: #333;"' : '' !!}>
                             <strong>{{ $shiftCode }}</strong>
                         </td>
                     @endfor

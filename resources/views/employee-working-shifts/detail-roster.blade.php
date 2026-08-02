@@ -16,7 +16,7 @@
         }
     @endforeach
 </style>
-<div class="space-y-6" x-data="{ 
+<div class="p-6 space-y-6" x-data="{ 
         openExportModal: false, 
         exportType: 'pdf',
         notes: '',
@@ -127,6 +127,10 @@
                                     @if($shiftCode)
                                         <div class="{{ $shiftColor }} text-[10px] font-bold px-1 py-1 rounded shadow-sm w-full flex items-center justify-center min-h-[28px]">
                                             {{ $shiftCode }}
+                                        </div>
+                                    @else
+                                        <div class="bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-[10px] font-bold px-1 py-1 rounded shadow-sm w-full flex items-center justify-center min-h-[28px]">
+                                            OFF
                                         </div>
                                     @endif
                                 </td>
