@@ -515,7 +515,7 @@ class EmployeeController extends Controller
             'S1 Pendidikan Matematika', 'Matematika', 'Guru Kelas', 'Wali Kelas',
             '2010-07-01', 'GTY', '2010-07-01',
             '2020-01-01', '012/SK/SANS/2020', '10 Tahun 6 Bulan',
-            'Jl. Veteran No. 123, Malang', '081234567890', 'Guru berprestasi tingkat provinsi', '1001', 'Active'
+            'Jl. Veteran No. 123, Malang', '081234567890', 'Guru berprestasi tingkat provinsi', '', 'Active'
         ];
 
         foreach ($headers as $colIndex => $header) {
@@ -688,5 +688,6 @@ class EmployeeController extends Controller
         ]);
     }
 }
+
 
 
