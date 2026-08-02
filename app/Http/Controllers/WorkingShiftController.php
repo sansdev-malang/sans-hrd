@@ -15,7 +15,7 @@ class WorkingShiftController extends Controller
      */
     public function index()
     {
-        $shifts = WorkingShift::with('details')->orderBy('name')->get();
+        $shifts = WorkingShift::with('details')->latest()->get();
         return view('working-shifts.index', compact('shifts'));
     }
 
