@@ -88,4 +88,19 @@ class ZktecoDeviceController extends Controller
         return redirect()->back()
             ->with('error', $result['message']);
     }
+
+    /**
+     * Force ADMS device to push all logs by queueing a DATA UPDATE ATTLOG command.
+     */
+    public function forceAdms(ZktecoDevice $zktecoDevice)
+    {
+        \App\Models\AdmsCommand::create([
+            'zkteco_device_id' => $zktecoDevice->id,
+            'command_string' => 'DATA UPDATE ATTLOG',
+            'status' => 'pending'
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Perintah "Force ADMS" telah dikirim. Mesin akan segera mem-push semua data absen lamanya secara otomatis dalam beberapa menit ke depan.');
+    }
 }

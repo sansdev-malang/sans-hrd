@@ -144,6 +144,12 @@
                                                 <i data-lucide="download-cloud" class="w-4 h-4"></i>
                                             </button>
                                         </form>
+                                        <form action="{{ route('zkteco-devices.force-adms', $device->id) }}" method="POST" onsubmit="return confirm('Paksa mesin ini memuntahkan ulang semua data absennya via ADMS?')">
+                                            @csrf
+                                            <button type="submit" class="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-450 hover:text-blue-750 transition-colors cursor-pointer" title="Paksa Sinkron Ulang ADMS">
+                                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                            </button>
+                                        </form>
                                         <button @click="openEditModal({{ $device }})" class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer" title="Edit Mesin">
                                             <i data-lucide="edit" class="w-4 h-4"></i>
                                         </button>
