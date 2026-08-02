@@ -149,6 +149,7 @@ class AttendanceLogController extends Controller
                 }
 
                 $hasShiftToday = false;
+                $isOffShift = false;
                 $shiftStartTime = null;
                 $shiftEndTime = null;
                 $shiftKey = $unit . '_' . $empId;
@@ -159,10 +160,14 @@ class AttendanceLogController extends Controller
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
-                            if ($detail && !$detail->is_off) {
-                                $hasShiftToday = true;
-                                $shiftStartTime = $detail->start_time;
-                                $shiftEndTime = $detail->end_time;
+                            if ($detail) {
+                                if ($detail->is_off) {
+                                    $isOffShift = true;
+                                } else {
+                                    $hasShiftToday = true;
+                                    $shiftStartTime = $detail->start_time;
+                                    $shiftEndTime = $detail->end_time;
+                                }
                             }
                             break;
                         }
@@ -238,6 +243,8 @@ class AttendanceLogController extends Controller
                     } else {
                         $dailyDetails[$dateStr] = ['status' => 'Alfa'];
                     }
+                } elseif ($isOffShift) {
+                    $dailyDetails[$dateStr] = ['status' => 'Off'];
                 }
 
                 $currentDate->addDay();
@@ -392,6 +399,9 @@ class AttendanceLogController extends Controller
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE));
                     } elseif ($detail['status'] === 'Libur') {
                         $cellValue = 'L';
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
+                    } elseif ($detail['status'] === 'Off') {
+                        $cellValue = 'OFF';
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
                     }
                 } else {
