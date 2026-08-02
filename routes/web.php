@@ -75,6 +75,9 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::post('zkteco-devices/{zktecoDevice}/force-adms', [\App\Http\Controllers\ZktecoDeviceController::class, 'forceAdms'])->name('zkteco-devices.force-adms');
     Route::resource('zkteco-devices', \App\Http\Controllers\ZktecoDeviceController::class);
 
+    // Raw Attendance Logs
+    Route::get('raw-attendance-logs', [\App\Http\Controllers\RawAttendanceLogController::class, 'index'])->name('raw-attendance-logs.index');
+
     // Attendance Logs
     Route::post('attendance-logs/sync', [\App\Http\Controllers\AttendanceLogController::class, 'sync'])->name('attendance-logs.sync');
     Route::delete('attendance-logs/clear', [\App\Http\Controllers\AttendanceLogController::class, 'clear'])->name('attendance-logs.clear');
