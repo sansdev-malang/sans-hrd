@@ -368,7 +368,7 @@ class AttendanceLogController extends Controller
         $colIndex = 3; // C
         foreach ($dates as $dateObj) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
-            $sheet->setCellValue($colLetter . '1', $dateObj->format('d/M'));
+            $sheet->setCellValue($colLetter . '1', $dateObj->translatedFormat('D') . ", " . $dateObj->format('d/M'));
             $sheet->getColumnDimension($colLetter)->setWidth(12);
             $colIndex++;
         }
