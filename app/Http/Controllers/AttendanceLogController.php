@@ -370,6 +370,9 @@ class AttendanceLogController extends Controller
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
             $sheet->setCellValue($colLetter . '1', $dateObj->translatedFormat('D') . ", " . $dateObj->format('d/M'));
             $sheet->getColumnDimension($colLetter)->setWidth(12);
+            if ($dateObj->isSunday()) {
+                $sheet->getStyle($colLetter . '1')->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
+            }
             $colIndex++;
         }
 
@@ -424,8 +427,8 @@ class AttendanceLogController extends Controller
                     }
                 } else {
                     if ($date->isSunday()) {
-                        $cellValue = 'L';
-                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
+                        $cellValue = '-';
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
                     }
                 }
                 
