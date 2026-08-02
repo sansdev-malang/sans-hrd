@@ -92,7 +92,7 @@
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                     <div class="flex items-center gap-2">
                         <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
-                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">Menunggu Persetujuan Cuti</h3>
+                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">Menunggu Persetujuan Izin/Cuti</h3>
                     </div>
                     <a href="{{ route('leave-approvals.index') }}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Lihat Semua</a>
                 </div>
@@ -100,7 +100,7 @@
                     <div class="divide-y divide-slate-100 dark:divide-slate-800/60">
                         @if(isset($pendingLeaves) && count($pendingLeaves) > 0)
                             @foreach($pendingLeaves as $leave)
-                                <div class="p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                                <a href="{{ route('leave-approvals.index') }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
                                     <div class="flex items-center justify-between mb-1">
                                         <p class="font-semibold text-sm text-slate-900 dark:text-slate-100">{{ $leave->employee_name ?? 'Pegawai' }}</p>
                                         <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">Pending</span>
@@ -109,11 +109,11 @@
                                         Mengajukan <span class="font-semibold">{{ $leave->type }}</span> pada {{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}
                                     </p>
                                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 italic"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i>{{ $leave->reason }}</p>
-                                </div>
+                                </a>
                             @endforeach
                         @else
                             <div class="p-8 text-center text-slate-400">
-                                <p class="text-sm">Tidak ada pengajuan cuti yang menunggu persetujuan.</p>
+                                <p class="text-sm">Tidak ada pengajuan izin/cuti yang menunggu persetujuan.</p>
                             </div>
                         @endif
                     </div>
