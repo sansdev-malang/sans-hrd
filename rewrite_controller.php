@@ -1,4 +1,7 @@
 <?php
+// Script to generate the refactored AttendanceLogController
+$code = <<< 'EOD'
+<?php
 
 namespace App\Http\Controllers;
 
@@ -119,7 +122,7 @@ class AttendanceLogController extends Controller
             
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) to 6 (Sat)
+                $dayOfWeek = $currentDate->dayOfWeekIso;
 
                 if (in_array($dateStr, $holidayDates)) {
                     $dailyDetails[$dateStr] = ['status' => 'Libur'];
@@ -434,3 +437,6 @@ class AttendanceLogController extends Controller
         return redirect()->route('attendance-logs.index')->with('success', 'Semua log absensi berhasil dikosongkan.');
     }
 }
+EOD;
+file_put_contents('c:\Users\SERVER SANS\SANS-PROJECT\sans-hrd\app\Http\Controllers\AttendanceLogController.php', $code);
+echo "done";

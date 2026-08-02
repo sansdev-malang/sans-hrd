@@ -191,17 +191,17 @@
                                         @elseif($detail['status'] === 'Alfa')
                                             <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 font-bold text-xs" title="Alfa">-</div>
                                         @elseif($detail['status'] === 'Libur')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-100 dark:bg-slate-800/50 text-slate-400 font-bold text-xs" title="Libur">-</div>
+                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-100 dark:bg-slate-800/50 text-slate-400 font-bold text-[10px]" title="Libur">OFF</div>
                                         @elseif($detail['status'] === 'Cuti/Izin')
                                             <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 font-bold text-[9px]" title="{{ $detail['leave_type'] ?? 'Izin/Cuti' }}">{{ $detail['leave_type'] ?? 'IZIN' }}</div>
                                         @else
-                                            <div class="text-xs text-slate-300">-</div>
+                                            <div class="text-[10px] font-bold text-slate-300 dark:text-slate-600">OFF</div>
                                         @endif
                                     @else
                                         @if($date->isWeekend())
-                                            <div class="mx-auto flex items-center justify-center text-red-200 dark:text-red-900/30 font-bold text-xs" title="Akhir Pekan">-</div>
+                                            <div class="mx-auto flex items-center justify-center text-red-300 dark:text-red-900/50 font-bold text-[10px]" title="Akhir Pekan">OFF</div>
                                         @else
-                                            <div class="mx-auto flex items-center justify-center text-slate-100 dark:text-slate-800/50 font-bold text-[10px]">-</div>
+                                            <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700/50 font-bold text-[10px]">OFF</div>
                                         @endif
                                     @endif
                                 </td>
