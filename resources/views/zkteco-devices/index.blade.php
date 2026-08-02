@@ -138,7 +138,12 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-center gap-2">
-
+                                        <form action="{{ route('zkteco-devices.pull', $device->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-450 hover:text-emerald-750 transition-colors cursor-pointer" title="Tarik Log Manual">
+                                                <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                                            </button>
+                                        </form>
                                         <button @click="openEditModal({{ $device }})" class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer" title="Edit Mesin">
                                             <i data-lucide="edit" class="w-4 h-4"></i>
                                         </button>
