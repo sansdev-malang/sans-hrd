@@ -263,6 +263,10 @@ class AttendanceLogController extends Controller
                     }
                 } elseif ($isOffShift) {
                     $dailyDetails[$dateStr] = ['status' => 'Off'];
+                } else {
+                    if ($dayOfWeek == 0) { // Sunday
+                        $dailyDetails[$dateStr] = ['status' => 'Libur'];
+                    }
                 }
 
                 $currentDate->addDay();

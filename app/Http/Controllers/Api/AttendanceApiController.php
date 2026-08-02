@@ -255,6 +255,10 @@ class AttendanceApiController extends Controller
                     }
                 } elseif ($isOffShift) {
                     $dailyDetails[$dateStr] = ['status' => 'Off'];
+                } else {
+                    if ($dayOfWeek == 7) { // Sunday (dayOfWeekIso returns 7 for Sunday)
+                        $dailyDetails[$dateStr] = ['status' => 'Libur'];
+                    }
                 }
 
                 $currentDate->addDay();
