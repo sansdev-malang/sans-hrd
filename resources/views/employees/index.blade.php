@@ -351,7 +351,7 @@
                                     </template>
                                 </div>
                                 <div class="space-y-1">
-                                    <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50" x-text="selectedEmp ? selectedEmp.full_name : ''"></h4>
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50" x-text="selectedEmp ? selectedEmp.name : ''"></h4>
                                     <p class="text-slate-500 dark:text-slate-400 font-mono text-[11px]" x-text="selectedEmp ? 'NIP/NUPTK: ' + (selectedEmp.nik_nuptk || '-') : ''"></p>
                                     <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 uppercase" x-text="selectedEmp ? selectedEmp.position : ''"></span>
                                 </div>
@@ -794,7 +794,7 @@
                                         <!-- Nama Lengkap -->
                                         <div class="md:col-span-2">
                                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
-                                            <input type="text" name="name" required :value="selectedEmp ? selectedEmp.name : ''" placeholder="Eko Wibowo"
+                                            <input type="text" name="name" required :value="selectedEmp ? selectedEmp.raw_name : ''" placeholder="Eko Wibowo"
                                                 class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         </div>
                                         <!-- Gelar Belakang -->
@@ -1010,7 +1010,7 @@
                         </div>
                         <h3 class="text-base font-bold text-slate-900 dark:text-slate-50 mb-2" id="delete-modal-title">Hapus Pegawai?</h3>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-                            Anda yakin ingin menghapus <strong class="text-slate-700 dark:text-slate-300" x-text="selectedEmp ? selectedEmp.full_name : ''"></strong> dari unit <span class="font-semibold text-slate-700 dark:text-slate-300" x-text="selectedEmp ? selectedEmp.unit_name : ''"></span>? Data yang telah dihapus tidak dapat dikembalikan.
+                            Anda yakin ingin menghapus <strong class="text-slate-700 dark:text-slate-300" x-text="selectedEmp ? selectedEmp.name : ''"></strong> dari unit <span class="font-semibold text-slate-700 dark:text-slate-300" x-text="selectedEmp ? selectedEmp.unit_name : ''"></span>? Data yang telah dihapus tidak dapat dikembalikan.
                         </p>
 
                         <div class="flex justify-center gap-3">
@@ -1181,5 +1181,6 @@
     }
 </style>
 </x-admin-layout>
+
 
 
