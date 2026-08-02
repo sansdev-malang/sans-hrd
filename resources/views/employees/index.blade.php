@@ -544,11 +544,26 @@
                                         </select>
                                     </div>
 
-                                    <!-- Nama Lengkap -->
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="name" required placeholder="Contoh: Drs. Eko Wibowo, M.Pd"
-                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                    <!-- Gelar & Nama -->
+                                    <div class="col-span-full grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <!-- Gelar Depan -->
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Gelar Depan</label>
+                                            <input type="text" name="front_title" placeholder="Dr., Ir."
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <!-- Nama Lengkap -->
+                                        <div class="md:col-span-2">
+                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="name" required placeholder="Eko Wibowo"
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <!-- Gelar Belakang -->
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Gelar Belakang</label>
+                                            <input type="text" name="back_title" placeholder="S.Pd., M.Kom."
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        </div>
                                     </div>
 
                                     <!-- Email -->
@@ -768,11 +783,26 @@
                                 @method('PUT')
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <!-- Nama Lengkap -->
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="name" required :value="selectedEmp ? selectedEmp.name : ''"
-                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                    <!-- Gelar & Nama -->
+                                    <div class="col-span-full grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <!-- Gelar Depan -->
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Gelar Depan</label>
+                                            <input type="text" name="front_title" :value="selectedEmp ? selectedEmp.front_title : ''" placeholder="Dr., Ir."
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <!-- Nama Lengkap -->
+                                        <div class="md:col-span-2">
+                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="name" required :value="selectedEmp ? selectedEmp.name : ''" placeholder="Eko Wibowo"
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <!-- Gelar Belakang -->
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Gelar Belakang</label>
+                                            <input type="text" name="back_title" :value="selectedEmp ? selectedEmp.back_title : ''" placeholder="S.Pd., M.Kom."
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        </div>
                                     </div>
 
                                     <!-- Email -->
@@ -1151,3 +1181,4 @@
     }
 </style>
 </x-admin-layout>
+

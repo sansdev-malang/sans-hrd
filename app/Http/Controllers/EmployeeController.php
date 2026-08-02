@@ -157,7 +157,9 @@ class EmployeeController extends Controller
                 $request->validate([
             'school_unit_id' => 'required|exists:school_units,id',
             'employee_type_code' => 'required|string',
+            'front_title' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
+            'back_title' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'gender' => 'required|in:Male,Female,L,P',
             'birth_place' => 'nullable|string|max:255',
@@ -323,7 +325,9 @@ class EmployeeController extends Controller
 
                 $request->validate([
             'employee_type_code' => 'required|string',
+            'front_title' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
+            'back_title' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'gender' => 'required|in:Male,Female,L,P',
             'birth_place' => 'nullable|string|max:255',
@@ -495,7 +499,7 @@ class EmployeeController extends Controller
 
         // Headers for 28 fields + unit
         $headers = [
-            'Nama Lengkap', 'Email', 'Kode Tipe Pegawai (teacher/employee)', 'Unit Sekolah (paud/sd/smp)',
+            'Gelar Depan', 'Nama Lengkap', 'Gelar Belakang', 'Email', 'Kode Tipe Pegawai (teacher/employee)', 'Unit Sekolah (paud/sd/smp)',
             'Jenis Kelamin (Male/Female)', 'Tempat Lahir', 'Tanggal Lahir (YYYY-MM-DD)', 
             'NIK', 'NIY', 'NUPTK', 'No UKG', 'NRG', 'Pangkat/Golongan', 
             'Pendidikan Terakhir', 'Jurusan', 'Jabatan Utama', 'Jabatan Tambahan', 
@@ -505,7 +509,7 @@ class EmployeeController extends Controller
         ];
 
         $example = [
-            'Budi Santoso', 'budi@example.com', 'teacher', 'sd',
+            'Dr.', 'Budi Santoso', 'S.Pd.', 'budi@example.com', 'teacher', 'sd',
             'Male', 'Malang', '1985-01-01',
             '3573010101850001', '12345678', '198501012010121002', '201501234567', '-', 'Penata Muda / III.a',
             'S1 Pendidikan Matematika', 'Matematika', 'Guru Kelas', 'Wali Kelas',
@@ -684,3 +688,5 @@ class EmployeeController extends Controller
         ]);
     }
 }
+
+
