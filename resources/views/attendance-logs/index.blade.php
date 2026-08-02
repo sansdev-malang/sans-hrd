@@ -189,7 +189,7 @@
                                                 <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500" title="Pulang">{{ $detail['check_out'] ?? '-' }}</span>
                                             </div>
                                         @elseif($detail['status'] === 'Alfa')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 font-bold text-xs" title="Alfa">-</div>
+                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 font-bold text-xs" title="Alfa">A</div>
                                         @elseif($detail['status'] === 'Libur')
                                             <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-100 dark:bg-slate-800/50 text-slate-400 font-bold text-xs" title="Libur">-</div>
                                         @elseif($detail['status'] === 'Off')
