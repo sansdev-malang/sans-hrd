@@ -80,16 +80,18 @@ class AttendanceApiController extends Controller
             $assignedShifts[$key][] = $s;
         }
 
+        // Fetch logs up to next day noon to catch night shift clock outs
         $logsData = \App\Models\AttendanceLog::whereBetween('timestamp', [
             $startDate->format('Y-m-d 00:00:00'),
-            $endDate->format('Y-m-d 23:59:59')
+            $endDate->copy()->addDay()->format('Y-m-d 12:00:00')
         ])->get();
 
         $attendanceLogs = [];
         foreach ($logsData as $log) {
-            $date = substr($log->timestamp, 0, 10);
-            $key = $log->uid . '_' . $date;
-            $attendanceLogs[$key][] = $log;
+            $attendanceLogs[(string)$log->uid][] = $log->timestamp;
+        }
+        foreach ($attendanceLogs as &$ulogs) {
+            sort($ulogs);
         }
 
         $reports = [];
@@ -137,61 +139,122 @@ class AttendanceApiController extends Controller
                 }
 
                 $hasShiftToday = false;
+                $isOffShift = false;
                 $shiftStartTime = null;
+                $shiftEndTime = null;
                 $shiftKey = $unit . '_' . $empId;
+                
+                $isShiftWorker = false;
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
+                        if ($assignment->workingShift->is_shift) {
+                            $isShiftWorker = true;
+                        }
+                        
                         $assignStartDate = substr($assignment->start_date, 0, 10);
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
-                            if ($detail && !$detail->is_off) {
-                                $hasShiftToday = true;
-                                $shiftStartTime = $detail->start_time;
+                            if ($detail) {
+                                if ($detail->is_off) {
+                                    $isOffShift = true;
+                                } else {
+                                    $hasShiftToday = true;
+                                    $shiftStartTime = $detail->start_time;
+                                    $shiftEndTime = $detail->end_time;
+                                }
                             }
                             break;
                         }
                     }
                 }
+                
+                if ($isShiftWorker && !$hasShiftToday && !$isOffShift) {
+                    $isOffShift = true;
+                }
 
                 if ($hasShiftToday) {
-                    $logKey = $uid . '_' . $dateStr;
-                    if (isset($attendanceLogs[$logKey])) {
-                        $logsForDay = collect($attendanceLogs[$logKey])->sortBy('timestamp')->values();
-                        $firstCheckIn = $logsForDay->first();
-                        $lastCheckOut = $logsForDay->last();
-                        
-                        $checkInTime = substr($firstCheckIn->timestamp, 11, 5);
-                        $checkOutTime = null;
-                        
-                        if ($logsForDay->count() > 1) {
-                            $firstCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
-                            $lastCarbon = \Carbon\Carbon::parse($lastCheckOut->timestamp);
-                            if ($firstCarbon->diffInHours($lastCarbon) >= 3 || (int)$lastCarbon->format('H') >= 12) {
-                                $checkOutTime = substr($lastCheckOut->timestamp, 11, 5);
+                    $isNightShift = $shiftStartTime > $shiftEndTime;
+                    $expectedIn = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
+                    $expectedOut = \Carbon\Carbon::parse($dateStr . ' ' . $shiftEndTime);
+                    if ($isNightShift) {
+                        $expectedOut->addDay();
+                    }
+
+                    $inStart = $expectedIn->copy()->subHours(6);
+                    $inEnd = $expectedIn->copy()->addHours(6);
+                    $outStart = $expectedOut->copy()->subHours(6);
+                    $outEnd = $expectedOut->copy()->addHours(6);
+
+                    $checkInLog = null;
+                    $checkOutLog = null;
+
+                    $userLogs = $attendanceLogs[(string)$uid] ?? [];
+
+                    foreach ($userLogs as $tsStr) {
+                        $ts = \Carbon\Carbon::parse($tsStr);
+                        if ($ts->between($inStart, $inEnd)) {
+                            if (!$checkInLog || $ts < \Carbon\Carbon::parse($checkInLog)) {
+                                $checkInLog = $tsStr;
                             }
                         }
-                        
-                        // Check if late
+                        if ($ts->between($outStart, $outEnd)) {
+                            if (!$checkOutLog || $ts > \Carbon\Carbon::parse($checkOutLog)) {
+                                $checkOutLog = $tsStr;
+                            }
+                        }
+                    }
+
+                    if ($checkInLog || $checkOutLog) {
                         $isLate = false;
-                        if ($shiftStartTime && $checkInTime) {
-                            $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
-                            $actualIn = \Carbon\Carbon::parse($dateStr . ' ' . $checkInTime);
-                            if ($actualIn > $expectedStart) {
+                        if ($checkInLog) {
+                            if (\Carbon\Carbon::parse($checkInLog) > $expectedIn) {
                                 $isLate = true;
+                            }
+                        }
+
+                        if ($checkInLog && $checkOutLog && $checkInLog === $checkOutLog) {
+                            $diffIn = \Carbon\Carbon::parse($checkInLog)->diffInMinutes($expectedIn);
+                            $diffOut = \Carbon\Carbon::parse($checkOutLog)->diffInMinutes($expectedOut);
+                            if ($diffIn < $diffOut) {
+                                $checkOutLog = null; 
+                            } else {
+                                $checkInLog = null; 
+                            }
+                        }
+
+                        if ($checkInLog && $checkOutLog && $checkInLog !== $checkOutLog) {
+                            if (\Carbon\Carbon::parse($checkInLog)->diffInHours(\Carbon\Carbon::parse($checkOutLog)) < 2) {
+                                $diffIn = \Carbon\Carbon::parse($checkInLog)->diffInMinutes($expectedIn);
+                                $diffOut = \Carbon\Carbon::parse($checkOutLog)->diffInMinutes($expectedOut);
+                                if ($diffIn < $diffOut) {
+                                    $checkOutLog = null;
+                                } else {
+                                    $checkInLog = null;
+                                }
                             }
                         }
 
                         $dailyDetails[$dateStr] = [
                             'status' => 'Hadir',
-                            'check_in' => $checkInTime,
-                            'check_out' => $checkOutTime,
+                            'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
+                            'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
                             'is_late' => $isLate
                         ];
                     } else {
-                        $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                        // Determine if it is actually Alfa or if the shift hasn't started yet
+                        $now = \Carbon\Carbon::now('Asia/Jakarta');
+                        $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                        
+                        if ($now->lessThan($shiftStartDateTime)) {
+                            $dailyDetails[$dateStr] = ['status' => 'Pending'];
+                        } else {
+                            $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                        }
                     }
+                } elseif ($isOffShift) {
+                    $dailyDetails[$dateStr] = ['status' => 'Off'];
                 }
 
                 $currentDate->addDay();
