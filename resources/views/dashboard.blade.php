@@ -129,9 +129,10 @@
                     </div>
                 </div>
                 <div class="p-5 flex-1 overflow-hidden flex flex-col">
-                    <div class="border-l-2 border-slate-200 dark:border-slate-800 ml-2 space-y-5 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar flex-1">
-                        
-                        @php
+                    <div class="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar flex-1">
+                        <div class="border-l-2 border-slate-200 dark:border-slate-800 ml-2 space-y-5">
+                            
+                            @php
                             $recentAtts = collect($attendanceMap)
                                 ->filter(fn($att) => isset($att['status']) && $att['status'] == 'Present' && isset($att['clock_in']))
                                 ->sortByDesc(fn($att) => $att['last_activity'] ?? $att['clock_in']);
@@ -187,6 +188,7 @@
                             </div>
                         @endforelse
 
+                        </div>
                     </div>
                 </div>
             </div>
