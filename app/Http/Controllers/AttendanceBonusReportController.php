@@ -500,7 +500,7 @@ class AttendanceBonusReportController extends Controller
             $searchStr = '_Pencarian_' . preg_replace('/[^a-zA-Z0-9]+/', '_', $searchQuery);
         }
         
-        $baseFileName = "Rekapan_Bonus_{$unitName}_{$month}{$searchStr}";
+        $baseFileName = "Rekap_Bonus_{$unitName}_{$month}{$searchStr}";
 
         if ($format === 'pdf') {
             ini_set('memory_limit', '512M');
