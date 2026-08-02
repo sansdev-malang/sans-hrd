@@ -109,7 +109,7 @@ class AttendanceApiController extends Controller
             
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeekIso;
+                $dayOfWeek = $currentDate->dayOfWeek;
 
                 if (in_array($dateStr, $holidayDates)) {
                     $dailyDetails[$dateStr] = ['status' => 'Libur'];
@@ -256,7 +256,7 @@ class AttendanceApiController extends Controller
                 } elseif ($isOffShift) {
                     $dailyDetails[$dateStr] = ['status' => 'Off'];
                 } else {
-                    if ($dayOfWeek == 7) { // Sunday (dayOfWeekIso returns 7 for Sunday)
+                    if ($dayOfWeek == 0) { // Sunday
                         $dailyDetails[$dateStr] = ['status' => 'Libur'];
                     }
                 }
@@ -377,7 +377,7 @@ class AttendanceApiController extends Controller
             $currentDate = $startDate->copy();
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeekIso; // 1 (Mon) - 7 (Sun)
+                $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) - 6 (Sat)
 
                 // Skip Holidays
                 if (in_array($dateStr, $holidayDates)) {
