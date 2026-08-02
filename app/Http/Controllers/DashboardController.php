@@ -32,27 +32,34 @@ class DashboardController extends Controller
         foreach ($logs as $log) {
             $uid = (string)$log->uid;
             $ts = Carbon::parse($log->timestamp);
-            if (!isset($zktecoLogs[$uid])) {
-                $zktecoLogs[$uid] = [
-                    'clock_in' => $ts->format('H:i:s'),
-                    'clock_in_device' => $log->device->name ?? 'Mesin Absen',
-                    'clock_out' => clone $ts, // store temporarily for comparison
-                    'clock_out_device' => $log->device->name ?? 'Mesin Absen',
-                    '_min' => $ts->timestamp,
-                    '_max' => $ts->timestamp,
-                ];
-            } else {
-                if ($ts->timestamp < $zktecoLogs[$uid]['_min']) {
-                    $zktecoLogs[$uid]['_min'] = $ts->timestamp;
-                    $zktecoLogs[$uid]['clock_in'] = $ts->format('H:i:s');
-                    $zktecoLogs[$uid]['clock_in_device'] = $log->device->name ?? 'Mesin Absen';
-                }
-                if ($ts->timestamp > $zktecoLogs[$uid]['_max']) {
-                    $zktecoLogs[$uid]['_max'] = $ts->timestamp;
-                    $zktecoLogs[$uid]['clock_out'] = clone $ts;
-                    $zktecoLogs[$uid]['clock_out_device'] = $log->device->name ?? 'Mesin Absen';
-                }
-            }
+            $zktecoLogs[$uid][] = [
+                'time' => $ts->format('H:i:s'),
+                'device' => $log->device->name ?? 'Mesin Absen',
+                'timestamp' => $ts->timestamp,
+            ];
+        }
+
+        foreach ($zktecoLogs as $uid => &$ulogs) {
+            usort($ulogs, fn($a, $b) => $a['timestamp'] <=> $b['timestamp']);
+        }
+
+        // Fetch shift assignments for yesterday and today
+        $startDate = Carbon::parse($date)->subDay();
+        $endDate = Carbon::parse($date);
+        
+        $shiftsData = \App\Models\EmployeeWorkingShift::with('workingShift.details')
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->where('start_date', '<=', $endDate->format('Y-m-d'))
+                  ->where(function($sq) use ($startDate) {
+                      $sq->whereNull('end_date')
+                         ->orWhere('end_date', '>=', $startDate->format('Y-m-d'));
+                  });
+            })->get();
+            
+        $assignedShifts = [];
+        foreach ($shiftsData as $s) {
+            $key = $s->school_unit_id . '_' . $s->employee_id;
+            $assignedShifts[$key][] = $s;
         }
 
         // We can group the data for display
@@ -76,6 +83,11 @@ class DashboardController extends Controller
 
         $attendanceMap = [];
         
+        $todayStr = Carbon::parse($date)->format('Y-m-d');
+        $yesterdayStr = Carbon::parse($date)->subDay()->format('Y-m-d');
+        $dayOfWeekToday = Carbon::parse($date)->dayOfWeekIso;
+        $dayOfWeekYesterday = Carbon::parse($date)->subDay()->dayOfWeekIso;
+
         foreach ($sdEmployees as $emp) {
             $empId = $emp['id'];
             $unitId = $emp['unit_id'] ?? 0;
@@ -83,19 +95,63 @@ class DashboardController extends Controller
             $uid = isset($emp['zkteco_uid']) ? (string)$emp['zkteco_uid'] : null;
 
             if ($uid && isset($zktecoLogs[$uid])) {
-                $clockIn = $zktecoLogs[$uid]['clock_in'];
-                $clockOut = null;
-                if ($zktecoLogs[$uid]['_max'] > $zktecoLogs[$uid]['_min']) {
-                    $clockOut = $zktecoLogs[$uid]['clock_out']->format('H:i:s');
+                
+                $activeShiftYesterday = null;
+                $activeShiftToday = null;
+
+                if (isset($assignedShifts[$uniqueKey])) {
+                    foreach ($assignedShifts[$uniqueKey] as $assignment) {
+                        $assignStartDate = substr($assignment->start_date, 0, 10);
+                        $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                        
+                        if ($todayStr >= $assignStartDate && (!$assignEndDate || $todayStr <= $assignEndDate)) {
+                            $activeShiftToday = $assignment->workingShift->details->where('day_of_week', $dayOfWeekToday)->first();
+                        }
+                        if ($yesterdayStr >= $assignStartDate && (!$assignEndDate || $yesterdayStr <= $assignEndDate)) {
+                            $activeShiftYesterday = $assignment->workingShift->details->where('day_of_week', $dayOfWeekYesterday)->first();
+                        }
+                    }
+                }
+
+                $empLogs = $zktecoLogs[$uid];
+                $finalClockIn = null;
+                $finalClockInDevice = null;
+                $finalClockOut = null;
+                $finalClockOutDevice = null;
+
+                $isNightShiftYesterday = false;
+                $yesterdayExpectedOut = null;
+                if ($activeShiftYesterday && !$activeShiftYesterday->is_off) {
+                    if ($activeShiftYesterday->start_time > $activeShiftYesterday->end_time) {
+                        $isNightShiftYesterday = true;
+                        $yesterdayExpectedOut = Carbon::parse($date . ' ' . $activeShiftYesterday->end_time);
+                    }
+                }
+
+                foreach ($empLogs as $log) {
+                    $logTime = Carbon::parse($date . ' ' . $log['time']);
+                    
+                    if ($isNightShiftYesterday && $logTime->diffInHours($yesterdayExpectedOut) <= 6 && $logTime->format('H') < 14) {
+                        $finalClockOut = $log['time'];
+                        $finalClockOutDevice = $log['device'];
+                    } else {
+                        if (!$finalClockIn) {
+                            $finalClockIn = $log['time'];
+                            $finalClockInDevice = $log['device'];
+                        } else {
+                            $finalClockOut = $log['time'];
+                            $finalClockOutDevice = $log['device'];
+                        }
+                    }
                 }
 
                 $attendanceMap[$uniqueKey] = [
                     'status' => 'Present',
-                    'clock_in' => $clockIn,
-                    'clock_in_device' => $zktecoLogs[$uid]['clock_in_device'],
-                    'clock_out' => $clockOut,
-                    'clock_out_device' => $clockOut ? $zktecoLogs[$uid]['clock_out_device'] : null,
-                    'last_activity' => $clockOut ?: $clockIn,
+                    'clock_in' => $finalClockIn,
+                    'clock_in_device' => $finalClockInDevice,
+                    'clock_out' => $finalClockOut,
+                    'clock_out_device' => $finalClockOutDevice,
+                    'last_activity' => $finalClockOut ?: $finalClockIn,
                 ];
                 $hadir++;
             } else {

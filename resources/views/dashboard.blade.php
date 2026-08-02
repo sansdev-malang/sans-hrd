@@ -134,8 +134,8 @@
                             
                             @php
                             $recentAtts = collect($attendanceMap)
-                                ->filter(fn($att) => isset($att['status']) && $att['status'] == 'Present' && isset($att['clock_in']))
-                                ->sortByDesc(fn($att) => $att['last_activity'] ?? $att['clock_in']);
+                                ->filter(fn($att) => isset($att['status']) && $att['status'] == 'Present' && (isset($att['clock_in']) || isset($att['clock_out'])))
+                                ->sortByDesc(fn($att) => $att['last_activity'] ?? ($att['clock_out'] ?? $att['clock_in']));
                         @endphp
 
                         @forelse($recentAtts as $uniqueKey => $att)
@@ -166,13 +166,17 @@
                                     <div class="min-w-0">
                                         <p class="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate">{{ $empName }}</p>
                                         <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                                            Hadir <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $att['clock_in'] }}</span>
-                                            @if(isset($att['clock_in_device']))
-                                                <span class="text-slate-400">({{ $att['clock_in_device'] }})</span>
+                                            @if(isset($att['clock_in']))
+                                                Hadir <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $att['clock_in'] }}</span>
+                                                @if(isset($att['clock_in_device']))
+                                                    <span class="text-slate-400">({{ $att['clock_in_device'] }})</span>
+                                                @endif
                                             @endif
                                             
                                             @if(isset($att['clock_out']))
-                                                <span class="mx-1">&bull;</span>
+                                                @if(isset($att['clock_in']))
+                                                    <span class="mx-1">&bull;</span>
+                                                @endif
                                                 Pulang <span class="font-bold text-blue-600 dark:text-blue-400">{{ $att['clock_out'] }}</span>
                                                 @if(isset($att['clock_out_device']))
                                                     <span class="text-slate-400">({{ $att['clock_out_device'] }})</span>
