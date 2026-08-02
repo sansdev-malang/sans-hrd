@@ -134,7 +134,7 @@
                         @php
                             $recentAtts = collect($attendanceMap)
                                 ->filter(fn($att) => isset($att['status']) && $att['status'] == 'Present' && isset($att['clock_in']))
-                                ->sortByDesc('clock_in')
+                                ->sortByDesc(fn($att) => $att['last_activity'] ?? $att['clock_in'])
                                 ->take(5);
                         @endphp
 
@@ -145,7 +145,13 @@
                             <div class="relative pl-5">
                                 <span class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-950"></span>
                                 <p class="font-semibold text-sm text-slate-900 dark:text-slate-100">{{ $empName }}</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Hadir pukul <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $att['clock_in'] }}</span></p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    Hadir pukul <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $att['clock_in'] }}</span>
+                                    @if(isset($att['clock_out']))
+                                        <span class="mx-1">&bull;</span>
+                                        Pulang pukul <span class="font-bold text-blue-600 dark:text-blue-400">{{ $att['clock_out'] }}</span>
+                                    @endif
+                                </p>
                             </div>
                         @empty
                             <div class="text-center py-4">

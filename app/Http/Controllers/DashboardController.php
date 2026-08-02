@@ -86,6 +86,7 @@ class DashboardController extends Controller
                     'status' => 'Present',
                     'clock_in' => $clockIn,
                     'clock_out' => $clockOut,
+                    'last_activity' => $clockOut ?: $clockIn,
                 ];
                 $hadir++;
             } else {
