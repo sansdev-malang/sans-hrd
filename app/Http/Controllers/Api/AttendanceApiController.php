@@ -104,9 +104,10 @@ class AttendanceApiController extends Controller
 
             $dailyDetails = [];
             
+            $lastDay = $endDate > now() ? now()->endOfDay() : $endDate;
             $currentDate = $startDate->copy();
             
-            while ($currentDate <= $endDate) {
+            while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek;
 
