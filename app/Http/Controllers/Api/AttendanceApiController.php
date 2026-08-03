@@ -30,11 +30,19 @@ class AttendanceApiController extends Controller
         $month = $request->query('month', date('Y-m'));
         $unitId = $request->query('unit_id');
 
-        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
-        $monthCarbon = Carbon::createFromFormat('Y-m', $month);
-        
-        $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
-        $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
+        $startDateParam = $request->query('start_date');
+        $endDateParam = $request->query('end_date');
+
+        if ($startDateParam && $endDateParam) {
+            $startDate = Carbon::parse($startDateParam)->startOfDay();
+            $endDate = Carbon::parse($endDateParam)->endOfDay();
+        } else {
+            $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+            $monthCarbon = Carbon::createFromFormat('Y-m', $month);
+            
+            $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
+            $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
+        }
 
         $rawEmployees = collect($this->service->getSdEmployees());
         if (!empty($unitId)) {

@@ -20,9 +20,9 @@ class PayslipApiController extends Controller
 
         // Map short code to actual name in DB
         $unitName = $unitCode;
-        if (strtolower($unitCode) === 'sd') $unitName = 'SD Unit';
-        elseif (strtolower($unitCode) === 'smp') $unitName = 'SMP Unit';
-        elseif (strtolower($unitCode) === 'paud') $unitName = 'PAUD Unit';
+        if (strtolower($unitCode) === 'sd') $unitName = 'SD';
+        elseif (strtolower($unitCode) === 'smp') $unitName = 'SMP';
+        elseif (strtolower($unitCode) === 'paud') $unitName = 'PAUD';
 
         $unit = SchoolUnit::where('name', $unitName)->orWhere('id', $unitCode)->first();
         if (!$unit) {
