@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Sans HRD - Pusat Aggregator</title>
+        <title>{{ setting('app_name', 'SANS HRD') }} - Pusat Aggregator</title>
         <!-- Favicon -->
         @if(setting('app_favicon'))
             <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . setting('app_favicon')) }}">

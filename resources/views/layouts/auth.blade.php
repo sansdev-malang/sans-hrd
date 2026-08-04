@@ -77,12 +77,14 @@
             <!-- Header section (Logo and Theme Toggle) -->
             <div class="flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2.5">
-                    <!-- Logo badge with animated gradient -->
-                    <div
-                        class="w-8 h-8 rounded-lg logo-bg flex items-center justify-center shrink-0 shadow-sm">
-                        <span class="text-white text-lg font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">A</span>
-                    </div>
-                    <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">SANS HRD</span>
+                    @if (setting('app_logo'))
+                        <img src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo" class="w-8 h-8 rounded-lg object-cover shrink-0 shadow-sm">
+                    @else
+                        <div class="w-8 h-8 rounded-lg logo-bg flex items-center justify-center shrink-0 shadow-sm">
+                            <span class="text-white text-lg font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">{{ substr(setting('app_name', 'SANS HRD'), 0, 1) }}</span>
+                        </div>
+                    @endif
+                    <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">{{ setting('app_name', 'SANS HRD') }}</span>
                 </a>
 
                 <div class="flex items-center gap-4">

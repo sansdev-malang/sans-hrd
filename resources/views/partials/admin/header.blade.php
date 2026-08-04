@@ -10,7 +10,7 @@
         <!-- Breadcrumbs display (sidebar-07 look) -->
         <nav
             class="hidden sm:flex items-center space-x-1.5 text-xs font-medium text-slate-400 dark:text-slate-550 select-none">
-            <span class="hover:text-slate-700 dark:hover:text-slate-350 cursor-pointer">Sans HRD</span>
+            <span class="hover:text-slate-700 dark:hover:text-slate-350 cursor-pointer">{{ setting('app_name', 'SANS HRD') }}</span>
             <span class="text-slate-300 dark:text-slate-700">/</span>
             <span class="hover:text-slate-700 dark:hover:text-slate-350 cursor-pointer font-bold">HRD Pusat</span>
         </nav>

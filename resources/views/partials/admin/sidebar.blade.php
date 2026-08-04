@@ -26,7 +26,7 @@
         <!-- Tooltip for collapsed view -->
         <span
             class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-150 pointer-events-none whitespace-nowrap z-50" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;" >
-            SANS HRD
+            {{ setting('app_name', 'SANS HRD') }}
         </span>
     </div>
 
@@ -50,17 +50,26 @@
                     <i data-lucide="users-2" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Data Pegawai</span>
                 </a>
-                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
-                    <i data-lucide="award" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Sertifikat Pegawai</span>
+                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('coming-soon') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="award" class="menu-icon w-4 h-4"></i>
+                        <span class="menu-text">Sertifikat Pegawai</span>
+                    </div>
+                    <span class="menu-text text-[9px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Dev</span>
                 </a>
-                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
-                    <i data-lucide="star" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Prestasi Pegawai</span>
+                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('coming-soon') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="star" class="menu-icon w-4 h-4"></i>
+                        <span class="menu-text">Prestasi Pegawai</span>
+                    </div>
+                    <span class="menu-text text-[9px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Dev</span>
                 </a>
-                <a href="#" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-xs relative group">
-                    <i data-lucide="bar-chart-2" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Rapor Kinerja</span>
+                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('coming-soon') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="bar-chart-2" class="menu-icon w-4 h-4"></i>
+                        <span class="menu-text">Rapor Kinerja</span>
+                    </div>
+                    <span class="menu-text text-[9px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Dev</span>
                 </a>
             </nav>
 
