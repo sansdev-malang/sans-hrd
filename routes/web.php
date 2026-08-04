@@ -85,6 +85,9 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::delete('attendance-logs/clear', [\App\Http\Controllers\AttendanceLogController::class, 'clear'])->name('attendance-logs.clear');
     Route::get('attendance-logs/export', [\App\Http\Controllers\AttendanceLogController::class, 'export'])->name('attendance-logs.export');
     Route::get('attendance-logs', [\App\Http\Controllers\AttendanceLogController::class, 'index'])->name('attendance-logs.index');
+
+    // Announcements CRUD
+    Route::resource('announcements', \App\Http\Controllers\AnnouncementController::class);
 });
 
 // Unit API access (unprotected internally for simplicity, or protect later if exposed publicly)

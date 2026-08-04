@@ -175,6 +175,12 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Fetch latest announcements
+        $latestAnnouncements = \App\Models\Announcement::with('creator')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
         return view('dashboard', compact(
             'date',
             'sdEmployees',
@@ -185,7 +191,8 @@ class DashboardController extends Controller
             'sakit',
             'alpa',
             'belumAbsen',
-            'pendingLeaves'
+            'pendingLeaves',
+            'latestAnnouncements'
         ));
     }
 }

@@ -245,7 +245,8 @@
         </div>
 
         <!-- REJECT MODAL -->
-        <div x-show="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" style="display: none;">
+        <template x-teleport="body">
+            <div x-show="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" style="display: none; margin-top: 0px !important; z-index: 9999;">
             <div @click.outside="showRejectModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-sm p-6 text-left">
                 <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4 font-sans">
                     <div>
@@ -274,10 +275,11 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </template>
 
         <!-- MODAL DETAIL PEGAWAI -->
-        <div x-show="showEmpDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-955/60 backdrop-blur-xs text-left" style="display: none;">
+        <template x-teleport="body">
+            <div x-show="showEmpDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-955/60 backdrop-blur-xs text-left" style="display: none; margin-top: 0px !important; z-index: 9999;">
             <div @click.outside="showEmpDetailModal = false" class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-150 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-55 font-nasalization flex items-center gap-2">
@@ -330,6 +332,6 @@
                     <button @click="showEmpDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Tutup</button>
                 </div>
             </div>
-        </div>
+        </template>
     </div>
 </x-admin-layout>

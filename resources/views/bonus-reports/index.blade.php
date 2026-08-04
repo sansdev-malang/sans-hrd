@@ -207,12 +207,16 @@
                                             @php 
                                                 $nominal = $detail['bonus_nominal'];
                                                 $shortNominal = ($nominal >= 1000) ? ($nominal / 1000) . 'k' : $nominal;
+                                                $titleText = (isset($detail['status']) && $detail['status'] === 'Dinas') ? 'Dinas: Rp ' . number_format($nominal, 0, ',', '.') : 'Rp ' . number_format($nominal, 0, ',', '.');
                                             @endphp
-                                            <div class="mx-auto w-9 h-6 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] rounded shadow-sm border border-emerald-200 dark:border-emerald-800/50" title="Rp {{ number_format($nominal, 0, ',', '.') }}">
+                                            <div class="mx-auto w-9 h-6 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] rounded shadow-sm border border-emerald-200 dark:border-emerald-800/50" title="{{ $titleText }}">
                                                 {{ $shortNominal }}
                                             </div>
                                         @else
-                                            <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-600 font-bold text-xs" title="Tidak ada bonus">-</div>
+                                            @php
+                                                $titleText = (isset($detail['status']) && $detail['status'] === 'Dinas') ? 'Dinas (Tidak ada bonus)' : 'Tidak ada bonus';
+                                            @endphp
+                                            <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-600 font-bold text-xs" title="{{ $titleText }}">-</div>
                                         @endif
                                     @else
                                         @if($date->isSunday())

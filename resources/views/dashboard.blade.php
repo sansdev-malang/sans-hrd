@@ -86,6 +86,46 @@
 
         <!-- WIDGETS SECTION -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Pengumuman Terbaru Widget -->
+            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="megaphone" class="w-4 h-4 text-indigo-500"></i>
+                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">Pengumuman Terbaru</h3>
+                    </div>
+                    <a href="{{ route('announcements.index') }}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Lihat Semua</a>
+                </div>
+                <div class="flex-1 overflow-y-auto max-h-[300px]">
+                    <div class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        @forelse($latestAnnouncements as $ann)
+                            @php
+                                $catColor = [
+                                    'umum' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 border-indigo-150/40 dark:border-indigo-900/20',
+                                    'akademik' => 'bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 border-blue-150/40 dark:border-blue-900/20',
+                                    'kepegawaian' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-emerald-150/40 dark:border-emerald-900/20',
+                                    'penting' => 'bg-rose-50 text-rose-700 dark:bg-rose-955/20 dark:text-rose-400 border-rose-150/40 dark:border-rose-900/20 animate-pulse',
+                                ][$ann->category] ?? 'bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+                            @endphp
+                            <a href="{{ route('announcements.show', $ann) }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate pr-2">{{ $ann->title }}</p>
+                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase shrink-0 {{ $catColor }}">
+                                        {{ $ann->category }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500">
+                                    <span>Tanggal: {{ $ann->publish_date ? $ann->publish_date->format('d M Y') : $ann->created_at->format('d M Y') }}</span>
+                                    <span class="font-medium text-slate-500">{{ $ann->creator->name ?? 'Admin' }}</span>
+                                </div>
+                            </a>
+                        @empty
+                            <div class="p-8 text-center text-slate-400">
+                                <p class="text-xs">Belum ada pengumuman terbaru.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
             
             <!-- Pengajuan Cuti Widget -->
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
@@ -96,30 +136,33 @@
                     </div>
                     <a href="{{ route('leave-approvals.index') }}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Lihat Semua</a>
                 </div>
-                <div class="flex-1 overflow-y-auto">
+                <div class="flex-1 overflow-y-auto max-h-[300px]">
                     <div class="divide-y divide-slate-100 dark:divide-slate-800/60">
                         @if(isset($pendingLeaves) && count($pendingLeaves) > 0)
                             @foreach($pendingLeaves as $leave)
                                 <a href="{{ route('leave-approvals.index') }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
                                     <div class="flex items-center justify-between mb-1">
-                                        <p class="font-semibold text-sm text-slate-900 dark:text-slate-100">{{ $leave->employee_name ?? 'Pegawai' }}</p>
+                                        <p class="font-semibold text-sm text-slate-900 dark:text-slate-100 text-left">{{ $leave->employee_name ?? 'Pegawai' }}</p>
                                         <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">Pending</span>
                                     </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 text-left">
                                         Mengajukan <span class="font-semibold">{{ $leave->type }}</span> pada {{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}
                                     </p>
-                                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 italic"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i>{{ $leave->reason }}</p>
+                                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 italic text-left"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i>{{ $leave->reason }}</p>
                                 </a>
                             @endforeach
                         @else
                             <div class="p-8 text-center text-slate-400">
-                                <p class="text-sm">Tidak ada pengajuan izin/cuti yang menunggu persetujuan.</p>
+                                <p class="text-xs">Tidak ada pengajuan izin/cuti yang menunggu persetujuan.</p>
                             </div>
                         @endif
                     </div>
                 </div>
             </div>
+        </section>
 
+        <!-- DETAILS ROW -->
+        <section class="grid grid-cols-1 gap-6 mt-6">
             <!-- Aktivitas Absensi Terkini -->
             <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">

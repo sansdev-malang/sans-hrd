@@ -138,8 +138,9 @@ class AttendanceBonusReportController extends Controller
                     continue;
                 }
 
-                // Skip Leaves
+                // Skip Leaves (except Dinas)
                 $isOnLeave = false;
+                $leaveType = null;
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -147,11 +148,12 @@ class AttendanceBonusReportController extends Controller
                         $leaveEnd = substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
+                            $leaveType = $leave->type;
                             break;
                         }
                     }
                 }
-                if ($isOnLeave) {
+                if ($isOnLeave && $leaveType !== 'Dinas') {
                     $currentDate->addDay();
                     continue;
                 }
@@ -184,22 +186,29 @@ class AttendanceBonusReportController extends Controller
                     $dailyBonus = 0;
                     $dailyTierLevel = null;
 
-                    // Check Attendance
+                    // Check Attendance or Dinas
                     $logKey = $uid . '_' . $dateStr;
-                    if (isset($attendanceLogs[$logKey])) {
-                        $dailyStatus = 'Present';
+                    $isDinas = ($isOnLeave && $leaveType === 'Dinas');
+
+                    if (isset($attendanceLogs[$logKey]) || $isDinas) {
+                        $dailyStatus = $isDinas ? 'Dinas' : 'Present';
                         $totalPresent++;
                         
                         // Calculate Late
-                        $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
-                        $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
-                        $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
-                        $dailyCheckIn = $checkInCarbon->format('H:i:s');
+                        if (isset($attendanceLogs[$logKey]) && !$isDinas) {
+                            $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                            $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
+                            $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
+                            $dailyCheckIn = $checkInCarbon->format('H:i:s');
 
-                        if ($checkInCarbon > $expectedStart) {
-                            $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
-                            $dailyLateMinutes = $diff;
-                            $totalLateMinutes += $diff;
+                            if ($checkInCarbon > $expectedStart) {
+                                $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
+                                $dailyLateMinutes = $diff;
+                                $totalLateMinutes += $diff;
+                            }
+                        } else {
+                            $dailyLateMinutes = 0;
+                            $dailyCheckIn = 'DINAS';
                         }
 
                         // Calculate Daily Bonus
@@ -379,7 +388,9 @@ class AttendanceBonusReportController extends Controller
                     continue;
                 }
 
+                // Skip Leaves (except Dinas)
                 $isOnLeave = false;
+                $leaveType = null;
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -387,11 +398,12 @@ class AttendanceBonusReportController extends Controller
                         $leaveEnd = substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
+                            $leaveType = $leave->type;
                             break;
                         }
                     }
                 }
-                if ($isOnLeave) {
+                if ($isOnLeave && $leaveType !== 'Dinas') {
                     $currentDate->addDay();
                     continue;
                 }
@@ -418,19 +430,29 @@ class AttendanceBonusReportController extends Controller
                 if ($hasShiftToday) {
                     $dailyLateMinutes = 0;
                     $dailyBonus = 0;
+                    $dailyStatus = 'Absent';
+                    $dailyCheckIn = null;
                     
                     $logKey = $uid . '_' . $dateStr;
-                    if (isset($attendanceLogs[$logKey])) {
+                    $isDinas = ($isOnLeave && $leaveType === 'Dinas');
+
+                    if (isset($attendanceLogs[$logKey]) || $isDinas) {
+                        $dailyStatus = $isDinas ? 'Dinas' : 'Present';
                         $totalPresent++;
                         
-                        $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
-                        $checkInCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
-                        $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
+                        if (isset($attendanceLogs[$logKey]) && !$isDinas) {
+                            $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                            $checkInCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
+                            $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
 
-                        if ($checkInCarbon > $expectedStart) {
-                            $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
-                            $dailyLateMinutes = $diff;
-                            $totalLateMinutes += $diff;
+                            if ($checkInCarbon > $expectedStart) {
+                                $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
+                                $dailyLateMinutes = $diff;
+                                $totalLateMinutes += $diff;
+                            }
+                        } else {
+                            $dailyLateMinutes = 0;
+                            $dailyCheckIn = 'DINAS';
                         }
 
                         if ($activeSchema && $activeSchema->tiers->count() > 0) {
@@ -456,6 +478,7 @@ class AttendanceBonusReportController extends Controller
                     }
 
                     $dailyDetails[$dateStr] = [
+                        'status' => $dailyStatus,
                         'bonus_nominal' => $dailyBonus
                     ];
                 }

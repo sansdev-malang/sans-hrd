@@ -838,6 +838,7 @@
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Foto Profil</label>
                                         <input type="file" name="photo" accept="image/*"
                                             class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none file:mr-4 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/30 file:text-indigo-600 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/50 cursor-pointer">
+                                        <span class="text-[10px] text-slate-400 block mt-1">Format: JPG, JPEG, PNG, GIF, SVG. Maksimal 2MB.</span>
                                     </div>
 
                                 </div>
@@ -1194,6 +1195,7 @@
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Foto Profil</label>
                                         <input type="file" name="photo" accept="image/*"
                                             class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none file:mr-4 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/30 file:text-indigo-600 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/50 cursor-pointer">
+                                        <span class="text-[10px] text-slate-400 block mt-1">Format: JPG, JPEG, PNG, GIF, SVG. Maksimal 2MB.</span>
                                     </div>
 
                                 </div>
@@ -1254,7 +1256,7 @@
                             <button type="button" @click="showDeleteModal = false" class="flex-1 h-10 px-4 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold rounded-xl cursor-pointer transition-colors">
                                 Batal
                             </button>
-                            <form id="delete-employee-form" method="POST" :action="selectedEmp ? '/employees/' + selectedEmp.unit_id + '/' + selectedEmp.id : ''" class="flex-1">
+                            <form id="delete-employee-form" data-confirm="false" method="POST" :action="selectedEmp ? '/employees/' + selectedEmp.unit_id + '/' + selectedEmp.id : ''" class="flex-1">
                                 @csrf
                                 @if($errors->has('api_error'))
                                 <div class="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-xs font-medium flex items-start gap-2">
