@@ -459,7 +459,7 @@ class AttendanceApiController extends Controller
                                 $totalLateMinutes += $diff;
                             }
                         } else {
-                            $dailyCheckIn = 'DINAS';
+                            $dailyCheckIn = null;
                         }
 
                         $currentSchema = ($currentAssignment && $currentAssignment->bonus_schema_id) 
