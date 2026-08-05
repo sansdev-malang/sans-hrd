@@ -297,7 +297,7 @@
                         <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">Statistik Kehadiran Unit</h3>
                     </div>
                 </div>
-                <div class="p-5 flex-1 overflow-y-auto space-y-6">
+                <div class="p-5 max-h-[400px] overflow-y-auto custom-scrollbar flex-1 space-y-6">
                     @forelse($unitStats as $unitName => $stats)
                         @php
                             $attendanceRate = $stats['total'] > 0 ? round(($stats['hadir'] / $stats['total']) * 100) : 0;
