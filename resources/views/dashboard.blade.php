@@ -164,7 +164,7 @@
         <!-- DETAILS ROW -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <!-- Aktivitas Absensi Terkini -->
-            <div class="lg:col-span-2 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="lg-span-2 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                     <div class="flex items-center gap-2">
                         <i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i>
@@ -353,4 +353,12 @@
         </section>
 
     </div>
+
+    <style>
+        @media (min-width: 1024px) {
+            .lg-span-2 {
+                grid-column: span 2 / span 2 !important;
+            }
+        }
+    </style>
 </x-admin-layout>
