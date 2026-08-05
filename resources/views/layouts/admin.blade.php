@@ -292,10 +292,10 @@
                             <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 0.5rem 0; line-height: 1.25;">Konfirmasi Hapus</h3>
                             <p style="font-size: 0.875rem; color: ${descText}; margin: 0 0 1.5rem 0; line-height: 1.5;" id="global-delete-message"></p>
                             <div style="display: flex; gap: 0.75rem; justify-content: center;">
-                                <button type="button" id="global-delete-cancel" style="flex: 1; height: 2.5rem; padding: 0 1rem; border: 1px solid ${cancelBorder}; color: ${cancelText}; background: ${cancelBg}; font-size: 0.875rem; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: background 0.2s; outline: none;">
+                                <button type="button" id="global-delete-cancel" style="flex: 1; height: 2.5rem; padding: 0 1rem; border: 1px solid ${cancelBorder}; color: ${cancelText}; background: ${cancelBg}; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: background 0.2s; outline: none;" class="text-xs">
                                     Batal
                                 </button>
-                                <button type="button" id="global-delete-confirm" style="flex: 1; height: 2.5rem; padding: 0 1rem; border: none; color: #ffffff; background: #e11d48; font-size: 0.875rem; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: background 0.2s; outline: none;">
+                                <button type="button" id="global-delete-confirm" style="flex: 1; height: 2.5rem; padding: 0 1rem; border: none; color: #ffffff; background: #e11d48; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: background 0.2s; outline: none;" class="text-xs">
                                     Ya, Hapus
                                 </button>
                             </div>
