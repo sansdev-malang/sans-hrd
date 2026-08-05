@@ -393,6 +393,7 @@ class AttendanceApiController extends Controller
 
                 // Skip Leaves
                 $isOnLeave = false;
+                $leaveType = null;
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -400,11 +401,12 @@ class AttendanceApiController extends Controller
                         $leaveEnd = substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
+                            $leaveType = $leave->type ?? 'Izin';
                             break;
                         }
                     }
                 }
-                if ($isOnLeave) {
+                if ($isOnLeave && $leaveType !== 'Dinas') {
                     $currentDate->addDay();
                     continue;
                 }
@@ -439,19 +441,25 @@ class AttendanceApiController extends Controller
                     $dailyTierLevel = null;
 
                     $logKey = $uid . '_' . $dateStr;
-                    if (isset($attendanceLogs[$logKey])) {
-                        $dailyStatus = 'Present';
+                    $isDinas = ($isOnLeave && $leaveType === 'Dinas');
+
+                    if (isset($attendanceLogs[$logKey]) || $isDinas) {
+                        $dailyStatus = $isDinas ? 'Dinas' : 'Present';
                         $totalPresent++;
                         
-                        $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
-                        $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
-                        $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
-                        $dailyCheckIn = $checkInCarbon->format('H:i:s');
-
-                        if ($checkInCarbon > $expectedStart) {
-                            $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
-                            $dailyLateMinutes = $diff;
-                            $totalLateMinutes += $diff;
+                        if (isset($attendanceLogs[$logKey]) && !$isDinas) {
+                            $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                            $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
+                            $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
+                            $dailyCheckIn = $checkInCarbon->format('H:i:s');
+    
+                            if ($checkInCarbon > $expectedStart) {
+                                $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
+                                $dailyLateMinutes = $diff;
+                                $totalLateMinutes += $diff;
+                            }
+                        } else {
+                            $dailyCheckIn = 'DINAS';
                         }
 
                         $currentSchema = ($currentAssignment && $currentAssignment->bonus_schema_id) 
