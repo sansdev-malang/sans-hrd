@@ -328,18 +328,30 @@
                             </div>
                             
                             <!-- Breakdown Stats -->
-                            <div class="grid grid-cols-3 gap-2 pt-1 text-center font-sans">
-                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-1.5 border border-slate-100 dark:border-slate-800">
-                                    <span class="block text-[8px] text-slate-400 font-bold uppercase tracking-wider">Hadir</span>
-                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">{{ $stats['hadir'] }}</span>
+                            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.25rem;" class="font-sans">
+                                <!-- Hadir -->
+                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-2 border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-1">
+                                    <div class="flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                        <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Hadir</span>
+                                    </div>
+                                    <span class="text-xs font-bold text-emerald-650 dark:text-emerald-400 font-mono">{{ $stats['hadir'] }}</span>
                                 </div>
-                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-1.5 border border-slate-100 dark:border-slate-800">
-                                    <span class="block text-[8px] text-slate-400 font-bold uppercase tracking-wider">Izin/Sakit</span>
-                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">{{ $stats['izin'] + $stats['sakit'] }}</span>
+                                <!-- Izin/Sakit -->
+                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-2 border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-1">
+                                    <div class="flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                                        <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Izin</span>
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">{{ $stats['izin'] + $stats['sakit'] }}</span>
                                 </div>
-                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-1.5 border border-slate-100 dark:border-slate-800">
-                                    <span class="block text-[8px] text-slate-400 font-bold uppercase tracking-wider">Absen</span>
-                                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">{{ $stats['alpa'] + $stats['belum_absen'] }}</span>
+                                <!-- Absen -->
+                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-2 border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-1">
+                                    <div class="flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                        <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Absen</span>
+                                    </div>
+                                    <span class="text-xs font-bold text-rose-650 dark:text-rose-400 font-mono">{{ $stats['alpa'] + $stats['belum_absen'] }}</span>
                                 </div>
                             </div>
                         </div>
