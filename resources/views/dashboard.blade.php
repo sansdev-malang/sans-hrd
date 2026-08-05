@@ -196,18 +196,35 @@
                                     $photoSrc = str_contains($empPhoto, 'photos/') ? rtrim($empUrl, '/') . '/storage/' . $empPhoto : rtrim($empUrl, '/') . '/storage/photos/' . $empPhoto;
                                 }
                             @endphp
+                            @php
+                                $isCheckout = !empty($att['clock_out']) && (!isset($att['clock_in']) || $att['clock_out'] >= $att['clock_in']);
+                            @endphp
                             <div class="relative pl-5">
-                                <span class="absolute -left-[9px] top-2.5 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-950"></span>
+                                <span class="absolute -left-[9px] top-2.5 w-4 h-4 rounded-full border-4 border-white dark:border-slate-955 {{ $isCheckout ? 'bg-blue-500' : 'bg-emerald-500' }}"></span>
                                 <div class="flex items-center gap-3">
-                                    @if($photoSrc)
-                                        <img src="{{ $photoSrc }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700">
-                                    @else
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-800 shrink-0">
+                                    <div class="relative shrink-0 w-8 h-8">
+                                        @if($photoSrc)
+                                            <img src="{{ $photoSrc }}" onerror="this.remove(); document.getElementById('initials-{{ $uniqueKey }}').classList.remove('hidden');" class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700">
+                                        @endif
+                                        <div id="initials-{{ $uniqueKey }}" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-800 shrink-0 {{ $photoSrc ? 'hidden' : '' }}">
                                             {{ strtoupper(substr($empName, 0, 2)) }}
                                         </div>
-                                    @endif
-                                    <div class="min-w-0">
-                                        <p class="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate">{{ $empName }}</p>
+                                    </div>
+                                    <div class="min-w-0 flex-1 text-left">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="font-bold text-sm text-slate-900 dark:text-slate-100">{{ $empName }}</span>
+                                            @if(isset($empObj['unit_name']))
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider
+                                                    @if(strtolower($empObj['unit_name']) === 'sd') bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30
+                                                    @elseif(strtolower($empObj['unit_name']) === 'smp') bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 dark:border-indigo-900/30
+                                                    @else bg-amber-50 dark:bg-amber-955/40 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30 @endif">
+                                                    {{ $empObj['unit_name'] }}
+                                                </span>
+                                            @endif
+                                            @if(!empty($empObj['position']))
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">({{ $empObj['position'] }})</span>
+                                            @endif
+                                        </div>
                                         <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                                             @if(isset($att['clock_in']))
                                                 Hadir <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $att['clock_in'] }}</span>
