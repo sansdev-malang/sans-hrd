@@ -162,9 +162,9 @@
         </section>
 
         <!-- DETAILS ROW -->
-        <section class="grid grid-cols-1 gap-6 mt-6">
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <!-- Aktivitas Absensi Terkini -->
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="lg:col-span-2 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                     <div class="flex items-center gap-2">
                         <i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i>
@@ -179,7 +179,39 @@
                             $recentAtts = collect($attendanceMap)
                                 ->filter(fn($att) => isset($att['status']) && $att['status'] == 'Present' && (isset($att['clock_in']) || isset($att['clock_out'])))
                                 ->sortByDesc(fn($att) => $att['last_activity'] ?? ($att['clock_out'] ?? $att['clock_in']));
-                        @endphp
+
+                            // Calculate statistics per unit
+                            $unitStats = [];
+                            foreach ($sdEmployees as $emp) {
+                                $empId = $emp['id'];
+                                $unitId = $emp['unit_id'] ?? 0;
+                                $unitName = $emp['unit_name'] ?? 'Lainnya';
+                                $key = "{$unitId}_{$empId}";
+                                
+                                if (!isset($unitStats[$unitName])) {
+                                    $unitStats[$unitName] = ['total' => 0, 'hadir' => 0, 'sakit' => 0, 'izin' => 0, 'alpa' => 0, 'belum_absen' => 0];
+                                }
+                                
+                                $unitStats[$unitName]['total']++;
+                                
+                                if (isset($attendanceMap[$key])) {
+                                    $status = $attendanceMap[$key]['status'] ?? '';
+                                    if ($status === 'Present') {
+                                        $unitStats[$unitName]['hadir']++;
+                                    } elseif ($status === 'Sick') {
+                                        $unitStats[$unitName]['sakit']++;
+                                    } elseif ($status === 'Permit') {
+                                        $unitStats[$unitName]['izin']++;
+                                    } elseif ($status === 'Absent') {
+                                        $unitStats[$unitName]['alpa']++;
+                                    } else {
+                                        $unitStats[$unitName]['belum_absen']++;
+                                    }
+                                } else {
+                                    $unitStats[$unitName]['belum_absen']++;
+                                }
+                            }
+                            @endphp
 
                         @forelse($recentAtts as $uniqueKey => $att)
                             @php
@@ -215,8 +247,8 @@
                                             <span class="font-bold text-sm text-slate-900 dark:text-slate-100">{{ $empName }}</span>
                                             @if(isset($empObj['unit_name']))
                                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider
-                                                    @if(strtolower($empObj['unit_name']) === 'sd') bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30
-                                                    @elseif(strtolower($empObj['unit_name']) === 'smp') bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 dark:border-indigo-900/30
+                                                    @if(strtolower($empObj['unit_name']) === 'sd') bg-indigo-50 dark:bg-indigo-955/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30
+                                                    @elseif(strtolower($empObj['unit_name']) === 'smp') bg-emerald-50 dark:bg-emerald-955/40 text-emerald-700 dark:text-emerald-400 border border-indigo-200/30 dark:border-indigo-900/30
                                                     @else bg-amber-50 dark:bg-amber-955/40 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30 @endif">
                                                     {{ $empObj['unit_name'] }}
                                                 </span>
@@ -257,6 +289,67 @@
                 </div>
             </div>
 
+            <!-- Statistik Unit Hari Ini -->
+            <div class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-500"></i>
+                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">Statistik Kehadiran Unit</h3>
+                    </div>
+                </div>
+                <div class="p-5 flex-1 overflow-y-auto space-y-6">
+                    @forelse($unitStats as $unitName => $stats)
+                        @php
+                            $attendanceRate = $stats['total'] > 0 ? round(($stats['hadir'] / $stats['total']) * 100) : 0;
+                            $themeColor = 'indigo';
+                            if (strtolower($unitName) === 'sd') $themeColor = 'indigo';
+                            elseif (strtolower($unitName) === 'smp') $themeColor = 'emerald';
+                            elseif (strtolower($unitName) === 'paud') $themeColor = 'amber';
+                        @endphp
+                        <div class="space-y-2 text-left">
+                            <div class="flex justify-between items-center font-sans">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full 
+                                        @if($themeColor === 'indigo') bg-indigo-500
+                                        @elseif($themeColor === 'emerald') bg-emerald-500
+                                        @else bg-amber-500 @endif"></span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">Unit {{ $unitName }}</span>
+                                </div>
+                                <span class="text-xs font-bold text-slate-900 dark:text-slate-50">{{ $attendanceRate }}% Hadir</span>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="w-full bg-slate-100 dark:bg-slate-900 rounded-full h-2">
+                                <div class="h-2 rounded-full transition-all duration-500 
+                                    @if($themeColor === 'indigo') bg-indigo-650 dark:bg-indigo-500
+                                    @elseif($themeColor === 'emerald') bg-emerald-600 dark:bg-emerald-500
+                                    @else bg-amber-600 dark:bg-amber-500 @endif" 
+                                    style="width: {{ $attendanceRate }}%"></div>
+                            </div>
+                            
+                            <!-- Breakdown Stats -->
+                            <div class="grid grid-cols-3 gap-2 pt-1 text-center font-sans">
+                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-1.5 border border-slate-100 dark:border-slate-800">
+                                    <span class="block text-[8px] text-slate-400 font-bold uppercase tracking-wider">Hadir</span>
+                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">{{ $stats['hadir'] }}</span>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-1.5 border border-slate-100 dark:border-slate-800">
+                                    <span class="block text-[8px] text-slate-400 font-bold uppercase tracking-wider">Izin/Sakit</span>
+                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">{{ $stats['izin'] + $stats['sakit'] }}</span>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-1.5 border border-slate-100 dark:border-slate-800">
+                                    <span class="block text-[8px] text-slate-400 font-bold uppercase tracking-wider">Absen</span>
+                                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">{{ $stats['alpa'] + $stats['belum_absen'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-4">
+                            <p class="text-xs text-slate-400">Belum ada data unit terhubung.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
         </section>
 
     </div>
