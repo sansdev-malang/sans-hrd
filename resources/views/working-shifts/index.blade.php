@@ -340,7 +340,7 @@
                             <form id="delete-shift-form" method="POST" :action="deleteShift ? `{{ url('working-shifts') }}/${deleteShift.id}` : ''" class="flex-1">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="w-full px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl cursor-pointer transition-colors shadow-sm flex items-center justify-center gap-2">
+                                <button type="submit" class="w-full text-xs px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl cursor-pointer transition-colors shadow-sm flex items-center justify-center gap-2">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     Ya, Hapus
                                 </button>
