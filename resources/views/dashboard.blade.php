@@ -175,6 +175,7 @@
                     <div class="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar flex-1">
                         <div class="border-l-2 border-slate-200 dark:border-slate-800 ml-2 space-y-5">
                             
+                            @php
                             $recentAtts = collect($attendanceMap)
                                 ->filter(fn($att) => isset($att['status']) && ($att['status'] == 'Present' || $att['status'] == 'Late') && (isset($att['clock_in']) || isset($att['clock_out'])))
                                 ->sortByDesc(fn($att) => $att['last_activity'] ?? ($att['clock_out'] ?? $att['clock_in']));
