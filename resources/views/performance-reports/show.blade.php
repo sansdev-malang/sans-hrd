@@ -7,7 +7,7 @@
                 Kembali
             </a>
             <div>
-                <h3 class="text-sm font-bold dark:text-white text-slate-900">Rapor Kinerja: {{ $employee->name }}</h3>
+                <h3 class="text-sm font-bold dark:white text-slate-900">Rapor Kinerja: {{ $employee['name'] }}</h3>
                 <p class="text-[10px] dark:text-slate-400 text-slate-500 mt-0.5">Tahun Ajaran {{ $report->academic_year }} - Semester {{ $report->semester }}</p>
             </div>
         </div>
@@ -69,12 +69,12 @@
                         <tr>
                             <td class="w-[120px] text-slate-400 font-medium pb-2">Nama Lengkap</td>
                             <td class="w-4 text-slate-400 pb-2">:</td>
-                            <td class="font-bold text-slate-900 pb-2">{{ $employee->name }}</td>
+                            <td class="font-bold text-slate-900 pb-2">{{ $employee['name'] }}</td>
                         </tr>
                         <tr>
                             <td class="text-slate-400 font-medium pb-2">Email Pegawai</td>
                             <td class="text-slate-400 pb-2">:</td>
-                            <td class="font-medium text-slate-700 pb-2">{{ $employee->email }}</td>
+                            <td class="font-medium text-slate-700 pb-2">{{ $employee['email'] }}</td>
                         </tr>
                         <tr>
                             <td class="text-slate-400 font-medium pb-2">Unit Sekolah</td>

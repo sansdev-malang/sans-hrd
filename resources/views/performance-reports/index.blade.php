@@ -101,15 +101,15 @@
                                 <td class="py-3.5 px-4">
                                     @if($emp)
                                         <div class="flex items-center gap-3">
-                                            @if(!empty($emp->photo))
-                                                <img src="{{ asset('storage/photos/' . $emp->photo) }}" class="w-8 h-8 rounded-full object-cover border dark:border-slate-800 border-slate-200 shadow-sm" onerror="this.remove(); document.getElementById('initials-{{ $report->id }}').classList.remove('hidden');">
+                                            @if(!empty($emp['photo']))
+                                                <img src="{{ asset('storage/photos/' . $emp['photo']) }}" class="w-8 h-8 rounded-full object-cover border dark:border-slate-800 border-slate-200 shadow-sm" onerror="this.remove(); document.getElementById('initials-{{ $report->id }}').classList.remove('hidden');">
                                             @endif
-                                            <div id="initials-{{ $report->id }}" class="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-extrabold text-[11px] uppercase shadow-inner {{ !empty($emp->photo) ? 'hidden' : '' }}">
-                                                {{ substr($emp->name, 0, 2) }}
+                                            <div id="initials-{{ $report->id }}" class="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-extrabold text-[11px] uppercase shadow-inner {{ !empty($emp['photo']) ? 'hidden' : '' }}">
+                                                {{ substr($emp['name'], 0, 2) }}
                                             </div>
                                             <div>
-                                                <span class="font-bold block dark:text-slate-100 text-slate-850">{{ $emp->name }}</span>
-                                                <span class="text-[10px] dark:text-slate-400 text-slate-500 block">{{ $emp->email }}</span>
+                                                <span class="font-bold block dark:text-slate-100 text-slate-850">{{ $emp['name'] }}</span>
+                                                <span class="text-[10px] dark:text-slate-400 text-slate-500 block">{{ $emp['email'] }}</span>
                                             </div>
                                         </div>
                                     @else

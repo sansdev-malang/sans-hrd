@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\PerformanceReport;
 use App\Models\SchoolUnit;
-use App\Models\Employee;
+use App\Services\SchoolUnitService;
 use Illuminate\Http\Request;
 
 class PerformanceReportController extends Controller
 {
+    protected SchoolUnitService $schoolService;
+
+    public function __construct(SchoolUnitService $schoolService)
+    {
+        $this->schoolService = $schoolService;
+    }
+
     /**
      * Display a listing of synced performance reports.
      */
@@ -27,6 +34,10 @@ class PerformanceReportController extends Controller
         if (empty($academicYears)) {
             $academicYears = ['2025/2026', '2024/2025'];
         }
+
+        // Fetch dynamic employees list from active units via API
+        $allEmployees = $this->schoolService->getSdEmployees();
+        $employeesCol = collect($allEmployees);
 
         $query = PerformanceReport::with(['schoolUnit']);
 
@@ -47,20 +58,18 @@ class PerformanceReportController extends Controller
 
         // Filter by Search Name
         if ($request->filled('search')) {
-            $search = $request->input('search');
-            $employeeIds = Employee::where('name', 'like', "%{$search}%")
-                ->pluck('id')
-                ->toArray();
-            $query->whereIn('employee_id', $employeeIds);
+            $search = strtolower($request->input('search'));
+            $matchingEmployeeIds = $employeesCol->filter(function($emp) use ($search) {
+                return str_contains(strtolower($emp['name'] ?? ''), $search);
+            })->pluck('id')->toArray();
+            
+            $query->whereIn('employee_id', $matchingEmployeeIds);
         }
 
         $reports = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
-        // Retrieve employees names map to display in view without looping queries
-        $employeeIdsInReports = $reports->pluck('employee_id')->unique()->toArray();
-        $employeesMap = Employee::whereIn('id', $employeeIdsInReports)
-            ->get()
-            ->keyBy('id');
+        // Build keyed map of employees for quick view retrieval
+        $employeesMap = $employeesCol->keyBy('id');
 
         return view('performance-reports.index', compact('reports', 'schoolUnits', 'academicYears', 'employeesMap'));
     }
@@ -72,9 +81,12 @@ class PerformanceReportController extends Controller
     {
         $report = PerformanceReport::with('schoolUnit')->findOrFail($id);
         
-        $employee = Employee::find($report->employee_id);
+        // Fetch dynamic employee profile via API
+        $allEmployees = $this->schoolService->getSdEmployees();
+        $employee = collect($allEmployees)->firstWhere('id', (int)$report->employee_id);
+        
         if (!$employee) {
-            abort(404, 'Data pegawai tidak ditemukan.');
+            abort(404, 'Data pegawai tidak ditemukan di unit sekolah.');
         }
 
         // Predicate letters fallback based on score
@@ -101,8 +113,8 @@ class PerformanceReportController extends Controller
         $reportLogoPath = \App\Models\Setting::get('report_logo_path', null);
         $reportStampPath = \App\Models\Setting::get('report_stamp_path', null);
 
-        // Parse photo
-        $pos = $employee->position ?? 'Guru';
+        // Parse position and photo
+        $pos = $employee['position'] ?? 'Guru';
         if (!$pos || trim($pos) === '' || trim($pos) === '-') {
             $pos = 'Guru';
         }
