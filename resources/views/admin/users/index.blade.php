@@ -41,13 +41,13 @@
                 <div style="flex: 0 0 250px;">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Cari Pengguna</label>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama atau email..." 
-                        class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                        class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                 </div>
 
                 <!-- Filter Role -->
                 <div style="flex: 0 0 180px;">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Hak Akses / Role</label>
-                    <select name="role" class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                    <select name="role" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                         <option value="">Semua Role</option>
                         <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                         <option value="admin_sd" {{ request('role') === 'admin_sd' ? 'selected' : '' }}>Admin SD</option>
@@ -63,12 +63,11 @@
                 <div style="flex: 0 0 auto; display: flex; align-items: flex-end;">
                     <div class="flex gap-2 w-full h-9">
                         <button type="submit" class="px-5 h-full bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                            <i data-lucide="search" class="w-3.5 h-3.5"></i>
-                            Filter
+                            Terapkan
                         </button>
                         @if(request()->anyFilled(['search', 'role']))
                             <a href="{{ route('users.index') }}" class="h-full px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center transition-all cursor-pointer" title="Reset Filter">
-                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                Reset
                             </a>
                         @endif
                     </div>
@@ -77,7 +76,7 @@
                 <!-- Per Page -->
                 <div style="margin-left: auto; flex: 0 0 110px;">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
-                    <select name="per_page" onchange="this.form.submit()" class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                    <select name="per_page" onchange="this.form.submit()" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                         <option value="10" {{ request('per_page', '10') == '10' ? 'selected' : '' }}>10 baris</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
                         <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 baris</option>
@@ -125,11 +124,11 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($user->role === 'super_admin')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 uppercase">Super Admin</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 uppercase">Super Admin</span>
                                     @elseif($user->role === 'hrd')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30 uppercase">Staf HRD</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30 uppercase">Staf HRD</span>
                                     @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 uppercase">{{ $user->role }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 uppercase">{{ $user->role }}</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right flex justify-end gap-2">
@@ -175,7 +174,6 @@
             <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
-                        <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
                         Tambah Akun User Baru
                     </h3>
                     <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
@@ -189,27 +187,27 @@
                         <div class="space-y-1.5">
                             <label class="block font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
                             <input type="text" name="name" placeholder="Nama lengkap..." required 
-                                class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
 
                         <!-- Email -->
                         <div class="space-y-1.5">
                             <label class="block font-bold text-slate-700 dark:text-slate-300">Alamat Email</label>
                             <input type="email" name="email" placeholder="nama@email.com" required 
-                                class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
 
                         <!-- Password -->
                         <div class="space-y-1.5">
                             <label class="block font-bold text-slate-700 dark:text-slate-300">Password Akses</label>
                             <input type="password" name="password" placeholder="Minimal 8 karakter..." required 
-                                class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
 
                         <!-- Role -->
                         <div class="space-y-1.5">
                             <label class="block font-bold text-slate-700 dark:text-slate-300">Hak Akses (Role)</label>
-                            <select name="role" x-model="selectedRole" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                            <select name="role" x-model="selectedRole" required class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                                 <option value="">-- Pilih Role --</option>
                                 <option value="hrd">Staf HRD</option>
                                 <option value="super_admin">Super Admin</option>
@@ -231,7 +229,6 @@
             <div @click.outside="showEditModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
-                        <i data-lucide="edit-3" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
                         Edit Akun Pengguna
                     </h3>
                     <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
@@ -246,27 +243,27 @@
                         <div class="space-y-1.5">
                             <label class="block font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
                             <input type="text" name="name" x-model="editUser.name" required 
-                                class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
 
                         <!-- Email -->
                         <div class="space-y-1.5">
                             <label class="block font-bold text-slate-700 dark:text-slate-300">Alamat Email</label>
                             <input type="email" name="email" x-model="editUser.email" required 
-                                class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
 
                         <!-- Password -->
                         <div class="space-y-1.5">
-                            <label class="block font-bold text-slate-700 dark:text-slate-300">Password Baru <span class="text-[10px] text-slate-400 font-normal">(Kosongkan jika tidak diubah)</span></label>
-                            <input type="password" name="password" placeholder="Sandi baru..." 
-                                class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
+                            <label class="block font-bold text-slate-700 dark:text-slate-300">Password Baru</label>
+                            <input type="password" name="password" placeholder="Sandi baru..." required
+                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
 
                         <!-- Role -->
                         <div class="space-y-1.5">
                             <label class="block font-bold text-slate-700 dark:text-slate-300">Hak Akses (Role)</label>
-                            <select name="role" x-model="editUser.role" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
+                            <select name="role" x-model="editUser.role" required class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                                 <option value="hrd">Staf HRD</option>
                                 <option value="super_admin">Super Admin</option>
                             </select>

@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="sm:flex sm:justify-between sm:items-center mb-8">
         <div class="mb-4 sm:mb-0">
-            <h1 class="text-2xl md:text-3xl text-slate-800 dark:text-slate-100 font-bold">Data Slip Gaji ✨</h1>
+            <h1 class="text-2xl md:text-3xl text-slate-800 dark:text-slate-100 font-bold">Data Slip Gaji</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Unggah dan kelola slip gaji (PDF) per pegawai.</p>
         </div>
     </div>
@@ -13,19 +13,19 @@
         @if(in_array(auth()->user()->role, ['super_admin', 'hrd']))
         <div class="w-full md:w-64">
             <label for="searchInput" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wide">Cari Pegawai</label>
-            <input type="text" id="searchInput" placeholder="Ketik nama..." class="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500">
+            <input type="text" id="searchInput" placeholder="Ketik nama..." class="w-full text-xs rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500">
         </div>
         @endif
         
         <form method="GET" action="{{ route('payslips.index') }}" class="flex flex-col md:flex-row gap-4 flex-1">
             <div class="w-full md:w-64">
                 <label for="month" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wide">Periode Bulan</label>
-                <input type="month" id="month" name="month" value="{{ $month }}" class="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
+                <input type="month" id="month" name="month" value="{{ $month }}" class="w-full text-xs rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
             </div>
             
             <div class="w-full md:w-64">
                 <label for="unit_id" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wide">Filter Unit</label>
-                <select id="unit_id" name="unit_id" class="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
+                <select id="unit_id" name="unit_id" class="w-full text-xs rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
                     <option value="">Semua Unit</option>
                     @foreach($units as $u)
                         <option value="{{ $u->id }}" {{ $unitId == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
@@ -72,7 +72,7 @@
                     @forelse($employees as $emp)
                         <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-900/30 transition-colors">
                             <td class="px-6 py-4">
-                                <div class="font-medium text-slate-800 dark:text-slate-200">{{ $emp['name'] }}</div>
+                                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ $emp['name'] }}</div>
                                 <div class="text-xs text-slate-500 mt-1">{{ $emp['nik'] ?? 'No NIK' }}</div>
                             </td>
                             <td class="px-6 py-4">
@@ -80,7 +80,7 @@
                                     {{ $emp['unit_name'] }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+                            <td class="px-6 py-4 text-xs font-bold text-slate-600 dark:text-slate-300">
                                 {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
                             </td>
                             <td class="px-6 py-4 text-center">
@@ -109,15 +109,12 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors" title="Hapus">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
+                                                <i data-lucide="x" class="w-4 h-4 mr-2"></i> Kosong
                                             </button>
                                         </form>
                                     @else
-                                        <button onclick="openUploadModal('{{ $emp['id'] }}', '{{ $emp['unit_id'] }}', '{{ addslashes($emp['name']) }}')" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                            Upload
+                                        <button onclick="openUploadModal('{{ $emp['id'] }}', '{{ $emp['unit_id'] }}', '{{ addslashes($emp['name']) }}')" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">
+                                            <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Upload
                                         </button>
                                     @endif
                                 </div>

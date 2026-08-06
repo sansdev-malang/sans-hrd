@@ -33,7 +33,7 @@
         @endif
 
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left font-sans">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left ">
             <div class="flex flex-col gap-0.5">
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Persetujuan Izin / Cuti</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Tinjau dan setujui pengajuan surat sakit, izin, dan cuti dari seluruh pegawai unit sekolah.</p>
@@ -41,7 +41,7 @@
         </header>
 
         <!-- PENDING REQUESTS -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left font-sans">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
             <div class="p-4 border-b border-slate-100 dark:border-slate-900">
                 <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">Menunggu Persetujuan</h4>
             </div>
@@ -91,7 +91,7 @@
                                                 leave_end: '{{ $leave->end_date->format('d M Y') }}',
                                                 leave_reason: '{{ addslashes($leave->reason ?? '-') }}',
                                                 leave_attachment: '{{ $leave->attachment ?? '' }}'
-                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-50 font-bold tracking-tight block cursor-pointer hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">{{ $leave->employee_name }}</span>
+                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-50 font-bold tracking-tight block cursor-pointer  hover:text-indigo-600 dark:hover:text-indigo-400">{{ $leave->employee_name }}</span>
                                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">NIP/NIK: {{ $leave->employee_nip }}</span>
                                         </div>
                                     </div>
@@ -116,7 +116,7 @@
                                     <span class="text-slate-600 dark:text-slate-400 block font-semibold">{{ $leave->reason ?? '-' }}</span>
                                     @if($leave->attachment)
                                         <div class="mt-1">
-                                            <a href="{{ $leave->attachment }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold underline">
+                                            <a href="{{ $leave->attachment }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold ">
                                                 <i data-lucide="paperclip" class="w-3 h-3"></i>
                                                 Lihat Lampiran
                                             </a>
@@ -140,7 +140,7 @@
                         @endforeach
                         @if($pendingCount === 0)
                             <tr>
-                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 font-sans">
+                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
                                     Tidak ada pengajuan izin yang memerlukan persetujuan saat ini.
                                 </td>
                             </tr>
@@ -151,7 +151,7 @@
         </div>
 
         <!-- PROCESSED REQUESTS -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left font-sans">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
             <div class="p-4 border-b border-slate-100 dark:border-slate-900">
                 <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">Riwayat Keputusan</h4>
             </div>
@@ -201,7 +201,7 @@
                                                 leave_end: '{{ $leave->end_date->format('d M Y') }}',
                                                 leave_reason: '{{ addslashes($leave->reason ?? '-') }}',
                                                 leave_attachment: '{{ $leave->attachment ?? '' }}'
-                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-50 font-bold tracking-tight block cursor-pointer hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">{{ $leave->employee_name }}</span>
+                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-50 font-bold tracking-tight block cursor-pointer  hover:text-indigo-600 dark:hover:text-indigo-400">{{ $leave->employee_name }}</span>
                                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">NIP/NIK: {{ $leave->employee_nip }}</span>
                                         </div>
                                     </div>
@@ -233,7 +233,7 @@
                                     <div class="text-slate-500 dark:text-slate-400 italic">{{ $leave->notes ?? '-' }}</div>
                                     @if($leave->attachment)
                                         <div class="mt-1">
-                                            <a href="{{ $leave->attachment }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold underline">
+                                            <a href="{{ $leave->attachment }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold ">
                                                 <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
                                                 Lihat Lampiran
                                             </a>
@@ -244,7 +244,7 @@
                         @endforeach
                         @if($processedCount === 0)
                             <tr>
-                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 font-sans">
+                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 ">
                                     Belum ada data pengajuan izin yang diproses.
                                 </td>
                             </tr>
@@ -258,7 +258,7 @@
         <template x-teleport="body">
             <div x-show="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" style="display: none; margin-top: 0px !important; z-index: 9999;">
             <div @click.outside="showRejectModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-sm p-6 text-left">
-                <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4 font-sans">
+                <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4 ">
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Tolak Pengajuan Izin</h3>
                         <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5" x-text="selectedLeaveEmployee"></p>
@@ -268,7 +268,7 @@
                     </button>
                 </div>
 
-                <form method="POST" :action="`{{ url('leave-approvals') }}/${selectedLeaveId}/reject`" class="space-y-4 text-xs font-sans">
+                <form method="POST" :action="`{{ url('leave-approvals') }}/${selectedLeaveId}/reject`" class="space-y-4 text-xs ">
                     @csrf
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Alasan Penolakan</label>
@@ -357,7 +357,7 @@
                             <template x-if="selectedEmp && selectedEmp.leave_attachment">
                                 <div class="col-span-2">
                                     <span class="block text-slate-400 text-[9px] uppercase font-semibold">Lampiran</span>
-                                    <a :href="selectedEmp.leave_attachment" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold underline mt-0.5">
+                                    <a :href="selectedEmp.leave_attachment" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold  mt-0.5">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                                         Lihat Lampiran Dokumen
                                     </a>

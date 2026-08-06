@@ -25,24 +25,19 @@
 
         <!-- FILTERS -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full">
-            <form method="GET" action="{{ route('bonus-reports.index') }}" class="flex flex-row flex-wrap items-end gap-3 w-full">
+            <form method="GET" action="{{ route('bonus-reports.index') }}" class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3 w-full">
                 
                 <!-- Bulan -->
-                <div class="space-y-1 w-40">
+                <div class="space-y-1 w-full sm:w-40">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
-                    <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
-                </div>
-
-                <!-- Cut-off -->
-                <div class="flex flex-col justify-end pb-1.5 pr-2">
-                    <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">Siklus: <br><strong class="text-slate-700 dark:text-slate-300 text-xs">{{ \Carbon\Carbon::parse($startDateReq)->format('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->format('d M') }}</strong></span>
+                    <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                 </div>
 
                 <!-- Filter Unit -->
                 @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                <div class="space-y-1 w-48">
+                <div class="space-y-1 w-full sm:w-48">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
-                    <select name="unit_id" class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                    <select name="unit_id" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                         <option value="">Semua Unit</option>
                         @foreach($schoolUnits as $unit)
                             <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
@@ -54,33 +49,33 @@
                 @endif
 
                 <!-- Search -->
-                <div class="space-y-1 w-60">
+                <div class="space-y-1 w-full sm:w-60">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Pencarian</label>
                     <div class="relative w-full">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </div>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIP..." class="w-full h-9 pl-9 pr-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIP..." class="w-full text-xs h-9 pl-9 pr-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                     </div>
                 </div>
 
                 <!-- Apply Buttons (Left side) -->
                 <div class="flex items-center gap-2.5">
-                    <button type="submit" class="h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer whitespace-nowrap">
+                    <button type="submit" class="w-full sm:w-auto h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer whitespace-nowrap">
                         Terapkan
                     </button>
                     @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
-                        <a href="{{ route('bonus-reports.index') }}" class="inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors">
+                        <a href="{{ route('bonus-reports.index') }}" class="w-full sm:w-auto inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors">
                             Reset
                         </a>
                     @endif
                 </div>
 
                 <!-- Tools (Right side) -->
-                <div class="flex items-center gap-2.5 ml-auto">
+                <div class="flex items-center justify-between gap-2.5 sm:ml-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-slate-100 dark:border-slate-800 sm:border-0 w-full sm:w-auto">
                     <!-- Per Page -->
-                    <div>
-                        <select name="per_page" onchange="this.form.submit()" class="h-9 px-3 text-xs font-semibold border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <div class="w-full sm:w-40">
+                        <select name="per_page" onchange="this.form.submit()" class="w-full h-9 pl-3 pr-8 text-xs font-semibold border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15 Baris</option>
                             <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
                             <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
@@ -99,11 +94,11 @@
                         </button>
                         
                         <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
-                            <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
+                            <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                                 <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                                 Excel (.xlsx)
                             </a>
-                            <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
+                            <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
                                 <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
                                 PDF (.pdf)
                             </a>
@@ -143,7 +138,13 @@
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
                             <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 text-left sticky top-0 left-0 z-40 border-r border-slate-200 dark:border-slate-800 min-w-[200px]">
-                                <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
+                                <div class="flex items-start justify-between gap-4">
+                                    <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
+                                    <span class="text-right leading-tight">
+                                        <span class="block text-[10px] font-medium text-slate-500 dark:text-slate-400">Siklus:</span>
+                                        <strong class="block text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{{ \Carbon\Carbon::parse($startDateReq)->format('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->format('d M') }}</strong>
+                                    </span>
+                                </div>
                             </th>
                             <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 text-center sticky top-0 left-[200px] z-40 border-r border-slate-200 dark:border-slate-800 min-w-[120px]">
                                 <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bonus</span>
@@ -189,9 +190,9 @@
                                 <!-- KOLOM 2: TOTAL BONUS -->
                                 <td class="px-4 py-2 sticky left-[200px] z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 text-center transition-colors">
                                     @if($report['bonus_nominal'] > 0)
-                                        <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">Rp {{ number_format($report['bonus_nominal'], 0, ',', '.') }}</span>
+                                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Rp {{ number_format($report['bonus_nominal'], 0, ',', '.') }}</span>
                                     @else
-                                        <span class="text-sm font-bold text-slate-400 dark:text-slate-500">Rp 0</span>
+                                        <span class="text-xs font-bold text-slate-400 dark:text-slate-500">Rp 0</span>
                                     @endif
                                 </td>
                                 
@@ -233,7 +234,7 @@
                                 <td colspan="{{ count($dates) + 2 }}" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
                                         <i data-lucide="file-search" class="w-12 h-12 mb-4 text-slate-300 dark:text-slate-600"></i>
-                                        <p class="text-sm font-medium">Tidak ada data pegawai yang ditemukan</p>
+                                        <p class="text-xs font-medium">Tidak ada data pegawai yang ditemukan</p>
                                     </div>
                                 </td>
                             </tr>
@@ -261,3 +262,4 @@
         </section>
     </div>
 </x-admin-layout>
+
