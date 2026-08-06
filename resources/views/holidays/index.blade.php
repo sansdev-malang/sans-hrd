@@ -6,19 +6,6 @@
         selectedHolidayName: ''
     }">
 
-        <!-- SUCCESS ALERT -->
-        @if(session('success'))
-            <div class="bg-emerald-50 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                </div>
-                <div class="text-left">
-                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Sukses!</h5>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ session('success') }}</p>
-                </div>
-            </div>
-        @endif
-
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
             <div class="flex flex-col gap-0.5">
@@ -158,17 +145,17 @@
                     @csrf
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Hari Libur</label>
-                        <input type="text" name="name" required placeholder="Contoh: Tahun Baru Hijriah" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-880 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                        <input type="text" name="name" required placeholder="Contoh: Tahun Baru Hijriah" class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-880 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                     </div>
 
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Asli Libur</label>
-                        <input type="date" name="original_date" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-880 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
+                        <input type="date" name="original_date" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-880 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                     </div>
 
                     <div class="flex items-center">
                         <input type="checkbox" id="is_global" name="is_global" value="1" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                        <label for="is_global" class="ml-2 font-semibold text-slate-750 dark:text-slate-300 font-mono">Libur Nasional (Berlaku Semua Unit)</label>
+                        <label for="is_global" class="ml-2 text-xs font-semibold text-slate-700 dark:text-slate-300 font-mono">Libur Nasional (Berlaku Semua Unit)</label>
                     </div>
 
                     <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-900 justify-end">
