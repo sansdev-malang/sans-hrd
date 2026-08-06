@@ -68,8 +68,10 @@ class PerformanceReportController extends Controller
 
         $reports = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
-        // Build keyed map of employees for quick view retrieval
-        $employeesMap = $employeesCol->keyBy('id');
+        // Build keyed map of employees using composite key unit_id . '_' . employee_id
+        $employeesMap = $employeesCol->keyBy(function ($emp) {
+            return $emp['unit_id'] . '_' . $emp['id'];
+        });
 
         return view('performance-reports.index', compact('reports', 'schoolUnits', 'academicYears', 'employeesMap'));
     }
@@ -81,9 +83,11 @@ class PerformanceReportController extends Controller
     {
         $report = PerformanceReport::with('schoolUnit')->findOrFail($id);
         
-        // Fetch dynamic employee profile via API
+        // Fetch dynamic employee profile via API matching both unit_id and employee_id
         $allEmployees = $this->schoolService->getSdEmployees();
-        $employee = collect($allEmployees)->firstWhere('id', (int)$report->employee_id);
+        $employee = collect($allEmployees)->first(function ($emp) use ($report) {
+            return (int)$emp['id'] === (int)$report->employee_id && (int)$emp['unit_id'] === (int)$report->unit_id;
+        });
         
         if (!$employee) {
             abort(404, 'Data pegawai tidak ditemukan di unit sekolah.');

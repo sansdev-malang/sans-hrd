@@ -94,7 +94,7 @@
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                         @forelse($reports as $report)
                             @php
-                                $emp = $employeesMap->get($report->employee_id);
+                                $emp = $employeesMap->get($report->unit_id . '_' . $report->employee_id);
                             @endphp
                             <tr class="hover:bg-slate-500/5 transition-colors">
                                 <!-- Name -->
