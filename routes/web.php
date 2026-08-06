@@ -88,6 +88,10 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
 
     // Announcements CRUD
     Route::resource('announcements', \App\Http\Controllers\AnnouncementController::class);
+
+    // Synced Performance Reports Web Views
+    Route::get('performance-reports', [\App\Http\Controllers\PerformanceReportController::class, 'index'])->name('performance-reports.index');
+    Route::get('performance-reports/{id}', [\App\Http\Controllers\PerformanceReportController::class, 'show'])->name('performance-reports.show');
 });
 
 // Unit API access (unprotected internally for simplicity, or protect later if exposed publicly)
