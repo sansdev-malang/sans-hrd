@@ -145,7 +145,7 @@
         </div>
 
         <!-- ADD HOLIDAY MODAL -->
-        <div x-show="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" style="display: none;">
+        <div x-show="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" style="display: none; margin-top: 0px !important; z-index: 9999;">
             <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-sm p-6 text-left">
                 <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Tambah Hari Libur Resmi</h3>
@@ -184,7 +184,7 @@
         </div>
 
         <!-- RESCHEDULE/ADJUST HOLIDAY MODAL -->
-        <div x-show="showAdjModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" style="display: none;">
+        <div x-show="showAdjModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" style="display: none; margin-top: 0px !important; z-index: 9999;">
             <div @click.outside="showAdjModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-sm p-6 text-left">
                 <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                     <div>
