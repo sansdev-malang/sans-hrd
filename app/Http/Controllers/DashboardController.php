@@ -159,13 +159,19 @@ class DashboardController extends Controller
                     $att = $apiAttMap[$uniqueKey];
                     $attendanceMap[$uniqueKey] = $att;
                     $status = $att['status'] ?? '';
-                    if ($status === 'Present') $hadir++;
-                    elseif ($status === 'Permit') $izin++;
-                    elseif ($status === 'Sick') $sakit++;
-                    elseif ($status === 'Absent') $alpa++;
-                    else $belumAbsen++;
+                    if ($status === 'Present' || $status === 'Late') {
+                        $hadir++;
+                    } elseif ($status === 'Leave' || $status === 'Permit') {
+                        $izin++;
+                    } elseif ($status === 'Sick' || $status === 'Sakit') {
+                        $sakit++;
+                    } elseif ($status === 'Absent' || $status === 'Alpa') {
+                        $alpa++;
+                    } else {
+                        $alpa++;
+                    }
                 } else {
-                    $belumAbsen++;
+                    $alpa++;
                 }
             }
         }
