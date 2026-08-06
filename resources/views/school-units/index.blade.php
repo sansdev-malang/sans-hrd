@@ -19,7 +19,7 @@
 
         <!-- SUCCESS ALERT -->
         @if(session('success'))
-            <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
+            <div class="bg-emerald-50 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <i data-lucide="check" class="w-4 h-4"></i>
                 </div>
@@ -47,11 +47,11 @@
         <!-- DATA LIST (CARDS GRID) -->
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
             @forelse($units as $unit)
-                <div class="animate-card bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-sm relative">
+                <div class="animate-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-sm relative">
                     <div class="space-y-4">
                         <div class="flex justify-between items-start">
                             <div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-650 dark:text-indigo-400 flex items-center justify-center shrink-0 font-bold">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 font-bold">
                                     {{ substr($unit->name, 0, 2) }}
                                 </div>
                                 <div>
@@ -61,9 +61,9 @@
                             </div>
                             <!-- Status Indicator -->
                             @if($unit->is_active)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-250/30 dark:border-emerald-900/30 uppercase">Aktif</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 dark:border-emerald-900/30 uppercase">Aktif</span>
                             @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-250/30 dark:border-rose-900/30 uppercase">Non-Aktif</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400 border border-rose-200/30 dark:border-rose-900/30 uppercase">Non-Aktif</span>
                             @endif
                         </div>
 
@@ -76,7 +76,7 @@
                                 <span class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Authentication Token</span>
                                 <div class="flex items-center gap-2 mt-0.5" x-data="{ showToken: false }">
                                     <code class="font-mono text-[11px] text-slate-600 dark:text-slate-400" x-text="showToken ? '{{ $unit->api_token }}' : '••••••••••••••••'"></code>
-                                    <button @click="showToken = !showToken" type="button" class="text-slate-400 hover:text-slate-650 cursor-pointer">
+                                    <button @click="showToken = !showToken" type="button" class="text-slate-400 hover:text-slate-600 cursor-pointer">
                                         <i :data-lucide="showToken ? 'eye-off' : 'eye'" class="w-3.5 h-3.5"></i>
                                     </button>
                                 </div>
@@ -92,7 +92,7 @@
                         <form action="{{ route('school-units.destroy', $unit->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus unit sekolah ini?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="h-8 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer flex items-center gap-1.5">
+                            <button type="submit" class="h-8 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer flex items-center gap-1.5">
                                 <i data-lucide="trash" class="w-3.5 h-3.5"></i>
                                 Hapus
                             </button>
@@ -100,7 +100,7 @@
                     </div>
                 </div>
             @empty
-                <div class="col-span-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-12 text-center text-slate-400">
+                <div class="col-span-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-12 text-center text-slate-400">
                     <div class="flex flex-col items-center justify-center gap-2.5 max-w-sm mx-auto">
                         <i data-lucide="settings-2" class="w-8 h-8 text-slate-300 dark:text-slate-700"></i>
                         <p class="text-xs font-semibold text-slate-900 dark:text-slate-50">Belum Ada Unit Sekolah Terdaftar</p>
@@ -113,31 +113,31 @@
 
         <!-- ADD MODAL -->
         <template x-teleport="body">
-            <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
+            <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
                 <h3 class="text-base font-bold text-slate-900 dark:text-slate-50">Tambah Unit Sekolah Baru</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Hubungkan unit sekolah baru ke dalam portal aggregator.</p>
 
                 <form method="POST" action="{{ route('school-units.store') }}" class="mt-4 space-y-4 text-xs">
                     @csrf
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Unit</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Unit</label>
                         <input type="text" name="name" required placeholder="Contoh: SD Unit, SMP Unit"
                             class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Endpoint API URL</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Endpoint API URL</label>
                         <input type="url" name="api_url" required placeholder="http://localhost:8000/api/v1/hrd"
                             class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Token API Otentikasi</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Token API Otentikasi</label>
                         <input type="text" name="api_token" required placeholder="rahasia_sd_123"
                             class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="checkbox" name="is_active" id="add_is_active" value="1" checked
-                            class="rounded border-slate-350 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                            class="rounded border-slate-300 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
                         <label for="add_is_active" class="font-medium text-slate-700 dark:text-slate-300 cursor-pointer">Aktifkan integrasi ini sekarang</label>
                     </div>
 
@@ -152,8 +152,8 @@
 
         <!-- EDIT MODAL -->
         <template x-teleport="body">
-            <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
+            <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
                 <h3 class="text-base font-bold text-slate-900 dark:text-slate-50">Edit Unit Sekolah</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Modifikasi parameter REST API unit sekolah yang terhubung.</p>
 
@@ -161,23 +161,23 @@
                     @csrf
                     @method('PUT')
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Unit</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Unit</label>
                         <input type="text" name="name" required x-model="editName"
                             class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Endpoint API URL</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Endpoint API URL</label>
                         <input type="url" name="api_url" required x-model="editApiUrl"
                             class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Token API Otentikasi</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Token API Otentikasi</label>
                         <input type="text" name="api_token" required x-model="editApiToken"
                             class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="checkbox" name="is_active" id="edit_is_active" value="1" :checked="editIsActive"
-                            class="rounded border-slate-350 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                            class="rounded border-slate-300 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
                         <label for="edit_is_active" class="font-medium text-slate-700 dark:text-slate-300 cursor-pointer">Aktifkan integrasi ini sekarang</label>
                     </div>
 

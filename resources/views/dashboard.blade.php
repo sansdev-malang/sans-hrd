@@ -100,10 +100,10 @@
                         @forelse($latestAnnouncements as $ann)
                             @php
                                 $catColor = [
-                                    'umum' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400 border-indigo-150/40 dark:border-indigo-900/20',
-                                    'akademik' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-150/40 dark:border-blue-900/20',
-                                    'kepegawaian' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-150/40 dark:border-emerald-900/20',
-                                    'penting' => 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400 border-rose-150/40 dark:border-rose-900/20 animate-pulse',
+                                    'umum' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400 border-indigo-100/40 dark:border-indigo-900/20',
+                                    'akademik' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-100/40 dark:border-blue-900/20',
+                                    'kepegawaian' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-100/40 dark:border-emerald-900/20',
+                                    'penting' => 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400 border-rose-100/40 dark:border-rose-900/20 animate-pulse',
                                 ][$ann->category] ?? 'bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
                             @endphp
                             <a href="{{ route('announcements.show', $ann) }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left">

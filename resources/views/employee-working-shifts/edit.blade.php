@@ -111,7 +111,7 @@
         </header>
 
         <!-- FORM -->
-        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
             <form method="POST" action="{{ route('employee-working-shifts.update-batch') }}" class="p-6 space-y-6">
                 @csrf
                 @method('PUT')
@@ -125,7 +125,7 @@
                     <div class="space-y-6">
                         <!-- Unit Sekolah -->
                         <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Unit Sekolah</label>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Pilih Unit Sekolah</label>
                             <select name="school_unit_id" required x-model="selectedUnit" @change="fetchEmployees(false)" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                 <option value="">-- Pilih Unit Sekolah --</option>
                                 @foreach($units as $unit)
@@ -137,7 +137,7 @@
                         <div class="grid grid-cols-2 gap-4">
                             <!-- Template Shift -->
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih Template Shift Kerja</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Pilih Template Shift Kerja</label>
                                 <select name="working_shift_id" required class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                     <option value="">-- Pilih Template Shift --</option>
                                     @foreach($shifts as $shift)
@@ -148,7 +148,7 @@
 
                             <!-- Bonus Schema -->
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Skema Bonus (Opsional)</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Skema Bonus (Opsional)</label>
                                 <select name="bonus_schema_id" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                     <option value="">-- Ikuti Default/Aktif --</option>
                                     @if(isset($bonusSchemas))
@@ -163,11 +163,11 @@
                         <!-- Dates -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal Mulai</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Tanggal Mulai</label>
                                 <input type="date" name="start_date" value="{{ $start }}" required class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                             </div>
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal Selesai (Opsional)</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Tanggal Selesai (Opsional)</label>
                                 <input type="date" name="end_date" value="{{ $end !== 'null' ? $end : '' }}" class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                             </div>
                         </div>
@@ -175,7 +175,7 @@
 
                     <!-- Pegawai List -->
                     <div class="flex flex-col h-full">
-                        <label class="font-semibold text-slate-700 dark:text-slate-350 mb-1.5 flex justify-between items-center text-sm shrink-0">
+                        <label class="font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center text-sm shrink-0">
                             <span>
                                 Pilih Pegawai 
                                 <span x-show="isLoadingEmployees" class="text-xs text-indigo-500 ml-2 animate-pulse font-normal">Memuat data...</span>
@@ -188,7 +188,7 @@
                         
                         <div class="flex flex-col bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
                             <!-- Search Bar -->
-                            <div class="p-2 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-950">
+                            <div class="p-2 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
                                 <div class="relative flex items-center">
                                     <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none"></i>
                                     <input type="text" x-model="searchQuery" :disabled="employees.length === 0" placeholder="Cari nama atau NIK..." style="padding-left: 2.25rem;" class="text-xs w-full pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 disabled:opacity-50">
@@ -208,7 +208,7 @@
                                 <template x-for="emp in employees" :key="emp.id">
                                     <label 
                                         x-show="searchQuery === '' || emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || (emp.nuptk_nip_nik && String(emp.nuptk_nip_nik).toLowerCase().includes(searchQuery.toLowerCase()))"
-                                        class="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg transition-colors shadow-sm">
+                                        class="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg transition-colors shadow-sm">
                                         <input type="checkbox" name="employee_ids[]" :value="emp.id" class="text-xs employee-checkbox w-4 h-4 rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 shrink-0">
                                         <div class="flex flex-col">
                                             <span class="text-xs text-slate-900 dark:text-slate-100 font-semibold leading-snug" x-text="emp.name"></span>

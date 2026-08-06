@@ -18,7 +18,7 @@
                             <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
                         </span>
                         <input type="text" name="search" value="{{ $search }}" placeholder="Cari UID atau Mesin..." 
-                            class="w-full pl-9 pr-4 h-9 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors">
+                            class="w-full pl-9 pr-4 h-9 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors">
                     </div>
 
                     <!-- BUTTON -->

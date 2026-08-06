@@ -3,7 +3,7 @@
 
         <!-- SUCCESS ALERT -->
         @if(session('success'))
-            <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
+            <div class="bg-emerald-50 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <i data-lucide="check" class="w-4 h-4"></i>
                 </div>
@@ -26,7 +26,7 @@
         <form action="{{ route('settings.update-adms') }}" method="POST" class="w-full">
             @csrf
             @method('PUT')
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
                 <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-900/30 flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                         <i data-lucide="radio" class="w-4 h-4"></i>
@@ -58,7 +58,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i data-lucide="key" class="w-4 h-4 text-slate-400"></i>
                                 </div>
-                                <input type="text" name="adms_auth_token" value="{{ old('adms_auth_token', setting('adms_auth_token')) }}" class="w-full h-11 pl-10 pr-4 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm" placeholder="Masukkan token rahasia...">
+                                <input type="text" name="adms_auth_token" value="{{ old('adms_auth_token', setting('adms_auth_token')) }}" class="w-full h-11 pl-10 pr-4 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm" placeholder="Masukkan token rahasia...">
                             </div>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Gunakan token untuk mencegah mesin asing mengirim data. Pastikan token yang dimasukkan di sini <b>sama persis</b> dengan yang dimasukkan di menu Cloud Server mesin ZKTeco.</p>
                         </div>

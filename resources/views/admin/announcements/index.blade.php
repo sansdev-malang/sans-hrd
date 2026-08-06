@@ -18,13 +18,13 @@
         </header>
 
         <!-- TABLE CARD -->
-        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
             <div class="p-4 border-b border-slate-100 dark:border-slate-900">
                 <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">Daftar Pengumuman</h4>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
-                    <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-150 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                    <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="px-6 py-3 text-left">Judul Pengumuman</th>
                             <th class="px-6 py-3 text-center">Kategori</th>
@@ -44,10 +44,10 @@
                                 <td class="px-6 py-4 text-center">
                                     @php
                                         $catColor = [
-                                            'umum' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-900/30',
-                                            'akademik' => 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 border border-blue-200/50 dark:border-blue-900/30',
-                                            'kepegawaian' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-900/30',
-                                            'penting' => 'bg-rose-50 text-rose-700 dark:bg-rose-955/20 dark:text-rose-400 border border-rose-200/50 dark:border-rose-900/30',
+                                            'umum' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-900/30',
+                                            'akademik' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200/50 dark:border-blue-900/30',
+                                            'kepegawaian' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-900/30',
+                                            'penting' => 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400 border border-rose-200/50 dark:border-rose-900/30',
                                         ][$announcement->category] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700';
                                     @endphp
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border {{ $catColor }} uppercase">
@@ -77,7 +77,7 @@
                                                 $audienceLabel = implode(', ', $translatedAudiences);
                                             @endphp
                                             @if($unit)
-                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 text-[9px] font-bold">
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 text-[9px] font-bold">
                                                     {{ $unit->name }} ({{ $audienceLabel }})
                                                 </span>
                                             @endif
@@ -94,7 +94,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($announcement->is_active)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                             Aktif
                                         </span>
@@ -106,18 +106,18 @@
                                 </td>
                                 <td class="px-6 py-4 text-right flex justify-end gap-2">
                                     <!-- View Link -->
-                                    <a href="{{ route('announcements.show', $announcement) }}" class="h-7 w-7 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-650 dark:text-slate-350 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-center transition" title="Lihat Detail">
+                                    <a href="{{ route('announcements.show', $announcement) }}" class="h-7 w-7 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-center transition" title="Lihat Detail">
                                         <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                     </a>
                                     <!-- Edit Link -->
-                                    <a href="{{ route('announcements.edit', $announcement) }}" class="h-7 w-7 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-650 dark:text-slate-350 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-center transition" title="Edit">
+                                    <a href="{{ route('announcements.edit', $announcement) }}" class="h-7 w-7 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-center transition" title="Edit">
                                         <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                                     </a>
                                     <!-- Delete Link -->
                                     <form action="{{ route('announcements.destroy', $announcement) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengumuman ini? Tindakan ini akan menghapusnya dari seluruh unit sekolah target.')" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="h-7 w-7 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-955/20 text-rose-700 dark:text-rose-455 border border-rose-200/30 dark:border-rose-900/30 rounded-lg flex items-center justify-center transition cursor-pointer" title="Hapus">
+                                        <button type="submit" class="h-7 w-7 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/30 dark:border-rose-900/30 rounded-lg flex items-center justify-center transition cursor-pointer" title="Hapus">
                                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                         </button>
                                     </form>

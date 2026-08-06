@@ -35,7 +35,7 @@
         </header>
 
         <!-- FILTERS -->
-        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left">
                                                                         <form method="GET" action="{{ route('users.index') }}" class="flex flex-col md:flex-row flex-wrap items-end gap-4 text-xs w-full">
                 <!-- Search Name/Email -->
                 <div style="flex: 0 0 250px;">
@@ -91,7 +91,7 @@
         </div>
 
         <!-- USERS TABLE -->
-        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
             <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700" style="max-height: calc(100vh - 280px); overflow-y: auto;">
                 <table class="w-full text-xs">
                     <thead class="sticky top-0 z-40 bg-slate-50/70 dark:bg-slate-900/50 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
@@ -107,7 +107,7 @@
                             <tr class="hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors">
                                 <td class="px-6 py-4 text-left">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center uppercase">
+                                        <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center uppercase">
                                             {{ substr($user->name, 0, 2) }}
                                         </div>
                                         <div>
@@ -125,9 +125,9 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($user->role === 'super_admin')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-150 dark:border-rose-900/30 uppercase">Super Admin</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 uppercase">Super Admin</span>
                                     @elseif($user->role === 'hrd')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400 border border-indigo-150 dark:border-indigo-900/30 uppercase">Staf HRD</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30 uppercase">Staf HRD</span>
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 uppercase">{{ $user->role }}</span>
                                     @endif
@@ -140,7 +140,7 @@
                                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="w-8 h-8 rounded-lg bg-rose-50/40 hover:bg-rose-50 dark:bg-rose-950/10 dark:hover:bg-rose-950/20 border border-rose-150/40 dark:border-rose-900/30 text-rose-600 dark:text-rose-450 flex items-center justify-center transition-colors cursor-pointer" title="Hapus Akun">
+                                            <button type="submit" class="w-8 h-8 rounded-lg bg-rose-50/40 hover:bg-rose-50 dark:bg-rose-900/10 dark:hover:bg-rose-900/20 border border-rose-100/40 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer" title="Hapus Akun">
                                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                             </button>
             </form>
@@ -171,8 +171,8 @@
 
         <!-- MODAL 1: ADD USER -->
         <template x-teleport="body">
-            <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
-            <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
+            <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
+            <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
                         <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
@@ -227,8 +227,8 @@
 
         <!-- MODAL 2: EDIT USER -->
         <template x-teleport="body">
-            <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
-            <div @click.outside="showEditModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
+            <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
+            <div @click.outside="showEditModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
                         <i data-lucide="edit-3" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
@@ -283,8 +283,8 @@
 
         <!-- MODAL 3: PROFILE DETAIL CARD -->
         <template x-teleport="body">
-            <div x-show="showDetailModal" @click.self="showDetailModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
-            <div @click.outside="showDetailModal = false" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
+            <div x-show="showDetailModal" @click.self="showDetailModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
+            <div @click.outside="showDetailModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
                         <i data-lucide="user-check" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
@@ -298,7 +298,7 @@
                 <div class="p-5 space-y-6">
                     <!-- User Account Card -->
                     <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center text-2xl uppercase shadow-sm">
+                        <div class="w-16 h-16 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center text-2xl uppercase shadow-sm">
                             <span x-text="selectedUser ? selectedUser.name.substring(0,2) : ''"></span>
                         </div>
                         <div class="space-y-1">

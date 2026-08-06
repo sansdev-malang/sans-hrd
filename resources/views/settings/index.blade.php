@@ -10,7 +10,7 @@
 
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full">
                 <form action="{{ route('cutoff-settings.update') }}" method="POST" class="space-y-4">
                     @csrf
                     @method('PUT')

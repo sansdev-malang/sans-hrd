@@ -16,7 +16,7 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                     </button>
                     
-                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
                         <a href="{{ route('employees.export.excel', request()->query()) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                             Excel (.xlsx)
@@ -27,7 +27,7 @@
                         </a>
                     </div>
                 </div>
-                <button @click="showImportModal = true" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-855 text-slate-700 dark:text-slate-355 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-150 cursor-pointer w-full sm:w-auto">
+                <button @click="showImportModal = true" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-100 cursor-pointer w-full sm:w-auto">
                     <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-slate-500"></i>
                     Impor Pegawai
                 </button>
@@ -39,7 +39,7 @@
         </header>
 
         <!-- FILTERS & SEARCH -->
-        <section class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Search Box -->
                 <div class="relative w-full md:max-w-2xl">
@@ -91,7 +91,7 @@
         </section>
 
         <!-- DATA TABLE -->
-        <section class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
             <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Daftar Pegawai Gabungan</h3>
             </div>
@@ -99,14 +99,14 @@
                 <table class="w-full text-xs border-collapse">
                                         <thead class="sticky top-0 z-10 shadow-sm">
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-14">No</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider min-w-[200px]">Nama Lengkap</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-40">Unit</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-40">Tipe Pegawai</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-56">Jabatan</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-40">ZK ID</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
-                            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider w-24">Aksi</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-14">No</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[200px]">Nama Lengkap</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Unit</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Tipe Pegawai</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-56">Jabatan</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">ZK ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
+                            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
@@ -141,13 +141,13 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if(str_contains(strtolower($emp['unit_name']), 'paud'))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-400 border border-teal-200/50 dark:border-teal-800/40 uppercase">PAUD & TK</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border border-teal-200/50 dark:border-teal-800/40 uppercase">PAUD & TK</span>
                                     @elseif(str_contains(strtolower($emp['unit_name']), 'sd'))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/40 uppercase">SD</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/40 uppercase">SD</span>
                                     @elseif(str_contains(strtolower($emp['unit_name']), 'smp'))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/40 uppercase">SMP</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/40 uppercase">SMP</span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 uppercase tracking-wider">{{ $emp['unit_name'] }}</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 uppercase tracking-wider">{{ $emp['unit_name'] }}</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium">
@@ -168,11 +168,11 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if(($emp['status'] ?? '') == 'Active')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-lime-50 dark:bg-lime-950/30 text-lime-700 dark:text-lime-400 border border-lime-200/50 dark:border-lime-800/40">Aktif</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-lime-50 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400 border border-lime-200/50 dark:border-lime-800/40">Aktif</span>
                                     @elseif(($emp['status'] ?? '') == 'Leave')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">Cuti</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">Cuti</span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 dark:bg-red-955/20 text-red-700 dark:text-red-400 border border-red-200/50 dark:border-red-800/40">Nonaktif</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200/50 dark:border-red-800/40">Nonaktif</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -181,7 +181,7 @@
                                             <i data-lucide="edit" class="w-3.5 h-3.5"></i>
                                             Edit
                                         </button>
-                                        <button type="button" @click='selectedEmp = @json($emp); showDeleteModal = true' class="h-8 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer flex items-center gap-1">
+                                        <button type="button" @click='selectedEmp = @json($emp); showDeleteModal = true' class="h-8 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer flex items-center gap-1">
                                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                             Hapus
                                         </button>
@@ -207,18 +207,18 @@
                 <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-900 bg-slate-50/30 dark:bg-slate-900/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
                     <div>
                         Menampilkan
-                        <span class="font-bold text-slate-700 dark:text-slate-350">{{ $employees->firstItem() }}</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $employees->firstItem() }}</span>
                         sampai
-                        <span class="font-bold text-slate-700 dark:text-slate-350">{{ $employees->lastItem() }}</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $employees->lastItem() }}</span>
                         dari
-                        <span class="font-bold text-slate-700 dark:text-slate-350">{{ $employees->total() }}</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $employees->total() }}</span>
                         pegawai
                     </div>
                     <div class="flex items-center gap-1.5 font-semibold">
                         @if ($employees->onFirstPage())
                             <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Sebelumnya</span>
                         @else
-                            <a href="{{ $employees->previousPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-950">Sebelumnya</a>
+                            <a href="{{ $employees->previousPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Sebelumnya</a>
                         @endif
 
                         <span class="px-3 py-1 font-medium text-slate-700 dark:text-slate-300">
@@ -226,7 +226,7 @@
                         </span>
 
                         @if ($employees->hasMorePages())
-                            <a href="{{ $employees->nextPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-950">Berikutnya</a>
+                            <a href="{{ $employees->nextPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Berikutnya</a>
                         @else
                             <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Berikutnya</span>
                         @endif
@@ -261,7 +261,7 @@
                      x-transition:leave="ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-950 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-lg border border-slate-200 dark:border-slate-800">
+                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-lg border border-slate-200 dark:border-slate-800">
                     
                     <form action="{{ route('employees.import') }}" method="POST" enctype="multipart/form-data">
                         @csrf
@@ -348,7 +348,7 @@
                      x-transition:leave="ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-950 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl border border-slate-200 dark:border-slate-800">
+                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl border border-slate-200 dark:border-slate-800">
                     
                     <div class="p-6">
                         <!-- Header -->
@@ -538,7 +538,7 @@
                      x-transition:leave="ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-950 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-3xl border border-slate-200 dark:border-slate-800">
+                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-3xl border border-slate-200 dark:border-slate-800">
                     
                     <div class="flex flex-col max-h-[85vh] text-left">
                         <!-- Header -->
@@ -569,7 +569,7 @@
                                     <!-- Unit Sekolah -->
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Unit Sekolah Tujuan <span class="text-rose-500">*</span></label>
-                                        <select name="school_unit_id" id="modal_school_unit_id" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('school_unit_id') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                        <select name="school_unit_id" id="modal_school_unit_id" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('school_unit_id') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">-- Pilih Unit Sekolah --</option>
                                             @foreach($schoolUnits as $unit)
                                                 <option value="{{ $unit->id }}" {{ old('school_unit_id') == $unit->id ? 'selected' : '' }}>{{ $unit->name }}</option>
@@ -586,7 +586,7 @@
                                         <div>
                                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Gelar Depan</label>
                                             <input type="text" name="front_title" placeholder="Dr., Ir."
-                                                value="{{ old('front_title') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('front_title') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                                value="{{ old('front_title') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('front_title') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('front_title')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -595,7 +595,7 @@
                                         <div class="md:col-span-2">
                                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
                                             <input type="text" name="name" required placeholder="Eko Wibowo"
-                                                value="{{ old('name') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('name') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                                value="{{ old('name') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('name') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('name')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -604,7 +604,7 @@
                                         <div>
                                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Gelar Belakang</label>
                                             <input type="text" name="back_title" placeholder="S.Pd., M.Kom."
-                                                value="{{ old('back_title') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('back_title') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                                value="{{ old('back_title') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('back_title') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('back_title')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -615,7 +615,7 @@
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Alamat Email</label>
                                         <input type="email" name="email" placeholder="Contoh: nama@sans.dev" 
-                                            value="{{ old('email') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('email') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                            value="{{ old('email') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('email') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('email')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -624,7 +624,7 @@
                                     <!-- Tipe Pegawai -->
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tipe Pegawai <span class="text-rose-500">*</span></label>
-                                        <select name="employee_type_code" id="modal_employee_type_code" required disabled class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('employee_type_code') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                        <select name="employee_type_code" id="modal_employee_type_code" required disabled class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('employee_type_code') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">-- Pilih Unit Sekolah Dahulu --</option>
                                         </select>
                                         @error('employee_type_code')
@@ -639,21 +639,21 @@
 
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tempat Lahir</label>
-                                        <input type="text" name="birth_place" value="{{ old('birth_place') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('birth_place') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="birth_place" value="{{ old('birth_place') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('birth_place') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('birth_place')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tanggal Lahir</label>
-                                        <input type="date" name="birth_date" value="{{ old('birth_date') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('birth_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="date" name="birth_date" value="{{ old('birth_date') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('birth_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('birth_date')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jenis Kelamin</label>
-                                        <select name="gender" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('gender') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                        <select name="gender" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('gender') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Laki-laki</option>
                                             <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Perempuan</option>
                                         </select>
@@ -663,14 +663,14 @@
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Alamat</label>
-                                        <input type="text" name="address" value="{{ old('address') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('address') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="address" value="{{ old('address') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('address') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('address')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">No. HP / WA</label>
-                                        <input type="text" name="phone" value="{{ old('phone') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('phone') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="phone" value="{{ old('phone') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('phone') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('phone')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -683,112 +683,112 @@
 
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NIK</label>
-                                        <input type="text" name="nik" value="{{ old('nik') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nik') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="nik" value="{{ old('nik') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nik') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('nik')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NIY</label>
-                                        <input type="text" name="niy" value="{{ old('niy') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('niy') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="niy" value="{{ old('niy') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('niy') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('niy')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NUPTK</label>
-                                        <input type="text" name="nuptk" value="{{ old('nuptk') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nuptk') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="nuptk" value="{{ old('nuptk') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nuptk') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('nuptk')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NO UKG</label>
-                                        <input type="text" name="no_ukg" value="{{ old('no_ukg') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('no_ukg') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="no_ukg" value="{{ old('no_ukg') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('no_ukg') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('no_ukg')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NRG</label>
-                                        <input type="text" name="nrg" value="{{ old('nrg') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nrg') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="nrg" value="{{ old('nrg') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nrg') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('nrg')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pangkat / Golongan</label>
-                                        <input type="text" name="pangkat_golongan" value="{{ old('pangkat_golongan') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('pangkat_golongan') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="pangkat_golongan" value="{{ old('pangkat_golongan') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('pangkat_golongan') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('pangkat_golongan')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pendidikan Terakhir</label>
-                                        <input type="text" name="last_education" value="{{ old('last_education') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_education') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="last_education" value="{{ old('last_education') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_education') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('last_education')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jurusan</label>
-                                        <input type="text" name="major" value="{{ old('major') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('major') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="major" value="{{ old('major') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('major') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('major')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jabatan Utama</label>
-                                        <input type="text" name="position" value="{{ old('position') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('position') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="position" value="{{ old('position') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('position') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('position')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jabatan Tambahan</label>
-                                        <input type="text" name="additional_position" value="{{ old('additional_position') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('additional_position') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="additional_position" value="{{ old('additional_position') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('additional_position') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('additional_position')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status Kepegawaian</label>
-                                        <input type="text" name="employment_status" value="{{ old('employment_status') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('employment_status') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="employment_status" value="{{ old('employment_status') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('employment_status') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('employment_status')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tanggal Mulai Tugas</label>
-                                        <input type="date" name="task_start_date" value="{{ old('task_start_date') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('task_start_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="date" name="task_start_date" value="{{ old('task_start_date') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('task_start_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('task_start_date')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tanggal Diangkat</label>
-                                        <input type="date" name="appointment_date" value="{{ old('appointment_date') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('appointment_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="date" name="appointment_date" value="{{ old('appointment_date') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('appointment_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('appointment_date')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tanggal SK Terakhir</label>
-                                        <input type="date" name="last_sk_date" value="{{ old('last_sk_date') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_sk_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="date" name="last_sk_date" value="{{ old('last_sk_date') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_sk_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('last_sk_date')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nomor SK Terakhir</label>
-                                        <input type="text" name="last_sk_number" value="{{ old('last_sk_number') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_sk_number') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="last_sk_number" value="{{ old('last_sk_number') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_sk_number') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('last_sk_number')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Masa Kerja Golongan</label>
-                                        <input type="text" name="work_period" value="{{ old('work_period') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('work_period') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="work_period" value="{{ old('work_period') }}" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('work_period') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('work_period')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -803,7 +803,7 @@
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">ID ZKTeco / PIN Fingerprint</label>
                                         <div class="flex items-center gap-2">
-                                            <input type="text" name="zkteco_uid" id="modal_zkteco_uid" value="{{ old('zkteco_uid') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('zkteco_uid') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                            <input type="text" name="zkteco_uid" id="modal_zkteco_uid" value="{{ old('zkteco_uid') }}" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('zkteco_uid') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('zkteco_uid')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -825,7 +825,7 @@
 
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status Keaktifan <span class="text-rose-500">*</span></label>
-                                        <select name="status" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('status') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                        <select name="status" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('status') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="Active" {{ old('status', 'Active') == 'Active' ? 'selected' : '' }}>Aktif</option>
                                             <option value="Leave" {{ old('status') == 'Leave' ? 'selected' : '' }}>Cuti</option>
                                             <option value="Inactive" {{ old('status') == 'Inactive' ? 'selected' : '' }}>Nonaktif</option>
@@ -883,7 +883,7 @@
                      x-transition:leave="ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-950 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-3xl border border-slate-200 dark:border-slate-800">
+                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-3xl border border-slate-200 dark:border-slate-800">
 
                     <div class="flex flex-col max-h-[85vh] text-left">
                         <!-- Header -->
@@ -922,7 +922,7 @@
                                     </template>
                                     <div class="flex flex-col gap-1 text-left">
                                         <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Foto Profil Saat Ini</h4>
-                                        <p class="text-[10px] text-slate-450 dark:text-slate-500">Ganti foto dengan mengunggah file baru pada field di bawah.</p>
+                                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Ganti foto dengan mengunggah file baru pada field di bawah.</p>
                                     </div>
                                 </div>
 
@@ -943,7 +943,7 @@
                                         <div>
                                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Gelar Depan</label>
                                             <input type="text" name="front_title" :value="selectedEmp ? selectedEmp.front_title : ''" placeholder="Dr., Ir."
-                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('front_title') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('front_title') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('front_title')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -952,7 +952,7 @@
                                         <div class="md:col-span-2">
                                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
                                             <input type="text" name="name" required :value="selectedEmp ? selectedEmp.raw_name : ''" placeholder="Eko Wibowo"
-                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('name') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('name') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('name')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -961,7 +961,7 @@
                                         <div>
                                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Gelar Belakang</label>
                                             <input type="text" name="back_title" :value="selectedEmp ? selectedEmp.back_title : ''" placeholder="S.Pd., M.Kom."
-                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('back_title') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('back_title') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('back_title')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -972,7 +972,7 @@
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Alamat Email</label>
                                         <input type="email" name="email" :value="selectedEmp ? selectedEmp.email : ''"
-                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('email') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('email') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('email')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -981,7 +981,7 @@
                                     <!-- Tipe Pegawai -->
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tipe Pegawai <span class="text-rose-500">*</span></label>
-                                        <select name="employee_type_code" id="modal_edit_employee_type_code" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('employee_type_code') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                        <select name="employee_type_code" id="modal_edit_employee_type_code" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('employee_type_code') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Memuat...</option>
                                         </select>
                                         @error('employee_type_code')
@@ -996,21 +996,21 @@
 
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tempat Lahir</label>
-                                        <input type="text" name="birth_place" :value="selectedEmp ? selectedEmp.birth_place : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('birth_place') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="birth_place" :value="selectedEmp ? selectedEmp.birth_place : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('birth_place') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('birth_place')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tanggal Lahir</label>
-                                        <input type="date" name="birth_date" :value="selectedEmp ? selectedEmp.birth_date : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('birth_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="date" name="birth_date" :value="selectedEmp ? selectedEmp.birth_date : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('birth_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('birth_date')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jenis Kelamin</label>
-                                        <select name="gender" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('gender') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                        <select name="gender" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('gender') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="Male" x-bind:selected="selectedEmp && selectedEmp.gender == 'Male'">Laki-laki</option>
                                             <option value="Female" x-bind:selected="selectedEmp && selectedEmp.gender == 'Female'">Perempuan</option>
                                         </select>
@@ -1020,14 +1020,14 @@
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Alamat</label>
-                                        <input type="text" name="address" :value="selectedEmp ? selectedEmp.address : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('address') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="address" :value="selectedEmp ? selectedEmp.address : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('address') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('address')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">No. HP / WA</label>
-                                        <input type="text" name="phone" :value="selectedEmp ? selectedEmp.phone : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('phone') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="phone" :value="selectedEmp ? selectedEmp.phone : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('phone') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('phone')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -1040,112 +1040,112 @@
 
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NIK</label>
-                                        <input type="text" name="nik" :value="selectedEmp ? selectedEmp.nik : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nik') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="nik" :value="selectedEmp ? selectedEmp.nik : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nik') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('nik')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NIY</label>
-                                        <input type="text" name="niy" :value="selectedEmp ? selectedEmp.niy : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('niy') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="niy" :value="selectedEmp ? selectedEmp.niy : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('niy') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('niy')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NUPTK</label>
-                                        <input type="text" name="nuptk" :value="selectedEmp ? selectedEmp.nuptk : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nuptk') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="nuptk" :value="selectedEmp ? selectedEmp.nuptk : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nuptk') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('nuptk')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NO UKG</label>
-                                        <input type="text" name="no_ukg" :value="selectedEmp ? selectedEmp.no_ukg : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('no_ukg') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="no_ukg" :value="selectedEmp ? selectedEmp.no_ukg : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('no_ukg') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('no_ukg')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">NRG</label>
-                                        <input type="text" name="nrg" :value="selectedEmp ? selectedEmp.nrg : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nrg') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="nrg" :value="selectedEmp ? selectedEmp.nrg : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('nrg') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('nrg')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pangkat / Golongan</label>
-                                        <input type="text" name="pangkat_golongan" :value="selectedEmp ? selectedEmp.pangkat_golongan : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('pangkat_golongan') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="pangkat_golongan" :value="selectedEmp ? selectedEmp.pangkat_golongan : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('pangkat_golongan') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('pangkat_golongan')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pendidikan Terakhir</label>
-                                        <input type="text" name="last_education" :value="selectedEmp ? selectedEmp.last_education : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_education') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="last_education" :value="selectedEmp ? selectedEmp.last_education : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_education') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('last_education')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jurusan</label>
-                                        <input type="text" name="major" :value="selectedEmp ? selectedEmp.major : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('major') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="major" :value="selectedEmp ? selectedEmp.major : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('major') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('major')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jabatan Utama</label>
-                                        <input type="text" name="position" :value="selectedEmp ? selectedEmp.position : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('position') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="position" :value="selectedEmp ? selectedEmp.position : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('position') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('position')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jabatan Tambahan</label>
-                                        <input type="text" name="additional_position" :value="selectedEmp ? selectedEmp.additional_position : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('additional_position') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="additional_position" :value="selectedEmp ? selectedEmp.additional_position : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('additional_position') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('additional_position')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status Kepegawaian</label>
-                                        <input type="text" name="employment_status" :value="selectedEmp ? selectedEmp.employment_status : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('employment_status') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="employment_status" :value="selectedEmp ? selectedEmp.employment_status : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('employment_status') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('employment_status')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tanggal Mulai Tugas</label>
-                                        <input type="date" name="task_start_date" :value="selectedEmp ? selectedEmp.task_start_date : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('task_start_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="date" name="task_start_date" :value="selectedEmp ? selectedEmp.task_start_date : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('task_start_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('task_start_date')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tanggal Diangkat</label>
-                                        <input type="date" name="appointment_date" :value="selectedEmp ? selectedEmp.appointment_date : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('appointment_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="date" name="appointment_date" :value="selectedEmp ? selectedEmp.appointment_date : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('appointment_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('appointment_date')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tanggal SK Terakhir</label>
-                                        <input type="date" name="last_sk_date" :value="selectedEmp ? selectedEmp.last_sk_date : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_sk_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="date" name="last_sk_date" :value="selectedEmp ? selectedEmp.last_sk_date : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_sk_date') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('last_sk_date')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nomor SK Terakhir</label>
-                                        <input type="text" name="last_sk_number" :value="selectedEmp ? selectedEmp.last_sk_number : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_sk_number') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="last_sk_number" :value="selectedEmp ? selectedEmp.last_sk_number : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('last_sk_number') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('last_sk_number')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Masa Kerja Golongan</label>
-                                        <input type="text" name="work_period" :value="selectedEmp ? selectedEmp.work_period : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('work_period') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="work_period" :value="selectedEmp ? selectedEmp.work_period : ''" class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border @error('work_period') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('work_period')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -1160,7 +1160,7 @@
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">ID ZKTeco / PIN Fingerprint</label>
                                         <div class="flex items-center gap-2">
-                                            <input type="text" name="zkteco_uid" id="modal_edit_zkteco_uid" :value="selectedEmp ? selectedEmp.zkteco_uid : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('zkteco_uid') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
+                                            <input type="text" name="zkteco_uid" id="modal_edit_zkteco_uid" :value="selectedEmp ? selectedEmp.zkteco_uid : ''" class="w-full text-xs h-9 px-3 font-mono bg-white dark:bg-slate-900 border @error('zkteco_uid') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         @error('zkteco_uid')
                                             <span class="text-[10px] text-rose-500 mt-1 block font-medium">{{ $message }}</span>
                                         @enderror
@@ -1182,7 +1182,7 @@
 
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status Keaktifan <span class="text-rose-500">*</span></label>
-                                        <select name="status" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('status') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-950/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                        <select name="status" required class="w-full text-xs h-9 pl-3 pr-8 bg-white dark:bg-slate-900 border @error('status') border-rose-500 focus:ring-rose-200 dark:focus:ring-rose-900/40 @else border-slate-200 dark:border-slate-800 @enderror rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="Active" x-bind:selected="selectedEmp && selectedEmp.status == 'Active'">Aktif</option>
                                             <option value="Leave" x-bind:selected="selectedEmp && selectedEmp.status == 'Leave'">Cuti</option>
                                             <option value="Inactive" x-bind:selected="selectedEmp && selectedEmp.status == 'Inactive'">Nonaktif</option>
@@ -1240,7 +1240,7 @@
                      x-transition:leave="ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-950 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-sm border border-slate-200 dark:border-slate-800">
+                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-sm border border-slate-200 dark:border-slate-800">
 
                     <!-- Body -->
                     <div class="p-6 text-center">

@@ -61,7 +61,7 @@
     @endif
 
     <!-- Controls -->
-    <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4">
         <form method="GET" action="{{ route('employee-working-shifts.roster') }}" id="filterForm">
             @if(request('emp_ids'))
                 @foreach(request('emp_ids') as $empId)
@@ -71,7 +71,7 @@
             <input type="hidden" name="roster_name" value="{{ $rosterName ?? request('roster_name') }}">
             <div class="flex flex-wrap items-end gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Unit Sekolah</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Sekolah</label>
                     <select name="unit_id" class="pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer" onchange="document.getElementById('filterForm').submit()">
                         @foreach($units as $unit)
                             <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>{{ $unit->name }}</option>
@@ -79,7 +79,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Bulan</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Bulan</label>
                     <select name="month" class="pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer" onchange="document.getElementById('filterForm').submit()">
                         @php
                             $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -90,18 +90,18 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Tahun</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun</label>
                     <input type="number" name="year" value="{{ $year }}" class="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="document.getElementById('filterForm').submit()">
                 </div>
                 
                 <div class="relative" x-data="{ openFilter: false }">
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Tampilkan Shift</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tampilkan Shift</label>
                     <button type="button" @click="openFilter = !openFilter" class="w-48 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-between text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
                         <span class="font-medium whitespace-nowrap">{{ count($selectedShiftIds) > 0 ? count($selectedShiftIds) . ' Shift Terpilih' : 'Semua Shift' }}</span>
                         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     
-                    <div x-show="openFilter" style="display: none; width: 500px; max-width: 90vw;" @click.away="openFilter = false" class="absolute top-full left-0 mt-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-3">
+                    <div x-show="openFilter" style="display: none; width: 500px; max-width: 90vw;" @click.away="openFilter = false" class="absolute top-full left-0 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-3">
                         <div class="gap-2 max-h-60 overflow-y-auto custom-scrollbar p-1" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));">
                             @foreach($allShifts as $s)
                                 <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-lg transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
@@ -167,7 +167,7 @@
         <input type="hidden" name="month" value="{{ $month }}">
         <input type="hidden" name="old_roster_name" value="{{ $oldRosterName ?? '' }}">
         
-        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
             <!-- Table Tools -->
             <div class="p-4 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between">
                 <div class="relative w-full max-w-sm">
@@ -209,7 +209,7 @@
                                 $bonusSchemaId = $rowData['bonus_schema_id'] ?? '';
                             @endphp
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group" x-show="'{{ addslashes(strtolower($emp['name'])) }}'.includes(searchQuery.toLowerCase())">
-                                <td class="p-3 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-white dark:bg-slate-950 group-hover:bg-slate-50 dark:group-hover:bg-slate-900 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)]">
+                                <td class="p-3 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-900 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)]">
                                     <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm whitespace-nowrap">{{ $emp['name'] }}</div>
                                 </td>
                                 <td class="p-2 border-r border-slate-200 dark:border-slate-800">
@@ -261,7 +261,7 @@
             <div class="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center gap-4">
                 <div class="flex-1 max-w-sm">
                     <label for="roster_name" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Roster <span class="text-rose-500">*</span></label>
-                    <input type="text" name="roster_name" id="roster_name" value="{{ $rosterName ?? '' }}" required placeholder="Contoh: Roster Satpam" class="w-full h-10 px-3 text-sm bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-sm">
+                    <input type="text" name="roster_name" id="roster_name" value="{{ $rosterName ?? '' }}" required placeholder="Contoh: Roster Satpam" class="w-full h-10 px-3 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-sm">
                 </div>
                 <div class="flex items-end gap-3 h-full pt-5">
                     <a href="{{ route('employee-working-shifts.index') }}" onclick="return confirm('Apakah Anda yakin ingin membatalkan? Semua perubahan jadwal yang belum disimpan akan hilang.');" class="h-10 px-6 inline-flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 gap-2">

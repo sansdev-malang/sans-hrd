@@ -64,7 +64,7 @@
     </div>
 
     <!-- Roster Grid Read Only -->
-    <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
         <div class="overflow-x-auto relative">
             <table class="w-full text-sm text-left border-collapse min-w-max">
                 <thead class="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-50 dark:bg-slate-900/80 sticky top-0 z-20 shadow-sm">
@@ -105,7 +105,7 @@
                             }
                         @endphp
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group">
-                            <td class="px-4 py-2 border-r border-slate-200 dark:border-slate-800 sticky left-0 bg-white dark:bg-slate-950 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50 transition-colors z-10 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)]">
+                            <td class="px-4 py-2 border-r border-slate-200 dark:border-slate-800 sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50 transition-colors z-10 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)]">
                                 <div class="flex flex-col">
                                     <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $emp['name'] }}</span>
                                 </div>
@@ -180,8 +180,8 @@
                                         </p>
                                         
                                         <div class="w-full">
-                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Catatan Tambahan (Opsional)</label>
-                                            <textarea name="notes" x-model="notes" rows="3" class="w-full text-sm px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="Ketik catatan di sini..."></textarea>
+                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Catatan Tambahan (Opsional)</label>
+                                            <textarea name="notes" x-model="notes" rows="3" class="w-full text-sm px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="Ketik catatan di sini..."></textarea>
                                         </div>
                                     </div>
                                 </div>

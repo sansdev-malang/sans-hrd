@@ -9,10 +9,10 @@
         </button>
         <!-- Breadcrumbs display (sidebar-07 look) -->
         <nav
-            class="hidden sm:flex items-center space-x-1.5 text-xs font-medium text-slate-400 dark:text-slate-550 select-none">
-            <span class="hover:text-slate-700 dark:hover:text-slate-350 cursor-pointer">{{ setting('app_name', 'SANS HRD') }}</span>
+            class="hidden sm:flex items-center space-x-1.5 text-xs font-medium text-slate-400 dark:text-slate-500 select-none">
+            <span class="hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer">{{ setting('app_name', 'SANS HRD') }}</span>
             <span class="text-slate-300 dark:text-slate-700">/</span>
-            <span class="hover:text-slate-700 dark:hover:text-slate-350 cursor-pointer font-bold">@yield('title', $title ?? 'HRD Pusat')</span>
+            <span class="hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer font-bold">@yield('title', $title ?? 'HRD Pusat')</span>
         </nav>
     </div>
 
@@ -35,13 +35,13 @@
                 
                 <!-- Display badge if there are notifications -->
                 @if(isset($pendingLeavesCount) && $pendingLeavesCount > 0)
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-rose-600 dark:bg-rose-455 rounded-full ring-2 ring-white dark:ring-[#09090b]"></span>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-rose-600 dark:bg-rose-400 rounded-full ring-2 ring-white dark:ring-[#09090b]"></span>
                 @endif
             </button>
             
             <!-- Dropdown Menu -->
             <div x-show="open" @click.outside="open = false" 
-                class="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-2 z-50 text-left text-xs"
+                class="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-2 z-50 text-left text-xs"
                 x-transition:enter="transition ease-out duration-100"
                 x-transition:enter-start="transform opacity-0 scale-95"
                 x-transition:enter-end="transform opacity-100 scale-100"
@@ -50,20 +50,20 @@
                 x-transition:leave-end="transform opacity-0 scale-95"
                 style="display: none;">
                 
-                <div class="px-4 py-1.5 border-b border-slate-150 dark:border-slate-850 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/20">
+                <div class="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/20">
                     <span class="font-bold text-slate-900 dark:text-slate-100">Notifikasi</span>
                     @if(isset($pendingLeavesCount) && $pendingLeavesCount > 0)
-                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 dark:bg-rose-955/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/40">
+                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/40">
                             {{ $pendingLeavesCount }} Baru
                         </span>
                     @endif
                 </div>
                 
-                <div class="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-850/60">
+                <div class="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                     @if(isset($pendingLeaves) && count($pendingLeaves) > 0)
                         @foreach($pendingLeaves as $item)
                             <a href="{{ route('leave-approvals.index') }}" class="flex items-start gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
-                                <div class="w-8 h-8 rounded-lg bg-amber-50/60 dark:bg-amber-955/20 text-amber-700 dark:text-amber-455 flex items-center justify-center shrink-0 border border-amber-100/40 dark:border-amber-900/20">
+                                <div class="w-8 h-8 rounded-lg bg-amber-50/60 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-100/40 dark:border-amber-900/20">
                                     <i data-lucide="file-signature" class="w-4 h-4"></i>
                                 </div>
                                 <div class="space-y-0.5 overflow-hidden">

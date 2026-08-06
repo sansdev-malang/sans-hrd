@@ -10,7 +10,7 @@
 
         <!-- SUCCESS STATUS -->
         @if (session('status'))
-            <div class="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-400 text-xs font-semibold rounded-lg flex items-center gap-2">
+            <div class="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-400 text-xs font-semibold rounded-lg flex items-center gap-2">
                 <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
                 <span>
                     @if (session('status') === 'profile-updated')
@@ -28,18 +28,18 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- PROFILE INFORMATION -->
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-indigo-500/50 dark:hover:border-indigo-400/50">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-indigo-500/50 dark:hover:border-indigo-400/50">
                 @include('profile.partials.update-profile-information-form')
             </div>
 
             <!-- UPDATE PASSWORD -->
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-indigo-500/50 dark:hover:border-indigo-400/50">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-indigo-500/50 dark:hover:border-indigo-400/50">
                 @include('profile.partials.update-password-form')
             </div>
         </div>
 
         <!-- DELETE ACCOUNT -->
-        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full border-rose-100 dark:border-rose-950/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-rose-500/50 dark:hover:border-rose-400/50">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full border-rose-100 dark:border-rose-900/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-rose-500/50 dark:hover:border-rose-400/50">
             @include('profile.partials.delete-user-form')
         </div>
     </div>

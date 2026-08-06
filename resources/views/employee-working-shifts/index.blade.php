@@ -132,13 +132,13 @@
 
         <!-- FILTERS & LIST -->
         <div
-            class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
+            class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
             <div
                 class="p-4 border-b border-slate-100 dark:border-slate-900 flex flex-col sm:flex-row justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/30">
                 <form method="GET" action="{{ route('employee-working-shifts.index') }}"
                     class="flex items-center gap-3">
                     <select name="unit_id"
-                        class="pl-3 pr-8 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                        class="pl-3 pr-8 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                         <option value="">Semua Unit Sekolah</option>
                         @foreach ($units as $unit)
                             <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>
@@ -236,7 +236,7 @@
                                                 <input type="hidden" name="roster_name"
                                                     value="{{ $batch['roster_name'] ?? '' }}">
                                                 <button type="submit"
-                                                    class="h-8 px-3 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/50 dark:border-rose-900/30 transition-all cursor-pointer gap-1.5">
+                                                    class="h-8 px-3 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/50 dark:border-rose-900/30 transition-all cursor-pointer gap-1.5">
                                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                 </button>
                                             </form>
@@ -307,7 +307,7 @@
                                                     value="{{ $batch['end_date'] ? \Carbon\Carbon::parse($batch['end_date'])->format('Y-m-d') : 'null' }}">
 
                                                 <button type="submit"
-                                                    class="h-8 px-3 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/50 dark:border-rose-900/30 transition-all cursor-pointer gap-1.5">
+                                                    class="h-8 px-3 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/50 dark:border-rose-900/30 transition-all cursor-pointer gap-1.5">
                                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                     Hapus
                                                 </button>
@@ -358,7 +358,7 @@
                     x-transition:leave="ease-in duration-200"
                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-950 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl border border-slate-200 dark:border-slate-800">
+                    class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl border border-slate-200 dark:border-slate-800">
 
                     <div class="p-6">
                         <div
@@ -450,7 +450,7 @@
                     x-transition:leave="ease-in duration-200"
                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="relative w-full sm:max-w-4xl rounded-xl bg-white dark:bg-slate-950 shadow-2xl border border-slate-200 dark:border-slate-800"
+                    class="relative w-full sm:max-w-4xl rounded-xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800"
                     x-data="{ selectedUnit: '', employees: [], searchQuery: '', isLoadingEmployees: false, selectAll: false, async fetchEmployees() { if (!this.selectedUnit) { this.employees = []; return } this.isLoadingEmployees = true; try { let r = await fetch('/employee-working-shifts/unit/' + this.selectedUnit + '/employees');
                                 this.employees = await r.json();
                                 this.selectAll = false;
@@ -473,7 +473,7 @@
                                 <!-- Unit Sekolah -->
                                 <div>
                                     <label
-                                        class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih
+                                        class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Pilih
                                         Unit Sekolah</label>
                                     <select name="school_unit_id" required x-model="selectedUnit"
                                         @change="fetchEmployees()"
@@ -489,7 +489,7 @@
                                     <!-- Template Shift -->
                                     <div>
                                         <label
-                                            class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Pilih
+                                            class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Pilih
                                             Template Shift Kerja</label>
                                         <select name="working_shift_id" required
                                             class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
@@ -504,7 +504,7 @@
                                     <!-- Bonus Schema -->
                                     <div>
                                         <label
-                                            class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Skema
+                                            class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Skema
                                             Bonus (Opsional)</label>
                                         <select name="bonus_schema_id"
                                             class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
@@ -523,14 +523,14 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label
-                                            class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal
+                                            class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Tanggal
                                             Mulai</label>
                                         <input type="date" name="start_date" required
                                             class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
                                     </div>
                                     <div>
                                         <label
-                                            class="block font-semibold text-slate-700 dark:text-slate-350 mb-1.5 text-sm">Tanggal
+                                            class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Tanggal
                                             Selesai (Opsional)</label>
                                         <input type="date" name="end_date"
                                             class="text-xs w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 font-mono">
@@ -541,7 +541,7 @@
                             <!-- Pegawai List -->
                             <div class="flex flex-col h-full">
                                 <label
-                                    class="font-semibold text-slate-700 dark:text-slate-350 mb-1.5 flex justify-between items-center text-sm shrink-0">
+                                    class="font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center text-sm shrink-0">
                                     <span>
                                         Pilih Pegawai
                                         <span x-show="isLoadingEmployees"
@@ -560,7 +560,7 @@
                                     class="flex flex-col bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
                                     <!-- Search Bar -->
                                     <div
-                                        class="p-2 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-950">
+                                        class="p-2 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
                                         <div class="relative flex items-center">
                                             <i data-lucide="search"
                                                 class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none"></i>
@@ -586,7 +586,7 @@
                                         <template x-for="emp in employees" :key="emp.id">
                                             <label
                                                 x-show="searchQuery === '' || emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || (emp.nuptk_nip_nik && String(emp.nuptk_nip_nik).toLowerCase().includes(searchQuery.toLowerCase()))"
-                                                class="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg transition-colors shadow-sm">
+                                                class="flex items-center gap-3 cursor-pointer p-3 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg transition-colors shadow-sm">
                                                 <input type="checkbox" name="employee_ids[]" :value="emp.id"
                                                     class="text-xs employee-checkbox w-4 h-4 rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500 shrink-0">
                                                 <div class="flex flex-col">
@@ -635,7 +635,7 @@
                     x-transition:leave="ease-in duration-200"
                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-950 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl border border-slate-200 dark:border-slate-800">
+                    class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl border border-slate-200 dark:border-slate-800">
 
                     <form action="{{ route('employee-working-shifts.roster') }}" method="GET">
                         <div class="p-6">
@@ -657,7 +657,7 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label
-                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Unit
+                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit
                                             Sekolah</label>
                                         <select x-model="createUnitId" name="unit_id"
                                             @change="loadEmployeesForUnit()"
@@ -669,7 +669,7 @@
                                     </div>
                                     <div>
                                         <label
-                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Nama
+                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama
                                             Roster <span class="text-rose-500">*</span></label>
                                         <input type="text" name="roster_name" required
                                             placeholder="Misal: Roster Satpam"
@@ -679,7 +679,7 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label
-                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Bulan</label>
+                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Bulan</label>
                                         <select name="month"
                                             class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs focus:border-indigo-500 focus:ring-indigo-500">
                                             @php
@@ -708,7 +708,7 @@
                                     </div>
                                     <div>
                                         <label
-                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">Tahun</label>
+                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun</label>
                                         <input type="number" name="year" value="{{ date('Y') }}"
                                             class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
@@ -717,11 +717,11 @@
                                 <div>
                                     <div class="flex justify-between items-end mb-1.5">
                                         <label
-                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-350">Pilih
+                                            class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Pilih
                                             Pegawai</label>
                                         <div class="flex items-center gap-2">
                                             <input type="text" x-model="empSearch" placeholder="Cari..."
-                                                class="w-32 px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500">
+                                                class="w-32 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500">
                                             <button type="button" @click="selectAllEmp = !selectAllEmp"
                                                 class="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline">Pilih
                                                 Semua</button>

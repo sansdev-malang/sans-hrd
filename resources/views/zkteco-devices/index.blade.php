@@ -34,7 +34,7 @@
             </div>
             <div class="flex items-center gap-2.5 shrink-0">
                 <button @click="showAddModal = true"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-50 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all duration-150 cursor-pointer">
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-50 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all duration-100 cursor-pointer">
                     <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
                     Daftarkan Perangkat
                 </button>
@@ -44,7 +44,7 @@
         <!-- STATS CARDS -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-left">
             <!-- Total Perangkat -->
-            <div class="bg-white dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex items-center gap-4">
+            <div class="bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex items-center gap-4">
                 <div class="p-3 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-lg">
                     <i data-lucide="cpu" class="w-5 h-5"></i>
                 </div>
@@ -54,7 +54,7 @@
                 </div>
             </div>
             <!-- Online -->
-            <div class="bg-white dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex items-center gap-4">
+            <div class="bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex items-center gap-4">
                 <div class="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
                     <i data-lucide="wifi" class="w-5 h-5"></i>
                 </div>
@@ -64,7 +64,7 @@
                 </div>
             </div>
             <!-- Offline -->
-            <div class="bg-white dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex items-center gap-4">
+            <div class="bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex items-center gap-4">
                 <div class="p-3 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-lg">
                     <i data-lucide="wifi-off" class="w-5 h-5"></i>
                 </div>
@@ -76,7 +76,7 @@
         </div>
 
         <!-- MAIN MACHINE TABLE CARD -->
-        <section class="animate-card bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden transition-all w-full p-6 space-y-6">
+        <section class="animate-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden transition-all w-full p-6 space-y-6">
             
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
                 <div class="space-y-1">
@@ -109,12 +109,12 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2.5">
                                         <i data-lucide="fingerprint" class="w-4 h-4 text-slate-400"></i>
-                                        <span class="font-bold text-slate-850 dark:text-slate-100">{{ $device->name }}</span>
+                                        <span class="font-bold text-slate-800 dark:text-slate-100">{{ $device->name }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 font-mono">{{ $device->sn ?? '-' }}</td>
                                 <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 font-mono">{{ $device->ip_address }}</td>
-                                <td class="px-6 py-4 text-slate-650 dark:text-slate-400 font-mono">{{ $device->port }}</td>
+                                <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-mono">{{ $device->port }}</td>
                                 <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">{{ $device->model_name }}</td>
                                 <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ $device->location ?? '-' }}</td>
                                 <td class="px-6 py-4">
@@ -125,12 +125,12 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($device->is_online)
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900/30">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/30">
                                             <span id="status-indicator-{{ $device->id }}" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                             <span id="status-text-{{ $device->id }}">Online</span>
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-955/20 text-rose-700 dark:text-rose-400 border border-rose-250 dark:border-rose-900/30">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30">
                                             <span id="status-indicator-{{ $device->id }}" class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                                             <span id="status-text-{{ $device->id }}">Offline</span>
                                         </span>
@@ -140,13 +140,13 @@
                                     <div class="flex items-center justify-center gap-2">
                                         <form action="{{ route('zkteco-devices.pull', $device->id) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-450 hover:text-emerald-750 transition-colors cursor-pointer" title="Tarik Log Manual (Hanya berfungsi saat development local)">
+                                            <button type="submit" class="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-400 hover:text-emerald-750 transition-colors cursor-pointer" title="Tarik Log Manual (Hanya berfungsi saat development local)">
                                                 <i data-lucide="download-cloud" class="w-4 h-4"></i>
                                             </button>
                                         </form>
                                         <form action="{{ route('zkteco-devices.force-adms', $device->id) }}" method="POST" onsubmit="return confirm('Paksa mesin ini memuntahkan ulang semua data absennya via ADMS?')">
                                             @csrf
-                                            <button type="submit" class="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-450 hover:text-blue-750 transition-colors cursor-pointer" title="Paksa Sinkron Ulang ADMS">
+                                            <button type="submit" class="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400 hover:text-blue-750 transition-colors cursor-pointer" title="Paksa Sinkron Ulang ADMS">
                                                 <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                                             </button>
                                         </form>
@@ -156,7 +156,7 @@
                                         <form action="{{ route('zkteco-devices.destroy', $device->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus perangkat absensi ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg text-rose-600 dark:text-rose-450 hover:text-rose-750 transition-colors cursor-pointer" title="Hapus Mesin">
+                                            <button type="submit" class="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-rose-600 dark:text-rose-400 hover:text-rose-750 transition-colors cursor-pointer" title="Hapus Mesin">
                                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                                             </button>
                                         </form>
@@ -181,11 +181,11 @@
 
         <!-- ADD MODAL -->
         <template x-teleport="body">
-            <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
+            <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
                 <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-900">
                     <h3 class="text-base font-bold text-slate-900 dark:text-slate-50">Daftarkan Perangkat Baru</h3>
-                    <button @click="showAddModal = false" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-400 hover:text-slate-650 cursor-pointer">
+                    <button @click="showAddModal = false" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -193,25 +193,25 @@
                 <form method="POST" action="{{ route('zkteco-devices.store') }}" class="mt-4 space-y-4 text-xs">
                     @csrf
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Perangkat</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Perangkat</label>
                         <input type="text" name="name" required placeholder="Contoh: Mesin Utama Lt. 1" 
                             class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
 
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Serial Number (SN) - <span class="text-[9px] font-normal normal-case">Wajib untuk ADMS</span></label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Serial Number (SN) - <span class="text-[9px] font-normal normal-case">Wajib untuk ADMS</span></label>
                         <input type="text" name="sn" placeholder="Contoh: C123456789" 
                             class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">IP Address</label>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">IP Address</label>
                             <input type="text" name="ip_address" required placeholder="192.168.1.201" 
                                 class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
                         <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider mb-1">Port Comm</label>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Port Comm</label>
                             <input type="number" name="port" required value="4370" 
                                 class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
@@ -219,7 +219,7 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Tipe / Model</label>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tipe / Model</label>
                             <select name="model_name" required class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                                 <option value="ZKTeco K40">ZKTeco K40</option>
                                 <option value="ZKTeco iFace">ZKTeco iFace</option>
@@ -227,14 +227,14 @@
                             </select>
                         </div>
                         <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Lokasi Penempatan</label>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Lokasi Penempatan</label>
                             <input type="text" name="location" placeholder="Pintu Gerbang Utama" 
                                 class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Interval Sinkronisasi Otomatis (Menit)</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Interval Sinkronisasi Otomatis (Menit)</label>
                         <input type="number" name="sync_interval" required value="5" min="1"
                             class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         <p class="text-[10px] text-slate-500 mt-1">Berapa menit sekali mesin ini akan ditarik log datanya secara otomatis di background.</p>
@@ -251,8 +251,8 @@
 
         <!-- EDIT MODAL -->
         <template x-teleport="body">
-            <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
+            <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" style="display: none; z-index: 9999;" x-transition>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-md shadow-2xl p-6 relative text-left">
                 <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-900">
                     <h3 class="text-base font-bold text-slate-900 dark:text-slate-50">Edit Perangkat Absensi</h3>
                     <button @click="showEditModal = false" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer">
@@ -265,25 +265,25 @@
                     @method('PUT')
                     
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Perangkat</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Nama Perangkat</label>
                         <input type="text" name="name" required x-model="editName"
                             class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
 
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Serial Number (SN) - <span class="text-[9px] font-normal normal-case">Wajib untuk ADMS</span></label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Serial Number (SN) - <span class="text-[9px] font-normal normal-case">Wajib untuk ADMS</span></label>
                         <input type="text" name="sn" x-model="editSn" placeholder="Contoh: C123456789" 
                             class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">IP Address</label>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">IP Address</label>
                             <input type="text" name="ip_address" required x-model="editIp"
                                 class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
                         <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Port Comm</label>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Port Comm</label>
                             <input type="number" name="port" required x-model="editPort"
                                 class="w-full h-9 px-3 font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
@@ -291,7 +291,7 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Tipe / Model</label>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tipe / Model</label>
                             <select name="model_name" required x-model="editModelName" class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 cursor-pointer">
                                 <option value="ZKTeco K40">ZKTeco K40</option>
                                 <option value="ZKTeco iFace">ZKTeco iFace</option>
@@ -299,14 +299,14 @@
                             </select>
                         </div>
                         <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Lokasi Penempatan</label>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Lokasi Penempatan</label>
                             <input type="text" name="location" x-model="editLocation"
                                 class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1">Interval Sinkronisasi Otomatis (Menit)</label>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Interval Sinkronisasi Otomatis (Menit)</label>
                         <input type="number" name="sync_interval" required min="1" x-model="editSyncInterval"
                             class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800">
                     </div>
