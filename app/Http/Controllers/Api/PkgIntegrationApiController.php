@@ -165,9 +165,12 @@ class PkgIntegrationApiController extends Controller
         }
 
         $employees = $this->schoolService->getSdEmployees();
+        $units = \App\Models\SchoolUnit::where('is_active', true)->select('id', 'name')->get();
+
         return response()->json([
             'success' => true,
-            'data' => $employees
+            'data' => $employees,
+            'units' => $units
         ]);
     }
 
