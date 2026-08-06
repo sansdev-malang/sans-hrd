@@ -96,6 +96,12 @@ Route::prefix('api')->group(function () {
     Route::get('attendances', [\App\Http\Controllers\Api\AttendanceApiController::class, 'index']);
     Route::get('bonus-reports', [\App\Http\Controllers\Api\AttendanceApiController::class, 'bonusReport']);
     Route::get('payslips', [\App\Http\Controllers\Api\PayslipApiController::class, 'index']);
+
+    // PKG Integration Endpoints
+    Route::get('employees', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'employees']);
+    Route::get('attendances/summary', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'attendanceSummary']);
+    Route::post('auth/verify-credential', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'verifyCredential']);
+    Route::post('performance-reports', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'receivePerformanceReport']);
 });
 
 // ZKTeco ADMS Endpoints (Must bypass CSRF)
