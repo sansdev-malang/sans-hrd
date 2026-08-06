@@ -48,6 +48,41 @@ class PkgIntegrationApiController extends Controller
         $employees = $this->schoolService->getSdEmployees();
         $matchingEmployees = collect($employees)->where('email', $email);
 
+        // 1. Check central users table first
+        $hrdUser = \App\Models\User::where('email', $email)->first();
+        if ($hrdUser && \Illuminate\Support\Facades\Hash::check($password, $hrdUser->password)) {
+            // Central SANS HRD Admin/Yayasan User
+            $allUnits = \App\Models\SchoolUnit::where('is_active', true)->get();
+            $unitsList = [];
+
+            foreach ($allUnits as $unit) {
+                // Find if this central admin is also registered as an employee in this unit
+                $empRecord = $matchingEmployees->firstWhere('unit_id', $unit->id);
+                $unitsList[] = [
+                    'unit_id' => $unit->id,
+                    'unit_name' => $unit->name,
+                    'employee_id' => $empRecord ? $empRecord['id'] : 0,
+                    'role' => $empRecord ? ($empRecord['position'] ?? 'teacher') : $hrdUser->role,
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Authenticated successfully as central user',
+                'user' => [
+                    'id' => 0,
+                    'name' => $hrdUser->name,
+                    'email' => $hrdUser->email,
+                    'unit_id' => $allUnits->first()?->id ?? null,
+                    'unit_name' => $allUnits->first()?->name ?? null,
+                    'role' => $hrdUser->role,
+                    'is_central_admin' => in_array($hrdUser->role, ['super_admin', 'yayasan']),
+                    'units' => $unitsList
+                ]
+            ]);
+        }
+
+        // 2. Fallback to employee verification on local units
         if ($matchingEmployees->isEmpty()) {
             return response()->json(['success' => false, 'message' => 'Kredensial salah atau pegawai tidak terdaftar di unit mana pun.'], 404);
         }
@@ -111,6 +146,7 @@ class PkgIntegrationApiController extends Controller
                     'unit_id' => $authenticatedUser['unit_id'],
                     'unit_name' => $authenticatedUser['unit_name'],
                     'role' => $authenticatedUser['role'],
+                    'is_central_admin' => false,
                     'units' => $unitsList
                 ]
             ]);
