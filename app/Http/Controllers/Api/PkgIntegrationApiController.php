@@ -46,57 +46,77 @@ class PkgIntegrationApiController extends Controller
 
         // Fetch all active employees from SANS HRD
         $employees = $this->schoolService->getSdEmployees();
-        $employee = collect($employees)->firstWhere('email', $email);
+        $matchingEmployees = collect($employees)->where('email', $email);
 
-        if (!$employee) {
+        if ($matchingEmployees->isEmpty()) {
             return response()->json(['success' => false, 'message' => 'Kredensial salah atau pegawai tidak terdaftar di unit mana pun.'], 404);
         }
 
-        $unitId = $employee['unit_id'] ?? null;
-        if (!$unitId) {
-            return response()->json(['success' => false, 'message' => 'Pegawai tidak terasosiasi dengan unit sekolah.'], 400);
-        }
+        $unitsList = [];
+        $authenticatedUser = null;
+        $isAuthenticated = false;
 
-        // Fetch the School Unit
-        $unit = \App\Models\SchoolUnit::find($unitId);
-        if (!$unit || !$unit->is_active) {
-            return response()->json(['success' => false, 'message' => 'Unit sekolah tidak aktif atau tidak ditemukan.'], 400);
-        }
+        foreach ($matchingEmployees as $emp) {
+            $unitId = $emp['unit_id'] ?? null;
+            if (!$unitId) continue;
 
-        // Contact the unit's local API to verify the email and password
-        try {
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'X-API-TOKEN' => $unit->api_token,
-                'Accept' => 'application/json',
-            ])->timeout(5)->post(rtrim($unit->api_url, '/') . '/auth/verify', [
-                'email' => $email,
-                'password' => $password,
-            ]);
+            $unit = \App\Models\SchoolUnit::find($unitId);
+            if (!$unit || !$unit->is_active) continue;
 
-            if ($response->successful()) {
-                $body = $response->json();
-                if ($body['success'] ?? false) {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Authenticated successfully via unit ' . $unit->name,
-                        'user' => [
-                            'id' => $employee['id'],
-                            'name' => $employee['name'],
-                            'email' => $employee['email'],
-                            'unit_id' => $unit->id,
-                            'unit_name' => $unit->name,
-                            'role' => $body['role'] ?? 'teacher',
-                        ]
+            $unitsList[] = [
+                'unit_id' => $unit->id,
+                'unit_name' => $unit->name,
+                'employee_id' => $emp['id'],
+                'role' => $emp['position'] ?? 'teacher',
+            ];
+
+            if (!$isAuthenticated) {
+                try {
+                    $response = \Illuminate\Support\Facades\Http::withHeaders([
+                        'X-API-TOKEN' => $unit->api_token,
+                        'Accept' => 'application/json',
+                    ])->timeout(5)->post(rtrim($unit->api_url, '/') . '/auth/verify', [
+                        'email' => $email,
+                        'password' => $password,
                     ]);
-                } else {
-                    return response()->json(['success' => false, 'message' => $body['message'] ?? 'Password salah.'], 401);
+
+                    if ($response->successful()) {
+                        $body = $response->json();
+                        if ($body['success'] ?? false) {
+                            $isAuthenticated = true;
+                            $authenticatedUser = [
+                                'id' => $emp['id'],
+                                'name' => $emp['name'],
+                                'email' => $emp['email'],
+                                'unit_id' => $unit->id,
+                                'unit_name' => $unit->name,
+                                'role' => $body['role'] ?? $emp['position'] ?? 'teacher',
+                            ];
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Try next unit if connection fails
                 }
-            } else {
-                return response()->json(['success' => false, 'message' => 'Gagal menghubungi server unit sekolah.'], 502);
             }
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Koneksi ke unit sekolah terputus: ' . $e->getMessage()], 502);
         }
+
+        if ($isAuthenticated && $authenticatedUser) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Authenticated successfully',
+                'user' => [
+                    'id' => $authenticatedUser['id'],
+                    'name' => $authenticatedUser['name'],
+                    'email' => $authenticatedUser['email'],
+                    'unit_id' => $authenticatedUser['unit_id'],
+                    'unit_name' => $authenticatedUser['unit_name'],
+                    'role' => $authenticatedUser['role'],
+                    'units' => $unitsList
+                ]
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Kata sandi salah atau verifikasi gagal di semua unit sekolah.'], 401);
     }
 
     /**
