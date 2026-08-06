@@ -7,9 +7,9 @@
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Dashboard Utama</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Memonitor ringkasan aktivitas kepegawaian dan kehadiran seluruh unit sekolah.</p>
             </div>
-            <div class="flex items-center gap-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 shadow-sm">
+            <div class="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 shadow-sm">
                 <!-- Unit Tag Indicator -->
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 uppercase tracking-wider">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-400 uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                     Seluruh Unit Terhubung
                 </span>
@@ -19,20 +19,20 @@
         <!-- STATS SECTION -->
         <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <!-- Total Pegawai -->
-            <div class="animate-card bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
+            <div class="animate-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
                 <div>
                     <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Total Pegawai</span>
                     <span class="text-2xl font-bold text-slate-900 dark:text-slate-50 mt-1 block">
                         <span class="stat-counter" data-target="{{ $employeesCount }}">{{ $employeesCount }}</span>
                     </span>
                 </div>
-                <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-650 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                     <i data-lucide="users" class="w-5 h-5"></i>
                 </div>
             </div>
 
             <!-- Hadir -->
-            <div class="animate-card bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
+            <div class="animate-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
                 <div>
                     <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Hadir</span>
                     <span class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
@@ -45,7 +45,7 @@
             </div>
 
             <!-- Sakit -->
-            <div class="animate-card bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
+            <div class="animate-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
                 <div>
                     <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Sakit</span>
                     <span class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1 block">
@@ -58,7 +58,7 @@
             </div>
 
             <!-- Izin -->
-            <div class="animate-card bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
+            <div class="animate-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
                 <div>
                     <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Izin</span>
                     <span class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1 block">
@@ -71,7 +71,7 @@
             </div>
 
             <!-- Alpa -->
-            <div class="animate-card bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
+            <div class="animate-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
                 <div>
                     <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Alpa</span>
                     <span class="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1 block">
@@ -87,7 +87,7 @@
         <!-- WIDGETS SECTION -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <!-- Pengumuman Terbaru Widget -->
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                     <div class="flex items-center gap-2">
                         <i data-lucide="megaphone" class="w-4 h-4 text-indigo-500"></i>
@@ -100,10 +100,10 @@
                         @forelse($latestAnnouncements as $ann)
                             @php
                                 $catColor = [
-                                    'umum' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 border-indigo-150/40 dark:border-indigo-900/20',
-                                    'akademik' => 'bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 border-blue-150/40 dark:border-blue-900/20',
-                                    'kepegawaian' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-emerald-150/40 dark:border-emerald-900/20',
-                                    'penting' => 'bg-rose-50 text-rose-700 dark:bg-rose-955/20 dark:text-rose-400 border-rose-150/40 dark:border-rose-900/20 animate-pulse',
+                                    'umum' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400 border-indigo-150/40 dark:border-indigo-900/20',
+                                    'akademik' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-150/40 dark:border-blue-900/20',
+                                    'kepegawaian' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-150/40 dark:border-emerald-900/20',
+                                    'penting' => 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400 border-rose-150/40 dark:border-rose-900/20 animate-pulse',
                                 ][$ann->category] ?? 'bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
                             @endphp
                             <a href="{{ route('announcements.show', $ann) }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left">
@@ -128,7 +128,7 @@
             </div>
             
             <!-- Pengajuan Cuti Widget -->
-            <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                     <div class="flex items-center gap-2">
                         <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
@@ -164,7 +164,7 @@
         <!-- DETAILS ROW -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <!-- Aktivitas Absensi Terkini -->
-            <div class="lg-span-2 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="lg-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                     <div class="flex items-center gap-2">
                         <i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i>
@@ -232,7 +232,7 @@
                                 $isCheckout = !empty($att['clock_out']) && (!isset($att['clock_in']) || $att['clock_out'] >= $att['clock_in']);
                             @endphp
                             <div class="relative pl-5">
-                                <span class="absolute -left-[9px] top-2.5 w-4 h-4 rounded-full border-4 border-white dark:border-slate-955 {{ $isCheckout ? 'bg-blue-500' : 'bg-emerald-500' }}"></span>
+                                <span class="absolute -left-[9px] top-2.5 w-4 h-4 rounded-full border-4 border-white dark:border-slate-900 {{ $isCheckout ? 'bg-blue-500' : 'bg-emerald-500' }}"></span>
                                 <div class="flex items-center gap-3">
                                     <div class="relative shrink-0 w-8 h-8">
                                         @if($photoSrc)
@@ -247,9 +247,9 @@
                                             <span class="font-bold text-sm text-slate-900 dark:text-slate-100">{{ $empName }}</span>
                                             @if(isset($empObj['unit_name']))
                                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider
-                                                    @if(strtolower($empObj['unit_name']) === 'sd') bg-indigo-50 dark:bg-indigo-955/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30
-                                                    @elseif(strtolower($empObj['unit_name']) === 'smp') bg-emerald-50 dark:bg-emerald-955/40 text-emerald-700 dark:text-emerald-400 border border-indigo-200/30 dark:border-indigo-900/30
-                                                    @else bg-amber-50 dark:bg-amber-955/40 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30 @endif">
+                                                    @if(strtolower($empObj['unit_name']) === 'sd') bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30
+                                                    @elseif(strtolower($empObj['unit_name']) === 'smp') bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-indigo-200/30 dark:border-indigo-900/30
+                                                    @else bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30 @endif">
                                                     {{ $empObj['unit_name'] }}
                                                 </span>
                                             @endif
@@ -290,7 +290,7 @@
             </div>
 
             <!-- Statistik Unit Hari Ini -->
-            <div class="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                     <div class="flex items-center gap-2">
                         <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-500"></i>
@@ -321,7 +321,7 @@
                             <!-- Progress Bar -->
                             <div class="w-full bg-slate-100 dark:bg-slate-900 rounded-full h-2">
                                 <div class="h-2 rounded-full transition-all duration-500 
-                                    @if($themeColor === 'indigo') bg-indigo-650 dark:bg-indigo-500
+                                    @if($themeColor === 'indigo') bg-indigo-600 dark:bg-indigo-500
                                     @elseif($themeColor === 'emerald') bg-emerald-600 dark:bg-emerald-500
                                     @else bg-amber-600 dark:bg-amber-500 @endif" 
                                     style="width: {{ $attendanceRate }}%"></div>
@@ -330,15 +330,15 @@
                             <!-- Breakdown Stats -->
                             <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.25rem;" class="font-sans">
                                 <!-- Hadir -->
-                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-2 border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-1">
+                                <div class="bg-slate-50 dark:bg-slate-800 rounded-lg p-2 border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center gap-1">
                                     <div class="flex items-center gap-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                                         <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Hadir</span>
                                     </div>
-                                    <span class="text-xs font-bold text-emerald-650 dark:text-emerald-400 font-mono">{{ $stats['hadir'] }}</span>
+                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">{{ $stats['hadir'] }}</span>
                                 </div>
                                 <!-- Izin/Sakit -->
-                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-2 border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-1">
+                                <div class="bg-slate-50 dark:bg-slate-800 rounded-lg p-2 border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center gap-1">
                                     <div class="flex items-center gap-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
                                         <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Izin</span>
@@ -346,12 +346,12 @@
                                     <span class="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">{{ $stats['izin'] + $stats['sakit'] }}</span>
                                 </div>
                                 <!-- Absen -->
-                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-2 border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-1">
+                                <div class="bg-slate-50 dark:bg-slate-800 rounded-lg p-2 border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center gap-1">
                                     <div class="flex items-center gap-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                                         <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Absen</span>
                                     </div>
-                                    <span class="text-xs font-bold text-rose-650 dark:text-rose-400 font-mono">{{ $stats['alpa'] + $stats['belum_absen'] }}</span>
+                                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400 font-mono">{{ $stats['alpa'] + $stats['belum_absen'] }}</span>
                                 </div>
                             </div>
                         </div>
