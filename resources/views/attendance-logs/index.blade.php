@@ -6,23 +6,43 @@
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Riwayat Absensi</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Memantau waktu kedatangan dan kepulangan pegawai secara komprehensif.</p>
             </div>
+            
+            <!-- EXPORT DROPDOWN -->
+            <div x-data="{ open: false }" class="relative w-full md:w-auto self-stretch md:self-auto flex justify-end">
+                <button type="button" @click="open = !open" @click.outside="open = false" class="w-full md:w-auto justify-center h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border border-slate-200/50 dark:border-slate-800/40 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Ekspor Data</span>
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
+                </button>
+                
+                <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-11 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                    <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
+                        Excel (.xlsx)
+                    </a>
+                    <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
+                        PDF (.pdf)
+                    </a>
+                </div>
+            </div>
         </section>
 
         <!-- FILTERS -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full">
-            <form method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3 w-full">
+            <form method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-col md:flex-row items-stretch md:items-end gap-3.5 w-full text-left">
                 
                 <!-- Bulan -->
-                <div class="space-y-1 w-full sm:w-40">
+                <div class="space-y-1 w-full md:w-40">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
-                    <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                    <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer">
                 </div>
 
                 <!-- Filter Unit -->
                 @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                <div class="space-y-1 w-full sm:w-48">
+                <div class="space-y-1 w-full md:w-48">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
-                    <select name="unit_id" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap">
+                    <select name="unit_id" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer">
                         <option value="">Semua Unit</option>
                         @foreach($schoolUnits as $unit)
                             <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
@@ -34,7 +54,7 @@
                 @endif
 
                 <!-- Search -->
-                <div class="space-y-1 w-full sm:w-60">
+                <div class="space-y-1 flex-1 min-w-[200px]">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Pencarian</label>
                     <div class="relative w-full">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
@@ -44,51 +64,27 @@
                     </div>
                 </div>
 
-                <!-- Apply Buttons (Left side) -->
-                <div class="flex items-center gap-2.5">
-                    <button type="submit" class="w-full sm:w-auto h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer whitespace-nowrap">
+                <!-- Per Page (Tampilkan) -->
+                <div class="space-y-1 w-full md:w-36">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
+                    <select name="per_page" onchange="this.form.submit()" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer">
+                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15 Baris</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua Data</option>
+                    </select>
+                </div>
+
+                <!-- Apply Buttons -->
+                <div class="flex items-center gap-2 w-full md:w-auto self-stretch md:self-end">
+                    <button type="submit" class="flex-1 md:flex-none h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer whitespace-nowrap">
                         Terapkan
                     </button>
-                    @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
-                        <a href="{{ route('attendance-logs.index') }}" class="w-full sm:w-auto inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors">
+                    @if(request()->hasAny(['unit_id', 'search', 'per_page']) && count(request()->except('page')) > 0)
+                        <a href="{{ route('attendance-logs.index') }}" class="flex-1 md:flex-none inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-semibold text-xs rounded-lg shadow-sm transition-colors">
                             Reset
                         </a>
                     @endif
-                </div>
-
-                <!-- Tools (Right side) -->
-                <div class="flex items-center justify-between gap-2.5 sm:ml-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-slate-100 dark:border-slate-800 sm:border-0 w-full sm:w-auto">
-                    <!-- Per Page -->
-                    <div class="w-32 sm:w-40">
-                        <select name="per_page" onchange="this.form.submit()" class="w-full h-9 pl-3 pr-8 text-xs font-semibold border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-ellipsis overflow-hidden whitespace-nowrap">
-                            <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15 Baris</option>
-                            <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
-                            <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
-                            <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua Data</option>
-                        </select>
-                    </div>
-                    
-                    <div class="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
-                    
-                    <!-- EXPORT DROPDOWN -->
-                    <div x-data="{ open: false }" class="relative w-32 sm:w-auto">
-                        <button type="button" @click="open = !open" @click.outside="open = false" class="w-full sm:w-auto justify-center h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border border-slate-200/50 dark:border-slate-800/40 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                            <span>Ekspor</span>
-                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
-                        </button>
-                        
-                        <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
-                            <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
-                                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
-                                Excel (.xlsx)
-                            </a>
-                            <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
-                                <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
-                                PDF (.pdf)
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </form>
         </section>
