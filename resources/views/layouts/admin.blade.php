@@ -11,6 +11,7 @@
                 $routeTitles = [
                     'dashboard' => 'Dashboard',
                     'bonus-reports.index' => 'Rekap Bonus Kehadiran',
+                    'attendance-percentage-reports.index' => 'Laporan Persentase Kehadiran',
                     'performance-reports.index' => 'Rapor Kinerja Guru',
                     'performance-reports.show' => 'Detail Rapor Kinerja',
                     'attendance-logs.index' => 'Log Absensi',

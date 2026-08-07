@@ -131,29 +131,37 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
-                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">Menunggu Persetujuan Izin/Cuti</h3>
+                        <i data-lucide="calendar-clock" class="w-4 h-4 text-indigo-500"></i>
+                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">Riwayat Izin/Cuti Terbaru</h3>
                     </div>
                     <a href="{{ route('leave-approvals.index') }}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Lihat Semua</a>
                 </div>
                 <div class="flex-1 overflow-y-auto max-h-[300px]">
                     <div class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                        @if(isset($pendingLeaves) && count($pendingLeaves) > 0)
-                            @foreach($pendingLeaves as $leave)
+                        @if(isset($recentLeaves) && count($recentLeaves) > 0)
+                            @foreach($recentLeaves as $leave)
+                                @php
+                                    $unitName = $leave->schoolUnit->name ?? 'Sekolah';
+                                    $unitBadge = [
+                                        'SD' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-800/40',
+                                        'SMP' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-800/40',
+                                        'PAUD' => 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/40',
+                                    ][$unitName] ?? 'bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-350 border-slate-200';
+                                @endphp
                                 <a href="{{ route('leave-approvals.index') }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
                                     <div class="flex items-center justify-between mb-1">
                                         <p class="font-semibold text-sm text-slate-900 dark:text-slate-100 text-left">{{ $leave->employee_name ?? 'Pegawai' }}</p>
-                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">Pending</span>
+                                        <span class="text-[9px] font-bold px-2 py-0.5 rounded border uppercase {{ $unitBadge }}">Unit {{ $unitName }}</span>
                                     </div>
                                     <p class="text-xs text-slate-500 dark:text-slate-400 text-left">
-                                        Mengajukan <span class="font-semibold">{{ $leave->type }}</span> pada {{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}
+                                        Mengajukan <span class="font-semibold text-slate-750 dark:text-slate-300">{{ $leave->type }}</span> pada {{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}
                                     </p>
                                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 italic text-left"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i>{{ $leave->reason }}</p>
                                 </a>
                             @endforeach
                         @else
                             <div class="p-8 text-center text-slate-400">
-                                <p class="text-xs">Tidak ada pengajuan izin/cuti yang menunggu persetujuan.</p>
+                                <p class="text-xs">Belum ada riwayat pengajuan izin/cuti.</p>
                             </div>
                         @endif
                     </div>

@@ -62,23 +62,30 @@
                 <div class="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                     @if(isset($pendingLeaves) && count($pendingLeaves) > 0)
                         @foreach($pendingLeaves as $item)
-                            <a href="{{ route('leave-approvals.index') }}" class="flex items-start gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                            <a href="{{ route('leave-approvals.index', ['read_id' => $item->id]) }}" class="flex items-start gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
                                 <div class="w-8 h-8 rounded-lg bg-amber-50/60 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-100/40 dark:border-amber-900/20">
                                     <i data-lucide="file-signature" class="w-4 h-4"></i>
                                 </div>
                                 <div class="space-y-0.5 overflow-hidden">
                                     <p class="font-bold text-slate-800 dark:text-slate-200 truncate">{{ $item->employee_name ?? 'Pegawai' }}</p>
-                                    <p class="text-slate-500 dark:text-slate-400 text-[10px]">Mengajukan {{ $item->type }} ({{ $item->start_date->format('d M Y') }})</p>
+                                    <p class="text-slate-500 dark:text-slate-400 text-[10px]">Menginput {{ $item->type }} ({{ $item->start_date->format('d M Y') }})</p>
                                 </div>
                             </a>
                         @endforeach
                     @else
                         <div class="p-6 text-center text-slate-400">
                             <i data-lucide="bell-off" class="w-6 h-6 mx-auto mb-1 text-slate-300 dark:text-slate-750"></i>
-                            <p class="text-[10px]">Tidak ada pengajuan izin tertunda.</p>
+                            <p class="text-[10px]">Tidak ada izin baru baru-baru ini.</p>
                         </div>
                     @endif
                 </div>
+                @if(isset($pendingLeavesCount) && $pendingLeavesCount > 0)
+                    <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-800 text-center bg-slate-50/30 dark:bg-slate-900/10">
+                        <a href="{{ route('leave-approvals.index', ['clear_all' => 1]) }}" class="text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold hover:underline">
+                            Tandai Semua Sudah Dibaca
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

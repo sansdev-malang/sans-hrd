@@ -15,6 +15,8 @@ class LeaveRequest extends Model
         'employee_name',
         'school_unit_id',
         'type',
+        'status_code',
+        'gets_presence_bonus',
         'start_date',
         'end_date',
         'reason',
@@ -26,6 +28,7 @@ class LeaveRequest extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'gets_presence_bonus' => 'boolean',
     ];
 
     public function schoolUnit()

@@ -11,10 +11,10 @@
 
         <!-- FILTERS -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full text-left">
-            <form method="GET" action="{{ route('performance-reports.index') }}" class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3 w-full">
+            <form method="GET" action="{{ route('performance-reports.index') }}" class="flex flex-col md:flex-row items-stretch md:items-end gap-3.5 w-full">
                 
                 <!-- Search -->
-                <div class="space-y-1 w-full sm:w-64">
+                <div class="space-y-1 flex-1 min-w-[200px]">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Cari Pegawai</label>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama guru..."
                         class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
@@ -22,7 +22,7 @@
 
                 <!-- Filter Unit -->
                 @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                <div class="space-y-1 w-full sm:w-48">
+                <div class="space-y-1 w-full md:w-48">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
                     <select name="unit_id" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                         <option value="">Semua Unit</option>
@@ -36,7 +36,7 @@
                 @endif
 
                 <!-- Filter Tahun Akademik -->
-                <div class="space-y-1 w-full sm:w-36">
+                <div class="space-y-1 w-full md:w-36">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tahun Akademik</label>
                     <select name="academic_year" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                         <option value="">Semua Tahun</option>
@@ -49,7 +49,7 @@
                 </div>
 
                 <!-- Filter Semester -->
-                <div class="space-y-1 w-full sm:w-28">
+                <div class="space-y-1 w-full md:w-32">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Semester</label>
                     <select name="semester" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                         <option value="">Semua</option>
@@ -59,12 +59,12 @@
                 </div>
 
                 <!-- Buttons -->
-                <div class="flex items-center gap-2">
-                    <button type="submit" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5">
+                <div class="flex items-center gap-2 w-full md:w-auto self-stretch md:self-end">
+                    <button type="submit" class="flex-1 md:flex-none h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5">
                         <i data-lucide="filter" class="w-3.5 h-3.5"></i>
                         Filter
                     </button>
-                    <a href="{{ route('performance-reports.index') }}" class="h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center justify-center">
+                    <a href="{{ route('performance-reports.index') }}" class="flex-1 md:flex-none h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center justify-center">
                         Reset
                     </a>
                 </div>

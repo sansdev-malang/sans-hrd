@@ -38,7 +38,9 @@ class AppServiceProvider extends ServiceProvider
                         }
                     }
 
-                    $pendingLeavesQuery = \App\Models\LeaveRequest::where('status', 'Pending');
+                    $readIds = session('read_leave_ids_' . $user->id, []);
+                    $pendingLeavesQuery = \App\Models\LeaveRequest::where('created_at', '>=', now()->subDays(3))
+                        ->whereNotIn('id', $readIds);
                     $pendingLeavesCount = (clone $pendingLeavesQuery)->count();
                     $pendingLeaves = $pendingLeavesQuery->latest()->limit(5)->get();
                     

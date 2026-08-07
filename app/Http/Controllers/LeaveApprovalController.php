@@ -15,6 +15,19 @@ class LeaveApprovalController extends Controller
      */
     public function index()
     {
+        if (request()->has('clear_all')) {
+            $recentIds = LeaveRequest::where('created_at', '>=', now()->subDays(3))->pluck('id')->toArray();
+            $readIds = session('read_leave_ids_' . auth()->id(), []);
+            $newReadIds = array_unique(array_merge($readIds, $recentIds));
+            session(['read_leave_ids_' . auth()->id() => $newReadIds]);
+            return redirect()->route('leave-approvals.index');
+        }
+
+        if (request()->has('read_id')) {
+            $readIds = session('read_leave_ids_' . auth()->id(), []);
+            $readIds[] = (int) request('read_id');
+            session(['read_leave_ids_' . auth()->id() => array_unique($readIds)]);
+        }
         // 1. Pull latest leave requests from all active units and sync locally
         $this->pullLeaveRequestsFromUnits();
 
@@ -161,6 +174,8 @@ class LeaveApprovalController extends Controller
                                 'start_date' => $rL['start_date'],
                                 'end_date' => $rL['end_date'],
                                 'type' => $rL['type'],
+                                'status_code' => $rL['status_code'] ?? null,
+                                'gets_presence_bonus' => $rL['gets_presence_bonus'] ?? false,
                                 'reason' => $rL['reason'],
                                 'status' => $rL['status'],
                                 'notes' => $rL['notes'] ?? null,

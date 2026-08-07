@@ -138,9 +138,10 @@ class AttendanceBonusReportController extends Controller
                     continue;
                 }
 
-                // Skip Leaves (except Dinas)
+                // Skip Leaves (except Dinas or those getting presence bonus)
                 $isOnLeave = false;
                 $leaveType = null;
+                $getsBonus = false;
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -149,11 +150,12 @@ class AttendanceBonusReportController extends Controller
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
                             $leaveType = $leave->type;
+                            $getsBonus = $leave->gets_presence_bonus || ($leave->type === 'Dinas');
                             break;
                         }
                     }
                 }
-                if ($isOnLeave && $leaveType !== 'Dinas') {
+                if ($isOnLeave && !$getsBonus) {
                     $currentDate->addDay();
                     continue;
                 }
@@ -186,12 +188,12 @@ class AttendanceBonusReportController extends Controller
                     $dailyBonus = 0;
                     $dailyTierLevel = null;
 
-                    // Check Attendance or Dinas
+                    // Check Attendance or Dinas/getsBonus
                     $logKey = $uid . '_' . $dateStr;
-                    $isDinas = ($isOnLeave && $leaveType === 'Dinas');
+                    $isDinas = ($isOnLeave && $getsBonus);
 
                     if (isset($attendanceLogs[$logKey]) || $isDinas) {
-                        $dailyStatus = $isDinas ? 'Dinas' : 'Present';
+                        $dailyStatus = $isDinas ? ($leaveType ?: 'Dinas') : 'Present';
                         $totalPresent++;
                         
                         // Calculate Late

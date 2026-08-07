@@ -1,8 +1,5 @@
 <x-admin-layout>
     <div class="p-6 space-y-6" x-data="{ 
-        showRejectModal: false,
-        selectedLeaveId: '',
-        selectedLeaveEmployee: '',
         showEmpDetailModal: false,
         selectedEmp: null
     }">
@@ -35,33 +32,27 @@
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left ">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Persetujuan Izin / Cuti</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Tinjau dan setujui pengajuan surat sakit, izin, dan cuti dari seluruh pegawai unit sekolah.</p>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-55 font-nasalization">Riwayat Izin Pegawai</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Daftar riwayat izin, sakit, dan cuti pegawai yang dihimpun dari seluruh unit sekolah.</p>
             </div>
         </header>
 
-        <!-- PENDING REQUESTS -->
+        <!-- TABLE LIST -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
-            <div class="p-4 border-b border-slate-100 dark:border-slate-900">
-                <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">Menunggu Persetujuan</h4>
-            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
-                    <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                    <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-505 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="px-6 py-3 text-left">Pegawai</th>
                             <th class="px-6 py-3 text-left">Unit</th>
                             <th class="px-6 py-3 text-center">Jenis Izin</th>
                             <th class="px-6 py-3 text-center">Tanggal Mulai</th>
                             <th class="px-6 py-3 text-center">Tanggal Selesai</th>
-                            <th class="px-6 py-3 text-left">Alasan</th>
-                            <th class="px-6 py-3 text-right">Aksi</th>
+                            <th class="px-6 py-3 text-left">Keterangan</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
-                        @php $pendingCount = 0; @endphp
-                        @foreach($leaves->where('status', 'Pending') as $leave)
-                            @php $pendingCount++; @endphp
+                        @forelse($leaves as $leave)
                             <tr>
                                 <td class="px-6 py-4 text-left">
                                     <div class="flex items-center gap-3">
@@ -91,12 +82,12 @@
                                                 leave_end: '{{ $leave->end_date->format('d M Y') }}',
                                                 leave_reason: '{{ addslashes($leave->reason ?? '-') }}',
                                                 leave_attachment: '{{ $leave->attachment ?? '' }}'
-                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-50 font-bold tracking-tight block cursor-pointer  hover:text-indigo-600 dark:hover:text-indigo-400">{{ $leave->employee_name }}</span>
+                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-55 font-bold tracking-tight block cursor-pointer hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">{{ $leave->employee_name }}</span>
                                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">NIP/NIK: {{ $leave->employee_nip }}</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-left">
+                                <td class="px-6 py-4 text-left font-nasalization">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30 uppercase">
                                         {{ $leave->schoolUnit ? $leave->schoolUnit->name : '-' }}
                                     </span>
@@ -113,179 +104,33 @@
                                     {{ $leave->end_date->format('d M Y') }}
                                 </td>
                                 <td class="px-6 py-4 text-left">
-                                    <span class="text-slate-600 dark:text-slate-400 block font-semibold">{{ $leave->reason ?? '-' }}</span>
+                                    <span class="text-slate-600 dark:text-slate-400 block">{{ $leave->reason ?? '-' }}</span>
                                     @if($leave->attachment)
                                         <div class="mt-1">
-                                            <a href="{{ $leave->attachment }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold ">
+                                            @php
+                                                $attachmentUrl = str_starts_with($leave->attachment, 'http') ? $leave->attachment : (
+                                                    $leave->employee_unit_url ? rtrim($leave->employee_unit_url, '/') . '/storage/' . $leave->attachment : '#'
+                                                );
+                                            @endphp
+                                            <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold underline">
                                                 <i data-lucide="paperclip" class="w-3 h-3"></i>
                                                 Lihat Lampiran
                                             </a>
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-right flex justify-end gap-2.5">
-                                    <form action="{{ route('leave-approvals.approve', $leave->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="h-7 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold rounded border border-emerald-200/30 dark:border-emerald-900/30 transition-all cursor-pointer flex items-center gap-1">
-                                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                                            Setujui
-                                        </button>
-                                    </form>
-                                    <button @click="selectedLeaveId = '{{ $leave->id }}'; selectedLeaveEmployee = '{{ $leave->employee_name }}'; showRejectModal = true" class="h-7 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-[10px] font-semibold rounded border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer flex items-center gap-1">
-                                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                        Tolak
-                                    </button>
-                                </td>
                             </tr>
-                        @endforeach
-                        @if($pendingCount === 0)
+                        @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
-                                    Tidak ada pengajuan izin yang memerlukan persetujuan saat ini.
+                                <td colspan="6" class="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                                    Belum ada data riwayat izin pegawai.
                                 </td>
                             </tr>
-                        @endif
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- PROCESSED REQUESTS -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
-            <div class="p-4 border-b border-slate-100 dark:border-slate-900">
-                <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">Riwayat Keputusan</h4>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs">
-                    <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                        <tr>
-                            <th class="px-6 py-3 text-left">Pegawai</th>
-                            <th class="px-6 py-3 text-left">Unit</th>
-                            <th class="px-6 py-3 text-center">Jenis Izin</th>
-                            <th class="px-6 py-3 text-center">Tanggal Mulai</th>
-                            <th class="px-6 py-3 text-center">Tanggal Selesai</th>
-                            <th class="px-6 py-3 text-center">Keputusan</th>
-                            <th class="px-6 py-3 text-left">Catatan / Alasan</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
-                        @php $processedCount = 0; @endphp
-                        @foreach($leaves->whereIn('status', ['Approved', 'Rejected']) as $leave)
-                            @php $processedCount++; @endphp
-                            <tr>
-                                <td class="px-6 py-4 text-left">
-                                    <div class="flex items-center gap-3">
-                                        @if(!empty($leave->employee_photo) && !empty($leave->employee_unit_url))
-                                            @php
-                                                $photoPath = str_contains($leave->employee_photo, 'photos/') ? $leave->employee_photo : 'photos/' . $leave->employee_photo;
-                                                $photoUrl = rtrim($leave->employee_unit_url, '/') . '/storage/' . $photoPath;
-                                            @endphp
-                                            <img src="{{ $photoUrl }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
-                                        @else
-                                            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0">
-                                                {{ strtoupper(substr($leave->employee_name, 0, 2)) }}
-                                            </div>
-                                        @endif
-                                        <div>
-                                            <span @click="selectedEmp = {
-                                                name: '{{ $leave->employee_name }}',
-                                                nuptk_nip_nik: '{{ $leave->employee_nip }}',
-                                                subject_position: '{{ $leave->employee_position }}',
-                                                unit: '{{ strtoupper($leave->schoolUnit ? $leave->schoolUnit->name : '-') }}',
-                                                email: '{{ $leave->employee_email }}',
-                                                gender: '{{ $leave->employee_gender }}',
-                                                employment_status: '{{ $leave->employee_status }}',
-                                                photo_url: '{{ !empty($leave->employee_photo) && !empty($leave->employee_unit_url) ? rtrim($leave->employee_unit_url, '/') . '/storage/' . (str_contains($leave->employee_photo, 'photos/') ? $leave->employee_photo : 'photos/' . $leave->employee_photo) : '' }}',
-                                                leave_type: '{{ $leave->type }}',
-                                                leave_start: '{{ $leave->start_date->format('d M Y') }}',
-                                                leave_end: '{{ $leave->end_date->format('d M Y') }}',
-                                                leave_reason: '{{ addslashes($leave->reason ?? '-') }}',
-                                                leave_attachment: '{{ $leave->attachment ?? '' }}'
-                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-50 font-bold tracking-tight block cursor-pointer  hover:text-indigo-600 dark:hover:text-indigo-400">{{ $leave->employee_name }}</span>
-                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">NIP/NIK: {{ $leave->employee_nip }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-left">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30 uppercase">
-                                        {{ $leave->schoolUnit ? $leave->schoolUnit->name : '-' }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200/45 dark:border-slate-800 uppercase">
-                                        {{ $leave->type }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center font-mono">
-                                    {{ $leave->start_date->format('d M Y') }}
-                                </td>
-                                <td class="px-6 py-4 text-center font-mono">
-                                    {{ $leave->end_date->format('d M Y') }}
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    @if($leave->status === 'Approved')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 dark:border-emerald-900/30 uppercase">Disetujui</span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/30 dark:border-rose-900/30 uppercase">Ditolak</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-left">
-                                    <div class="text-slate-500 dark:text-slate-400 italic">{{ $leave->notes ?? '-' }}</div>
-                                    @if($leave->attachment)
-                                        <div class="mt-1">
-                                            <a href="{{ $leave->attachment }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold ">
-                                                <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
-                                                Lihat Lampiran
-                                            </a>
-                                        </div>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                        @if($processedCount === 0)
-                            <tr>
-                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 ">
-                                    Belum ada data pengajuan izin yang diproses.
-                                </td>
-                            </tr>
-                        @endif
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- REJECT MODAL -->
-        <template x-teleport="body">
-            <div x-show="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" style="display: none; margin-top: 0px !important; z-index: 9999;">
-            <div @click.outside="showRejectModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-sm p-6 text-left">
-                <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4 ">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Tolak Pengajuan Izin</h3>
-                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5" x-text="selectedLeaveEmployee"></p>
-                    </div>
-                    <button @click="showRejectModal = false" class="text-slate-400 hover:text-slate-600 cursor-pointer">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                </div>
-
-                <form method="POST" :action="`{{ url('leave-approvals') }}/${selectedLeaveId}/reject`" class="space-y-4 text-xs ">
-                    @csrf
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Alasan Penolakan</label>
-                        <textarea name="notes" required rows="3" placeholder="Masukkan alasan penolakan izin..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-880 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500"></textarea>
-                    </div>
-
-                    <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-900 justify-end">
-                        <button type="button" @click="showRejectModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer">
-                            Batal
-                        </button>
-                        <button type="submit" class="h-9 px-4 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer">
-                            Tolak Izin
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </template>
 
         <!-- MODAL DETAIL PEGAWAI -->
         <template x-teleport="body">
@@ -340,24 +185,27 @@
 
                     <!-- Detail Pengajuan Izin -->
                     <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                        <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[10px]">Detail Pengajuan Izin</h4>
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[10px]">Detail Izin Pegawai</h4>
                         <div class="grid grid-cols-2 gap-4 text-[11px]">
                             <div>
                                 <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jenis Izin</span>
-                                <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30 uppercase" x-text="selectedEmp ? selectedEmp.leave_type : ''"></span>
+                                <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200/45 dark:border-slate-800 uppercase" x-text="selectedEmp ? selectedEmp.leave_type : ''"></span>
                             </div>
                             <div>
                                 <span class="block text-slate-400 text-[9px] uppercase font-semibold">Rentang Tanggal</span>
                                 <span class="font-medium text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.leave_start + ' - ' + selectedEmp.leave_end : ''"></span>
                             </div>
                             <div class="col-span-2">
-                                <span class="block text-slate-400 text-[9px] uppercase font-semibold">Alasan</span>
+                                <span class="block text-slate-400 text-[9px] uppercase font-semibold">Keterangan</span>
                                 <span class="font-medium text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.leave_reason : ''"></span>
                             </div>
                             <template x-if="selectedEmp && selectedEmp.leave_attachment">
                                 <div class="col-span-2">
                                     <span class="block text-slate-400 text-[9px] uppercase font-semibold">Lampiran</span>
-                                    <a :href="selectedEmp.leave_attachment" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold  mt-0.5">
+                                    @php
+                                        $modalAttachmentUrl = "selectedEmp.leave_attachment.startsWith('http') ? selectedEmp.leave_attachment : (selectedEmp.photo_url ? selectedEmp.photo_url.split('/storage')[0] + '/storage/' + selectedEmp.leave_attachment : '#')";
+                                    @endphp
+                                    <a :href="{{ $modalAttachmentUrl }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold mt-0.5">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                                         Lihat Lampiran Dokumen
                                     </a>
@@ -369,6 +217,7 @@
                 <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                     <button @click="showEmpDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Tutup</button>
                 </div>
+            </div>
             </div>
         </template>
     </div>

@@ -75,6 +75,7 @@
                         <i data-lucide="bar-chart-2" class="menu-icon w-4 h-4"></i>
                         <span class="menu-text">Rapor Kinerja</span>
                     </div>
+                    <span class="menu-text text-[9px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Dev</span>
                 </a>
             </nav>
 
@@ -90,7 +91,7 @@
                     {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="file-check" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Persetujuan Izin</span>
+                    <span class="menu-text">Riwayat Izin</span>
                 </a>
                 <a href="{{ route('working-shifts.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('working-shifts.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
@@ -121,6 +122,12 @@
                     text-xs relative group">
                     <i data-lucide="calculator" class="menu-icon w-4 h-4"></i>
                     <span class="menu-text">Rekap Bonus</span>
+                </a>
+                <a href="{{ route('attendance-percentage-reports.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('attendance-percentage-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="percent" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Persentase Kehadiran</span>
                 </a>
             </nav>
 

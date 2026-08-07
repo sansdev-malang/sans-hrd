@@ -7,7 +7,7 @@
                 Kembali
             </a>
             <div>
-                <h3 class="text-sm font-bold dark:white text-slate-900">Rapor Kinerja: {{ $employee['name'] }}</h3>
+                <h3 class="text-sm font-bold dark:text-white text-slate-900">Rapor Kinerja: {{ $employee['name'] }}</h3>
                 <p class="text-[10px] dark:text-slate-400 text-slate-500 mt-0.5">Tahun Ajaran {{ $report->academic_year }} - Semester {{ $report->semester }}</p>
             </div>
         </div>
@@ -22,7 +22,7 @@
     <div class="py-8 px-4 bg-slate-50 dark:bg-slate-950/20 min-h-screen flex justify-center print:bg-white print:p-0 print:min-h-0">
         
         <!-- A4 Page Container -->
-        <div class="w-full max-w-[210mm] min-h-[297mm] bg-white text-slate-800 p-[15mm] shadow-lg border border-slate-200 rounded-2xl flex flex-col justify-between print:border-none print:shadow-none print:rounded-none print:p-0 print:max-w-none print:min-h-0 print:bg-white">
+        <div class="w-full max-w-[210mm] min-h-[297mm] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-[15mm] shadow-lg border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between print:border-none print:shadow-none print:rounded-none print:p-0 print:max-w-none print:min-h-0 print:bg-white print:text-black">
             
             <div class="w-full">
                 <!-- Kop Surat Yayasan -->
@@ -57,34 +57,34 @@
 
                 <!-- Judul Dokumen -->
                 <div class="text-center mb-6">
-                    <h3 class="text-sm font-extrabold uppercase text-slate-900 tracking-widest leading-none">Rapor Penilaian Kinerja Guru (PKG)</h3>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wide mt-1.5">
+                    <h3 class="text-sm font-extrabold uppercase text-slate-900 dark:text-white tracking-widest leading-none">Rapor Penilaian Kinerja Guru (PKG)</h3>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wide mt-1.5">
                         Tahun Ajaran {{ $report->academic_year }} &bull; Semester {{ $report->semester == 1 ? 'Ganjil' : 'Genap' }}
                     </p>
                 </div>
 
                 <!-- Identitas Guru -->
-                <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50 mb-6 text-left">
+                <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-850/50 mb-6 text-left">
                     <table class="w-full text-[11px] leading-relaxed">
                         <tr>
-                            <td class="w-[120px] text-slate-400 font-medium pb-2">Nama Lengkap</td>
-                            <td class="w-4 text-slate-400 pb-2">:</td>
-                            <td class="font-bold text-slate-900 pb-2">{{ $employee['name'] }}</td>
+                            <td class="w-[120px] text-slate-400 dark:text-slate-500 font-medium pb-2">Nama Lengkap</td>
+                            <td class="w-4 text-slate-400 dark:text-slate-500 pb-2">:</td>
+                            <td class="font-bold text-slate-900 dark:text-white pb-2">{{ $employee['name'] }}</td>
                         </tr>
                         <tr>
-                            <td class="text-slate-400 font-medium pb-2">Email Pegawai</td>
-                            <td class="text-slate-400 pb-2">:</td>
-                            <td class="font-medium text-slate-700 pb-2">{{ $employee['email'] }}</td>
+                            <td class="text-slate-400 dark:text-slate-500 font-medium pb-2">Email Pegawai</td>
+                            <td class="text-slate-400 dark:text-slate-500 pb-2">:</td>
+                            <td class="font-medium text-slate-700 dark:text-slate-300 pb-2">{{ $employee['email'] }}</td>
                         </tr>
                         <tr>
-                            <td class="text-slate-400 font-medium pb-2">Unit Sekolah</td>
-                            <td class="text-slate-400 pb-2">:</td>
-                            <td class="font-semibold text-slate-800 pb-2">Unit {{ $report->schoolUnit->name ?? '-' }}</td>
+                            <td class="text-slate-400 dark:text-slate-500 font-medium pb-2">Unit Sekolah</td>
+                            <td class="text-slate-400 dark:text-slate-500 pb-2">:</td>
+                            <td class="font-semibold text-slate-800 dark:text-slate-200 pb-2">Unit {{ $report->schoolUnit->name ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-slate-400 font-medium">Jabatan / Tugas</td>
-                            <td class="text-slate-400">:</td>
-                            <td class="font-semibold text-slate-800 capitalize">{{ strtolower($pos) }}</td>
+                            <td class="text-slate-400 dark:text-slate-500 font-medium">Jabatan / Tugas</td>
+                            <td class="text-slate-400 dark:text-slate-500">:</td>
+                            <td class="font-semibold text-slate-800 dark:text-slate-200 capitalize">{{ strtolower($pos) }}</td>
                         </tr>
                     </table>
                 </div>
@@ -92,40 +92,40 @@
                 <!-- Rubrik Nilai Kompetensi -->
                 <div class="mb-6">
                     <h4 class="text-[10px] font-extrabold uppercase text-slate-450 tracking-wider mb-2.5 text-left">Rincian Hasil Penilaian Aspek (Skala 0-100)</h4>
-                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
                         <table class="w-full text-xs text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[9px]">
+                                <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[9px]">
                                     <th class="py-2.5 px-4 w-12 text-center">No</th>
                                     <th class="py-2.5 px-2">Dimensi Kompetensi / Kinerja</th>
                                     <th class="py-2.5 px-4 w-28 text-center">Nilai Aspek</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-150">
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
                                 <tr>
-                                    <td class="py-3 px-4 text-center text-slate-400 font-medium">1</td>
-                                    <td class="py-3 px-2 font-semibold text-slate-800">Kompetensi Pedagogik</td>
-                                    <td class="py-3 px-4 text-center font-bold text-slate-900 text-sm tabular-nums">{{ round($report->score_pedagogik) }}</td>
+                                    <td class="py-3 px-4 text-center text-slate-400 dark:text-slate-500 font-medium">1</td>
+                                    <td class="py-3 px-2 font-semibold text-slate-800 dark:text-slate-200">Kompetensi Pedagogik</td>
+                                    <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white text-sm tabular-nums">{{ round($report->score_pedagogik) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="py-3 px-4 text-center text-slate-400 font-medium">2</td>
-                                    <td class="py-3 px-2 font-semibold text-slate-800">Kompetensi Kepribadian</td>
-                                    <td class="py-3 px-4 text-center font-bold text-slate-900 text-sm tabular-nums">{{ round($report->score_kepribadian) }}</td>
+                                    <td class="py-3 px-4 text-center text-slate-400 dark:text-slate-500 font-medium">2</td>
+                                    <td class="py-3 px-2 font-semibold text-slate-800 dark:text-slate-200">Kompetensi Kepribadian</td>
+                                    <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white text-sm tabular-nums">{{ round($report->score_kepribadian) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="py-3 px-4 text-center text-slate-400 font-medium">3</td>
-                                    <td class="py-3 px-2 font-semibold text-slate-800">Kompetensi Sosial</td>
-                                    <td class="py-3 px-4 text-center font-bold text-slate-900 text-sm tabular-nums">{{ round($report->score_sosial) }}</td>
+                                    <td class="py-3 px-4 text-center text-slate-400 dark:text-slate-500 font-medium">3</td>
+                                    <td class="py-3 px-2 font-semibold text-slate-800 dark:text-slate-200">Kompetensi Sosial</td>
+                                    <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white text-sm tabular-nums">{{ round($report->score_sosial) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="py-3 px-4 text-center text-slate-400 font-medium">4</td>
-                                    <td class="py-3 px-2 font-semibold text-slate-800">Kompetensi Profesional</td>
-                                    <td class="py-3 px-4 text-center font-bold text-slate-900 text-sm tabular-nums">{{ round($report->score_profesional) }}</td>
+                                    <td class="py-3 px-4 text-center text-slate-400 dark:text-slate-500 font-medium">4</td>
+                                    <td class="py-3 px-2 font-semibold text-slate-800 dark:text-slate-200">Kompetensi Profesional</td>
+                                    <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white text-sm tabular-nums">{{ round($report->score_profesional) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="py-3 px-4 text-center text-slate-400 font-medium">5</td>
-                                    <td class="py-3 px-2 font-semibold text-slate-800">Kedisiplinan & Loyalitas (Absensi Kehadiran)</td>
-                                    <td class="py-3 px-4 text-center font-bold text-slate-900 text-sm tabular-nums">{{ round($report->score_discipline) }}</td>
+                                    <td class="py-3 px-4 text-center text-slate-400 dark:text-slate-500 font-medium">5</td>
+                                    <td class="py-3 px-2 font-semibold text-slate-800 dark:text-slate-200">Kedisiplinan & Loyalitas (Absensi Kehadiran)</td>
+                                    <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white text-sm tabular-nums">{{ round($report->score_discipline) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -135,28 +135,28 @@
                 <!-- Bagian Nilai Akhir & Predikat -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-left">
                     <!-- Nilai Akhir Box -->
-                    <div class="border-2 border-emerald-600 rounded-xl p-4 bg-emerald-50/20 flex items-center justify-between">
+                    <div class="border-2 border-emerald-600 dark:border-emerald-500/30 rounded-xl p-4 bg-emerald-50/20 dark:bg-emerald-950/20 flex items-center justify-between">
                         <div>
-                            <span class="text-[9px] font-extrabold uppercase text-emerald-800 tracking-wider block">Nilai Akhir Rapor</span>
-                            <span class="text-[10px] text-slate-500 font-medium block mt-0.5">Rata-rata dari seluruh aspek</span>
+                            <span class="text-[9px] font-extrabold uppercase text-emerald-800 dark:text-emerald-400 tracking-wider block">Nilai Akhir Rapor</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium block mt-0.5">Rata-rata dari seluruh aspek</span>
                         </div>
                         <div class="text-right">
-                            <span class="text-3xl font-black text-emerald-700 tabular-nums leading-none">{{ round($report->final_score) }}</span>
-                            <span class="text-[10px] text-emerald-600/80 font-bold block mt-1">Skala 0-100</span>
+                            <span class="text-3xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums leading-none">{{ round($report->final_score) }}</span>
+                            <span class="text-[10px] text-emerald-650 dark:text-emerald-400/80 font-bold block mt-1">Skala 0-100</span>
                         </div>
                     </div>
 
                     <!-- Predikat Box -->
-                    <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 flex items-center justify-between">
+                    <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-850/50 flex items-center justify-between">
                         <div>
-                            <span class="text-[9px] font-extrabold uppercase text-slate-500 tracking-wider block">Predikat Kinerja</span>
-                            <span class="text-[10px] text-slate-500 font-medium block mt-0.5">Berdasarkan Standar Yayasan</span>
+                            <span class="text-[9px] font-extrabold uppercase text-slate-500 dark:text-slate-450 tracking-wider block">Predikat Kinerja</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium block mt-0.5">Berdasarkan Standar Yayasan</span>
                         </div>
                         <div class="text-right flex items-center gap-3">
-                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 border-2 border-indigo-500 text-lg font-black text-indigo-700">
+                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950 border-2 border-indigo-500 text-lg font-black text-indigo-700 dark:text-indigo-400">
                                 {{ $predicateLetter }}
                             </span>
-                            <span class="text-xs font-bold text-slate-700 block text-left leading-tight max-w-[80px]">
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 block text-left leading-tight max-w-[80px]">
                                 {{ $report->predicate ?? 'Kurang Sekali' }}
                             </span>
                         </div>
@@ -164,9 +164,9 @@
                 </div>
 
                 <!-- Legenda Rentang Nilai Yayasan -->
-                <div class="border border-slate-150 rounded-xl p-3 bg-slate-50/30 mb-6 text-left">
+                <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-3 bg-slate-50/30 dark:bg-slate-900/30 mb-6 text-left">
                     <span class="text-[9px] font-extrabold uppercase text-slate-450 tracking-wider block mb-2">Standar Predikat Penilaian Yayasan:</span>
-                    <div class="grid grid-cols-3 gap-2 text-[9px] text-slate-500 font-medium">
+                    <div class="grid grid-cols-3 gap-2 text-[9px] text-slate-500 dark:text-slate-400 font-medium">
                         <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 91 - 100 : A (Amat Baik)</div>
                         <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> 81 - 90 : B+ (Baik Sekali)</div>
                         <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> 71 - 80 : B (Baik)</div>
@@ -178,9 +178,9 @@
 
                 <!-- Catatan Rekomendasi/Catatan Umum -->
                 @if(!empty($report->recommendations))
-                    <div class="border border-dashed border-slate-300 rounded-xl p-4 mb-6 text-left">
-                        <span class="text-[9px] font-extrabold uppercase text-slate-450 tracking-wider block mb-1">Catatan & Rekomendasi Pimpinan:</span>
-                        <p class="text-xs text-slate-700 italic leading-relaxed whitespace-pre-line">
+                    <div class="border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 mb-6 text-left">
+                        <span class="text-[9px] font-extrabold uppercase text-slate-450 dark:text-slate-500 tracking-wider block mb-1">Catatan & Rekomendasi Pimpinan:</span>
+                        <p class="text-xs text-slate-700 dark:text-slate-300 italic leading-relaxed whitespace-pre-line">
                             "{{ $report->recommendations }}"
                         </p>
                     </div>
@@ -190,14 +190,14 @@
             <!-- Tanda Tangan & Stempel Basah Yayasan -->
             <div class="w-full flex justify-between items-end mt-8 text-left text-[11px] leading-relaxed">
                 <!-- Catatan Kaki Tanggal Cetak -->
-                <div class="text-slate-400 italic text-[9px] self-end">
+                <div class="text-slate-400 dark:text-slate-500 italic text-[9px] self-end">
                     Rapor disinkronisasi pada: {{ $report->created_at->translatedFormat('d F Y H:i') }}
                 </div>
 
                 <!-- Area Tanda Tangan & Stempel -->
                 <div class="w-[220px] text-center relative flex flex-col items-center">
-                    <p class="text-slate-800 font-medium">Kota Malang, {{ $report->created_at->translatedFormat('d F Y') }}</p>
-                    <p class="text-slate-800 font-extrabold uppercase mt-0.5">Direktur Pendidikan,</p>
+                    <p class="text-slate-800 dark:text-slate-200 font-medium">Kota Malang, {{ $report->created_at->translatedFormat('d F Y') }}</p>
+                    <p class="text-slate-800 dark:text-slate-200 font-extrabold uppercase mt-0.5">Direktur Pendidikan,</p>
                     
                     <!-- Space for Stamp and Signature -->
                     <div class="w-full h-24 relative flex items-center justify-center my-1 select-none">
@@ -207,7 +207,7 @@
                         @else
                             <!-- Fallback Vektor SVG Stempel Transparan Hijau khas Yayasan -->
                             <div class="absolute inset-0 flex items-center justify-center opacity-85 select-none pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="w-24 h-24 text-emerald-600/70 fill-none stroke-current">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="w-24 h-24 text-emerald-600/70 dark:text-emerald-500/50 fill-none stroke-current">
                                     <!-- Double outer circles -->
                                     <circle cx="100" cy="100" r="85" stroke-width="2.5" stroke-dasharray="6 2" />
                                     <circle cx="100" cy="100" r="78" stroke-width="1" />
@@ -241,7 +241,7 @@
                             
                             <!-- Fake Signature Overlay -->
                             <div class="absolute inset-0 flex items-center justify-center select-none pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60" class="w-16 h-12 text-indigo-700/80 stroke-current fill-none stroke-[2.5] stroke-linecap-round stroke-linejoin-round">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60" class="w-16 h-12 text-indigo-700/80 dark:text-indigo-400/80 stroke-current fill-none stroke-[2.5] stroke-linecap-round stroke-linejoin-round">
                                     <path d="M15 45 C30 15, 45 10, 50 25 C55 40, 60 50, 70 30 C80 10, 85 20, 90 25" />
                                     <path d="M35 30 L65 30" stroke-width="1.5" />
                                 </svg>
@@ -250,10 +250,10 @@
                     </div>
 
                     <!-- Nama Direktur -->
-                    <p class="font-bold dark:text-slate-200 text-slate-850 underline decoration-emerald-600 decoration-2 underline-offset-4">
+                    <p class="font-bold text-slate-800 dark:text-slate-200 underline decoration-emerald-600 dark:decoration-emerald-500 decoration-2 underline-offset-4">
                         {{ $reportDirectorName }}
                     </p>
-                    <p class="text-[10px] text-slate-500 font-bold tracking-wider mt-0.5 uppercase">Direktur Utama Yayasan</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-450 font-bold tracking-wider mt-0.5 uppercase">Direktur Utama Yayasan</p>
                 </div>
             </div>
             

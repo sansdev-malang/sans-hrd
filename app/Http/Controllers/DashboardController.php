@@ -175,8 +175,8 @@ class DashboardController extends Controller
                 }
             }
         }
-        // Fetch pending leave requests for the widget
-        $pendingLeaves = \App\Models\LeaveRequest::where('status', 'Pending')
+        // Fetch latest leave requests for the widget (any status)
+        $recentLeaves = \App\Models\LeaveRequest::with('schoolUnit')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
@@ -197,7 +197,7 @@ class DashboardController extends Controller
             'sakit',
             'alpa',
             'belumAbsen',
-            'pendingLeaves',
+            'recentLeaves',
             'latestAnnouncements'
         ));
     }

@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class PayslipController extends Controller
 {
@@ -83,10 +84,37 @@ class PayslipController extends Controller
             $payslip->file_path = $path;
             $payslip->save();
 
+            // Notify the unit application about the new payslip
+            $this->notifyUnitAboutPayslip($payslip);
+
             return back()->with('success', 'Slip gaji berhasil diunggah.');
         } catch (\Exception $e) {
             Log::error('Upload Payslip Error: ' . $e->getMessage());
             return back()->with('error', 'Gagal mengunggah slip gaji: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send payslip notification to the unit application.
+     */
+    private function notifyUnitAboutPayslip(Payslip $payslip)
+    {
+        $unit = SchoolUnit::find($payslip->school_unit_id);
+        if (!$unit) return;
+
+        $fileUrl = asset('storage/' . $payslip->file_path);
+
+        try {
+            Http::withHeaders([
+                'X-API-TOKEN' => $unit->api_token,
+                'Accept' => 'application/json',
+            ])->post(rtrim($unit->api_url, '/') . '/sync/payslips', [
+                'employee_id' => $payslip->employee_id,
+                'period' => $payslip->period,
+                'file_url' => $fileUrl,
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to send payslip notification to unit {$unit->name}: " . $e->getMessage());
         }
     }
 

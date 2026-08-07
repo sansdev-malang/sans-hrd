@@ -52,6 +52,9 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('bonus-reports', [\App\Http\Controllers\AttendanceBonusReportController::class, 'index'])->name('bonus-reports.index');
     Route::get('bonus-reports/export', [\App\Http\Controllers\AttendanceBonusReportController::class, 'export'])->name('bonus-reports.export');
 
+    // Attendance Percentage Reports
+    Route::get('attendance-percentage-reports', [\App\Http\Controllers\AttendancePercentageReportController::class, 'index'])->name('attendance-percentage-reports.index');
+
     // Manajemen Gaji
     Route::get('payslips', [\App\Http\Controllers\PayslipController::class, 'index'])->name('payslips.index');
     Route::post('payslips', [\App\Http\Controllers\PayslipController::class, 'store'])->name('payslips.store');
