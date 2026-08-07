@@ -81,7 +81,7 @@
 
                 <!-- RIGHT SIDE: PER PAGE (Pushed to far right using auto margins) -->
                 <div class="space-y-1 lg:ml-auto" style="width: 120px; flex-shrink: 0;">
-                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
+                    <label class="hidden lg:block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
                     <select name="per_page" onchange="this.form.submit()" class="h-9 w-full pl-3 pr-8 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-350 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <option value="15" {{ request('per_page', 15) == '15' ? 'selected' : '' }}>15 Baris</option>
                         <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
@@ -123,7 +123,7 @@
                 <table class="w-full text-xs border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 text-left sticky top-0 left-auto md:left-0 z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 left-auto md:left-0 z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
                                 <div class="grid grid-cols-2">
                                     <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
                                     <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap text-right">Siklus: <br><strong class="text-slate-700 dark:text-slate-300 text-xs">{{ \Carbon\Carbon::parse($startDateReq)->format('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->format('d M') }}</strong></span>
@@ -135,7 +135,7 @@
                                 $isToday = $date->isToday();
                                 $isSunday = $date->isSunday();
                             @endphp
-                            <th class="py-2 px-1 text-center sticky top-0 z-30 bg-slate-50 dark:bg-slate-900/60 min-w-[32px] border-r border-slate-100 dark:border-slate-800/60">
+                            <th class="py-2 px-1 text-center sticky top-0 z-30 bg-slate-50 dark:bg-slate-900 min-w-[32px] border-r border-slate-100 dark:border-slate-800/60">
                                 <div class="flex flex-col items-center justify-center gap-1 py-0.5">
                                     <span class="text-[9px] font-semibold {{ $isSunday && !$isToday ? 'text-red-400' : ($isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500') }} uppercase tracking-wider leading-none">
                                         {{ $date->translatedFormat('D') }}
