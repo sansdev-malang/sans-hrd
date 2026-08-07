@@ -15,7 +15,7 @@
                     <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                 </button>
                 
-                <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-11 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
                     <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                         <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                         Excel (.xlsx)
@@ -30,17 +30,17 @@
 
         <!-- FILTERS -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full">
-            <form method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-col md:flex-row items-stretch md:items-end gap-3.5 w-full text-left">
+            <form method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-col md:flex-row items-stretch md:items-end gap-4 w-full text-left">
                 
                 <!-- Bulan -->
-                <div class="space-y-1 w-full md:w-40">
+                <div class="space-y-1 w-full md:w-44">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
                     <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer">
                 </div>
 
                 <!-- Filter Unit -->
                 @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                <div class="space-y-1 w-full md:w-48">
+                <div class="space-y-1 w-full md:w-52">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
                     <select name="unit_id" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer">
                         <option value="">Semua Unit</option>
@@ -64,23 +64,12 @@
                     </div>
                 </div>
 
-                <!-- Per Page (Tampilkan) -->
-                <div class="space-y-1 w-full md:w-36">
-                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
-                    <select name="per_page" onchange="this.form.submit()" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer">
-                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15 Baris</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
-                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua Data</option>
-                    </select>
-                </div>
-
                 <!-- Apply Buttons -->
                 <div class="flex items-center gap-2 w-full md:w-auto self-stretch md:self-end">
                     <button type="submit" class="flex-1 md:flex-none h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer whitespace-nowrap">
                         Terapkan
                     </button>
-                    @if(request()->hasAny(['unit_id', 'search', 'per_page']) && count(request()->except('page')) > 0)
+                    @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
                         <a href="{{ route('attendance-logs.index') }}" class="flex-1 md:flex-none inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-semibold text-xs rounded-lg shadow-sm transition-colors">
                             Reset
                         </a>
@@ -88,6 +77,40 @@
                 </div>
             </form>
         </section>
+
+        <!-- TABLE CONTROLS -->
+        <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 w-full text-left">
+            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                @if($paginatedReports instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    Menampilkan <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedReports->firstItem() ?? 0 }}</span> - <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedReports->lastItem() ?? 0 }}</span> dari <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedReports->total() }}</span> pegawai
+                @else
+                    Menampilkan seluruh pegawai
+                @endif
+            </div>
+            
+            <!-- Per Page (Tampilkan) -->
+            <div class="flex items-center gap-2 self-end sm:self-auto text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <span>Tampilkan:</span>
+                <form method="GET" action="{{ route('attendance-logs.index') }}" class="inline-block">
+                    <!-- Pass existing filters as hidden inputs -->
+                    @foreach(request()->except(['per_page', 'page']) as $key => $value)
+                        @if(is_array($value))
+                            @foreach($value as $v)
+                                <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                            @endforeach
+                        @else
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <select name="per_page" onchange="this.form.submit()" class="h-8 pl-3 pr-8 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-350 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <option value="15" {{ request('per_page', 15) == '15' ? 'selected' : '' }}>15 Baris</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua Data</option>
+                    </select>
+                </form>
+            </div>
+        </div>
         
         
 
