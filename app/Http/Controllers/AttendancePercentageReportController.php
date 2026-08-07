@@ -212,13 +212,33 @@ class AttendancePercentageReportController extends Controller
 
         $schoolUnits = SchoolUnit::where('is_active', true)->get();
 
+        // Calculate average percentages per unit based on filtered/fetched reports
+        $unitStats = [];
+        $reportsGrouped = collect($reports)->groupBy(function ($rep) {
+            return $rep['employee']['unit_id'] ?? 0;
+        });
+
+        foreach ($schoolUnits as $unit) {
+            $unitReports = $reportsGrouped->get($unit->id) ?? collect();
+            $totalPresentUnit = $unitReports->sum('total_present');
+            $totalAbsentUnit = $unitReports->sum('total_absent');
+            $totalActiveUnit = $totalPresentUnit + $totalAbsentUnit;
+            
+            $unitStats[$unit->id] = [
+                'name' => $unit->name,
+                'average' => $totalActiveUnit > 0 ? round(($totalPresentUnit / $totalActiveUnit) * 100, 1) : 0,
+                'count' => $unitReports->count()
+            ];
+        }
+
         return view('attendance-percentage-reports.index', compact(
             'reports',
             'schoolUnits',
             'month',
             'unitId',
             'startDateReq',
-            'endDateReq'
+            'endDateReq',
+            'unitStats'
         ));
     }
 }

@@ -62,6 +62,44 @@
             </form>
         </section>
 
+        <!-- STAT CARDS -->
+        <div class="grid grid-cols-1 {{ empty($unitId) ? 'md:grid-cols-3' : '' }} gap-4 w-full text-left">
+            @foreach($schoolUnits as $unit)
+                @if(empty($unitId) || $unitId == $unit->id)
+                    @php
+                        $stat = $unitStats[$unit->id] ?? ['average' => 0, 'count' => 0];
+                        $avg = $stat['average'];
+                        if ($avg >= 95) {
+                            $theme = 'border-emerald-250 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-900/30';
+                            $textClass = 'text-emerald-600 dark:text-emerald-400';
+                        } elseif ($avg >= 90) {
+                            $theme = 'border-amber-250 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-900/30';
+                            $textClass = 'text-amber-600 dark:text-amber-400';
+                        } else {
+                            $theme = 'border-rose-250 bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-400 dark:border-rose-900/30';
+                            $textClass = 'text-rose-600 dark:text-rose-400';
+                        }
+                    @endphp
+                    <div class="animate-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex items-center justify-between transition-all duration-300 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Rata-Rata Kehadiran</span>
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50 leading-tight">Unit {{ $unit->name }}</h4>
+                            <p class="text-[10px] text-slate-400 font-medium">{{ $stat['count'] }} Pegawai aktif</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-px bg-slate-100 dark:bg-slate-800"></div>
+                            <div class="text-right">
+                                <span class="text-2xl font-black font-mono tracking-tight block {{ $textClass }}">{{ $avg }}%</span>
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase border {{ $theme }}">
+                                    {{ $avg >= 95 ? 'Amat Baik' : ($avg >= 90 ? 'Baik' : 'Kurang') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endforeach
+        </div>
+
         <!-- TABLE SECTION -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-880 rounded-xl shadow-sm overflow-hidden w-full text-left">
             <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
