@@ -82,9 +82,9 @@
                 </form>
 
                 <!-- RIGHT SIDE: PER PAGE -->
-                <div class="flex items-center gap-2 self-start lg:self-end text-xs text-slate-500 dark:text-slate-400 font-medium shrink-0 mb-0.5">
-                    <span class="whitespace-nowrap">Tampilkan:</span>
-                    <form method="GET" action="{{ route('attendance-logs.index') }}" class="inline-block">
+                <div class="space-y-1 w-full sm:w-32 shrink-0 self-stretch sm:self-end text-left">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
+                    <form method="GET" action="{{ route('attendance-logs.index') }}" class="inline-block w-full">
                         <!-- Pass existing filters as hidden inputs -->
                         @foreach(request()->except(['per_page', 'page']) as $key => $value)
                             @if(is_array($value))
@@ -95,27 +95,16 @@
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                             @endif
                         @endforeach
-                        <select name="per_page" onchange="this.form.submit()" class="h-9 pl-3 pr-8 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-350 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <select name="per_page" onchange="this.form.submit()" class="h-9 w-full pl-3 pr-8 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-350 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                             <option value="15" {{ request('per_page', 15) == '15' ? 'selected' : '' }}>15 Baris</option>
                             <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
                             <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
-                            <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua Data</option>
+                            <option value="all" {{ request('per_page', 15) == 'all' ? 'selected' : '' }}>Semua Data</option>
                         </select>
                     </form>
                 </div>
             </div>
         </section>
-
-        <!-- TABLE CONTROLS -->
-        <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 w-full text-left">
-            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                @if($paginatedReports instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                    Menampilkan <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedReports->firstItem() ?? 0 }}</span> - <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedReports->lastItem() ?? 0 }}</span> dari <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedReports->total() }}</span> pegawai
-                @else
-                    Menampilkan seluruh pegawai
-                @endif
-            </div>
-        </div>
         
         
 
