@@ -160,7 +160,7 @@
             <div class="text-[11px] text-slate-500 dark:text-slate-400 space-y-1.5 leading-relaxed font-medium">
                 <p>Rumus perhitungan persentase kehadiran pegawai adalah:</p>
                 <div class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-lg inline-block font-mono text-[10px] font-bold text-slate-800 dark:text-slate-350">
-                    Persentase = ( Hari Hadir / ( Hari Hadir + Hari Alpa ) ) &times; 100%
+                    Persentase = ( Hari Hadir / ( Hari Kerja - ( Sakit + Izin + Cuti ) ) ) &times; 100%
                 </div>
                 <p>Keterangan:</p>
                 <ul class="list-disc pl-5 space-y-0.5">
