@@ -30,60 +30,57 @@
 
         <!-- FILTERS & CONTROLS -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full">
-            <form method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-col lg:flex-row items-stretch lg:items-end justify-between gap-4 w-full text-left">
+            <form method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-wrap items-end gap-4 w-full text-left">
                 
-                <!-- LEFT SIDE: FILTER FIELDS -->
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3.5 flex-1">
-                    <!-- Bulan -->
-                    <div class="space-y-1 w-full sm:w-36 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
-                        <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer">
-                    </div>
+                <!-- Bulan -->
+                <div class="space-y-1" style="width: 140px; flex-shrink: 0;">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
+                    <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer">
+                </div>
 
-                    <!-- Filter Unit -->
-                    @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                    <div class="space-y-1 w-full sm:w-40 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
-                        <select name="unit_id" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer">
-                            <option value="">Semua Unit</option>
-                            @foreach($schoolUnits as $unit)
-                                <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
-                                    {{ $unit->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @endif
+                <!-- Filter Unit -->
+                @if(isset($schoolUnits) && count($schoolUnits) > 0)
+                <div class="space-y-1" style="width: 130px; flex-shrink: 0;">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
+                    <select name="unit_id" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer">
+                        <option value="">Semua Unit</option>
+                        @foreach($schoolUnits as $unit)
+                            <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
+                                {{ $unit->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
 
-                    <!-- Search -->
-                    <div class="space-y-1 flex-1 min-w-[180px]">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Pencarian</label>
-                        <div class="relative w-full">
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                                <i data-lucide="search" class="w-4 h-4"></i>
-                            </div>
-                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIP..." class="w-full text-xs h-9 pl-9 pr-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                <!-- Search -->
+                <div class="space-y-1" style="flex-grow: 1; min-width: 180px;">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Pencarian</label>
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <i data-lucide="search" class="w-4 h-4"></i>
                         </div>
-                    </div>
-
-                    <!-- Apply & Reset Buttons -->
-                    <div class="space-y-1 w-full sm:w-auto self-stretch sm:self-end">
-                        <div class="hidden sm:block text-[10px] font-bold invisible mb-1 select-none">&nbsp;</div>
-                        <div class="flex items-center gap-2">
-                            <button type="submit" class="flex-1 sm:flex-none h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors cursor-pointer whitespace-nowrap">
-                                Terapkan
-                            </button>
-                            @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
-                                <a href="{{ route('attendance-logs.index') }}" class="flex-1 sm:flex-none inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer">
-                                    Reset
-                                </a>
-                            @endif
-                        </div>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIP..." class="w-full text-xs h-9 pl-9 pr-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                     </div>
                 </div>
 
-                <!-- RIGHT SIDE: PER PAGE -->
-                <div class="space-y-1 w-full lg:w-32 shrink-0 self-stretch lg:self-end">
+                <!-- Apply & Reset Buttons -->
+                <div class="space-y-1" style="flex-shrink: 0;">
+                    <div class="hidden sm:block text-[10px] font-bold invisible mb-1 select-none">&nbsp;</div>
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors cursor-pointer whitespace-nowrap">
+                            Terapkan
+                        </button>
+                        @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
+                            <a href="{{ route('attendance-logs.index') }}" class="inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer">
+                                Reset
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- RIGHT SIDE: PER PAGE (Pushed to far right using auto margins) -->
+                <div class="space-y-1 lg:ml-auto" style="width: 120px; flex-shrink: 0;">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
                     <select name="per_page" onchange="this.form.submit()" class="h-9 w-full pl-3 pr-8 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-350 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <option value="15" {{ request('per_page', 15) == '15' ? 'selected' : '' }}>15 Baris</option>
