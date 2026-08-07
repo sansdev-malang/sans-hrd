@@ -123,7 +123,7 @@
                 <table class="w-full text-xs border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 text-left sticky top-0 left-0 z-40 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 text-left sticky top-0 left-auto md:left-0 z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
                                 <div class="grid grid-cols-2">
                                     <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
                                     <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap text-right">Siklus: <br><strong class="text-slate-700 dark:text-slate-300 text-xs">{{ \Carbon\Carbon::parse($startDateReq)->format('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->format('d M') }}</strong></span>
@@ -159,7 +159,7 @@
                             @endphp
                             <tr class="group hover:bg-slate-50/60 dark:hover:bg-slate-900/30 transition-colors">
                                 <!-- KOLOM 1: PROFIL -->
-                                <td class="px-4 py-2 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
+                                <td class="px-4 py-2 static md:sticky md:left-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
                                         <div class="flex flex-col min-w-0">
