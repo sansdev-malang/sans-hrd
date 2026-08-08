@@ -239,15 +239,15 @@
                             </tr>
                         @endforelse
                                         </tbody>
-                    <tfoot class="bg-slate-50 dark:bg-slate-900/80 sticky bottom-0 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                    <tfoot class="bg-slate-50 dark:bg-slate-900 sticky bottom-0 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                         <tr>
-                            <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-200 text-right sticky left-0 z-40 bg-slate-50 dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800">
+                            <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-200 text-right static md:sticky md:left-0 md:z-40 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
                                 TOTAL KESELURUHAN
                             </td>
-                            <td class="px-4 py-3 font-bold text-emerald-600 dark:text-emerald-400 text-center sticky left-[200px] z-40 bg-slate-50 dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800">
+                            <td class="px-4 py-3 font-bold text-emerald-600 dark:text-emerald-400 text-center static md:sticky md:left-[200px] md:z-40 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
                                 Rp {{ number_format($totalSemuaBonus ?? 0, 0, ',', '.') }}
                             </td>
-                            <td colspan="{{ count($dates) }}" class="bg-slate-50 dark:bg-slate-900/80"></td>
+                            <td colspan="{{ count($dates) }}" class="bg-slate-50 dark:bg-slate-900"></td>
                         </tr>
                     </tfoot>
                 </table>
