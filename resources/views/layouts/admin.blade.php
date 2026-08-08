@@ -491,5 +491,63 @@
                 });
             })();
         </script>
+
+        <!-- GLOBAL LOADING OVERLAY -->
+        <div id="global-loading-overlay" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/10 backdrop-blur-[2px] opacity-0 pointer-events-none transition-opacity duration-300">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-4 flex items-center gap-3">
+                <svg class="animate-spin h-5 w-5 text-indigo-600 dark:text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-350">Memuat data...</span>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                const loader = document.getElementById('global-loading-overlay');
+                if (!loader) return;
+
+                // Handle form submit events
+                document.addEventListener('submit', function (e) {
+                    const form = e.target.closest('form');
+                    if (!form) return;
+                    if (form.getAttribute('target') === '_blank') return;
+                    
+                    loader.classList.remove('opacity-0', 'pointer-events-none');
+                });
+
+                // Handle auto-submit elements (like select and inputs inside form)
+                document.addEventListener('change', function (e) {
+                    const input = e.target;
+                    if (!input.closest('form')) return;
+                    
+                    // Check if it's a select or a month input that triggers submit
+                    const isAutoSubmit = input.tagName === 'SELECT' || (input.tagName === 'INPUT' && input.getAttribute('type') === 'month');
+                    if (isAutoSubmit && input.closest('form').getAttribute('target') !== '_blank') {
+                        loader.classList.remove('opacity-0', 'pointer-events-none');
+                    }
+                });
+
+                // Handle clicking sync/action links that trigger operations (like sync button in matrix or other pages)
+                document.addEventListener('click', function (e) {
+                    const link = e.target.closest('a');
+                    if (!link) return;
+                    
+                    // Show loader if the link contains specific sync/action routes or classes
+                    const href = link.getAttribute('href');
+                    if (href && (href.includes('sync') || href.includes('pull')) && !link.getAttribute('target')) {
+                        loader.classList.remove('opacity-0', 'pointer-events-none');
+                    }
+                });
+
+                // Hide loader if page is loaded/restored from back-forward cache (bfcache)
+                window.addEventListener('pageshow', function (event) {
+                    if (event.persisted) {
+                        loader.classList.add('opacity-0', 'pointer-events-none');
+                    }
+                });
+            })();
+        </script>
     </body>
 </html>

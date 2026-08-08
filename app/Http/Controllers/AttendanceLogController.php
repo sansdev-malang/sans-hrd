@@ -32,7 +32,7 @@ class AttendanceLogController extends Controller
         }
     }
 
-    private function generateReportsData($startDate, $endDate, $search = null, $unitId = null)
+    private function generateReportsData($startDate, $endDate, $search = null, $unitId = null, $position = null)
     {
         $rawEmployees = collect($this->service->getSdEmployees());
 
@@ -41,7 +41,15 @@ class AttendanceLogController extends Controller
         }
         if (!empty($search)) {
             $rawEmployees = $rawEmployees->filter(function($e) use ($search) {
-                return stripos($e['name'], $search) !== false || (isset($e['zkteco_uid']) && stripos((string)$e['zkteco_uid'], $search) !== false) || (isset($e['nuptk']) && stripos($e['nuptk'], $search) !== false);
+                return stripos($e['name'], $search) !== false 
+                    || (isset($e['zkteco_uid']) && stripos((string)$e['zkteco_uid'], $search) !== false) 
+                    || (isset($e['nuptk']) && stripos($e['nuptk'], $search) !== false);
+            });
+        }
+        if (!empty($position)) {
+            $rawEmployees = $rawEmployees->filter(function($e) use ($position) {
+                $empPos = $e['position'] ?? $e['subject_position'] ?? '';
+                return $empPos == $position;
             });
         }
         $employeesCollection = $rawEmployees->values();
@@ -292,8 +300,20 @@ class AttendanceLogController extends Controller
 
         $search = $request->query('search');
         $unitId = $request->query('unit_id');
+        $position = $request->query('position');
 
-        $reports = $this->generateReportsData($startDate, $endDate, $search, $unitId);
+        // Extract unique positions (jabatan) from raw employee data
+        $rawEmployeesForPos = $this->service->getSdEmployees();
+        $positions = collect($rawEmployeesForPos)
+            ->map(function ($emp) {
+                return $emp['position'] ?? $emp['subject_position'] ?? null;
+            })
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        $reports = $this->generateReportsData($startDate, $endDate, $search, $unitId, $position);
 
         $total = count($reports);
         $perPageReq = $request->query('per_page', 15);
@@ -312,7 +332,7 @@ class AttendanceLogController extends Controller
         $startDateReq = $startDate->format('Y-m-d');
         $endDateReq = $endDate->format('Y-m-d');
 
-        return view('attendance-logs.index', compact('paginatedReports', 'schoolUnits', 'month', 'startDateReq', 'endDateReq'));
+        return view('attendance-logs.index', compact('paginatedReports', 'schoolUnits', 'month', 'startDateReq', 'endDateReq', 'positions'));
     }
 
     public function export(Request $request)
@@ -329,8 +349,9 @@ class AttendanceLogController extends Controller
 
         $search = $request->query('search');
         $unitId = $request->query('unit_id');
+        $position = $request->query('position');
 
-        $reports = $this->generateReportsData($startDate, $endDate, $search, $unitId);
+        $reports = $this->generateReportsData($startDate, $endDate, $search, $unitId, $position);
 
         $format = $request->query('format', 'excel');
         
