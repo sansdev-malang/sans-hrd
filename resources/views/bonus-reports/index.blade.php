@@ -2,13 +2,13 @@
     <div class="p-6 space-y-6">
         
         <!-- HEADER -->
-        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex flex-col gap-0.5">
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Rekap Bonus Kehadiran</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Evaluasi kehadiran pegawai berdasarkan skema bonus aktif.</p>
             </div>
             
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
                 @if($activeSchema)
                     <div class="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg flex items-center gap-2">
                         <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
@@ -20,24 +20,44 @@
                         <span class="text-xs font-medium text-red-800 dark:text-red-300">Tidak ada skema bonus aktif!</span>
                     </div>
                 @endif
+
+                <!-- EXPORT DROPDOWN -->
+                <div x-data="{ open: false }" class="relative shrink-0">
+                    <button type="button" @click="open = !open" @click.outside="open = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Ekspor</span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
+                    </button>
+                    
+                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                        <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-350 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
+                            Excel (.xlsx)
+                        </a>
+                        <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-350 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
+                            <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
+                            PDF (.pdf)
+                        </a>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- FILTERS -->
+        <!-- FILTERS & CONTROLS -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full">
-            <form method="GET" action="{{ route('bonus-reports.index') }}" class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3 w-full">
+            <form method="GET" action="{{ route('bonus-reports.index') }}" class="flex flex-wrap items-end gap-4 w-full text-left">
                 
                 <!-- Bulan -->
-                <div class="space-y-1 w-full sm:w-40">
+                <div class="space-y-1" style="width: 140px; flex-shrink: 0;">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
-                    <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                    <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer">
                 </div>
 
                 <!-- Filter Unit -->
                 @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                <div class="space-y-1 w-full sm:w-48">
+                <div class="space-y-1" style="width: 130px; flex-shrink: 0;">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
-                    <select name="unit_id" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                    <select name="unit_id" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer">
                         <option value="">Semua Unit</option>
                         @foreach($schoolUnits as $unit)
                             <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
@@ -49,7 +69,7 @@
                 @endif
 
                 <!-- Search -->
-                <div class="space-y-1 w-full sm:w-60">
+                <div class="space-y-1" style="flex-grow: 1; min-width: 180px;">
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Pencarian</label>
                     <div class="relative w-full">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
@@ -59,51 +79,30 @@
                     </div>
                 </div>
 
-                <!-- Apply Buttons (Left side) -->
-                <div class="flex items-center gap-2.5">
-                    <button type="submit" class="w-full sm:w-auto h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer whitespace-nowrap">
-                        Terapkan
-                    </button>
-                    @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
-                        <a href="{{ route('bonus-reports.index') }}" class="w-full sm:w-auto inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors">
-                            Reset
-                        </a>
-                    @endif
+                <!-- Apply & Reset Buttons -->
+                <div class="space-y-1" style="flex-shrink: 0;">
+                    <div class="hidden sm:block text-[10px] font-bold invisible mb-1 select-none">&nbsp;</div>
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors cursor-pointer whitespace-nowrap">
+                            Terapkan
+                        </button>
+                        @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
+                            <a href="{{ route('bonus-reports.index') }}" class="inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer">
+                                Reset
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
-                <!-- Tools (Right side) -->
-                <div class="flex items-center justify-between gap-2.5 sm:ml-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-slate-100 dark:border-slate-800 sm:border-0 w-full sm:w-auto">
-                    <!-- Per Page -->
-                    <div class="w-full sm:w-40">
-                        <select name="per_page" onchange="this.form.submit()" class="w-full h-9 pl-3 pr-8 text-xs font-semibold border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-ellipsis overflow-hidden whitespace-nowrap">
-                            <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15 Baris</option>
-                            <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
-                            <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
-                            <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua Data</option>
-                        </select>
-                    </div>
-                    
-                    <div class="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                    
-                    <!-- EXPORT DROPDOWN -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button type="button" @click="open = !open" @click.outside="open = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                            <span>Ekspor</span>
-                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
-                        </button>
-                        
-                        <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
-                            <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
-                                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
-                                Excel (.xlsx)
-                            </a>
-                            <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
-                                <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
-                                PDF (.pdf)
-                            </a>
-                        </div>
-                    </div>
+                <!-- RIGHT SIDE: PER PAGE (Pushed to far right using auto margins) -->
+                <div class="space-y-1 lg:ml-auto" style="width: 120px; flex-shrink: 0;">
+                    <label class="hidden lg:block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
+                    <select name="per_page" onchange="this.form.submit()" class="h-9 w-full pl-3 pr-8 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-350 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <option value="15" {{ request('per_page', 15) == '15' ? 'selected' : '' }}>15 Baris</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
+                        <option value="all" {{ request('per_page', 15) == 'all' ? 'selected' : '' }}>Semua Data</option>
+                    </select>
                 </div>
             </form>
         </section>
@@ -137,7 +136,7 @@
                 <table class="w-full text-xs border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 text-left sticky top-0 left-0 z-40 border-r border-slate-200 dark:border-slate-800 min-w-[200px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 left-auto md:left-0 z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[200px]">
                                 <div class="flex items-start justify-between gap-4">
                                     <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
                                     <span class="text-right leading-tight">
@@ -146,7 +145,7 @@
                                     </span>
                                 </div>
                             </th>
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 text-center sticky top-0 left-[200px] z-40 border-r border-slate-200 dark:border-slate-800 min-w-[120px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-center sticky top-0 left-auto md:left-[200px] z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[120px]">
                                 <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bonus</span>
                             </th>
                             @foreach($dates as $date)
@@ -157,7 +156,7 @@
                                 $numColor = $isSunday && !$isToday ? 'text-red-500 dark:text-red-400' : ($isToday ? 'text-white' : 'text-slate-700 dark:text-slate-200');
                                 $bgToday = $isToday ? 'bg-indigo-600 dark:bg-indigo-500 w-6 h-6 flex items-center justify-center rounded-full' : '';
                             @endphp
-                            <th class="py-2 px-1 text-center sticky top-0 z-30 bg-slate-50 dark:bg-slate-900/60 min-w-[48px] max-w-[48px] border-r border-slate-100 dark:border-slate-800/60">
+                            <th class="py-2 px-1 text-center sticky top-0 z-30 bg-slate-50 dark:bg-slate-900 min-w-[48px] max-w-[48px] border-r border-slate-100 dark:border-slate-800/60">
                                 <div class="flex flex-col items-center gap-0.5 py-0.5">
                                     <span class="text-[9px] font-semibold {{ $dayColor }} uppercase tracking-wider">{{ $date->translatedFormat('D') }}</span>
                                     <span class="text-[11px] font-bold {{ $numColor }} {{ $bgToday }}">{{ $date->format('d') }}</span>
@@ -175,7 +174,7 @@
                             @endphp
                             <tr class="group hover:bg-slate-50/60 dark:hover:bg-slate-900/30 transition-colors">
                                 <!-- KOLOM 1: PROFIL -->
-                                <td class="px-4 py-2 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
+                                <td class="px-4 py-2 static md:sticky md:left-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
                                         <div class="flex flex-col min-w-0">
@@ -188,7 +187,7 @@
                                     </div>
                                 </td>
                                 <!-- KOLOM 2: TOTAL BONUS -->
-                                <td class="px-4 py-2 sticky left-[200px] z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 text-center transition-colors">
+                                <td class="px-4 py-2 static md:sticky md:left-[200px] md:z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 text-center transition-colors">
                                     @if($report['bonus_nominal'] > 0)
                                         <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Rp {{ number_format($report['bonus_nominal'], 0, ',', '.') }}</span>
                                     @else
