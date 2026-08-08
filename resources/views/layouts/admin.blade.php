@@ -529,16 +529,22 @@
                     }
                 });
 
-                // Handle clicking sync/action links that trigger operations (like sync button in matrix or other pages)
+                // Handle clicking links for page transitions (Reset buttons, pagination, menus, syncs)
                 document.addEventListener('click', function (e) {
                     const link = e.target.closest('a');
                     if (!link) return;
                     
-                    // Show loader if the link contains specific sync/action routes or classes
                     const href = link.getAttribute('href');
-                    if (href && (href.includes('sync') || href.includes('pull')) && !link.getAttribute('target')) {
-                        loader.classList.remove('opacity-0', 'pointer-events-none');
-                    }
+                    const target = link.getAttribute('target');
+                    
+                    // Skip if empty, hash anchor, javascript link, or opens in new tab
+                    if (!href || href.startsWith('#') || href.startsWith('javascript:') || target === '_blank') return;
+                    
+                    // Skip file downloads/exports to prevent loader from getting stuck
+                    const isDownload = href.includes('export') || href.includes('download') || link.hasAttribute('download');
+                    if (isDownload) return;
+                    
+                    loader.classList.remove('opacity-0', 'pointer-events-none');
                 });
 
                 // Hide loader if page is loaded/restored from back-forward cache (bfcache)
