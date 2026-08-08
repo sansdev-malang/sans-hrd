@@ -42,16 +42,14 @@
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Search Box -->
-                <!-- Search Box -->
-                <div class="relative w-full md:max-w-xl flex items-center">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <i data-lucide="search" class="w-4 h-4 text-slate-400 dark:text-slate-500"></i>
-                    </span>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, email, NIP, atau jabatan..."
-                        style="padding-left: 2.25rem; padding-right: 4.5rem;"
+                <div x-data="{ searchVal: '{{ request('search') }}' }" class="relative w-full search-container">
+                    <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
+                        style="padding-left: 0.75rem; padding-right: 2.25rem;"
                         class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
-                    <button type="submit" class="absolute right-1 h-7 px-3 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] font-bold rounded-md hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-sm">
-                        Cari
+                    <button type="submit" 
+                        :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
+                        class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
+                        <i data-lucide="search" class="w-4 h-4"></i>
                     </button>
                 </div>
 
@@ -77,15 +75,16 @@
                         @endforeach
                     </select>
 
-                    <!-- Status -->
-                    <select name="status" onchange="this.form.submit()"
-                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
-                        <option value="">Semua Status</option>
-                        <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Aktif</option>
-                        <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Non-Aktif</option>
+                    <!-- Jabatan -->
+                    <select name="position" onchange="this.form.submit()"
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        <option value="">Semua Jabatan</option>
+                        @foreach($positions as $pos)
+                            <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
+                        @endforeach
                     </select>
 
-                    @if(request()->anyFilled(['search', 'unit', 'status']) || request()->filled('per_page') && request('per_page') != 50)
+                    @if(request()->anyFilled(['search', 'unit', 'position']) || request()->filled('per_page') && request('per_page') != 50)
                         <a href="{{ route('employees.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors" title="Reset Filter">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </a>
@@ -96,21 +95,33 @@
 
         <!-- DATA TABLE -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
-            <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center">
-                <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Daftar Pegawai Gabungan</h3>
+            <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center flex-wrap gap-2 bg-white dark:bg-slate-900">
+                <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">
+                    @if(request('unit') && $schoolUnits->firstWhere('id', request('unit')))
+                        Daftar Pegawai {{ $schoolUnits->firstWhere('id', request('unit'))->name }}
+                    @else
+                        Daftar Pegawai
+                    @endif
+                </h3>
+                <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 md:hidden bg-slate-50 dark:bg-slate-900/50 px-2 py-1 rounded-md border border-slate-200/50 dark:border-slate-800/40">
+                    <i data-lucide="move-horizontal" class="w-3.5 h-3.5 animate-pulse text-indigo-500"></i>
+                    <span>Geser tabel</span>
+                </div>
             </div>
-            <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 240px);">
-                <table class="w-full text-xs border-collapse">
-                                        <thead class="sticky top-0 z-10 shadow-sm">
-                        <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-14">No</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[200px]">Nama Lengkap</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Unit</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Tipe Pegawai</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-56">Jabatan</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">ZK ID</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
-                            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Aksi</th>
+            <div class="overflow-x-auto overflow-y-auto custom-scrollbar" style="max-height: calc(100vh - 240px);">
+                <table class="w-full min-w-[900px] text-xs border-collapse">
+                                        <thead class="z-10">
+                        <tr class="border-b border-slate-200 dark:border-slate-800">
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-14">No</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[200px]">Nama Lengkap</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Unit</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Tipe Pegawai</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-56">Jabatan</th>
+                            @if(auth()->user()->role === 'super_admin')
+                                <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">ZK ID</th>
+                            @endif
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
@@ -119,8 +130,8 @@
                         @endphp
                         @forelse($employees as $index => $emp)
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors text-left">
-                                <td class="px-6 py-4 text-slate-900 dark:text-slate-50 font-medium">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 md:px-6 py-3 md:py-4 text-slate-900 dark:text-slate-50 font-medium">{{ $index + 1 }}</td>
+                                <td class="px-3 md:px-6 py-3 md:py-4">
                                     <div class="flex items-center gap-3">
                                         @if(!empty($emp['photo']))
                                             <img @click='selectedEmp = @json($emp); showEmpDetailModal = true' src="{{ str_contains($emp['photo'], 'photos/') ? rtrim($emp['unit_url'], '/') . '/storage/' . $emp['photo'] : rtrim($emp['unit_url'], '/') . '/storage/photos/' . $emp['photo'] }}" class="w-8 h-8 cursor-pointer rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
@@ -143,7 +154,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 md:px-6 py-3 md:py-4">
                                     @if(str_contains(strtolower($emp['unit_name']), 'paud'))
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border border-teal-200/50 dark:border-teal-800/40 uppercase">PAUD & TK</span>
                                     @elseif(str_contains(strtolower($emp['unit_name']), 'sd'))
@@ -154,23 +165,25 @@
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 uppercase tracking-wider">{{ $emp['unit_name'] }}</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium">
+                                <td class="px-3 md:px-6 py-3 md:py-4 text-slate-600 dark:text-slate-400 font-medium">
                                     {{ $emp['employee_type']['name'] ?? 'Pegawai' }}
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 md:px-6 py-3 md:py-4">
                                     <span class="block text-slate-700 dark:text-slate-300 font-medium">{{ $emp['position'] ?? '-' }}</span>
                                     @if(!empty($emp['additional_position']))
                                         <span class="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{{ $emp['additional_position'] }}</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
-                                    @if(!empty($emp['zkteco_uid']))
-                                        <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono text-xs">ID: {{ $emp['zkteco_uid'] }}</span>
-                                    @else
-                                        <span class="text-slate-400 dark:text-slate-600">-</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4">
+                                @if(auth()->user()->role === 'super_admin')
+                                    <td class="px-3 md:px-6 py-3 md:py-4">
+                                        @if(!empty($emp['zkteco_uid']))
+                                            <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono text-xs">ID: {{ $emp['zkteco_uid'] }}</span>
+                                        @else
+                                            <span class="text-slate-400 dark:bg-slate-600">-</span>
+                                        @endif
+                                    </td>
+                                @endif
+                                <td class="px-3 md:px-6 py-3 md:py-4">
                                     @if(($emp['status'] ?? '') == 'Active')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-lime-50 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400 border border-lime-200/50 dark:border-lime-800/40">Aktif</span>
                                     @elseif(($emp['status'] ?? '') == 'Leave')
@@ -179,7 +192,7 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200/50 dark:border-red-800/40">Nonaktif</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-3 md:px-6 py-3 md:py-4 text-right">
                                     <div class="flex gap-2 justify-end">
                                         <button type="button" @click='selectedEmp = @json($emp); showEditModal = true; if(window.loadEditEmployeeTypes) window.loadEditEmployeeTypes(selectedEmp.unit_id, selectedEmp.employee_type_code || (selectedEmp.employee_type ? selectedEmp.employee_type.code : ""));' class="h-8 px-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer flex items-center gap-1">
                                             <i data-lucide="edit" class="w-3.5 h-3.5"></i>
@@ -194,7 +207,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center text-slate-400">
+                                <td colspan="{{ auth()->user()->role === 'super_admin' ? 8 : 7 }}" class="px-6 py-12 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <i data-lucide="users-2" class="w-8 h-8 text-slate-300 dark:text-slate-700"></i>
                                         <p class="text-xs">Tidak ada data pegawai yang dapat ditampilkan.</p>
@@ -1435,6 +1448,7 @@
 <style>
     .custom-scrollbar::-webkit-scrollbar {
         width: 4px;
+        height: 5px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
         background: transparent;
@@ -1445,6 +1459,11 @@
     }
     .dark .custom-scrollbar::-webkit-scrollbar-thumb {
         background: #334155;
+    }
+    @media (min-width: 768px) {
+        .search-container {
+            max-width: 280px !important;
+        }
     }
 </style>
 </x-admin-layout>

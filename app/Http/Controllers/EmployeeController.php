@@ -31,6 +31,16 @@ class EmployeeController extends Controller
         $schoolUnits = SchoolUnit::where('is_active', true)->get();
         $rawEmployees = $this->service->getSdEmployees();
         
+        // Extract unique positions (jabatan) from raw employee data
+        $positions = collect($rawEmployees)
+            ->map(function ($emp) {
+                return $emp['position'] ?? $emp['subject_position'] ?? null;
+            })
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+        
         $employeesCollection = collect($rawEmployees);
 
         // Apply search filter
@@ -52,11 +62,12 @@ class EmployeeController extends Controller
             });
         }
 
-        // Apply status filter
-        $status = $request->query('status');
-        if (!empty($status)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($status) {
-                return ($emp['status'] ?? '') == $status;
+        // Apply position filter
+        $position = $request->query('position');
+        if (!empty($position)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                $empPos = $emp['position'] ?? $emp['subject_position'] ?? '';
+                return $empPos == $position;
             });
         }
 
@@ -89,6 +100,7 @@ class EmployeeController extends Controller
             'employees' => $paginatedEmployees,
             'schoolUnits' => $schoolUnits,
             'devices' => $devices,
+            'positions' => $positions,
         ]);
     }
 
@@ -119,10 +131,11 @@ class EmployeeController extends Controller
             }
         }
 
-        $status = $request->query('status');
-        if (!empty($status)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($status) {
-                return ($emp['status'] ?? '') == $status;
+        $position = $request->query('position');
+        if (!empty($position)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                $empPos = $emp['position'] ?? $emp['subject_position'] ?? '';
+                return $empPos == $position;
             });
         }
 
@@ -197,10 +210,11 @@ class EmployeeController extends Controller
             }
         }
 
-        $status = $request->query('status');
-        if (!empty($status)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($status) {
-                return ($emp['status'] ?? '') == $status;
+        $position = $request->query('position');
+        if (!empty($position)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                $empPos = $emp['position'] ?? $emp['subject_position'] ?? '';
+                return $empPos == $position;
             });
         }
 
