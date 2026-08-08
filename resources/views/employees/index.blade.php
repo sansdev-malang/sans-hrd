@@ -43,14 +43,14 @@
             <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Search Box -->
                 <!-- Search Box -->
-                <div class="relative w-full md:max-w-xl">
+                <div class="relative w-full md:max-w-xl flex items-center">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <i data-lucide="search" class="w-4 h-4 text-slate-400 dark:text-slate-500"></i>
                     </span>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, email, NIP, atau jabatan..."
                         style="padding-left: 2.25rem; padding-right: 4.5rem;"
                         class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
-                    <button type="submit" class="absolute inset-y-1 right-1 px-3 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] font-bold rounded-md hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-sm">
+                    <button type="submit" class="absolute right-1 h-7 px-3 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] font-bold rounded-md hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-sm">
                         Cari
                     </button>
                 </div>
