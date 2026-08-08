@@ -55,11 +55,12 @@
         <thead>
             <tr>
                 <th width="5%" class="text-center">No</th>
-                <th width="15%">Unit</th>
-                <th width="25%">Nama Lengkap</th>
-                <th width="20%">Email</th>
+                <th width="10%">Unit</th>
+                <th width="20%">Nama Lengkap</th>
+                <th width="15%">Email</th>
                 <th width="15%">Tipe Pegawai</th>
-                <th width="10%">Jabatan</th>
+                <th width="15%">Jabatan</th>
+                <th width="10%">Kontak</th>
                 <th width="10%" class="text-center">Status</th>
             </tr>
         </thead>
@@ -72,6 +73,7 @@
                     <td>{{ $emp['email'] ?? '-' }}</td>
                     <td>{{ $emp['employee_type']['name'] ?? '-' }}</td>
                     <td>{{ $emp['position'] ?? '-' }}</td>
+                    <td>{{ $emp['phone'] ?? '-' }}</td>
                     <td class="text-center">
                         @php
                             $statusText = 'Aktif';
@@ -83,7 +85,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center">Tidak ada data pegawai.</td>
+                    <td colspan="8" class="text-center">Tidak ada data pegawai.</td>
                 </tr>
             @endforelse
         </tbody>

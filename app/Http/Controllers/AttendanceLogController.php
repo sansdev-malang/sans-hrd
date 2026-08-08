@@ -136,7 +136,8 @@ class AttendanceLogController extends Controller
                 }
 
                 $isOnLeave = false;
-                $leaveType = 'IZIN';
+                $leaveCode = 'I';
+                $originalType = 'Izin';
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -144,14 +145,27 @@ class AttendanceLogController extends Controller
                         $leaveEnd = substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
-                            $leaveType = strtoupper($leave->type ?? 'IZIN');
+                            $originalType = $leave->type ?? 'Izin';
+                            $rawType = strtolower($originalType);
+                            if (str_contains($rawType, 'sakit')) {
+                                $leaveCode = 'S';
+                            } elseif (str_contains($rawType, 'cuti')) {
+                                $leaveCode = 'C';
+                            } elseif (str_contains($rawType, 'dinas') || str_contains($rawType, 'dispensasi')) {
+                                $leaveCode = 'H';
+                            } else {
+                                $leaveCode = 'I';
+                            }
                             break;
                         }
                     }
                 }
                 if ($isOnLeave) {
-                    $displayType = strlen($leaveType) > 6 ? substr($leaveType, 0, 5) . '.' : $leaveType;
-                    $dailyDetails[$dateStr] = ['status' => 'Cuti/Izin', 'leave_type' => $displayType];
+                    $dailyDetails[$dateStr] = [
+                        'status' => 'Cuti/Izin', 
+                        'leave_code' => $leaveCode, 
+                        'leave_type' => $originalType
+                    ];
                     $currentDate->addDay();
                     continue;
                 }
@@ -316,7 +330,7 @@ class AttendanceLogController extends Controller
         $reports = $this->generateReportsData($startDate, $endDate, $search, $unitId, $position);
 
         $total = count($reports);
-        $perPageReq = $request->query('per_page', 15);
+        $perPageReq = $request->query('per_page', 50);
         $perPage = $perPageReq === 'all' ? ($total > 0 ? $total : 1) : (int) $perPageReq;
         $page = $request->query('page', 1);
         
@@ -375,7 +389,11 @@ class AttendanceLogController extends Controller
         if ($format === 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('attendance-logs.export-pdf', compact('reports', 'periodeStr', 'unitId', 'dates'))
                 ->setPaper('a4', 'landscape');
-            return $pdf->download($baseFileName . ".pdf");
+            $response = $pdf->download($baseFileName . ".pdf");
+            if ($request->filled('download_token')) {
+                $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
+            }
+            return $response;
         }
 
         // Generate Excel
@@ -441,8 +459,17 @@ class AttendanceLogController extends Controller
                         $cellValue = 'A';
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
                     } elseif ($detail['status'] === 'Cuti/Izin') {
-                        $cellValue = $detail['leave_type'] ?? 'IZIN';
-                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE));
+                        $leaveCode = $detail['leave_code'] ?? 'I';
+                        $cellValue = $leaveCode;
+                        
+                        $excelColorMap = [
+                            'S' => 'FFE28743', // Warm Amber
+                            'I' => 'FF8A2BE2', // Purple
+                            'C' => 'FF1F75FE', // Blue
+                            'H' => 'FF10B981', // Emerald/Green
+                        ];
+                        $colorHex = $excelColorMap[$leaveCode] ?? 'FF1F75FE';
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($colorHex));
                     } elseif ($detail['status'] === 'Libur') {
                         $cellValue = '-';
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
@@ -479,9 +506,15 @@ class AttendanceLogController extends Controller
             'Cache-Control' => 'max-age=0',
         ];
 
-        return response()->stream(function () use ($writer) {
+        $response = response()->stream(function () use ($writer) {
             $writer->save('php://output');
         }, 200, $responseHeaders);
+
+        if ($request->filled('download_token')) {
+            $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
+        }
+
+        return $response;
     }
 
     public function clear()

@@ -41,30 +41,19 @@
         <!-- FILTERS & SEARCH -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-                <!-- Search Box -->
-                <div x-data="{ searchVal: '{{ request('search') }}' }" class="relative w-full search-container">
-                    <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
-                        style="padding-left: 0.75rem; padding-right: 2.25rem;"
-                        class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
-                    <button type="submit" 
-                        :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
-                        class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
-                        <i data-lucide="search" class="w-4 h-4"></i>
-                    </button>
-                </div>
-
-                <!-- Filters -->
-                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <!-- Per Page -->
-                    <select name="per_page" onchange="this.form.submit()"
-                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
-                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
-                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
-                        <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
-                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
-                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
-                    </select>
+                <!-- Left Side: Search & Filters -->
+                <div class="flex flex-wrap items-center gap-2 flex-1">
+                    <!-- Search Box -->
+                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="relative w-full search-container">
+                        <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
+                            style="padding-left: 0.75rem; padding-right: 2.25rem;"
+                            class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
+                        <button type="submit" 
+                            :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
+                            class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </button>
+                    </div>
 
                     <!-- Unit -->
                     <select name="unit" onchange="this.form.submit()"
@@ -85,10 +74,23 @@
                     </select>
 
                     @if(request()->anyFilled(['search', 'unit', 'position']) || request()->filled('per_page') && request('per_page') != 50)
-                        <a href="{{ route('employees.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors" title="Reset Filter">
+                        <a href="{{ route('employees.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </a>
                     @endif
+                </div>
+
+                <!-- Right Side: Per Page Options -->
+                <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
+                    <select name="per_page" onchange="this.form.submit()"
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                        <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                    </select>
                 </div>
             </form>
         </section>
@@ -96,7 +98,7 @@
         <!-- DATA TABLE -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
             <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center flex-wrap gap-2 bg-white dark:bg-slate-900">
-                <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                     @if(request('unit') && $schoolUnits->firstWhere('id', request('unit')))
                         Daftar Pegawai {{ $schoolUnits->firstWhere('id', request('unit'))->name }}
                     @else
@@ -114,11 +116,12 @@
                         <tr class="border-b border-slate-200 dark:border-slate-800">
                             <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-14">No</th>
                             <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[200px]">Nama Lengkap</th>
-                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Unit</th>
-                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Tipe Pegawai</th>
-                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-56">Jabatan</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Unit</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[120px] whitespace-nowrap">Tipe Pegawai</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[240px]">Jabatan</th>
+                            <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40 whitespace-nowrap">Kontak</th>
                             @if(auth()->user()->role === 'super_admin')
-                                <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">ZK ID</th>
+                                <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-28">ZK ID</th>
                             @endif
                             <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
                             <th class="sticky top-0 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Aksi</th>
@@ -165,7 +168,7 @@
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 uppercase tracking-wider">{{ $emp['unit_name'] }}</span>
                                     @endif
                                 </td>
-                                <td class="px-3 md:px-6 py-3 md:py-4 text-slate-600 dark:text-slate-400 font-medium">
+                                <td class="px-3 md:px-6 py-3 md:py-4 text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">
                                     {{ $emp['employee_type']['name'] ?? 'Pegawai' }}
                                 </td>
                                 <td class="px-3 md:px-6 py-3 md:py-4">
@@ -173,6 +176,9 @@
                                     @if(!empty($emp['additional_position']))
                                         <span class="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{{ $emp['additional_position'] }}</span>
                                     @endif
+                                </td>
+                                <td class="px-3 md:px-6 py-3 md:py-4 text-slate-600 dark:text-slate-400 font-mono text-xs whitespace-nowrap">
+                                    {{ $emp['phone'] ?? '-' }}
                                 </td>
                                 @if(auth()->user()->role === 'super_admin')
                                     <td class="px-3 md:px-6 py-3 md:py-4">
@@ -207,7 +213,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ auth()->user()->role === 'super_admin' ? 8 : 7 }}" class="px-6 py-12 text-center text-slate-400">
+                                <td colspan="{{ auth()->user()->role === 'super_admin' ? 9 : 8 }}" class="px-6 py-12 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <i data-lucide="users-2" class="w-8 h-8 text-slate-300 dark:text-slate-700"></i>
                                         <p class="text-xs">Tidak ada data pegawai yang dapat ditampilkan.</p>

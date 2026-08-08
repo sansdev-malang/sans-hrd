@@ -29,7 +29,7 @@
             <div class="xl:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
                 <div>
                     <div class="p-4 border-b border-slate-100 dark:border-slate-900">
-                        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">Daftar Hari Libur Resmi</h4>
+                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Daftar Hari Libur Resmi</h4>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
@@ -88,7 +88,7 @@
             <!-- Adjustments / Reschedules -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-slate-100 dark:border-slate-900">
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">Daftar Pengalihan Tanggal Libur</h4>
+                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Daftar Pengalihan Tanggal Libur</h4>
                 </div>
                 <div class="p-4 space-y-4">
                     @forelse($holidays->flatMap->adjustments as $adj)

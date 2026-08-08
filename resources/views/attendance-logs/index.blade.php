@@ -9,7 +9,7 @@
             
             <!-- EXPORT DROPDOWN -->
             <div x-data="{ open: false }" class="relative w-full md:w-auto self-stretch md:self-auto flex justify-end">
-                <button type="button" @click="open = !open" @click.outside="open = false" class="w-full md:w-auto justify-center h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border border-slate-200/50 dark:border-slate-800/40 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
+                <button type="button" @click="open = !open" @click.outside="open = false" class="w-full md:w-auto justify-center h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
                     <i data-lucide="download" class="w-4 h-4"></i>
                     <span>Ekspor Data</span>
                     <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
@@ -72,8 +72,8 @@
                         @endforeach
                     </select>
 
-                    @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != now()->format('Y-m') || request()->filled('per_page') && request('per_page') != 15)
-                        <a href="{{ route('attendance-logs.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors" title="Reset Filter">
+                    @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != now()->format('Y-m') || request()->filled('per_page') && request('per_page') != 50)
+                        <a href="{{ route('attendance-logs.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </a>
                     @endif
@@ -83,9 +83,11 @@
                 <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
                     <select name="per_page" onchange="this.form.submit()"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
-                        <option value="15" {{ request('per_page', 15) == '15' ? 'selected' : '' }}>15 baris</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 baris</option>
+                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                        <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
                         <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
                         <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
                     </select>
                 </div>
@@ -188,13 +190,25 @@
                                                 <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500" title="Pulang">{{ $detail['check_out'] ?? '-' }}</span>
                                             </div>
                                         @elseif($detail['status'] === 'Alfa')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 font-bold text-xs" title="Alfa">A</div>
+                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded font-bold text-[10px]" title="Alfa (Tanpa Keterangan)">A</div>
                                         @elseif($detail['status'] === 'Libur')
                                             <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center text-red-200 dark:text-red-900/30 font-bold text-xs" title="Libur">-</div>
                                         @elseif($detail['status'] === 'Off')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-100 dark:bg-slate-800/50 text-slate-500 font-bold text-[10px]" title="Jadwal Off">OFF</div>
+                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-50 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[9px]" title="Jadwal Libur Kerja (Off)">OFF</div>
                                         @elseif($detail['status'] === 'Cuti/Izin')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 font-bold text-[9px]" title="{{ $detail['leave_type'] ?? 'Izin/Cuti' }}">{{ $detail['leave_type'] ?? 'IZIN' }}</div>
+                                            @php
+                                                $leaveCode = $detail['leave_code'] ?? 'I';
+                                                $leaveName = $detail['leave_type'] ?? 'Izin/Cuti';
+                                                
+                                                $colorMap = [
+                                                    'S' => 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30',
+                                                    'I' => 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30',
+                                                    'C' => 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30',
+                                                    'H' => 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                                                ];
+                                                $colorClass = $colorMap[$leaveCode] ?? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
+                                            @endphp
+                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center rounded font-bold text-[10px] {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</div>
                                         @else
                                             <div class="text-xs text-slate-300">-</div>
                                         @endif
@@ -223,9 +237,35 @@
                 </table>
             </div>
             
-                        @if($paginatedReports instanceof \Illuminate\Pagination\LengthAwarePaginator && $paginatedReports->hasPages())
-                <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                    {{ $paginatedReports->appends(request()->query())->links('pagination::tailwind') }}
+                        <!-- PAGINATION & COUNT FOOTER -->
+            @if($paginatedReports instanceof \Illuminate\Pagination\LengthAwarePaginator && $paginatedReports->total() > 0)
+                <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-900 bg-slate-50/30 dark:bg-slate-900/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                    <div>
+                        Menampilkan
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedReports->firstItem() }}</span>
+                        sampai
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedReports->lastItem() }}</span>
+                        dari
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedReports->total() }}</span>
+                        pegawai
+                    </div>
+                    <div class="flex items-center gap-1.5 font-semibold">
+                        @if ($paginatedReports->onFirstPage())
+                            <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Sebelumnya</span>
+                        @else
+                            <a href="{{ $paginatedReports->appends(request()->query())->previousPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Sebelumnya</a>
+                        @endif
+
+                        <span class="px-3 py-1 font-medium text-slate-700 dark:text-slate-300">
+                            Halaman {{ $paginatedReports->currentPage() }} dari {{ $paginatedReports->lastPage() }}
+                        </span>
+
+                        @if ($paginatedReports->hasMorePages())
+                            <a href="{{ $paginatedReports->appends(request()->query())->nextPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Berikutnya</a>
+                        @else
+                            <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Berikutnya</span>
+                        @endif
+                    </div>
                 </div>
             @endif
         </section>

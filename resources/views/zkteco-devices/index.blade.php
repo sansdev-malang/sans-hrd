@@ -80,7 +80,7 @@
             
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
                 <div class="space-y-1">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-slate-50">Daftar Mesin Terdaftar</h3>
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Daftar Mesin Terdaftar</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Kelola dan pastikan IP address dan port mesin sesuai dengan jaringan lokal sekolah.</p>
                 </div>
             </div>

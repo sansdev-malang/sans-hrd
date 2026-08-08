@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'iclock/*',
             'api/*',
         ]);
+
+        $middleware->encryptCookies(except: [
+            'download_token',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

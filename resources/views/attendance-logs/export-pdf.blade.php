@@ -106,7 +106,17 @@
                                 @elseif($detail['status'] === 'Alfa')
                                     <span class="text-red">A</span>
                                 @elseif($detail['status'] === 'Cuti/Izin')
-                                    <span class="badge-blue">{{ substr($detail['leave_type'] ?? 'IZIN', 0, 4) }}</span>
+                                    @php
+                                        $leaveCode = $detail['leave_code'] ?? 'I';
+                                        $pdfColorMap = [
+                                            'S' => 'color: #d97706;', // Amber
+                                            'I' => 'color: #7c3aed;', // Purple
+                                            'C' => 'color: #2563eb;', // Blue
+                                            'H' => 'color: #059669;', // Emerald
+                                        ];
+                                        $pdfStyle = $pdfColorMap[$leaveCode] ?? 'color: #3b82f6;';
+                                    @endphp
+                                    <span class="font-bold" style="{{ $pdfStyle }}">{{ $leaveCode }}</span>
                                 @elseif($detail['status'] === 'Libur')
                                     <span class="text-red">-</span>
                                 @elseif($detail['status'] === 'Off')

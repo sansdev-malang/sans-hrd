@@ -493,7 +493,7 @@
         </script>
 
         <!-- GLOBAL LOADING OVERLAY -->
-        <div id="global-loading-overlay" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/10 backdrop-blur-[2px] opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="global-loading-overlay" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/10 backdrop-blur-[2px] hidden">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-4 flex items-center gap-3">
                 <svg class="animate-spin h-5 w-5 text-indigo-600 dark:text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -514,7 +514,7 @@
                     if (!form) return;
                     if (form.getAttribute('target') === '_blank') return;
                     
-                    loader.classList.remove('opacity-0', 'pointer-events-none');
+                    loader.classList.remove('hidden');
                 });
 
                 // Handle auto-submit elements (like select and inputs inside form)
@@ -525,11 +525,24 @@
                     // Check if it's a select or a month input that triggers submit
                     const isAutoSubmit = input.tagName === 'SELECT' || (input.tagName === 'INPUT' && input.getAttribute('type') === 'month');
                     if (isAutoSubmit && input.closest('form').getAttribute('target') !== '_blank') {
-                        loader.classList.remove('opacity-0', 'pointer-events-none');
+                        loader.classList.remove('hidden');
                     }
                 });
 
-                // Handle clicking links for page transitions (Reset buttons, pagination, menus, syncs)
+                // Helper to get cookie
+                function getCookie(name) {
+                    const value = `; ${document.cookie}`;
+                    const parts = value.split(`; ${name}=`);
+                    if (parts.length === 2) return parts.pop().split(';').shift();
+                    return null;
+                }
+
+                // Helper to delete cookie
+                function deleteCookie(name) {
+                    document.cookie = `${name}=; Max-Age=-99999999; path=/;`;
+                }
+
+                // Handle clicking specific interactive links (Reset buttons, sync/pull data operations, and export downloads)
                 document.addEventListener('click', function (e) {
                     const link = e.target.closest('a');
                     if (!link) return;
@@ -540,20 +553,111 @@
                     // Skip if empty, hash anchor, javascript link, or opens in new tab
                     if (!href || href.startsWith('#') || href.startsWith('javascript:') || target === '_blank') return;
                     
-                    // Skip file downloads/exports to prevent loader from getting stuck
+                    // 1. Check if it's an export/download link
                     const isDownload = href.includes('export') || href.includes('download') || link.hasAttribute('download');
-                    if (isDownload) return;
+                    if (isDownload) {
+                        const token = 'dt_' + Date.now();
+                        
+                        // Trigger a non-intrusive toast notification and let browser download naturally in current tab
+                        window.showToast('Menyiapkan file ekspor... Berkas Anda akan terunduh sebentar lagi.', 'info', token);
+                        
+                        // Append download_token to URL
+                        const url = new URL(link.href, window.location.origin);
+                        url.searchParams.set('download_token', token);
+                        
+                        // Prevent default navigate and trigger it manually via URL with token
+                        e.preventDefault();
+                        window.location.href = url.toString();
+                        
+                        // Poll for cookie
+                        const intervalId = setInterval(function () {
+                            const cookieVal = getCookie('download_token');
+                            if (cookieVal === token) {
+                                // Dismiss the toast notification immediately!
+                                window.dispatchEvent(new CustomEvent('toast-dismiss-dispatch', { detail: { token } }));
+                                deleteCookie('download_token');
+                                clearInterval(intervalId);
+                            }
+                        }, 150);
+                        
+                        // Safety timeout (25 seconds)
+                        setTimeout(function () {
+                            clearInterval(intervalId);
+                            window.dispatchEvent(new CustomEvent('toast-dismiss-dispatch', { detail: { token } }));
+                        }, 25000);
+                        
+                        return;
+                    }
+
+                    // 2. Check if it's a reset button or sync action
+                    const title = (link.getAttribute('title') || '').toLowerCase();
+                    const text = (link.textContent || '').toLowerCase();
+                    const hrefPath = href.split('?')[0];
+                    const currentPath = window.location.pathname;
                     
-                    loader.classList.remove('opacity-0', 'pointer-events-none');
+                    const isReset = link.classList.contains('reset-filter-btn') || 
+                                    title.includes('reset') || 
+                                    text.includes('reset') ||
+                                    (hrefPath === currentPath && !href.includes('?') && window.location.search !== '');
+                    const isSyncAction = href.includes('sync') || href.includes('pull');
+                    
+                    if (isReset || isSyncAction) {
+                        loader.classList.remove('hidden');
+                    }
                 });
 
                 // Hide loader if page is loaded/restored from back-forward cache (bfcache)
                 window.addEventListener('pageshow', function (event) {
                     if (event.persisted) {
-                        loader.classList.add('opacity-0', 'pointer-events-none');
+                        loader.classList.add('hidden');
                     }
                 });
+
+                // Global function to trigger toast notification
+                window.showToast = function (message, type = 'info', token = null) {
+                    window.dispatchEvent(new CustomEvent('toast-dispatch', { detail: { message, type, token } }));
+                };
             })();
         </script>
+
+        <!-- GLOBAL TOAST NOTIFICATION CONTAINER -->
+        <div x-data="{ 
+                toasts: [],
+                add(message, type = 'info', token = null) {
+                    const id = Date.now();
+                    this.toasts.push({ id, message, type, token });
+                    setTimeout(() => {
+                        this.remove(id);
+                    }, 25000); // Safety fallback timeout
+                },
+                remove(id) {
+                    this.toasts = this.toasts.filter(t => t.id !== id);
+                },
+                removeByToken(token) {
+                    this.toasts = this.toasts.filter(t => t.token !== token);
+                }
+            }"
+            @toast-dispatch.window="add($event.detail.message, $event.detail.type, $event.detail.token)"
+            @toast-dismiss-dispatch.window="removeByToken($event.detail.token)"
+            class="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4">
+            
+            <template x-for="t in toasts" :key="t.id">
+                <div x-transition:enter="transition ease-out duration-300 transform translate-y-2 opacity-0"
+                     x-transition:enter-start="translate-y-2 opacity-0"
+                     x-transition:enter-end="translate-y-0 opacity-100"
+                     x-transition:leave="transition ease-in duration-200 opacity-0"
+                     class="pointer-events-auto flex items-center gap-3 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full">
+                     
+                     <template x-if="t.type === 'info'">
+                         <svg class="animate-spin h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                         </svg>
+                     </template>
+                     
+                     <span class="text-xs font-semibold text-slate-700 dark:text-slate-350" x-text="t.message"></span>
+                </div>
+            </template>
+        </div>
     </body>
 </html>

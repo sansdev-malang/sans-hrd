@@ -148,7 +148,8 @@ class EmployeeController extends Controller
         $sheet->setCellValue('D1', 'Email');
         $sheet->setCellValue('E1', 'Tipe Pegawai');
         $sheet->setCellValue('F1', 'Jabatan');
-        $sheet->setCellValue('G1', 'Status');
+        $sheet->setCellValue('G1', 'No. HP');
+        $sheet->setCellValue('H1', 'Status');
 
         $row = 2;
         $no = 1;
@@ -159,20 +160,26 @@ class EmployeeController extends Controller
             $sheet->setCellValue('D' . $row, $emp['email'] ?? '');
             $sheet->setCellValue('E' . $row, $emp['employee_type']['name'] ?? '');
             $sheet->setCellValue('F' . $row, $emp['position'] ?? '');
+            $sheet->setCellValue('G' . $row, $emp['phone'] ?? '-');
             
             $statusText = 'Aktif';
             if (($emp['status'] ?? '') == 'Leave') $statusText = 'Cuti';
             if (($emp['status'] ?? '') == 'Inactive') $statusText = 'Nonaktif';
             
-            $sheet->setCellValue('G' . $row, $statusText);
+            $sheet->setCellValue('H' . $row, $statusText);
             $row++;
         }
 
-        foreach(range('A','G') as $col) {
+        foreach(range('A','H') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         $fileName = 'Data Pegawai - ' . $unitName . '.xlsx';
+
+
+        if ($request->filled('download_token')) {
+            setcookie('download_token', $request->query('download_token'), time() + 60, '/', '', false, false);
+        }
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="'. $fileName .'"');
@@ -225,7 +232,11 @@ class EmployeeController extends Controller
             'unitName' => $unitName
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download($fileName);
+        $response = $pdf->download($fileName);
+        if ($request->filled('download_token')) {
+            $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
+        }
+        return $response;
     }
 
     /**
