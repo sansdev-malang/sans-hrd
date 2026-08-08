@@ -151,7 +151,7 @@
         <div class="flex h-screen overflow-hidden">
 
             <!-- SIDEBAR BACKDROP FOR MOBILE -->
-            <div id="sidebar-backdrop" class="fixed inset-0 z-35 bg-slate-900/20 backdrop-blur-xs hidden md:hidden transition-opacity duration-200 opacity-0"></div>
+            <div id="sidebar-backdrop" class="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-xs hidden md:hidden transition-opacity duration-200 opacity-0"></div>
 
             <!-- SIDEBAR -->
             @include('partials.admin.sidebar')

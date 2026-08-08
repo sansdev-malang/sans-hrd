@@ -93,7 +93,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
             <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700" style="max-height: calc(100vh - 280px); overflow-y: auto;">
                 <table class="w-full text-xs">
-                    <thead class="sticky top-0 z-40 bg-slate-50/70 dark:bg-slate-900/50 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                    <thead class="sticky top-0 z-20 bg-slate-50/70 dark:bg-slate-900/50 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="px-6 py-3.5 text-left">Pengguna</th>
                             <th class="px-6 py-3.5 text-left">Email</th>

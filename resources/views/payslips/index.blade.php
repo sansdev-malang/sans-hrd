@@ -72,7 +72,7 @@
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full p-0">
             <div class="overflow-x-auto" style="max-height: calc(100vh - 280px); overflow-y: auto;">
                 <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 uppercase font-semibold border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+                    <thead class="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 uppercase font-semibold border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
                         <tr>
                             <th class="px-6 py-4 w-64">Nama Pegawai</th>
                             <th class="px-6 py-4">Asal Unit</th>
