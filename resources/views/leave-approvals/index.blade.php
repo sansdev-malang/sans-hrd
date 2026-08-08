@@ -162,32 +162,24 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <div class="flex flex-col items-center gap-1">
+                                    <div class="flex items-center gap-1.5 justify-center">
                                         @php
                                             $statusCode = $leave->status_code ?? 'I';
                                             $badgeClasses = 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800';
                                             if ($statusCode === 'S') {
-                                                $badgeClasses = 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-900/50';
+                                                $badgeClasses = 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-450 dark:border-rose-900/50';
                                             } elseif ($statusCode === 'I') {
-                                                $badgeClasses = 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900/50';
+                                                $badgeClasses = 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-450 dark:border-amber-900/50';
                                             } elseif ($statusCode === 'C') {
-                                                $badgeClasses = 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-900/50';
+                                                $badgeClasses = 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-450 dark:border-sky-900/50';
                                             } elseif ($statusCode === 'H') {
-                                                $badgeClasses = 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900/50';
+                                                $badgeClasses = 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-450 dark:border-emerald-900/50';
                                             }
                                         @endphp
-                                        <div class="flex items-center gap-1.5 justify-center">
-                                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase {{ $badgeClasses }}" title="Kode Status: {{ $statusCode }}">
-                                                {{ $statusCode }}
-                                            </span>
-                                            <span class="text-xs text-slate-700 dark:text-slate-350 font-bold uppercase tracking-tight">{{ $leave->type }}</span>
-                                        </div>
-                                        @if($leave->gets_presence_bonus)
-                                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-50 dark:bg-emerald-900/40 text-emerald-750 dark:text-emerald-400 border border-emerald-250/20 dark:border-emerald-900/30 uppercase mt-0.5">
-                                                <svg xmlns="http://www.w3.org/2500/svg" class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                                Bonus Presensi
-                                            </span>
-                                        @endif
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase {{ $badgeClasses }}" title="Kode Status: {{ $statusCode }}">
+                                            {{ $statusCode }}
+                                        </span>
+                                        <span class="text-xs text-slate-700 dark:text-slate-350 font-bold uppercase tracking-tight">{{ $leave->type }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-center font-mono">
@@ -339,37 +331,16 @@
             <div @click.outside="showEmpDetailModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-lg w-full overflow-hidden text-xs">
                 <!-- Header -->
                 <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-200 font-nasalization flex items-center gap-2">
-                        <i data-lucide="file-text" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
-                        Detail Pengajuan Izin
+                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        <span>Detail Riwayat Izin</span>
                     </h3>
-                    <button @click="showEmpDetailModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
-                        <i data-lucide="x" class="w-4 h-4"></i>
+                    <button @click="showEmpDetailModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-transparent border-0 cursor-pointer flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                     </button>
                 </div>
                 
                 <div class="p-5 space-y-5">
-                    <!-- Status Banner -->
-                    <template x-if="selectedEmp">
-                        <div class="rounded-lg p-3 border text-[11px] font-medium flex items-center gap-2 animate-fade-in"
-                            :class="{
-                                'bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40': selectedEmp.leave_status === 'approved',
-                                'bg-rose-50/50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-400 border-rose-100 dark:border-rose-900/40': selectedEmp.leave_status === 'rejected',
-                                'bg-amber-50/50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-400 border-amber-100 dark:border-amber-900/40': selectedEmp.leave_status === 'pending'
-                            }">
-                            <span class="w-2 h-2 rounded-full"
-                                :class="{
-                                    'bg-emerald-500': selectedEmp.leave_status === 'approved',
-                                    'bg-rose-500': selectedEmp.leave_status === 'rejected',
-                                    'bg-amber-500': selectedEmp.leave_status === 'pending'
-                                }"></span>
-                            <span x-text="
-                                selectedEmp.leave_status === 'approved' ? 'Pengajuan izin ini telah disetujui' : 
-                               (selectedEmp.leave_status === 'rejected' ? 'Pengajuan izin ini telah ditolak' : 'Pengajuan izin ini sedang menunggu persetujuan')
-                            "></span>
-                        </div>
-                    </template>
-
                     <!-- Employee Compact Profile Card -->
                     <div class="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-4 border border-slate-100 dark:border-slate-800/80 flex items-center gap-4">
                         <!-- Photo / Initials -->
@@ -397,25 +368,22 @@
                     <div class="grid grid-cols-2 gap-4 text-[11px] bg-white dark:bg-slate-900 text-left">
                         <div>
                             <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Jenis Izin</span>
-                            <div class="flex flex-col items-start gap-1">
+                            <div class="flex flex-col items-start gap-1.5">
                                 <template x-if="selectedEmp">
-                                    <div class="flex items-center gap-1.5">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <!-- SICH Code Badge -->
                                         <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase"
                                             :class="{
-                                                'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-900/50': selectedEmp.status_code === 'S',
+                                                'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-455 dark:border-rose-900/50': selectedEmp.status_code === 'S',
                                                 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900/50': selectedEmp.status_code === 'I',
                                                 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-900/50': selectedEmp.status_code === 'C',
                                                 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900/50': selectedEmp.status_code === 'H'
                                             }"
                                             x-text="selectedEmp.status_code"></span>
+                                        
+                                        <!-- Type Name -->
                                         <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-950 text-slate-850 dark:text-slate-200 border border-slate-200/50 dark:border-slate-800 uppercase" x-text="selectedEmp.leave_type"></span>
                                     </div>
-                                </template>
-                                <template x-if="selectedEmp && selectedEmp.gets_presence_bonus">
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-450 border border-emerald-250/20 dark:border-emerald-900/30 uppercase mt-0.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-2 h-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                        Bonus Presensi
-                                    </span>
                                 </template>
                             </div>
                         </div>
@@ -423,7 +391,7 @@
                         <div>
                             <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Rentang Tanggal</span>
                             <div class="flex items-center gap-1.5 h-6">
-                                <i data-lucide="calendar" class="w-4.5 h-4.5 text-slate-400 shrink-0"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
                                 <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.leave_start + ' - ' + selectedEmp.leave_end : ''"></span>
                             </div>
                         </div>
@@ -442,7 +410,7 @@
                                     $modalAttachmentUrl = "selectedEmp.leave_attachment.startsWith('http') ? selectedEmp.leave_attachment : (selectedEmp.photo_url ? selectedEmp.photo_url.split('/storage')[0] + '/storage/' + selectedEmp.leave_attachment : '#')";
                                 @endphp
                                 <a :href="{{ $modalAttachmentUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] text-indigo-750 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 transition-all shadow-2xs hover:shadow-xs">
-                                    <svg xmlns="http://www.w3.org/2550/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                                     Lihat Lampiran Dokumen
                                 </a>
                             </div>
