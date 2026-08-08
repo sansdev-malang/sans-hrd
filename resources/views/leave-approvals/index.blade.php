@@ -149,7 +149,8 @@
                                                 leave_reason: '{{ addslashes($leave->reason ?? '-') }}',
                                                 leave_attachment: '{{ $leave->attachment ?? '' }}',
                                                 status_code: '{{ $leave->status_code ?? 'I' }}',
-                                                gets_presence_bonus: {{ $leave->gets_presence_bonus ? 'true' : 'false' }}
+                                                gets_presence_bonus: {{ $leave->gets_presence_bonus ? 'true' : 'false' }},
+                                                leave_status: '{{ $leave->status }}'
                                             }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-200 font-bold tracking-tight inline-block cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.03] transform transition-all duration-200 origin-left">{{ $leave->employee_name }}</span>
                                             <span class="text-[10px] text-slate-500 dark:text-slate-450 block mt-0.5">{{ $leave->employee_position }}</span>
                                         </div>
@@ -335,107 +336,134 @@
         <!-- MODAL DETAIL PEGAWAI -->
         <template x-teleport="body">
             <div x-show="showEmpDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs text-left" style="display: none; margin-top: 0px !important; z-index: 9999;">
-            <div @click.outside="showEmpDetailModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
+            <div @click.outside="showEmpDetailModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-lg w-full overflow-hidden text-xs">
+                <!-- Header -->
                 <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-200 font-nasalization flex items-center gap-2">
-                        <i data-lucide="user" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
-                        Profil Pegawai
+                        <i data-lucide="file-text" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+                        Detail Pengajuan Izin
                     </h3>
                     <button @click="showEmpDetailModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
-                <div class="p-5 space-y-6">
-                    <div class="flex items-center gap-4">
+                
+                <div class="p-5 space-y-5">
+                    <!-- Status Banner -->
+                    <template x-if="selectedEmp">
+                        <div class="rounded-lg p-3 border text-[11px] font-medium flex items-center gap-2 animate-fade-in"
+                            :class="{
+                                'bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40': selectedEmp.leave_status === 'approved',
+                                'bg-rose-50/50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-400 border-rose-100 dark:border-rose-900/40': selectedEmp.leave_status === 'rejected',
+                                'bg-amber-50/50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-400 border-amber-100 dark:border-amber-900/40': selectedEmp.leave_status === 'pending'
+                            }">
+                            <span class="w-2 h-2 rounded-full"
+                                :class="{
+                                    'bg-emerald-500': selectedEmp.leave_status === 'approved',
+                                    'bg-rose-500': selectedEmp.leave_status === 'rejected',
+                                    'bg-amber-500': selectedEmp.leave_status === 'pending'
+                                }"></span>
+                            <span x-text="
+                                selectedEmp.leave_status === 'approved' ? 'Pengajuan izin ini telah disetujui' : 
+                               (selectedEmp.leave_status === 'rejected' ? 'Pengajuan izin ini telah ditolak' : 'Pengajuan izin ini sedang menunggu persetujuan')
+                            "></span>
+                        </div>
+                    </template>
+
+                    <!-- Employee Compact Profile Card -->
+                    <div class="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-4 border border-slate-100 dark:border-slate-800/80 flex items-center gap-4">
                         <!-- Photo / Initials -->
                         <div class="shrink-0">
                             <template x-if="selectedEmp && selectedEmp.photo_url">
-                                <img :src="selectedEmp.photo_url" class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <img :src="selectedEmp.photo_url" class="w-14 h-14 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-xs">
                             </template>
                             <template x-if="!selectedEmp || !selectedEmp.photo_url">
-                                <div class="w-16 h-16 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center text-2xl uppercase shadow-sm">
+                                <div class="w-14 h-14 rounded-full bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center text-xl uppercase shadow-xs">
                                     <span x-text="selectedEmp ? selectedEmp.name.substring(0,2) : ''"></span>
                                 </div>
                             </template>
                         </div>
-                        <div class="space-y-1">
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization" x-text="selectedEmp ? selectedEmp.name : ''"></h4>
-                            <p class="text-slate-400 dark:text-slate-500 font-mono" x-text="selectedEmp ? 'NIP/NUPTK: ' + (selectedEmp.nuptk_nip_nik || '-') : ''"></p>
-                            <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 uppercase" x-text="selectedEmp ? selectedEmp.subject_position : ''"></span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 text-[11px] pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Unit Kerja</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 uppercase" x-text="selectedEmp ? selectedEmp.unit : ''"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Email</span>
-                            <span class="font-medium text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.email : ''"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jenis Kelamin</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? (selectedEmp.gender === 'Male' ? 'Laki-laki' : 'Perempuan') : ''"></span>
-                        </div>
-                        <div>
-                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Status Pegawai</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.employment_status : ''"></span>
+                        <div class="space-y-1 text-left flex-1 min-w-0">
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-200 font-nasalization truncate" x-text="selectedEmp ? selectedEmp.name : ''"></h4>
+                            <p class="text-[10px] text-slate-550 dark:text-slate-400 truncate" x-text="selectedEmp ? selectedEmp.email : ''"></p>
+                            <div class="flex items-center gap-2 flex-wrap pt-0.5">
+                                <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30 uppercase" x-text="selectedEmp ? selectedEmp.subject_position : ''"></span>
+                                <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900/60 text-slate-700 dark:text-slate-350 border border-slate-200/50 dark:border-slate-800/50 uppercase" x-text="selectedEmp ? selectedEmp.unit : ''"></span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Detail Pengajuan Izin -->
-                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                        <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[10px]">Detail Izin Pegawai</h4>
-                        <div class="grid grid-cols-2 gap-4 text-[11px]">
-                            <div>
-                                <span class="block text-slate-400 text-[9px] uppercase font-semibold mb-1">Jenis Izin</span>
-                                <div class="flex flex-col items-start gap-1">
-                                    <template x-if="selectedEmp">
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase"
-                                                :class="{
-                                                    'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-900/50': selectedEmp.status_code === 'S',
-                                                    'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900/50': selectedEmp.status_code === 'I',
-                                                    'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-900/50': selectedEmp.status_code === 'C',
-                                                    'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900/50': selectedEmp.status_code === 'H'
-                                                }"
-                                                x-text="selectedEmp.status_code"></span>
-                                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200/45 dark:border-slate-800 uppercase" x-text="selectedEmp.leave_type"></span>
-                                        </div>
-                                    </template>
-                                    <template x-if="selectedEmp && selectedEmp.gets_presence_bonus">
-                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-900/30 uppercase mt-0.5">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                            Bonus Presensi
-                                        </span>
-                                    </template>
-                                </div>
+                    <!-- Leave Info Grid -->
+                    <div class="grid grid-cols-2 gap-4 text-[11px] bg-white dark:bg-slate-900 text-left">
+                        <div>
+                            <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Jenis Izin</span>
+                            <div class="flex flex-col items-start gap-1">
+                                <template x-if="selectedEmp">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase"
+                                            :class="{
+                                                'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-900/50': selectedEmp.status_code === 'S',
+                                                'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900/50': selectedEmp.status_code === 'I',
+                                                'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-900/50': selectedEmp.status_code === 'C',
+                                                'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900/50': selectedEmp.status_code === 'H'
+                                            }"
+                                            x-text="selectedEmp.status_code"></span>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-950 text-slate-850 dark:text-slate-200 border border-slate-200/50 dark:border-slate-800 uppercase" x-text="selectedEmp.leave_type"></span>
+                                    </div>
+                                </template>
+                                <template x-if="selectedEmp && selectedEmp.gets_presence_bonus">
+                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-450 border border-emerald-250/20 dark:border-emerald-900/30 uppercase mt-0.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-2 h-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                        Bonus Presensi
+                                    </span>
+                                </template>
                             </div>
-                            <div>
-                                <span class="block text-slate-400 text-[9px] uppercase font-semibold">Rentang Tanggal</span>
-                                <span class="font-medium text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.leave_start + ' - ' + selectedEmp.leave_end : ''"></span>
+                        </div>
+
+                        <div>
+                            <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Rentang Tanggal</span>
+                            <div class="flex items-center gap-1.5 h-6">
+                                <i data-lucide="calendar" class="w-4.5 h-4.5 text-slate-400 shrink-0"></i>
+                                <span class="font-bold text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.leave_start + ' - ' + selectedEmp.leave_end : ''"></span>
                             </div>
-                            <div class="col-span-2">
-                                <span class="block text-slate-400 text-[9px] uppercase font-semibold">Keterangan</span>
-                                <span class="font-medium text-slate-700 dark:text-slate-200" x-text="selectedEmp ? selectedEmp.leave_reason : ''"></span>
+                        </div>
+
+                        <div class="col-span-2 pt-1">
+                            <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Keterangan / Alasan</span>
+                            <div class="bg-slate-50/50 dark:bg-slate-950/30 rounded-xl p-3 border border-slate-100 dark:border-slate-800/80">
+                                <p class="text-slate-600 dark:text-slate-350 italic font-medium leading-relaxed" x-text="selectedEmp ? selectedEmp.leave_reason : ''"></p>
                             </div>
-                            <template x-if="selectedEmp && selectedEmp.leave_attachment">
-                                <div class="col-span-2">
-                                    <span class="block text-slate-400 text-[9px] uppercase font-semibold">Lampiran</span>
-                                    @php
-                                        $modalAttachmentUrl = "selectedEmp.leave_attachment.startsWith('http') ? selectedEmp.leave_attachment : (selectedEmp.photo_url ? selectedEmp.photo_url.split('/storage')[0] + '/storage/' + selectedEmp.leave_attachment : '#')";
-                                    @endphp
-                                    <a :href="{{ $modalAttachmentUrl }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold mt-0.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                        Lihat Lampiran Dokumen
-                                    </a>
-                                </div>
-                            </template>
+                        </div>
+
+                        <template x-if="selectedEmp && selectedEmp.leave_attachment">
+                            <div class="col-span-2 pt-1">
+                                <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Berkas Lampiran</span>
+                                @php
+                                    $modalAttachmentUrl = "selectedEmp.leave_attachment.startsWith('http') ? selectedEmp.leave_attachment : (selectedEmp.photo_url ? selectedEmp.photo_url.split('/storage')[0] + '/storage/' + selectedEmp.leave_attachment : '#')";
+                                @endphp
+                                <a :href="{{ $modalAttachmentUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] text-indigo-750 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 transition-all shadow-2xs hover:shadow-xs">
+                                    <svg xmlns="http://www.w3.org/2550/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                    Lihat Lampiran Dokumen
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Additional Details Collapsible -->
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4 text-[10px] text-left">
+                        <div>
+                            <span class="block text-slate-450 dark:text-slate-500 font-medium">Status Kepegawaian</span>
+                            <span class="font-bold text-slate-600 dark:text-slate-350" x-text="selectedEmp ? selectedEmp.employment_status : ''"></span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-450 dark:text-slate-500 font-medium">Jenis Kelamin</span>
+                            <span class="font-bold text-slate-600 dark:text-slate-350" x-text="selectedEmp ? (selectedEmp.gender === 'Male' ? 'Laki-laki' : 'Perempuan') : ''"></span>
                         </div>
                     </div>
                 </div>
-                <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-                    <button @click="showEmpDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">Tutup</button>
+
+                <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50 dark:bg-slate-900/40">
+                    <button @click="showEmpDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-2xs hover:shadow-xs transition-all cursor-pointer">Tutup</button>
                 </div>
             </div>
             </div>
