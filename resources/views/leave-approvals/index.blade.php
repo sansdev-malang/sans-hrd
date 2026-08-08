@@ -32,13 +32,79 @@
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left ">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-55 font-nasalization">Riwayat Izin Pegawai</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-200 font-nasalization">Riwayat Izin Pegawai</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Daftar riwayat izin, sakit, dan cuti pegawai yang dihimpun dari seluruh unit sekolah.</p>
             </div>
         </header>
 
+        <!-- FILTERS & SEARCH -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
+            <form method="GET" action="{{ route('leave-approvals.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                <!-- Left Side: Search & Filters -->
+                <div class="flex flex-wrap items-center gap-2 flex-1">
+                    <!-- Search Box -->
+                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="relative w-full search-container">
+                        <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
+                            style="padding-left: 0.75rem; padding-right: 2.25rem;"
+                            class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
+                        <button type="submit" 
+                            :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
+                            class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Unit -->
+                    @if(isset($schoolUnits) && count($schoolUnits) > 0)
+                        <select name="unit_id" onchange="this.form.submit()"
+                            class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                            <option value="">Semua Unit Sekolah</option>
+                            @foreach($schoolUnits as $su)
+                                <option value="{{ $su->id }}" {{ request('unit_id') == $su->id ? 'selected' : '' }}>{{ $su->name }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+
+                    <!-- Jenis Izin -->
+                    @if(isset($leaveTypes) && count($leaveTypes) > 0)
+                        <select name="type" onchange="this.form.submit()"
+                            class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                            <option value="">Semua Jenis Izin</option>
+                            @foreach($leaveTypes as $lt)
+                                <option value="{{ $lt }}" {{ request('type') == $lt ? 'selected' : '' }}>{{ $lt }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+
+                    @if(request()->anyFilled(['search', 'unit_id', 'type']) || request()->filled('per_page') && request('per_page') != 50)
+                        <a href="{{ route('leave-approvals.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </a>
+                    @endif
+                </div>
+
+                <!-- Right Side: Per Page Options -->
+                <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
+                    <select name="per_page" onchange="this.form.submit()"
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                        <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                    </select>
+                </div>
+            </form>
+        </section>
+
         <!-- TABLE LIST -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left w-full flex flex-col justify-between">
+            <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center flex-wrap gap-2 bg-white dark:bg-slate-900">
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    Daftar Riwayat Izin
+                </h3>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-505 font-bold uppercase tracking-wider text-[10px]">
@@ -52,7 +118,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
-                        @forelse($leaves as $leave)
+                        @forelse($paginatedLeaves as $leave)
                             <tr>
                                 <td class="px-6 py-4 text-left">
                                     <div class="flex items-center gap-3">
@@ -68,7 +134,7 @@
                                             </div>
                                         @endif
                                         <div>
-                                            <span @click="selectedEmp = {
+                                             <span @click="selectedEmp = {
                                                 name: '{{ $leave->employee_name }}',
                                                 nuptk_nip_nik: '{{ $leave->employee_nip }}',
                                                 subject_position: '{{ $leave->employee_position }}',
@@ -81,9 +147,11 @@
                                                 leave_start: '{{ $leave->start_date->format('d M Y') }}',
                                                 leave_end: '{{ $leave->end_date->format('d M Y') }}',
                                                 leave_reason: '{{ addslashes($leave->reason ?? '-') }}',
-                                                leave_attachment: '{{ $leave->attachment ?? '' }}'
-                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-55 font-bold tracking-tight block cursor-pointer hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">{{ $leave->employee_name }}</span>
-                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">NIP/NIK: {{ $leave->employee_nip }}</span>
+                                                leave_attachment: '{{ $leave->attachment ?? '' }}',
+                                                status_code: '{{ $leave->status_code ?? 'I' }}',
+                                                gets_presence_bonus: {{ $leave->gets_presence_bonus ? 'true' : 'false' }}
+                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-200 font-bold tracking-tight inline-block cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.03] transform transition-all duration-200 origin-left">{{ $leave->employee_name }}</span>
+                                            <span class="text-[10px] text-slate-500 dark:text-slate-450 block mt-0.5">{{ $leave->employee_position }}</span>
                                         </div>
                                     </div>
                                 </td>
@@ -93,9 +161,33 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200/45 dark:border-slate-800 uppercase">
-                                        {{ $leave->type }}
-                                    </span>
+                                    <div class="flex flex-col items-center gap-1">
+                                        @php
+                                            $statusCode = $leave->status_code ?? 'I';
+                                            $badgeClasses = 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800';
+                                            if ($statusCode === 'S') {
+                                                $badgeClasses = 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-900/50';
+                                            } elseif ($statusCode === 'I') {
+                                                $badgeClasses = 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900/50';
+                                            } elseif ($statusCode === 'C') {
+                                                $badgeClasses = 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-900/50';
+                                            } elseif ($statusCode === 'H') {
+                                                $badgeClasses = 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900/50';
+                                            }
+                                        @endphp
+                                        <div class="flex items-center gap-1.5 justify-center">
+                                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase {{ $badgeClasses }}" title="Kode Status: {{ $statusCode }}">
+                                                {{ $statusCode }}
+                                            </span>
+                                            <span class="text-xs text-slate-700 dark:text-slate-350 font-bold uppercase tracking-tight">{{ $leave->type }}</span>
+                                        </div>
+                                        @if($leave->gets_presence_bonus)
+                                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-50 dark:bg-emerald-900/40 text-emerald-750 dark:text-emerald-400 border border-emerald-250/20 dark:border-emerald-900/30 uppercase mt-0.5">
+                                                <svg xmlns="http://www.w3.org/2500/svg" class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                                Bonus Presensi
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-center font-mono">
                                     {{ $leave->start_date->format('d M Y') }}
@@ -130,6 +222,114 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- PAGINATION -->
+            @if($paginatedLeaves->hasPages() || $paginatedLeaves->total() > 0)
+                <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-white dark:bg-slate-900">
+                    <!-- Mobile view (compact) -->
+                    <div class="flex flex-1 justify-between sm:hidden items-center">
+                        @if($paginatedLeaves->onFirstPage())
+                            <span class="px-3 py-1.5 text-xs font-semibold text-slate-350 dark:text-slate-600 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/40 rounded-lg cursor-not-allowed">Sebelumnya</span>
+                        @else
+                            <a href="{{ $paginatedLeaves->previousPageUrl() }}" class="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors">Sebelumnya</a>
+                        @endif
+
+                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            Halaman {{ $paginatedLeaves->currentPage() }} dari {{ $paginatedLeaves->lastPage() }}
+                        </span>
+
+                        @if($paginatedLeaves->hasMorePages())
+                            <a href="{{ $paginatedLeaves->nextPageUrl() }}" class="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors">Berikutnya</a>
+                        @else
+                            <span class="px-3 py-1.5 text-xs font-semibold text-slate-350 dark:text-slate-600 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/40 rounded-lg cursor-not-allowed">Berikutnya</span>
+                        @endif
+                    </div>
+
+                    <!-- Desktop view -->
+                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                Menampilkan
+                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedLeaves->firstItem() ?? 0 }}</span>
+                                sampai
+                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedLeaves->lastItem() ?? 0 }}</span>
+                                dari
+                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedLeaves->total() }}</span>
+                                data riwayat izin
+                            </p>
+                        </div>
+
+                        <div>
+                            <nav class="isolate inline-flex -space-x-px rounded-lg shadow-2xs" aria-label="Pagination">
+                                {{-- Previous Page Link --}}
+                                @if ($paginatedLeaves->onFirstPage())
+                                    <span class="relative inline-flex items-center rounded-l-lg px-2 py-1.5 text-slate-350 dark:text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-not-allowed">
+                                        <span class="sr-only">Sebelumnya</span>
+                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                @else
+                                    <a href="{{ $paginatedLeaves->previousPageUrl() }}" class="relative inline-flex items-center rounded-l-lg px-2 py-1.5 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                        <span class="sr-only">Sebelumnya</span>
+                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                @endif
+
+                                {{-- Page numbers --}}
+                                @php
+                                    $startPage = max($paginatedLeaves->currentPage() - 2, 1);
+                                    $endPage = min($startPage + 4, $paginatedLeaves->lastPage());
+                                    if ($endPage - $startPage < 4) {
+                                        $startPage = max($endPage - 4, 1);
+                                    }
+                                @endphp
+
+                                @if ($startPage > 1)
+                                    <a href="{{ $paginatedLeaves->url(1) }}" class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+                                    @if ($startPage > 2)
+                                        <span class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-default">...</span>
+                                    @endif
+                                @endif
+
+                                @for ($p = $startPage; $p <= $endPage; $p++)
+                                    @if ($p == $paginatedLeaves->currentPage())
+                                        <span aria-current="page" class="relative z-10 inline-flex items-center bg-indigo-50 dark:bg-indigo-950 px-3 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900 focus:z-20">{{ $p }}</span>
+                                    @else
+                                        <a href="{{ $paginatedLeaves->url($p) }}" class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+                                    @endif
+                                @endfor
+
+                                @if ($endPage < $paginatedLeaves->lastPage())
+                                    @if ($endPage < $paginatedLeaves->lastPage() - 1)
+                                        <span class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-default">...</span>
+                                    @endif
+                                    <a href="{{ $paginatedLeaves->url($paginatedLeaves->lastPage()) }}" class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $paginatedLeaves->lastPage() }}</a>
+                                @endif
+
+                                {{-- Next Page Link --}}
+                                @if ($paginatedLeaves->hasMorePages())
+                                    <a href="{{ $paginatedLeaves->nextPageUrl() }}" class="relative inline-flex items-center rounded-r-lg px-2 py-1.5 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                        <span class="sr-only">Berikutnya</span>
+                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                @else
+                                    <span class="relative inline-flex items-center rounded-r-lg px-2 py-1.5 text-slate-350 dark:text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-not-allowed">
+                                        <span class="sr-only">Berikutnya</span>
+                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                @endif
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
         <!-- MODAL DETAIL PEGAWAI -->
@@ -137,7 +337,7 @@
             <div x-show="showEmpDetailModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs text-left" style="display: none; margin-top: 0px !important; z-index: 9999;">
             <div @click.outside="showEmpDetailModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-55 font-nasalization flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-200 font-nasalization flex items-center gap-2">
                         <i data-lucide="user" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
                         Profil Pegawai
                     </h3>
@@ -188,8 +388,28 @@
                         <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[10px]">Detail Izin Pegawai</h4>
                         <div class="grid grid-cols-2 gap-4 text-[11px]">
                             <div>
-                                <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jenis Izin</span>
-                                <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200/45 dark:border-slate-800 uppercase" x-text="selectedEmp ? selectedEmp.leave_type : ''"></span>
+                                <span class="block text-slate-400 text-[9px] uppercase font-semibold mb-1">Jenis Izin</span>
+                                <div class="flex flex-col items-start gap-1">
+                                    <template x-if="selectedEmp">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase"
+                                                :class="{
+                                                    'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-900/50': selectedEmp.status_code === 'S',
+                                                    'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900/50': selectedEmp.status_code === 'I',
+                                                    'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-900/50': selectedEmp.status_code === 'C',
+                                                    'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900/50': selectedEmp.status_code === 'H'
+                                                }"
+                                                x-text="selectedEmp.status_code"></span>
+                                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200/45 dark:border-slate-800 uppercase" x-text="selectedEmp.leave_type"></span>
+                                        </div>
+                                    </template>
+                                    <template x-if="selectedEmp && selectedEmp.gets_presence_bonus">
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-900/30 uppercase mt-0.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            Bonus Presensi
+                                        </span>
+                                    </template>
+                                </div>
                             </div>
                             <div>
                                 <span class="block text-slate-400 text-[9px] uppercase font-semibold">Rentang Tanggal</span>
@@ -221,4 +441,12 @@
             </div>
         </template>
     </div>
+
+    <style>
+        @media (min-width: 768px) {
+            .search-container {
+                max-width: 280px !important;
+            }
+        }
+    </style>
 </x-admin-layout>

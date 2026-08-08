@@ -13,9 +13,9 @@ class LeaveApprovalController extends Controller
     /**
      * Display a listing of leave requests from all units.
      */
-    public function index()
+    public function index(Request $request)
     {
-        if (request()->has('clear_all')) {
+        if ($request->has('clear_all')) {
             $recentIds = LeaveRequest::where('created_at', '>=', now()->subDays(3))->pluck('id')->toArray();
             $readIds = session('read_leave_ids_' . auth()->id(), []);
             $newReadIds = array_unique(array_merge($readIds, $recentIds));
@@ -23,16 +23,26 @@ class LeaveApprovalController extends Controller
             return redirect()->route('leave-approvals.index');
         }
 
-        if (request()->has('read_id')) {
+        if ($request->has('read_id')) {
             $readIds = session('read_leave_ids_' . auth()->id(), []);
-            $readIds[] = (int) request('read_id');
+            $readIds[] = (int) $request->input('read_id');
             session(['read_leave_ids_' . auth()->id() => array_unique($readIds)]);
         }
         // 1. Pull latest leave requests from all active units and sync locally
         $this->pullLeaveRequestsFromUnits();
 
-        // 2. Load from local database
-        $leaves = LeaveRequest::with('schoolUnit')->orderBy('created_at', 'desc')->get();
+        // 2. Load from local database with query filters
+        $query = LeaveRequest::with('schoolUnit')->orderBy('created_at', 'desc');
+
+        if ($request->filled('unit_id')) {
+            $query->where('school_unit_id', $request->input('unit_id'));
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->input('type'));
+        }
+
+        $leavesCollection = $query->get();
 
         // 3. Map employee names
         $employees = (new \App\Services\SchoolUnitService)->getSdEmployees();
@@ -40,7 +50,10 @@ class LeaveApprovalController extends Controller
             return $item['unit_id'] . '-' . $item['id'];
         })->toArray();
 
-        foreach ($leaves as &$leave) {
+        $search = $request->query('search');
+        $mappedLeaves = [];
+
+        foreach ($leavesCollection as $leave) {
             $key = $leave->school_unit_id . '-' . $leave->employee_id;
             if (isset($employeeMap[$key])) {
                 $leave->employee_name = $employeeMap[$key]['name'];
@@ -49,7 +62,7 @@ class LeaveApprovalController extends Controller
                 $leave->employee_unit_url = $employeeMap[$key]['unit_url'] ?? null;
                 $leave->employee_gender = $employeeMap[$key]['gender'] ?? '-';
                 $leave->employee_status = $employeeMap[$key]['employment_status'] ?? '-';
-                $leave->employee_position = $employeeMap[$key]['subject_position'] ?? '-';
+                $leave->employee_position = $employeeMap[$key]['position'] ?? $employeeMap[$key]['subject_position'] ?? '-';
                 $leave->employee_email = $employeeMap[$key]['email'] ?? '-';
             } else {
                 $leave->employee_name = 'Pegawai #' . $leave->employee_id;
@@ -61,9 +74,37 @@ class LeaveApprovalController extends Controller
                 $leave->employee_position = '-';
                 $leave->employee_email = '-';
             }
+
+            if ($search) {
+                $searchLower = strtolower($search);
+                $nameMatch = str_contains(strtolower($leave->employee_name), $searchLower);
+                $nipMatch = str_contains(strtolower($leave->employee_nip), $searchLower);
+                if (!$nameMatch && !$nipMatch) {
+                    continue;
+                }
+            }
+
+            $mappedLeaves[] = $leave;
         }
 
-        return view('leave-approvals.index', compact('leaves'));
+        // 4. Paginate
+        $total = count($mappedLeaves);
+        $perPageReq = $request->query('per_page', 50);
+        $perPage = $perPageReq === 'all' ? ($total > 0 ? $total : 1) : (int) $perPageReq;
+        $page = (int) $request->query('page', 1);
+
+        $paginatedLeaves = new \Illuminate\Pagination\LengthAwarePaginator(
+            array_slice($mappedLeaves, ($page - 1) * $perPage, $perPage),
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        $schoolUnits = SchoolUnit::where('is_active', true)->orderBy('name')->get();
+        $leaveTypes = LeaveRequest::distinct()->pluck('type')->filter()->sort()->values();
+
+        return view('leave-approvals.index', compact('paginatedLeaves', 'schoolUnits', 'leaveTypes'));
     }
 
     /**

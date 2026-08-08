@@ -152,7 +152,7 @@
                                                 $emp['zkteco_device_ids'] = !empty($emp['zkteco_uid']) ? \App\Models\EmployeeDeviceMapping::where('zkteco_uid', $emp['zkteco_uid'])->pluck('zkteco_device_id')->toArray() : [];
                                                 $color = $colors[$index % count($colors)];
                                             @endphp
-                                            <div @click='selectedEmp = @json($emp); showEmpDetailModal = true' class="font-semibold text-slate-900 dark:text-slate-50 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">{{ $emp['name'] }}</div>
+                                            <div @click='selectedEmp = @json($emp); showEmpDetailModal = true' class="font-semibold text-slate-900 dark:text-slate-200 inline-block cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.03] transform transition-all duration-200 origin-left">{{ $emp['name'] }}</div>
                                             <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $emp['email'] ?? 'Tidak ada email' }}</div>
                                         </div>
                                     </div>
