@@ -268,9 +268,34 @@
                 </table>
             </div>
             
-            @if($paginatedReports->hasPages())
-                <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                    {{ $paginatedReports->links('pagination::tailwind') }}
+            @if($paginatedReports instanceof \Illuminate\Pagination\LengthAwarePaginator && $paginatedReports->total() > 0)
+                <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        Menampilkan
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedReports->firstItem() }}</span>
+                        sampai
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedReports->lastItem() }}</span>
+                        dari
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedReports->total() }}</span>
+                        pegawai
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        @if ($paginatedReports->onFirstPage())
+                            <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-650 flex items-center justify-center cursor-not-allowed select-none">Sebelumnya</span>
+                        @else
+                            <a href="{{ $paginatedReports->appends(request()->query())->previousPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Sebelumnya</a>
+                        @endif
+
+                        <span class="px-2 font-semibold text-slate-600 dark:text-slate-400">
+                            Halaman {{ $paginatedReports->currentPage() }} dari {{ $paginatedReports->lastPage() }}
+                        </span>
+
+                        @if ($paginatedReports->hasMorePages())
+                            <a href="{{ $paginatedReports->appends(request()->query())->nextPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Berikutnya</a>
+                        @else
+                            <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-650 flex items-center justify-center cursor-not-allowed select-none">Berikutnya</span>
+                        @endif
+                    </div>
                 </div>
             @endif
         </section>
