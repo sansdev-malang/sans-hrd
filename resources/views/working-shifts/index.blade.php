@@ -12,12 +12,12 @@
         deleteShift: null,
         days: [
             { name: 'Minggu', start_time: '', end_time: '', is_off: true },
-            { name: 'Senin', start_time: '07:00', end_time: '15:30', is_off: false },
-            { name: 'Selasa', start_time: '07:00', end_time: '15:30', is_off: false },
-            { name: 'Rabu', start_time: '07:00', end_time: '15:30', is_off: false },
-            { name: 'Kamis', start_time: '07:00', end_time: '15:30', is_off: false },
-            { name: 'Jumat', start_time: '07:00', end_time: '15:30', is_off: false },
-            { name: 'Sabtu', start_time: '07:30', end_time: '12:00', is_off: false }
+            { name: 'Senin', start_time: '', end_time: '', is_off: false },
+            { name: 'Selasa', start_time: '', end_time: '', is_off: false },
+            { name: 'Rabu', start_time: '', end_time: '', is_off: false },
+            { name: 'Kamis', start_time: '', end_time: '', is_off: false },
+            { name: 'Jumat', start_time: '', end_time: '', is_off: false },
+            { name: 'Sabtu', start_time: '', end_time: '', is_off: false }
         ],
         openEdit(shift) {
             this.editId = shift.id;
@@ -55,12 +55,12 @@
         resetAdd() {
             this.days = [
                 { name: 'Minggu', start_time: '', end_time: '', is_off: true },
-                { name: 'Senin', start_time: '07:00', end_time: '15:30', is_off: false },
-                { name: 'Selasa', start_time: '07:00', end_time: '15:30', is_off: false },
-                { name: 'Rabu', start_time: '07:00', end_time: '15:30', is_off: false },
-                { name: 'Kamis', start_time: '07:00', end_time: '15:30', is_off: false },
-                { name: 'Jumat', start_time: '07:00', end_time: '15:30', is_off: false },
-                { name: 'Sabtu', start_time: '07:30', end_time: '12:00', is_off: false }
+                { name: 'Senin', start_time: '', end_time: '', is_off: false },
+                { name: 'Selasa', start_time: '', end_time: '', is_off: false },
+                { name: 'Rabu', start_time: '', end_time: '', is_off: false },
+                { name: 'Kamis', start_time: '', end_time: '', is_off: false },
+                { name: 'Jumat', start_time: '', end_time: '', is_off: false },
+                { name: 'Sabtu', start_time: '', end_time: '', is_off: false }
             ];
             this.showAddModal = true;
         }
@@ -137,7 +137,7 @@
                                         {{ implode(', ', $days) }}
                                     </span>
                                     @if($timeKey === 'Libur')
-                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-955/30 text-rose-700 dark:text-rose-400 border border-rose-100/30 dark:border-rose-900/30 uppercase">Libur</span>
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border border-rose-100/30 dark:border-rose-900/30 uppercase">Libur</span>
                                     @else
                                         <span class="font-mono text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-800/40 px-2 py-0.5 rounded-lg whitespace-nowrap">
                                             {{ $timeKey }}
@@ -153,7 +153,7 @@
                             <i data-lucide="edit" class="w-3.5 h-3.5"></i>
                             Edit Shift
                         </button>
-                        <button type="button" @click="confirmDelete({{ json_encode($shift) }})" class="h-8 px-3 bg-rose-50/50 hover:bg-rose-100/60 text-rose-700 dark:bg-rose-955/20 dark:hover:bg-rose-900/30 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100 dark:border-rose-900/30 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1.5">
+                        <button type="button" @click="confirmDelete({{ json_encode($shift) }})" class="h-8 px-3 bg-rose-50/50 hover:bg-rose-100/60 text-rose-700 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100 dark:border-rose-900/30 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1.5">
                             <i data-lucide="trash" class="w-3.5 h-3.5"></i>
                             Hapus
                         </button>
