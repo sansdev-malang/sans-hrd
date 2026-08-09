@@ -136,7 +136,7 @@
                 <table class="w-full text-xs border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 left-auto md:left-0 z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[200px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 z-30 border-r border-slate-200 dark:border-slate-800 min-w-[200px]">
                                 <div class="flex items-start justify-between gap-4">
                                     <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
                                     <span class="text-right leading-tight">
@@ -145,18 +145,18 @@
                                     </span>
                                 </div>
                             </th>
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-center sticky top-0 left-auto md:left-[200px] z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[120px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-center sticky top-0 z-30 border-r border-slate-200 dark:border-slate-800 min-w-[120px]">
                                 <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bonus</span>
                             </th>
                             @foreach($dates as $date)
                             @php
                                 $isToday = $date->isToday();
                                 $isSunday = $date->isSunday();
-                                $dayColor = $isSunday && !$isToday ? 'text-red-400' : ($isToday ? '' : 'text-slate-400 dark:text-slate-500');
+                                $dayColor = $isSunday && !$isToday ? 'text-red-500' : ($isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500');
                                 $numColor = $isSunday && !$isToday ? 'text-red-500 dark:text-red-400' : ($isToday ? 'text-white' : 'text-slate-700 dark:text-slate-200');
                                 $bgToday = $isToday ? 'bg-indigo-600 dark:bg-indigo-500 w-6 h-6 flex items-center justify-center rounded-full' : '';
                             @endphp
-                            <th class="py-2 px-1 text-center sticky top-0 z-30 bg-slate-50 dark:bg-slate-900 min-w-[48px] max-w-[48px] border-r border-slate-100 dark:border-slate-800/60">
+                            <th class="py-2 px-1 text-center sticky top-0 z-30 min-w-[48px] max-w-[48px] border-r border-slate-100 dark:border-slate-800/60 {{ $isSunday ? 'bg-red-50 dark:bg-red-950' : 'bg-slate-50 dark:bg-slate-900' }}">
                                 <div class="flex flex-col items-center gap-0.5 py-0.5">
                                     <span class="text-[9px] font-semibold {{ $dayColor }} uppercase tracking-wider">{{ $date->translatedFormat('D') }}</span>
                                     <span class="text-[11px] font-bold {{ $numColor }} {{ $bgToday }}">{{ $date->format('d') }}</span>
@@ -174,20 +174,24 @@
                             @endphp
                             <tr class="group hover:bg-slate-50/60 dark:hover:bg-slate-900/30 transition-colors">
                                 <!-- KOLOM 1: PROFIL -->
-                                <td class="px-4 py-2 static md:sticky md:left-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
+                                <td class="px-4 py-2 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
+                                        @if(!empty($report['employee']['photo']))
+                                            <img src="{{ str_contains($report['employee']['photo'], 'photos/') ? rtrim($report['employee']['unit_url'], '/') . '/storage/' . $report['employee']['photo'] : rtrim($report['employee']['unit_url'], '/') . '/storage/photos/' . $report['employee']['photo'] }}" class="w-8 h-8 rounded-full object-cover border border-slate-200/50 dark:border-slate-800/40 shrink-0">
+                                        @else
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
+                                        @endif
                                         <div class="flex flex-col min-w-0">
                                             <span class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{{ $empName }}</span>
-                                            <div class="flex items-center gap-2 mt-0.5">
-                                                <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ $report['employee']['nuptk'] ?? '-' }}</span>
-                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[80px]">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
+                                            <div class="flex flex-col gap-0.5 mt-0.5">
+                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
+                                                <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate" title="{{ $report['employee']['position'] ?? '-' }}">{{ $report['employee']['position'] ?? '-' }}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
                                 <!-- KOLOM 2: TOTAL BONUS -->
-                                <td class="px-4 py-2 static md:sticky md:left-[200px] md:z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 text-center transition-colors">
+                                <td class="px-4 py-2 border-r border-slate-100 dark:border-slate-800/60 text-center transition-colors">
                                     @if($report['bonus_nominal'] > 0)
                                         <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Rp {{ number_format($report['bonus_nominal'], 0, ',', '.') }}</span>
                                     @else
@@ -201,7 +205,7 @@
                                     $dateStr = $date->format('Y-m-d');
                                     $detail = $report['daily_details'][$dateStr] ?? null;
                                 @endphp
-                                <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30">
+                                <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30 {{ $date->isSunday() ? 'bg-red-50/30 dark:bg-red-950/10' : '' }}">
                                     @if($detail)
                                         @if($detail['bonus_nominal'] > 0)
                                             @php 
@@ -241,10 +245,10 @@
                                         </tbody>
                     <tfoot class="bg-slate-50 dark:bg-slate-900 sticky bottom-0 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                         <tr>
-                            <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-200 text-right static md:sticky md:left-0 md:z-40 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+                            <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-200 text-right bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
                                 TOTAL KESELURUHAN
                             </td>
-                            <td class="px-4 py-3 font-bold text-emerald-600 dark:text-emerald-400 text-center static md:sticky md:left-[200px] md:z-40 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+                            <td class="px-4 py-3 font-bold text-emerald-600 dark:text-emerald-400 text-center bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
                                 Rp {{ number_format($totalSemuaBonus ?? 0, 0, ',', '.') }}
                             </td>
                             <td colspan="{{ count($dates) }}" class="bg-slate-50 dark:bg-slate-900"></td>
