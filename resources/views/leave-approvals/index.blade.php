@@ -99,7 +99,7 @@
                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-505 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="px-6 py-3 text-left min-w-[200px]">Profil Pegawai</th>
-                            <th class="px-6 py-3 text-center">Jenis Izin</th>
+                            <th class="px-6 py-3 text-left">Jenis Izin</th>
                             <th class="px-6 py-3 text-center">Tanggal Mulai</th>
                             <th class="px-6 py-3 text-center">Tanggal Selesai</th>
                             <th class="px-6 py-3 text-left">Keterangan</th>
@@ -154,14 +154,14 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-3 text-center">
-                                    <div class="flex flex-col items-center justify-center gap-1">
-                                        <div class="flex items-center gap-1.5 justify-center">
+                                <td class="px-6 py-3 text-left">
+                                    <div class="flex flex-col items-start justify-start gap-1">
+                                        <div class="flex items-center gap-1.5">
                                             @php
                                                 $statusCode = $leave->status_code ?? 'I';
                                                 $badgeClasses = 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800';
                                                 if ($statusCode === 'S') {
-                                                    $badgeClasses = 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-450 dark:border-rose-900/50';
+                                                    $badgeClasses = 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-455 dark:border-rose-900/50';
                                                 } elseif ($statusCode === 'I') {
                                                     $badgeClasses = 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-450 dark:border-amber-900/50';
                                                 } elseif ($statusCode === 'C') {
@@ -173,7 +173,7 @@
                                             <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase {{ $badgeClasses }}" title="Kode Status: {{ $statusCode }}">
                                                 {{ $statusCode }}
                                             </span>
-                                            <span class="text-xs text-slate-700 dark:text-slate-355 font-bold uppercase tracking-tight">{{ $leave->type }}</span>
+                                            <span class="text-xs text-slate-700 dark:text-slate-355 font-bold capitalize tracking-tight">{{ $leave->type }}</span>
                                         </div>
                                         @if($leave->attachment)
                                             <div class="mt-1">
@@ -182,8 +182,8 @@
                                                         $leave->employee_unit_url ? rtrim($leave->employee_unit_url, '/') . '/storage/' . $leave->attachment : '#'
                                                     );
                                                 @endphp
-                                                <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] text-indigo-700 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 transition-all shadow-2xs hover:shadow-xs">
-                                                    <i data-lucide="paperclip" class="w-3 h-3"></i>
+                                                <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex items-center gap-1 text-[9px] text-indigo-700 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 px-1.5 py-0.5 rounded transition-all shadow-2xs hover:shadow-xs">
+                                                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
                                                     Lampiran
                                                 </a>
                                             </div>
