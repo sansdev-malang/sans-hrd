@@ -98,11 +98,11 @@
                 <table class="w-full text-xs">
                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-505 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
-                            <th class="px-6 py-3 text-left min-w-[200px]">Profil Pegawai</th>
-                            <th class="px-6 py-3 text-left">Jenis Izin</th>
-                            <th class="px-6 py-3 text-center">Tanggal Mulai</th>
-                            <th class="px-6 py-3 text-center">Tanggal Selesai</th>
-                            <th class="px-6 py-3 text-left">Keterangan</th>
+                            <th class="px-6 py-3 text-left w-64 min-w-[220px]">Profil Pegawai</th>
+                            <th class="px-6 py-3 text-left w-48 min-w-[150px]">Jenis Izin</th>
+                            <th class="px-6 py-3 text-center w-32">Tanggal Mulai</th>
+                            <th class="px-6 py-3 text-center w-32">Tanggal Selesai</th>
+                            <th class="px-6 py-3 text-left min-w-[280px]">Keterangan</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
