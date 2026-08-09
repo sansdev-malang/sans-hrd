@@ -15,74 +15,7 @@
 @endphp
 
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="{
-        showCalendarModal: false,
-        selectedReport: null,
-        startDateStr: '{{ \Carbon\Carbon::parse($startDateReq)->translatedFormat('d M Y') }}',
-        endDateStr: '{{ \Carbon\Carbon::parse($endDateReq)->translatedFormat('d M Y') }}',
-        cycleDates: @json($cycleDateData),
-        calendarDays: [],
-        stats: { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 },
-        
-        openCalendarModal(report) {
-            this.selectedReport = report;
-            this.calendarDays = this.buildCutOffCalendar(this.cycleDates);
-            this.stats = this.calculateStats(report);
-            this.showCalendarModal = true;
-        },
-        calculateStats(report) {
-            let stats = { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 };
-            if (!report || !report.daily_details) return stats;
-            
-            Object.values(report.daily_details).forEach(function(day) {
-                if (day.status === 'Hadir') {
-                    stats.hadir++;
-                    if (day.is_late) {
-                        stats.telat++;
-                    }
-                } else if (day.status === 'Alfa') {
-                    stats.alfa++;
-                } else if (day.status === 'Cuti/Izin') {
-                    stats.izin++;
-                } else if (day.status === 'Off') {
-                    stats.off++;
-                }
-            });
-            return stats;
-        },
-        buildCutOffCalendar(cycleDates) {
-            if (!cycleDates || cycleDates.length === 0) return [];
-            
-            const days = [];
-            const firstDate = cycleDates[0];
-            const lastDate = cycleDates[cycleDates.length - 1];
-            
-            // Pad start of the week (Monday is 1, Sunday is 7)
-            for (let i = 1; i < firstDate.dayOfWeek; i++) {
-                days.push({ day: '', isCurrentMonth: false, dateStr: 'pad-start-' + i });
-            }
-            
-            // Add all dates from the cycle
-            cycleDates.forEach(function(d) {
-                days.push({ day: d.day, isCurrentMonth: true, dateStr: d.dateStr });
-            });
-            
-            // Pad end of the week
-            for (let i = 1; i <= (7 - lastDate.dayOfWeek); i++) {
-                days.push({ day: '', isCurrentMonth: false, dateStr: 'pad-end-' + i });
-            }
-            
-            return days;
-        },
-        getInitials(name) {
-            if (!name) return '?';
-            const words = name.split(' ');
-            if (words.length >= 2) {
-                return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
-            }
-            return name.substring(0, 2).toUpperCase();
-        }
-    }">
+    <div class="p-6 space-y-6" x-data="attendanceLogs">
         <!-- HEADER -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div class="flex flex-col gap-0.5">
@@ -469,7 +402,9 @@
                         <div class="grid grid-cols-7 gap-1">
                             <template x-for="day in calendarDays" :key="day.dateStr">
                                 <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between"
-                                     :class="day.isCurrentMonth ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40'">
+                                     :class="[
+                                         day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40'
+                                     ]">
                                      
                                     <!-- Day Number -->
                                     <span class="text-[9px] font-semibold"
@@ -555,3 +490,76 @@
         }
     }
 </style>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('attendanceLogs', () => ({
+            showCalendarModal: false,
+            selectedReport: null,
+            startDateStr: '{{ \Carbon\Carbon::parse($startDateReq)->translatedFormat("d M Y") }}',
+            endDateStr: '{{ \Carbon\Carbon::parse($endDateReq)->translatedFormat("d M Y") }}',
+            cycleDates: @json($cycleDateData),
+            calendarDays: [],
+            stats: { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 },
+            
+            openCalendarModal(report) {
+                this.selectedReport = report;
+                this.calendarDays = this.buildCutOffCalendar(this.cycleDates);
+                this.stats = this.calculateStats(report);
+                this.showCalendarModal = true;
+            },
+            calculateStats(report) {
+                let stats = { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 };
+                if (!report || !report.daily_details) return stats;
+                
+                Object.values(report.daily_details).forEach(function(day) {
+                    if (day.status === 'Hadir') {
+                        stats.hadir++;
+                        if (day.is_late) {
+                            stats.telat++;
+                        }
+                    } else if (day.status === 'Alfa') {
+                        stats.alfa++;
+                    } else if (day.status === 'Cuti/Izin') {
+                        stats.izin++;
+                    } else if (day.status === 'Off') {
+                        stats.off++;
+                    }
+                });
+                return stats;
+            },
+            buildCutOffCalendar(cycleDates) {
+                if (!cycleDates || cycleDates.length === 0) return [];
+                
+                const days = [];
+                const firstDate = cycleDates[0];
+                const lastDate = cycleDates[cycleDates.length - 1];
+                
+                // Pad start of the week (Monday is 1, Sunday is 7)
+                for (let i = 1; i < firstDate.dayOfWeek; i++) {
+                    days.push({ day: '', isCurrentMonth: false, dateStr: 'pad-start-' + i });
+                }
+                
+                // Add all dates from the cycle
+                cycleDates.forEach(function(d) {
+                    days.push({ day: d.day, isCurrentMonth: true, dateStr: d.dateStr });
+                });
+                
+                // Pad end of the week
+                for (let i = 1; i <= (7 - lastDate.dayOfWeek); i++) {
+                    days.push({ day: '', isCurrentMonth: false, dateStr: 'pad-end-' + i });
+                }
+                
+                return days;
+            },
+            getInitials(name) {
+                if (!name) return '?';
+                const words = name.split(' ');
+                if (words.length >= 2) {
+                    return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
+                }
+                return name.substring(0, 2).toUpperCase();
+            }
+        }));
+    });
+</script>
