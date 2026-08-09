@@ -280,17 +280,7 @@
             <!-- Dapat Bonus -->
             <div class="flex items-center gap-1.5">
                 <div class="w-8 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 rounded font-bold text-[9px]">10k</div>
-                <span>Mendapatkan Bonus (Nominal disesuaikan tingkat ketepatan waktu hadir sesuai jadwal shift)</span>
-            </div>
-            <!-- Tanpa Bonus -->
-            <div class="flex items-center gap-1.5">
-                <span class="text-xs font-bold text-slate-400 dark:text-slate-500">-</span>
-                <span>Tidak Mendapatkan Bonus (Terlambat melebihi batas toleransi shift atau tidak hadir)</span>
-            </div>
-            <!-- Hari Minggu -->
-            <div class="flex items-center gap-1.5">
-                <div class="w-5 h-5 bg-red-50 dark:bg-red-955/20 border border-red-100 dark:border-red-900/30 rounded"></div>
-                <span>Hari Minggu / Hari Libur Kerja</span>
+                <span>Nominal disesuaikan tingkat ketepatan waktu hadir sesuai jadwal shift</span>
             </div>
         </div>
 
