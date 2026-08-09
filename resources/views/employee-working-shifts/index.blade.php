@@ -149,15 +149,15 @@
 
         <!-- TABLE GRID -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left w-full">
-            <div class="overflow-x-auto custom-scrollbar w-full">
-                <table class="w-full text-xs">
+            <div class="overflow-x-auto overflow-y-auto custom-scrollbar w-full" style="max-height: calc(100vh - 240px);">
+                <table class="w-full text-xs border-collapse">
                     <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
-                            <th class="px-6 py-4 text-left w-[32%] whitespace-nowrap">Grup Penugasan</th>
-                            <th class="px-6 py-4 text-left w-[18%] whitespace-nowrap">Unit Sekolah</th>
-                            <th class="px-6 py-4 text-center w-[25%] whitespace-nowrap">Periode Jadwal</th>
-                            <th class="px-6 py-4 text-center w-[13%] whitespace-nowrap">Jumlah Pegawai</th>
-                            <th class="px-6 py-4 text-right w-[12%] whitespace-nowrap">Aksi</th>
+                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[32%] whitespace-nowrap">Grup Penugasan</th>
+                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[18%] whitespace-nowrap">Unit Sekolah</th>
+                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-4 text-center w-[25%] whitespace-nowrap">Periode Jadwal</th>
+                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-4 text-center w-[13%] whitespace-nowrap">Jumlah Pegawai</th>
+                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-4 text-right w-[12%] whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300 font-medium">
