@@ -71,7 +71,9 @@ class EmployeeWorkingShiftController extends Controller
                 $batches[$key]['employees'][] = [
                     'id' => $assignment->employee_id,
                     'name' => $employeeMap[$empKey]['name'] ?? 'Pegawai #' . $assignment->employee_id,
-                    'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-'
+                    'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-',
+                    'photo' => $employeeMap[$empKey]['photo'] ?? null,
+                    'unit_url' => $employeeMap[$empKey]['unit_url'] ?? null,
                 ];
             } else {
                 // Roster Shifts
@@ -101,7 +103,9 @@ class EmployeeWorkingShiftController extends Controller
                     $rosterBatches[$key]['employees_map'][$assignment->employee_id] = [
                         'id' => $assignment->employee_id,
                         'name' => $employeeMap[$empKey]['name'] ?? 'Pegawai #' . $assignment->employee_id,
-                        'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-'
+                        'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-',
+                        'photo' => $employeeMap[$empKey]['photo'] ?? null,
+                        'unit_url' => $employeeMap[$empKey]['unit_url'] ?? null,
                     ];
                 }
             }
@@ -129,7 +133,34 @@ class EmployeeWorkingShiftController extends Controller
             return strcmp($b['sort_date'], $a['sort_date']);
         });
 
-        return view('employee-working-shifts.index', ['batches' => $allBatches, 'units' => $units, 'shifts' => $shifts, 'selectedUnitId' => $selectedUnitId]);
+        // Paginate the array manually in PHP
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $perPageQuery = $request->query('per_page', '50');
+        
+        if ($perPageQuery === 'all') {
+            $perPage = 1000000;
+        } else {
+            $perPage = in_array((int)$perPageQuery, [10, 25, 50, 100, 500]) ? (int)$perPageQuery : 50;
+        }
+        
+        $itemCollection = collect($allBatches);
+        $currentPageItems = $itemCollection->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        
+        $paginatedBatches = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $itemCollection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('employee-working-shifts.index', [
+            'batches' => $paginatedBatches,
+            'units' => $units,
+            'shifts' => $shifts,
+            'selectedUnitId' => $selectedUnitId,
+            'perPage' => $perPageQuery
+        ]);
     }
 
     public function editBatch(Request $request)

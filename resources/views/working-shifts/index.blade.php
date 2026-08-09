@@ -296,11 +296,11 @@
                                             <div class="col-span-6 grid grid-cols-2 gap-2 w-full mt-1.5 sm:mt-0">
                                                 <div class="flex flex-col gap-1">
                                                     <span class="text-[8px] text-slate-400 uppercase font-bold sm:hidden">Jam Masuk</span>
-                                                    <input type="time" :name="`days[${index}][start_time]`" x-model="day.start_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
+                                                    <input type="time" :name="`days[${index}][start_time]`" x-model="day.start_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all dark:[color-scheme:dark]">
                                                 </div>
                                                 <div class="flex flex-col gap-1">
                                                     <span class="text-[8px] text-slate-400 uppercase font-bold sm:hidden">Jam Pulang</span>
-                                                    <input type="time" :name="`days[${index}][end_time]`" x-model="day.end_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
+                                                    <input type="time" :name="`days[${index}][end_time]`" x-model="day.end_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all dark:[color-scheme:dark]">
                                                 </div>
                                             </div>
                                         </div>
@@ -411,7 +411,7 @@
                                     <div class="col-span-3 text-center">Jam Pulang</div>
                                 </div>
  
-                                <div class="space-y-3 bg-slate-50/50 dark:bg-slate-955/20 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+                                <div class="space-y-3 bg-slate-50/50 dark:bg-slate-950/20 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80">
                                     <template x-for="(day, index) in days" :key="index">
                                         <div class="flex flex-col sm:grid sm:grid-cols-12 items-start sm:items-center gap-2 sm:gap-3 border-b border-slate-100/85 dark:border-slate-800/60 last:border-0 pb-3 last:pb-0 transition-opacity"
                                             :class="day.is_off ? 'opacity-60' : ''">
@@ -431,11 +431,11 @@
                                             <div class="col-span-6 grid grid-cols-2 gap-2 w-full mt-1.5 sm:mt-0">
                                                 <div class="flex flex-col gap-1">
                                                     <span class="text-[8px] text-slate-400 uppercase font-bold sm:hidden">Jam Masuk</span>
-                                                    <input type="time" :name="`days[${index}][start_time]`" x-model="day.start_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
+                                                    <input type="time" :name="`days[${index}][start_time]`" x-model="day.start_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all dark:[color-scheme:dark]">
                                                 </div>
                                                 <div class="flex flex-col gap-1">
                                                     <span class="text-[8px] text-slate-400 uppercase font-bold sm:hidden">Jam Pulang</span>
-                                                    <input type="time" :name="`days[${index}][end_time]`" x-model="day.end_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
+                                                    <input type="time" :name="`days[${index}][end_time]`" x-model="day.end_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all dark:[color-scheme:dark]">
                                                 </div>
                                             </div>
                                         </div>
