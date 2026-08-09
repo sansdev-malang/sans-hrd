@@ -301,7 +301,7 @@
                                             x-text="selectedEmp.status_code"></span>
                                         
                                         <!-- Type Name -->
-                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-950 text-slate-850 dark:text-slate-200 border border-slate-200/50 dark:border-slate-800 uppercase" x-text="selectedEmp.leave_type"></span>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-950 text-slate-850 dark:text-slate-200 border border-slate-200/50 dark:border-slate-800 capitalize" x-text="selectedEmp.leave_type"></span>
                                     </div>
                                 </template>
                             </div>
