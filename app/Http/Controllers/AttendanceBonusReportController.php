@@ -48,11 +48,30 @@ class AttendanceBonusReportController extends Controller
 
         // 3. Fetch Employees (Filter by unit if needed)
         $rawEmployees = $this->service->getSdEmployees();
+        
+        // Extract unique positions (jabatan) from raw employee data
+        $positions = collect($rawEmployees)
+            ->map(function ($emp) {
+                return $emp['position'] ?? $emp['subject_position'] ?? null;
+            })
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
         $employeesCollection = collect($rawEmployees);
 
         if (!empty($unitId)) {
             $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
                 return ($emp['unit_id'] ?? '') == $unitId;
+            });
+        }
+
+        // Apply position filter
+        $position = $request->query('position');
+        if (!empty($position)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                return ($emp['position'] ?? $emp['subject_position'] ?? '') === $position;
             });
         }
 
@@ -281,7 +300,7 @@ class AttendanceBonusReportController extends Controller
         $totalSemuaBonus = collect($reports)->sum('bonus_nominal');
         $schoolUnits = SchoolUnit::where('is_active', true)->get();
 
-        return view('bonus-reports.index', compact('paginatedReports', 'schoolUnits', 'activeSchema', 'month', 'startDateReq', 'endDateReq', 'cutoffDate', 'totalSemuaBonus'));
+        return view('bonus-reports.index', compact('paginatedReports', 'schoolUnits', 'activeSchema', 'month', 'startDateReq', 'endDateReq', 'cutoffDate', 'totalSemuaBonus', 'positions'));
     }
 
         public function export(Request $request)
@@ -309,6 +328,14 @@ class AttendanceBonusReportController extends Controller
             });
         }
         
+        // Apply position filter
+        $position = $request->query('position');
+        if (!empty($position)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                return ($emp['position'] ?? $emp['subject_position'] ?? '') === $position;
+            });
+        }
+
         $search = $request->query('search');
         if (!empty($search)) {
             $employeesCollection = $employeesCollection->filter(function ($emp) use ($search) {

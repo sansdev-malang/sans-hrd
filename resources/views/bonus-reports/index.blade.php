@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6">
+    <div class="p-6 space-y-6" x-data="bonusReports">
         
         <!-- HEADER -->
         <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -8,33 +8,33 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Evaluasi kehadiran pegawai berdasarkan skema bonus aktif.</p>
             </div>
             
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
                 @if($activeSchema)
-                    <div class="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg flex items-center gap-2">
+                    <div class="px-3 h-9 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg flex items-center gap-2">
                         <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
-                        <span class="text-xs font-medium text-emerald-800 dark:text-emerald-300">Skema Aktif: <strong>{{ $activeSchema->name }}</strong></span>
+                        <span class="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">Skema Aktif: <strong>{{ $activeSchema->name }}</strong></span>
                     </div>
                 @else
-                    <div class="px-3 py-1.5 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
+                    <div class="px-3 h-9 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
                         <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600 dark:text-red-400"></i>
-                        <span class="text-xs font-medium text-red-800 dark:text-red-300">Tidak ada skema bonus aktif!</span>
+                        <span class="text-[11px] font-semibold text-red-800 dark:text-red-300">Tidak ada skema bonus aktif!</span>
                     </div>
                 @endif
 
                 <!-- EXPORT DROPDOWN -->
                 <div x-data="{ open: false }" class="relative shrink-0">
-                    <button type="button" @click="open = !open" @click.outside="open = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
+                    <button type="button" @click="open = !open" @click.outside="open = false" class="h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-350 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
                         <i data-lucide="download" class="w-4 h-4"></i>
-                        <span>Ekspor</span>
+                        <span>Ekspor Data</span>
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                     </button>
                     
-                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
-                        <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-350 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
+                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                        <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                             Excel (.xlsx)
                         </a>
-                        <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-350 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
+                        <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
                             <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
                             PDF (.pdf)
                         </a>
@@ -44,64 +44,64 @@
         </section>
 
         <!-- FILTERS & CONTROLS -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full">
-            <form method="GET" action="{{ route('bonus-reports.index') }}" class="flex flex-wrap items-end gap-4 w-full text-left">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
+            <form method="GET" action="{{ route('bonus-reports.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 
-                <!-- Bulan -->
-                <div class="space-y-1" style="width: 140px; flex-shrink: 0;">
-                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
-                    <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer">
-                </div>
+                <!-- Left Side: Search & Filters -->
+                <div class="flex flex-wrap items-center gap-2 flex-1">
+                    <!-- Search Box -->
+                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="relative w-full search-container">
+                        <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
+                            style="padding-left: 0.75rem; padding-right: 2.25rem;"
+                            class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
+                        <button type="submit" 
+                            :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
+                            class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </button>
+                    </div>
 
-                <!-- Filter Unit -->
-                @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                <div class="space-y-1" style="width: 130px; flex-shrink: 0;">
-                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
-                    <select name="unit_id" class="w-full text-xs h-9 pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer">
-                        <option value="">Semua Unit</option>
-                        @foreach($schoolUnits as $unit)
-                            <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
-                                {{ $unit->name }}
-                            </option>
+                    <!-- Bulan -->
+                    <input type="month" name="month" value="{{ request('month', $month) }}" onchange="this.form.submit()"
+                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer shadow-inner">
+
+                    <!-- Filter Unit -->
+                    @if(isset($schoolUnits) && count($schoolUnits) > 0)
+                        <select name="unit_id" onchange="this.form.submit()"
+                            class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                            <option value="">Semua Unit Sekolah</option>
+                            @foreach($schoolUnits as $unit)
+                                <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
+                                    {{ $unit->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+
+                    <!-- Jabatan -->
+                    <select name="position" onchange="this.form.submit()"
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        <option value="">Semua Jabatan</option>
+                        @foreach($positions as $pos)
+                            <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
                         @endforeach
                     </select>
-                </div>
-                @endif
 
-                <!-- Search -->
-                <div class="space-y-1" style="flex-grow: 1; min-width: 180px;">
-                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Pencarian</label>
-                    <div class="relative w-full">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                            <i data-lucide="search" class="w-4 h-4"></i>
-                        </div>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIP..." class="w-full text-xs h-9 pl-9 pr-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
-                    </div>
+                    @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != now()->format('Y-m') || request()->filled('per_page') && request('per_page') != 15)
+                        <a href="{{ route('bonus-reports.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </a>
+                    @endif
                 </div>
 
-                <!-- Apply & Reset Buttons -->
-                <div class="space-y-1" style="flex-shrink: 0;">
-                    <div class="hidden sm:block text-[10px] font-bold invisible mb-1 select-none">&nbsp;</div>
-                    <div class="flex items-center gap-2">
-                        <button type="submit" class="h-9 px-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors cursor-pointer whitespace-nowrap">
-                            Terapkan
-                        </button>
-                        @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
-                            <a href="{{ route('bonus-reports.index') }}" class="inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer">
-                                Reset
-                            </a>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- RIGHT SIDE: PER PAGE (Pushed to far right using auto margins) -->
-                <div class="space-y-1 lg:ml-auto" style="width: 120px; flex-shrink: 0;">
-                    <label class="hidden lg:block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tampilkan</label>
-                    <select name="per_page" onchange="this.form.submit()" class="h-9 w-full pl-3 pr-8 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-350 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <option value="15" {{ request('per_page', 15) == '15' ? 'selected' : '' }}>15 Baris</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 Baris</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 Baris</option>
-                        <option value="all" {{ request('per_page', 15) == 'all' ? 'selected' : '' }}>Semua Data</option>
+                <!-- Right Side: Per Page Options -->
+                <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
+                    <select name="per_page" onchange="this.form.submit()"
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        <option value="15" {{ request('per_page', '15') == '15' ? 'selected' : '' }}>15 baris</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
                     </select>
                 </div>
             </form>
@@ -112,8 +112,14 @@
             $start = \Carbon\Carbon::parse($startDateReq);
             $end = \Carbon\Carbon::parse($endDateReq);
             $dates = [];
+            $cycleDateData = [];
             while($start <= $end) {
                 $dates[] = $start->copy();
+                $cycleDateData[] = [
+                    'dateStr' => $start->format('Y-m-d'),
+                    'day' => (int)$start->format('d'),
+                    'dayOfWeek' => (int)$start->format('N'),
+                ];
                 $start->addDay();
             }
             
@@ -176,13 +182,16 @@
                                 <!-- KOLOM 1: PROFIL -->
                                 <td class="px-4 py-2 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
                                     <div class="flex items-center gap-3">
-                                        @if(!empty($report['employee']['photo']))
-                                            <img src="{{ str_contains($report['employee']['photo'], 'photos/') ? rtrim($report['employee']['unit_url'], '/') . '/storage/' . $report['employee']['photo'] : rtrim($report['employee']['unit_url'], '/') . '/storage/photos/' . $report['employee']['photo'] }}" class="w-8 h-8 rounded-full object-cover border border-slate-200/50 dark:border-slate-800/40 shrink-0">
-                                        @else
-                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
-                                        @endif
-                                        <div class="flex flex-col min-w-0">
-                                            <span class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{{ $empName }}</span>
+                                        <!-- Clickable Photo/Avatar -->
+                                        <div @click='openCalendarModal(@json($report))' class="cursor-pointer hover:scale-105 transform transition-all active:scale-95 duration-150 shrink-0">
+                                            @if(!empty($report['employee']['photo']))
+                                                <img src="{{ str_contains($report['employee']['photo'], 'photos/') ? rtrim($report['employee']['unit_url'], '/') . '/storage/' . $report['employee']['photo'] : rtrim($report['employee']['unit_url'], '/') . '/storage/photos/' . $report['employee']['photo'] }}" class="w-8 h-8 rounded-full object-cover border border-slate-200/50 dark:border-slate-800/40">
+                                            @else
+                                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="flex flex-col min-w-0 text-left">
+                                            <span @click='openCalendarModal(@json($report))' class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ $empName }}</span>
                                             <div class="flex flex-col gap-0.5 mt-0.5">
                                                 <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
                                                 <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate" title="{{ $report['employee']['position'] ?? '-' }}">{{ $report['employee']['position'] ?? '-' }}</span>
@@ -263,6 +272,177 @@
                 </div>
             @endif
         </section>
+
+        <!-- CALENDAR DETAIL MODAL -->
+        <div x-show="showCalendarModal" 
+             class="fixed inset-0 z-50 overflow-y-auto" 
+             style="display: none;"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+             
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity"></div>
+
+            <!-- Modal Wrapper -->
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div @click.outside="showCalendarModal = false"
+                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-200 dark:border-slate-800"
+                     x-transition:enter="transition ease-out duration-300 transform scale-95"
+                     x-transition:enter-start="transform scale-95 opacity-0"
+                     x-transition:enter-end="transform scale-100 opacity-100"
+                     x-transition:leave="transition ease-in duration-200 transform scale-100"
+                     x-transition:leave-start="transform scale-100 opacity-100"
+                     x-transition:leave-end="transform scale-95 opacity-0">
+                     
+                    <!-- Modal Header -->
+                    <div class="border-b border-slate-100 dark:border-slate-800/60 px-5 py-4 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rincian Bonus Harian</span>
+                            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5" x-text="selectedReport ? selectedReport.employee.name : ''"></h3>
+                        </div>
+                        <button type="button" @click="showCalendarModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-355 cursor-pointer">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="p-5 space-y-4 text-left">
+                        <!-- Calendar Info Header -->
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                            <div class="flex items-center gap-1">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 opacity-80"></i>
+                                <span>Periode Cut-Off</span>
+                            </div>
+                            <span class="text-slate-700 dark:text-slate-300" x-text="`${startDateStr} - ${endDateStr}`"></span>
+                        </div>
+
+                        <!-- Grid Kalender -->
+                        <div class="border border-slate-100 dark:border-slate-800/60 rounded-xl p-3 bg-slate-50/30 dark:bg-slate-900/10">
+                            <!-- Nama-Nama Hari -->
+                            <div class="grid grid-cols-7 gap-1 text-center text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                                <div>Sen</div>
+                                <div>Sel</div>
+                                <div>Rab</div>
+                                <div>Kam</div>
+                                <div>Jum</div>
+                                <div class="text-red-400">Sab</div>
+                                <div class="text-red-500">Min</div>
+                            </div>
+
+                            <!-- Grid Tanggal -->
+                            <div class="grid grid-cols-7 gap-1">
+                                <template x-for="day in calendarDays" :key="day.dateStr">
+                                    <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between"
+                                         :class="[
+                                             day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40'
+                                         ]">
+                                         
+                                        <!-- Tanggal -->
+                                        <span class="text-[9px] font-semibold"
+                                              :class="[
+                                                  day.isCurrentMonth ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400',
+                                                  (day.dateStr && new Date(day.dateStr).getDay() === 0) ? 'text-red-500 font-bold' : ''
+                                              ]"
+                                              x-text="day.day"></span>
+                                              
+                                        <!-- Bonus Nominal -->
+                                        <div class="mt-auto w-full">
+                                            <template x-if="selectedReport && selectedReport.daily_details[day.dateStr]">
+                                                <div class="w-full">
+                                                    <template x-if="selectedReport.daily_details[day.dateStr].bonus_nominal > 0">
+                                                        <div class="w-full py-0.5 text-center bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded text-[7px] font-bold"
+                                                             x-text="(selectedReport.daily_details[day.dateStr].bonus_nominal >= 1000) ? (selectedReport.daily_details[day.dateStr].bonus_nominal / 1000) + 'k' : selectedReport.daily_details[day.dateStr].bonus_nominal"></div>
+                                                    </template>
+                                                    <template x-if="!selectedReport.daily_details[day.dateStr].bonus_nominal || selectedReport.daily_details[day.dateStr].bonus_nominal <= 0">
+                                                        <div class="text-center text-slate-300 dark:text-slate-600 text-[8px] font-bold">-</div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 px-5 py-3 flex flex-row items-center justify-between gap-4">
+                        <div class="flex flex-wrap gap-2.5 text-[9px] md:text-xs">
+                            <span class="font-bold text-slate-700 dark:text-slate-350">Ringkasan:</span>
+                            <span class="text-slate-600 dark:text-slate-400">Total: <strong class="text-emerald-650 dark:text-emerald-400" x-text="formatRupiah(stats.totalBonus)"></strong></span>
+                            <span class="text-slate-600 dark:text-slate-400">Dapat Bonus: <strong class="text-indigo-650 dark:text-indigo-400 font-bold" x-text="stats.bonusDays + ' Hari'"></strong></span>
+                        </div>
+                        <button type="button" @click="showCalendarModal = false" class="w-full sm:w-auto h-7 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg transition-colors cursor-pointer">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </x-admin-layout>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('bonusReports', () => ({
+            showCalendarModal: false,
+            selectedReport: null,
+            startDateStr: '{{ \Carbon\Carbon::parse($startDateReq)->translatedFormat("d M Y") }}',
+            endDateStr: '{{ \Carbon\Carbon::parse($endDateReq)->translatedFormat("d M Y") }}',
+            cycleDates: @json($cycleDateData),
+            calendarDays: [],
+            stats: { totalBonus: 0, bonusDays: 0 },
+            
+            openCalendarModal(report) {
+                this.selectedReport = report;
+                this.calendarDays = this.buildCutOffCalendar(this.cycleDates);
+                this.stats = this.calculateStats(report);
+                this.showCalendarModal = true;
+            },
+            calculateStats(report) {
+                let stats = { totalBonus: 0, bonusDays: 0 };
+                if (!report || !report.daily_details) return stats;
+                
+                Object.values(report.daily_details).forEach(function(day) {
+                    if (day.bonus_nominal && day.bonus_nominal > 0) {
+                        stats.totalBonus += day.bonus_nominal;
+                        stats.bonusDays++;
+                    }
+                });
+                return stats;
+            },
+            buildCutOffCalendar(cycleDates) {
+                if (!cycleDates || cycleDates.length === 0) return [];
+                
+                const days = [];
+                const firstDate = cycleDates[0];
+                const lastDate = cycleDates[cycleDates.length - 1];
+                
+                // Pad start of the week (Monday is 1, Sunday is 7)
+                for (let i = 1; i < firstDate.dayOfWeek; i++) {
+                    days.push({ day: '', isCurrentMonth: false, dateStr: 'pad-start-' + i });
+                }
+                
+                // Add all dates from the cycle
+                cycleDates.forEach(function(d) {
+                    days.push({ day: d.day, isCurrentMonth: true, dateStr: d.dateStr });
+                });
+                
+                // Pad end of the week
+                for (let i = 1; i <= (7 - lastDate.dayOfWeek); i++) {
+                    days.push({ day: '', isCurrentMonth: false, dateStr: 'pad-end-' + i });
+                }
+                
+                return days;
+            },
+            formatRupiah(amount) {
+                return 'Rp ' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(amount);
+            }
+        }));
+    });
+</script>
 
