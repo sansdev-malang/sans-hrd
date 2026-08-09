@@ -450,3 +450,11 @@
     });
 </script>
 
+<style>
+    @media (min-width: 768px) {
+        .search-container {
+            max-width: 280px !important;
+        }
+    }
+</style>
+
