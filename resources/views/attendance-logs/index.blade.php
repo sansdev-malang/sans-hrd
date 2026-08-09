@@ -94,55 +94,6 @@
             </form>
         </section>
 
-        <!-- LEGEND / STATUS EXPLANATION -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <h4 class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-wider">Petunjuk Status Absensi</h4>
-            <div class="flex flex-wrap gap-3 items-center text-[10px] md:text-xs">
-                <!-- Hadir -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/40 px-2.5 py-1.5 rounded-lg">
-                    <div class="flex flex-col items-center leading-none scale-90">
-                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">07:00</span>
-                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">16:00</span>
-                    </div>
-                    <span class="font-medium text-slate-600 dark:text-slate-400">Hadir (Jam Masuk / Pulang)</span>
-                </div>
-                <!-- Alfa -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/40 px-2.5 py-1.5 rounded-lg">
-                    <div class="w-6 h-6 flex items-center justify-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded font-bold text-[10px]">A</div>
-                    <span class="font-medium text-slate-600 dark:text-slate-400">Alfa (Tanpa Keterangan)</span>
-                </div>
-                <!-- Sakit -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/40 px-2.5 py-1.5 rounded-lg">
-                    <div class="w-6 h-6 flex items-center justify-center bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30 rounded font-bold text-[10px]">S</div>
-                    <span class="font-medium text-slate-600 dark:text-slate-400">Sakit</span>
-                </div>
-                <!-- Izin -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/40 px-2.5 py-1.5 rounded-lg">
-                    <div class="w-6 h-6 flex items-center justify-center bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 rounded font-bold text-[10px]">I</div>
-                    <span class="font-medium text-slate-600 dark:text-slate-400">Izin</span>
-                </div>
-                <!-- Cuti -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/40 px-2.5 py-1.5 rounded-lg">
-                    <div class="w-6 h-6 flex items-center justify-center bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 rounded font-bold text-[10px]">C</div>
-                    <span class="font-medium text-slate-600 dark:text-slate-400">Cuti</span>
-                </div>
-                <!-- Dinas/Dispensasi -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/40 px-2.5 py-1.5 rounded-lg">
-                    <div class="w-6 h-6 flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 rounded font-bold text-[10px]">H</div>
-                    <span class="font-medium text-slate-600 dark:text-slate-400">Dinas / Tugas Luar</span>
-                </div>
-                <!-- Off -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/40 px-2.5 py-1.5 rounded-lg">
-                    <div class="w-8 h-6 flex items-center justify-center bg-slate-100 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[9px]">OFF</div>
-                    <span class="font-medium text-slate-600 dark:text-slate-400">Off (Hari Libur Kerja)</span>
-                </div>
-                <!-- Libur / Minggu -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/40 px-2.5 py-1.5 rounded-lg">
-                    <div class="w-6 h-6 flex items-center justify-center text-red-500 dark:text-red-400 font-bold text-xs">-</div>
-                    <span class="font-medium text-slate-600 dark:text-slate-400">Hari Minggu / Libur Nasional</span>
-                </div>
-            </div>
-        </section>
 
         <!-- MAIN TABLE (MATRIX LAYOUT) -->
         @php
@@ -319,6 +270,48 @@
                     </div>
                 </div>
             @endif
+        </section>
+
+        <!-- LEGEND / STATUS EXPLANATION -->
+        <div class="flex flex-wrap gap-4 items-center justify-center text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-4 px-2">
+            <span class="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">Keterangan:</span>
+            
+            <!-- Alfa -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-5 h-5 flex items-center justify-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded font-bold text-[9px]">A</div>
+                <span>Alfa (Tanpa Keterangan)</span>
+            </div>
+            <!-- Sakit -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-5 h-5 flex items-center justify-center bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30 rounded font-bold text-[9px]">S</div>
+                <span>Sakit</span>
+            </div>
+            <!-- Izin -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-5 h-5 flex items-center justify-center bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 rounded font-bold text-[9px]">I</div>
+                <span>Izin</span>
+            </div>
+            <!-- Cuti -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-5 h-5 flex items-center justify-center bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 rounded font-bold text-[9px]">C</div>
+                <span>Cuti</span>
+            </div>
+            <!-- Dinas/Dispensasi -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-5 h-5 flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 rounded font-bold text-[9px]">H</div>
+                <span>Dinas / Tugas Luar</span>
+            </div>
+            <!-- Off -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-7 h-5 flex items-center justify-center bg-slate-100 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[8px]">OFF</div>
+                <span>Off (Hari Libur Kerja)</span>
+            </div>
+            <!-- Libur / Minggu -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-5 h-5 flex items-center justify-center text-red-500 dark:text-red-400 font-bold text-xs">-</div>
+                <span>Hari Minggu / Libur Nasional</span>
+            </div>
+        </div>
         </section>
     </div>
 </x-admin-layout>
