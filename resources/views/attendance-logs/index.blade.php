@@ -125,7 +125,7 @@
                 <table class="w-full text-xs border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 left-auto md:left-0 z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 z-30 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
                                 <div class="grid grid-cols-2">
                                     <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
                                     <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap text-right">Siklus: <br><strong class="text-slate-700 dark:text-slate-300 text-xs">{{ \Carbon\Carbon::parse($startDateReq)->format('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->format('d M') }}</strong></span>
@@ -161,15 +161,18 @@
                             @endphp
                             <tr class="group hover:bg-slate-50/60 dark:hover:bg-slate-900/30 transition-colors">
                                 <!-- KOLOM 1: PROFIL -->
-                                <td class="px-4 py-2 static md:sticky md:left-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
+                                <td class="px-4 py-2 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
-                                        <div class="flex flex-col min-w-0">
+                                        @if(!empty($report['employee']['photo']))
+                                            <img src="{{ str_contains($report['employee']['photo'], 'photos/') ? rtrim($report['employee']['unit_url'], '/') . '/storage/' . $report['employee']['photo'] : rtrim($report['employee']['unit_url'], '/') . '/storage/photos/' . $report['employee']['photo'] }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
+                                        @else
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
+                                        @endif
+                                        <div class="flex flex-col min-w-0 text-left">
                                             <span class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{{ $empName }}</span>
-                                            <div class="flex items-center gap-2 mt-0.5">
-                                                <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ $report['employee']['nuptk'] ?? '-' }}</span>
-                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[80px]">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
-                                                
+                                            <div class="flex flex-col gap-0.5 mt-0.5">
+                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
+                                                <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate" title="{{ $report['employee']['position'] ?? '-' }}">{{ $report['employee']['position'] ?? '-' }}</span>
                                             </div>
                                         </div>
                                     </div>
