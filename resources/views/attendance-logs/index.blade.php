@@ -1,5 +1,80 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6">
+    <div class="p-6 space-y-6" x-data="{
+        showCalendarModal: false,
+        selectedReport: null,
+        selectedMonth: '{{ request('month', $month) }}',
+        calendarDays: [],
+        stats: { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 },
+        
+        openCalendarModal(report) {
+            this.selectedReport = report;
+            this.calendarDays = this.generateCalendar(this.selectedMonth);
+            this.stats = this.calculateStats(report);
+            this.showCalendarModal = true;
+        },
+        calculateStats(report) {
+            let stats = { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 };
+            if (!report || !report.daily_details) return stats;
+            
+            Object.values(report.daily_details).forEach(day => {
+                if (day.status === 'Hadir') {
+                    stats.hadir++;
+                    if (day.is_late) {
+                        stats.telat++;
+                    }
+                } else if (day.status === 'Alfa') {
+                    stats.alfa++;
+                } else if (day.status === 'Cuti/Izin') {
+                    stats.izin++;
+                } else if (day.status === 'Off') {
+                    stats.off++;
+                }
+            });
+            return stats;
+        },
+        generateCalendar(monthStr) {
+            const [year, month] = monthStr.split('-').map(Number);
+            const firstDay = new Date(year, month - 1, 1);
+            const lastDay = new Date(year, month, 0);
+            const daysInMonth = lastDay.getDate();
+            
+            let startDayOfWeek = firstDay.getDay(); 
+            if (startDayOfWeek === 0) startDayOfWeek = 7;
+            
+            const days = [];
+            const prevMonthLastDay = new Date(year, month - 1, 0).getDate();
+            for (let i = startDayOfWeek - 1; i > 0; i--) {
+                const d = prevMonthLastDay - i + 1;
+                const prevMonth = month === 1 ? 12 : month - 1;
+                const prevYear = month === 1 ? year - 1 : year;
+                const dateStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                days.push({ day: d, isCurrentMonth: false, dateStr });
+            }
+            
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                days.push({ day: d, isCurrentMonth: true, dateStr });
+            }
+            
+            const totalCells = 42;
+            const remaining = totalCells - days.length;
+            for (let d = 1; d <= remaining; d++) {
+                const nextMonth = month === 12 ? 1 : month + 1;
+                const nextYear = month === 12 ? year + 1 : year;
+                const dateStr = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                days.push({ day: d, isCurrentMonth: false, dateStr });
+            }
+            return days;
+        },
+        getInitials(name) {
+            if (!name) return '?';
+            const words = name.split(' ');
+            if (words.length >= 2) {
+                return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+    }">
         <!-- HEADER -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div class="flex flex-col gap-0.5">
@@ -162,13 +237,16 @@
                                 <!-- KOLOM 1: PROFIL -->
                                 <td class="px-4 py-2 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
                                     <div class="flex items-center gap-3">
-                                        @if(!empty($report['employee']['photo']))
-                                            <img src="{{ str_contains($report['employee']['photo'], 'photos/') ? rtrim($report['employee']['unit_url'], '/') . '/storage/' . $report['employee']['photo'] : rtrim($report['employee']['unit_url'], '/') . '/storage/photos/' . $report['employee']['photo'] }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
-                                        @else
-                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
-                                        @endif
+                                        <!-- Clickable Photo/Avatar -->
+                                        <div @click='openCalendarModal(@json($report))' class="cursor-pointer hover:scale-105 transform transition-all active:scale-95 duration-150 shrink-0">
+                                            @if(!empty($report['employee']['photo']))
+                                                <img src="{{ str_contains($report['employee']['photo'], 'photos/') ? rtrim($report['employee']['unit_url'], '/') . '/storage/' . $report['employee']['photo'] : rtrim($report['employee']['unit_url'], '/') . '/storage/photos/' . $report['employee']['photo'] }}" class="w-8 h-8 rounded-full object-cover border border-slate-200/50 dark:border-slate-800/40">
+                                            @else
+                                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
+                                            @endif
+                                        </div>
                                         <div class="flex flex-col min-w-0 text-left">
-                                            <span class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{{ $empName }}</span>
+                                            <span @click='openCalendarModal(@json($report))' class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ $empName }}</span>
                                             <div class="flex flex-col gap-0.5 mt-0.5">
                                                 <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
                                                 <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate" title="{{ $report['employee']['position'] ?? '-' }}">{{ $report['employee']['position'] ?? '-' }}</span>
@@ -313,6 +391,160 @@
             </div>
         </div>
         </section>
+        <!-- CALENDAR DETAIL MODAL -->
+        <div x-show="showCalendarModal" 
+             class="fixed inset-0 z-50 overflow-y-auto" 
+             style="display: none;"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+             
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showCalendarModal = false"></div>
+
+            <!-- Modal Wrapper -->
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all w-full max-w-md border border-slate-200 dark:border-slate-800"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                     
+                    <!-- Modal Header -->
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 px-5 py-3.5">
+                        <div class="flex items-center gap-3">
+                            <!-- Circular Photo / Initials in Header -->
+                            <template x-if="selectedReport && selectedReport.employee.photo">
+                                <img :src="selectedReport.employee.photo.includes('photos/') ? selectedReport.employee.unit_url + '/storage/' + selectedReport.employee.photo : selectedReport.employee.unit_url + '/storage/photos/' + selectedReport.employee.photo" 
+                                     class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
+                            </template>
+                            <template x-if="selectedReport && !selectedReport.employee.photo">
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-xs shrink-0"
+                                     style="background: #6366f1"
+                                     x-text="getInitials(selectedReport.employee.name)"></div>
+                            </template>
+                            
+                            <div class="text-left min-w-0">
+                                <h3 class="text-xs font-bold text-slate-900 dark:text-slate-50 truncate" x-text="selectedReport ? selectedReport.employee.name : ''"></h3>
+                                <p class="text-[9px] text-slate-500 dark:text-slate-400 truncate">
+                                    <span x-text="selectedReport ? selectedReport.employee.position : ''"></span>
+                                    &bull;
+                                    <span x-text="selectedReport ? (selectedReport.employee.unit.name || selectedReport.employee.unit_name) : ''" class="font-semibold text-indigo-600 dark:text-indigo-400"></span>
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" @click="showCalendarModal = false" class="rounded-lg p-1 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 transition-colors">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="p-4">
+                        <!-- Calendar Header (Month Name) -->
+                        <div class="text-center mb-3">
+                            <h4 class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">
+                                Periode Kehadiran &bull; <span x-text="selectedReport ? selectedMonth : ''" class="text-indigo-600 dark:text-indigo-400"></span>
+                            </h4>
+                        </div>
+
+                        <!-- 7 Column Days Header -->
+                        <div class="grid grid-cols-7 gap-1 text-center text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                            <div>Sen</div>
+                            <div>Sel</div>
+                            <div>Rab</div>
+                            <div>Kam</div>
+                            <div>Jum</div>
+                            <div class="text-red-400">Sab</div>
+                            <div class="text-red-500">Min</div>
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div class="grid grid-cols-7 gap-1">
+                            <template x-for="day in calendarDays" :key="day.dateStr">
+                                <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between"
+                                     :class="day.isCurrentMonth ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40'">
+                                     
+                                    <!-- Day Number -->
+                                    <span class="text-[9px] font-semibold"
+                                          :class="[
+                                              day.isCurrentMonth ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400',
+                                              (new Date(day.dateStr).getDay() === 0) ? 'text-red-500 font-bold' : ''
+                                          ]"
+                                          x-text="day.day"></span>
+                                          
+                                    <!-- Status Indicator inside day -->
+                                    <div class="mt-auto w-full">
+                                        <template x-if="selectedReport && selectedReport.daily_details[day.dateStr]">
+                                            <div class="w-full">
+                                                <!-- Present -->
+                                                <template x-if="selectedReport.daily_details[day.dateStr].status === 'Hadir'">
+                                                    <div class="flex flex-col items-center leading-none scale-[0.85] origin-bottom">
+                                                        <span class="text-[8px] font-bold" 
+                                                              :class="selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'"
+                                                              x-text="selectedReport.daily_details[day.dateStr].check_in || '-'"></span>
+                                                        <span class="text-[8px] text-slate-450 dark:text-slate-550" x-text="selectedReport.daily_details[day.dateStr].check_out || '-'"></span>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Alfa -->
+                                                <template x-if="selectedReport.daily_details[day.dateStr].status === 'Alfa'">
+                                                    <div class="w-full py-0.5 text-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded text-[7px] font-bold">A</div>
+                                                </template>
+
+                                                <!-- Off -->
+                                                <template x-if="selectedReport.daily_details[day.dateStr].status === 'Off'">
+                                                    <div class="w-full py-0.5 text-center bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-550 rounded text-[7px] font-bold">OFF</div>
+                                                </template>
+
+                                                <!-- Cuti/Izin -->
+                                                <template x-if="selectedReport.daily_details[day.dateStr].status === 'Cuti/Izin'">
+                                                    <div class="w-full py-0.5 text-center rounded text-[7px] font-bold"
+                                                         :class="[
+                                                             selectedReport.daily_details[day.dateStr].leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400' : '',
+                                                             selectedReport.daily_details[day.dateStr].leave_code === 'I' ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400' : '',
+                                                             selectedReport.daily_details[day.dateStr].leave_code === 'C' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400' : '',
+                                                             selectedReport.daily_details[day.dateStr].leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' : ''
+                                                         ]"
+                                                         :title="selectedReport.daily_details[day.dateStr].leave_type"
+                                                         x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
+                                                </template>
+
+                                                <!-- Libur -->
+                                                <template x-if="selectedReport.daily_details[day.dateStr].status === 'Libur'">
+                                                    <div class="text-center text-red-300 dark:text-red-900/30 text-[8px] font-bold">-</div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer (Stats Summary) -->
+                    <div class="border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 px-5 py-3 flex flex-row items-center justify-between gap-4">
+                        <!-- Stats Grid -->
+                        <div class="flex flex-wrap gap-2.5 text-[9px] md:text-xs">
+                            <span class="font-bold text-slate-700 dark:text-slate-350">Ringkasan:</span>
+                            <span class="text-slate-600 dark:text-slate-400">Hadir: <strong class="text-emerald-650 dark:text-emerald-405" x-text="stats.hadir"></strong></span>
+                            <span class="text-slate-600 dark:text-slate-400">Telat: <strong class="text-amber-500" x-text="stats.telat"></strong></span>
+                            <span class="text-slate-600 dark:text-slate-400">Alfa: <strong class="text-rose-500" x-text="stats.alfa"></strong></span>
+                            <span class="text-slate-600 dark:text-slate-400">Izin/Cuti: <strong class="text-purple-600 dark:text-purple-400" x-text="stats.izin"></strong></span>
+                        </div>
+                        <button type="button" @click="showCalendarModal = false" class="w-full sm:w-auto h-7 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg transition-colors cursor-pointer">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </x-admin-layout>
 
