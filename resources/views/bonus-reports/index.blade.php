@@ -23,7 +23,7 @@
 
                 <!-- EXPORT DROPDOWN -->
                 <div x-data="{ open: false }" class="relative shrink-0">
-                    <button type="button" @click="open = !open" @click.outside="open = false" class="h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-350 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
+                    <button type="button" @click="open = !open" @click.outside="open = false" class="h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
                         <i data-lucide="download" class="w-4 h-4"></i>
                         <span>Ekspor Data</span>
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
@@ -142,7 +142,7 @@
                 <table class="w-full text-xs border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 z-30 border-r border-slate-200 dark:border-slate-800 min-w-[200px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 z-30 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
                                 <div class="flex items-start justify-between gap-4">
                                     <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
                                     <span class="text-right leading-tight">
@@ -162,7 +162,7 @@
                                 $numColor = $isSunday && !$isToday ? 'text-red-500 dark:text-red-400' : ($isToday ? 'text-white' : 'text-slate-700 dark:text-slate-200');
                                 $bgToday = $isToday ? 'bg-indigo-600 dark:bg-indigo-500 w-6 h-6 flex items-center justify-center rounded-full' : '';
                             @endphp
-                            <th class="py-2 px-1 text-center sticky top-0 z-30 min-w-[48px] max-w-[48px] border-r border-slate-100 dark:border-slate-800/60 {{ $isSunday ? 'bg-red-50 dark:bg-red-950' : 'bg-slate-50 dark:bg-slate-900' }}">
+                            <th class="py-2 px-1 text-center sticky top-0 z-30 min-w-[32px] border-r border-slate-100 dark:border-slate-800/60 {{ $isSunday ? 'bg-red-50 dark:bg-red-950' : 'bg-slate-50 dark:bg-slate-900' }}">
                                 <div class="flex flex-col items-center gap-0.5 py-0.5">
                                     <span class="text-[9px] font-semibold {{ $dayColor }} uppercase tracking-wider">{{ $date->translatedFormat('D') }}</span>
                                     <span class="text-[11px] font-bold {{ $numColor }} {{ $bgToday }}">{{ $date->format('d') }}</span>
@@ -222,7 +222,7 @@
                                                 $shortNominal = ($nominal >= 1000) ? ($nominal / 1000) . 'k' : $nominal;
                                                 $titleText = (isset($detail['status']) && $detail['status'] === 'Dinas') ? 'Dinas: Rp ' . number_format($nominal, 0, ',', '.') : 'Rp ' . number_format($nominal, 0, ',', '.');
                                             @endphp
-                                            <div class="mx-auto w-9 h-6 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] rounded shadow-sm border border-emerald-200 dark:border-emerald-800/50" title="{{ $titleText }}">
+                                            <div class="mx-auto w-7 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] rounded border border-emerald-200 dark:border-emerald-800/50" title="{{ $titleText }}">
                                                 {{ $shortNominal }}
                                             </div>
                                         @else
@@ -372,7 +372,7 @@
                     <!-- Modal Footer -->
                     <div class="border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 px-5 py-3 flex flex-row items-center justify-between gap-4">
                         <div class="flex flex-wrap gap-2.5 text-[9px] md:text-xs">
-                            <span class="font-bold text-slate-700 dark:text-slate-350">Ringkasan:</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300">Ringkasan:</span>
                             <span class="text-slate-600 dark:text-slate-400">Total: <strong class="text-emerald-650 dark:text-emerald-400" x-text="formatRupiah(stats.totalBonus)"></strong></span>
                             <span class="text-slate-600 dark:text-slate-400">Dapat Bonus: <strong class="text-indigo-650 dark:text-indigo-400 font-bold" x-text="stats.bonusDays + ' Hari'"></strong></span>
                         </div>
