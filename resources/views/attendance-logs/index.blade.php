@@ -1,14 +1,32 @@
+@php
+    $start = \Carbon\Carbon::parse($startDateReq);
+    $end = \Carbon\Carbon::parse($endDateReq);
+    $dates = [];
+    $cycleDateData = [];
+    while($start <= $end) {
+        $dates[] = $start->copy();
+        $cycleDateData[] = [
+            'dateStr' => $start->format('Y-m-d'),
+            'day' => (int)$start->format('d'),
+            'dayOfWeek' => (int)$start->format('N'),
+        ];
+        $start->addDay();
+    }
+@endphp
+
 <x-admin-layout>
     <div class="p-6 space-y-6" x-data="{
         showCalendarModal: false,
         selectedReport: null,
-        selectedMonth: '{{ request('month', $month) }}',
+        startDateStr: '{{ \Carbon\Carbon::parse($startDateReq)->translatedFormat('d M Y') }}',
+        endDateStr: '{{ \Carbon\Carbon::parse($endDateReq)->translatedFormat('d M Y') }}',
+        cycleDates: @json($cycleDateData),
         calendarDays: [],
         stats: { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 },
         
         openCalendarModal(report) {
             this.selectedReport = report;
-            this.calendarDays = this.generateCalendar(this.selectedMonth);
+            this.calendarDays = this.buildCutOffCalendar(this.cycleDates);
             this.stats = this.calculateStats(report);
             this.showCalendarModal = true;
         },
@@ -32,38 +50,28 @@
             });
             return stats;
         },
-        generateCalendar(monthStr) {
-            const [year, month] = monthStr.split('-').map(Number);
-            const firstDay = new Date(year, month - 1, 1);
-            const lastDay = new Date(year, month, 0);
-            const daysInMonth = lastDay.getDate();
-            
-            let startDayOfWeek = firstDay.getDay(); 
-            if (startDayOfWeek === 0) startDayOfWeek = 7;
+        buildCutOffCalendar(cycleDates) {
+            if (!cycleDates || cycleDates.length === 0) return [];
             
             const days = [];
-            const prevMonthLastDay = new Date(year, month - 1, 0).getDate();
-            for (let i = startDayOfWeek - 1; i > 0; i--) {
-                const d = prevMonthLastDay - i + 1;
-                const prevMonth = month === 1 ? 12 : month - 1;
-                const prevYear = month === 1 ? year - 1 : year;
-                const dateStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                days.push({ day: d, isCurrentMonth: false, dateStr });
+            const firstDate = cycleDates[0];
+            const lastDate = cycleDates[cycleDates.length - 1];
+            
+            // Pad start of the week (Monday is 1, Sunday is 7)
+            for (let i = 1; i < firstDate.dayOfWeek; i++) {
+                days.push({ day: '', isCurrentMonth: false, dateStr: 'pad-start-' + i });
             }
             
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                days.push({ day: d, isCurrentMonth: true, dateStr });
+            // Add all dates from the cycle
+            cycleDates.forEach(d => {
+                days.push({ day: d.day, isCurrentMonth: true, dateStr: d.dateStr });
+            });
+            
+            // Pad end of the week
+            for (let i = 1; i <= (7 - lastDate.dayOfWeek); i++) {
+                days.push({ day: '', isCurrentMonth: false, dateStr: 'pad-end-' + i });
             }
             
-            const totalCells = 42;
-            const remaining = totalCells - days.length;
-            for (let d = 1; d <= remaining; d++) {
-                const nextMonth = month === 12 ? 1 : month + 1;
-                const nextYear = month === 12 ? year + 1 : year;
-                const dateStr = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                days.push({ day: d, isCurrentMonth: false, dateStr });
-            }
             return days;
         },
         getInitials(name) {
@@ -172,14 +180,6 @@
 
         <!-- MAIN TABLE (MATRIX LAYOUT) -->
         @php
-            $start = \Carbon\Carbon::parse($startDateReq);
-            $end = \Carbon\Carbon::parse($endDateReq);
-            $dates = [];
-            while($start <= $end) {
-                $dates[] = $start->copy();
-                $start->addDay();
-            }
-            
             if (!function_exists('getInitials')) {
                 function getInitials($name) {
                     if (empty($name)) return '?';
@@ -450,7 +450,7 @@
                         <!-- Calendar Header (Month Name) -->
                         <div class="text-center mb-3">
                             <h4 class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">
-                                Periode Kehadiran &bull; <span x-text="selectedReport ? selectedMonth : ''" class="text-indigo-600 dark:text-indigo-400"></span>
+                                Periode Kehadiran &bull; <span x-text="startDateStr" class="text-indigo-650 dark:text-indigo-405"></span> - <span x-text="endDateStr" class="text-indigo-650 dark:text-indigo-405"></span>
                             </h4>
                         </div>
 
