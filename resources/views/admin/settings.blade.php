@@ -9,8 +9,7 @@
             </div>
         </section>
 
-        <!-- FORM SETTINGS -->
-        <form action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form id="settingsForm" action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
             @method('PUT')
 
@@ -154,11 +153,10 @@
 
             <!-- ADMS SETTINGS GROUP MOVED TO INTEGRASI API UNIT -->
 
-            <!-- ACTIONS BUTTONS -->
             <div class="flex justify-end items-center gap-3">
-                <a href="{{ route('dashboard') }}" class="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 text-xs font-bold rounded-lg cursor-pointer transition-colors">
+                <button type="reset" class="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 text-xs font-bold rounded-lg cursor-pointer transition-colors">
                     Batalkan
-                </a>
+                </button>
                 <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-bold rounded-lg cursor-pointer transition-colors flex items-center gap-2">
                     <i data-lucide="save" class="w-4 h-4"></i> Simpan Perubahan
                 </button>
@@ -188,5 +186,41 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        document.getElementById('settingsForm').addEventListener('reset', function() {
+            // Restore original logo preview
+            const logoPreview = document.getElementById('logo-preview');
+            const logoPlaceholder = document.getElementById('logo-placeholder');
+            const originalLogo = '{{ setting('app_logo') ? asset('storage/' . setting('app_logo')) : '' }}';
+            
+            if (logoPreview) {
+                if (originalLogo) {
+                    logoPreview.src = originalLogo;
+                    logoPreview.classList.remove('hidden');
+                    if (logoPlaceholder) logoPlaceholder.classList.add('hidden');
+                } else {
+                    logoPreview.src = '';
+                    logoPreview.classList.add('hidden');
+                    if (logoPlaceholder) logoPlaceholder.classList.remove('hidden');
+                }
+            }
+
+            // Restore original favicon preview
+            const faviconPreview = document.getElementById('favicon-preview');
+            const faviconPlaceholder = document.getElementById('favicon-placeholder');
+            const originalFavicon = '{{ setting('app_favicon') ? asset('storage/' . setting('app_favicon')) : '' }}';
+            
+            if (faviconPreview) {
+                if (originalFavicon) {
+                    faviconPreview.src = originalFavicon;
+                    faviconPreview.classList.remove('hidden');
+                    if (faviconPlaceholder) faviconPlaceholder.classList.add('hidden');
+                } else {
+                    faviconPreview.src = '';
+                    faviconPreview.classList.add('hidden');
+                    if (faviconPlaceholder) faviconPlaceholder.classList.remove('hidden');
+                }
+            }
+        });
     </script>
 </x-admin-layout>
