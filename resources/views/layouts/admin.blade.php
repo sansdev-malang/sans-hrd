@@ -178,6 +178,9 @@
             </div>
         </div>
 
+        <!-- Tailwind CSS Safelist helper for dynamic classes in showSessionToast -->
+        <div class="hidden bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 bg-rose-100 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400"></div>
+
         <!-- Anime.js CDN -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js" referrerpolicy="no-referrer"></script>
 
@@ -189,8 +192,8 @@
                 lucide.createIcons();
             }
 
-            // Global Toast helper function
-            function showToast(title, message, type = 'success') {
+            // Global Session Toast helper function
+            function showSessionToast(title, message, type = 'success') {
                 const toast = document.getElementById('toast-notification');
                 const titleEl = document.getElementById('toast-title');
                 const messageEl = document.getElementById('toast-message');
@@ -248,14 +251,14 @@
         @if(session('success'))
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
-                    showToast('Sukses!', "{{ session('success') }}", 'success');
+                    showSessionToast('Sukses!', "{{ session('success') }}", 'success');
                 });
             </script>
         @endif
         @if(session('error'))
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
-                    showToast('Perhatian!', "{{ session('error') }}", 'error');
+                    showSessionToast('Perhatian!', "{{ session('error') }}", 'error');
                 });
             </script>
         @endif
