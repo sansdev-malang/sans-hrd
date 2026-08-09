@@ -77,21 +77,6 @@
         },
     
         init() {
-            this.$watch('showModal', value => {
-                if (value) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
-            });
-            this.$watch('showAssignmentModal', value => { document.body.style.overflow = value ? 'hidden' : ''; });
-            this.$watch('showCreateModal', value => {
-                if (value) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
-            });
             this.$watch('selectAllEmp', value => {
                 if (value) {
                     this.selectedEmps = this.empList.map(e => e.id);
