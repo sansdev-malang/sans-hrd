@@ -158,13 +158,13 @@
                                     </div>
                                 </td>
                                 <td class="px-3 md:px-6 py-3 md:py-4">
-                                    @if(str_contains(strtolower($emp['unit_name']), 'paud'))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border border-teal-200/50 dark:border-teal-800/40 uppercase">PAUD & TK</span>
-                                    @elseif(str_contains(strtolower($emp['unit_name']), 'sd'))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/40 uppercase">SD</span>
-                                    @elseif(str_contains(strtolower($emp['unit_name']), 'smp'))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/40 uppercase">SMP</span>
-                                    @else
+                                     @if(str_contains(strtolower($emp['unit_name']), 'paud'))
+                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border border-teal-200/50 dark:border-teal-800/40 uppercase">{{ $emp['unit_name'] }}</span>
+                                     @elseif(str_contains(strtolower($emp['unit_name']), 'sd'))
+                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/40 uppercase">{{ $emp['unit_name'] }}</span>
+                                     @elseif(str_contains(strtolower($emp['unit_name']), 'smp'))
+                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/40 uppercase">{{ $emp['unit_name'] }}</span>
+                                     @else
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 uppercase tracking-wider">{{ $emp['unit_name'] }}</span>
                                     @endif
                                 </td>
