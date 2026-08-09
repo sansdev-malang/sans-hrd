@@ -24,14 +24,41 @@ class PayslipController extends Controller
     {
         $month = $request->query('month', date('Y-m'));
         $unitId = $request->query('unit_id');
+        $position = $request->query('position');
+        $search = $request->query('search');
 
         // Fetch all employees from units
-        $allEmployees = $this->schoolUnitService->getSdEmployees(); // The method gets all active units' employees
+        $allEmployees = $this->schoolUnitService->getSdEmployees(); 
         
+        // Extract unique positions (jabatan)
+        $positions = collect($allEmployees)
+            ->map(function ($emp) {
+                return $emp['position'] ?? $emp['subject_position'] ?? null;
+            })
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
         $employeesCollection = collect($allEmployees);
 
         if ($unitId) {
-            $employeesCollection = $employeesCollection->where('unit_id', (int)$unitId);
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
+                return ($emp['unit_id'] ?? '') == $unitId;
+            });
+        }
+
+        if ($position) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                return ($emp['position'] ?? $emp['subject_position'] ?? '') === $position;
+            });
+        }
+
+        if (!empty($search)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($search) {
+                return str_contains(strtolower($emp['name'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['nuptk_nip_nik'] ?? ''), strtolower($search));
+            });
         }
 
         // Fetch uploaded payslips for the given month
@@ -40,15 +67,29 @@ class PayslipController extends Controller
         });
 
         // Combine
-        $employees = $employeesCollection->map(function ($emp) use ($payslips) {
+        $employeesList = $employeesCollection->map(function ($emp) use ($payslips) {
             $key = $emp['unit_id'] . '-' . $emp['id'];
             $emp['payslip'] = $payslips->get($key);
             return $emp;
-        })->sortBy('name');
+        })->sortBy('name')->values()->toArray();
+
+        // Paginate
+        $total = count($employeesList);
+        $perPageReq = $request->query('per_page', 50);
+        $perPage = $perPageReq === 'all' ? ($total > 0 ? $total : 1) : (int) $perPageReq;
+        
+        $page = $request->query('page', 1);
+        $paginatedEmployees = new \Illuminate\Pagination\LengthAwarePaginator(
+            array_slice($employeesList, ($page - 1) * $perPage, $perPage),
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         $units = SchoolUnit::where('is_active', true)->get();
 
-        return view('payslips.index', compact('employees', 'units', 'month', 'unitId'));
+        return view('payslips.index', compact('paginatedEmployees', 'units', 'month', 'unitId', 'positions', 'position'));
     }
 
     public function store(Request $request)
