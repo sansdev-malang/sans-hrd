@@ -1,5 +1,8 @@
 <x-admin-layout>
     <div class="p-6 space-y-6" x-data="{ 
+        showAddModal: false,
+        showEditModal: false,
+        showDeleteModal: false,
         editId: null,
         editName: '',
         editCode: '',
@@ -43,11 +46,11 @@
                 }
             });
             
-            toggleModal('edit-shift-modal');
+            this.showEditModal = true;
         },
         confirmDelete(shift) {
             this.deleteShift = shift;
-            toggleModal('delete-shift-modal');
+            this.showDeleteModal = true;
         },
         resetAdd() {
             this.days = [
@@ -59,7 +62,7 @@
                 { name: 'Jumat', start_time: '07:00', end_time: '15:30', is_off: false },
                 { name: 'Sabtu', start_time: '07:30', end_time: '12:00', is_off: false }
             ];
-            toggleModal('add-shift-modal');
+            this.showAddModal = true;
         }
     }">
 
@@ -70,11 +73,11 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Atur template jam kerja masuk dan pulang bagi guru dan karyawan (shift maupun non-shift) secara terpusat.</p>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('working-shifts.sync') }}" class="h-9 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-2 cursor-pointer">
+                <a href="{{ route('working-shifts.sync') }}" class="h-9 px-4 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg shadow-2xs hover:shadow-xs border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-2 cursor-pointer">
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     Sync Ulang ke Unit
                 </a>
-                <button @click="resetAdd()" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
+                <button @click="resetAdd()" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     Tambah Shift Baru
                 </button>
@@ -99,7 +102,7 @@
         <!-- CARDS GRID -->
         <section class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 text-left">
             @forelse($shifts as $shift)
-                <div class="bg-white dark:bg-slate-900 border-t-4 {{ $shift->is_shift ? 'border-t-indigo-600 dark:border-t-indigo-500' : 'border-t-slate-450 dark:border-t-slate-600' }} border-x border-b border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+                <div class="bg-white dark:bg-slate-900 border-t-4 {{ $shift->is_shift ? 'border-t-indigo-650 dark:border-t-indigo-500' : 'border-t-slate-450 dark:border-t-slate-600' }} border-x border-b border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
                     <div class="space-y-4">
                         <div class="flex justify-between items-start">
                             <div>
@@ -109,7 +112,7 @@
                             @if($shift->is_shift)
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30 uppercase">Shift</span>
                             @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-900 text-slate-750 dark:text-slate-300 border border-slate-200/50 dark:border-slate-800 uppercase">Non-Shift</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-900 text-slate-755 dark:text-slate-300 border border-slate-200/50 dark:border-slate-800 uppercase">Non-Shift</span>
                             @endif
                         </div>
 
@@ -134,7 +137,7 @@
                                         {{ implode(', ', $days) }}
                                     </span>
                                     @if($timeKey === 'Libur')
-                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border border-rose-100/30 dark:border-rose-900/30 uppercase">Libur</span>
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 dark:bg-rose-955/30 text-rose-700 dark:text-rose-400 border border-rose-100/30 dark:border-rose-900/30 uppercase">Libur</span>
                                     @else
                                         <span class="font-mono text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-800/40 px-2 py-0.5 rounded-lg whitespace-nowrap">
                                             {{ $timeKey }}
@@ -146,11 +149,11 @@
                     </div>
 
                     <div class="flex gap-2.5 mt-5 border-t border-slate-50 dark:border-slate-900/60 pt-4 justify-end">
-                        <button @click="openEdit({{ json_encode($shift) }})" class="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer flex items-center gap-1.5">
+                        <button @click="openEdit({{ json_encode($shift) }})" class="h-8 px-3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1.5">
                             <i data-lucide="edit" class="w-3.5 h-3.5"></i>
                             Edit Shift
                         </button>
-                        <button type="button" @click="confirmDelete({{ json_encode($shift) }})" class="h-8 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer flex items-center gap-1.5">
+                        <button type="button" @click="confirmDelete({{ json_encode($shift) }})" class="h-8 px-3 bg-rose-50/50 hover:bg-rose-100/60 text-rose-700 dark:bg-rose-955/20 dark:hover:bg-rose-900/30 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100 dark:border-rose-900/30 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1.5">
                             <i data-lucide="trash" class="w-3.5 h-3.5"></i>
                             Hapus
                         </button>
@@ -164,40 +167,32 @@
             @endforelse
         </section>
 
-        <script>
-            function toggleModal(modalId) {
-                const modal = document.getElementById(modalId);
-                if (!modal) return;
-                const content = modal.firstElementChild;
-                if (modal.classList.contains('hidden')) {
-                    modal.classList.remove('hidden');
-                    setTimeout(() => {
-                        modal.style.opacity = '1';
-                        content.style.opacity = '1';
-                        content.style.transform = 'scale(1)';
-                    }, 50);
-                } else {
-                    content.style.opacity = '0';
-                    content.style.transform = 'scale(0.95)';
-                    modal.style.opacity = '0';
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                    }, 200);
-                }
-            }
-        </script>
-
         <!-- ADD MODAL -->
         <template x-teleport="body">
-            <div id="add-shift-modal" onclick="if(event.target === this) toggleModal('add-shift-modal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity text-left" style="z-index: 9999;">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden text-left transform transition-all scale-95 opacity-0 duration-200 text-xs">
+            <div x-show="showAddModal" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @keydown.escape.window="showAddModal = false"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="z-index: 9999; display: none;">
+                <div @click.outside="showAddModal = false"
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden text-left text-xs">
                     <!-- Header -->
                     <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 shrink-0">
                         <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-650 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
                             <span>Tambah Template Shift Baru</span>
                         </h3>
-                        <button type="button" onclick="toggleModal('add-shift-modal')" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-transparent border-0 cursor-pointer flex items-center justify-center">
+                        <button type="button" @click="showAddModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-transparent border-0 cursor-pointer flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                         </button>
                     </div>
@@ -252,6 +247,8 @@
                                             
                                             <!-- Off status toggle -->
                                             <div class="col-span-3 flex items-center mt-0.5 sm:mt-0">
+                                                <!-- Hidden input to guarantee value submits when unchecked -->
+                                                <input type="hidden" :name="`days[${index}][is_off]`" value="0">
                                                 <input type="checkbox" :name="`days[${index}][is_off]`" value="1" x-model="day.is_off" class="rounded border-slate-300 dark:border-slate-700 text-rose-500 w-4.5 h-4.5 focus:ring-rose-400 focus:ring-offset-0 cursor-pointer">
                                                 <span class="ml-2 text-rose-600 dark:text-rose-400 font-semibold uppercase text-[9px] tracking-wider cursor-pointer" @click="day.is_off = !day.is_off">Libur</span>
                                             </div>
@@ -274,10 +271,10 @@
                         </div>
  
                         <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex gap-2.5 justify-end bg-slate-50 dark:bg-slate-900/40 shrink-0">
-                            <button type="button" onclick="toggleModal('add-shift-modal')" class="h-9 px-4 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer">
+                            <button type="button" @click="showAddModal = false" class="h-9 px-4 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-lg cursor-pointer transition-colors shadow-2xs hover:shadow-xs">
                                 Batal
                             </button>
-                            <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer">
+                            <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-lg shadow-sm transition-all cursor-pointer">
                                 Simpan Shift
                             </button>
                         </div>
@@ -288,15 +285,30 @@
  
         <!-- EDIT MODAL -->
         <template x-teleport="body">
-            <div id="edit-shift-modal" onclick="if(event.target === this) toggleModal('edit-shift-modal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity text-left" style="z-index: 9999;">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden text-left transform transition-all scale-95 opacity-0 duration-200 text-xs">
+            <div x-show="showEditModal" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @keydown.escape.window="showEditModal = false"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="z-index: 9999; display: none;">
+                <div @click.outside="showEditModal = false"
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden text-left text-xs">
                     <!-- Header -->
                     <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 shrink-0">
                         <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-650 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
                             <span>Edit Template Shift</span>
                         </h3>
-                        <button type="button" onclick="toggleModal('edit-shift-modal')" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-transparent border-0 cursor-pointer flex items-center justify-center">
+                        <button type="button" @click="showEditModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-transparent border-0 cursor-pointer flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                         </button>
                     </div>
@@ -376,10 +388,10 @@
                         </div>
  
                         <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex gap-2.5 justify-end bg-slate-50 dark:bg-slate-900/40 shrink-0">
-                            <button type="button" onclick="toggleModal('edit-shift-modal')" class="h-9 px-4 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer">
+                            <button type="button" @click="showEditModal = false" class="h-9 px-4 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-lg cursor-pointer transition-colors shadow-2xs hover:shadow-xs">
                                 Batal
                             </button>
-                            <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer">
+                            <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-lg shadow-sm transition-all cursor-pointer">
                                 Simpan Perubahan
                             </button>
                         </div>
@@ -387,11 +399,26 @@
                 </div>
             </div>
         </template>
-
+ 
         <!-- DELETE MODAL -->
         <template x-teleport="body">
-            <div id="delete-shift-modal" onclick="if(event.target === this) toggleModal('delete-shift-modal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm hidden transition-opacity text-left">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-sm w-full overflow-hidden transform transition-all scale-95 opacity-0 duration-200 text-xs">
+            <div x-show="showDeleteModal" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @keydown.escape.window="showDeleteModal = false"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="z-index: 9999; display: none;">
+                <div @click.outside="showDeleteModal = false"
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-sm w-full overflow-hidden text-xs">
                     <div class="p-6 text-center">
                         <div class="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center mx-auto mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -402,7 +429,7 @@
                         </p>
                         
                         <div class="flex justify-center gap-3">
-                            <button type="button" onclick="toggleModal('delete-shift-modal')" class="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-xl cursor-pointer transition-colors shadow-sm">
+                            <button type="button" @click="showDeleteModal = false" class="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-xl cursor-pointer transition-colors shadow-2xs hover:shadow-xs">
                                 Batal
                             </button>
                             <form id="delete-shift-form" method="POST" :action="deleteShift ? `{{ url('working-shifts') }}/${deleteShift.id}` : ''" class="flex-1">
