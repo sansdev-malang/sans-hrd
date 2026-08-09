@@ -169,7 +169,8 @@
         <!-- TOAST NOTIFICATION CONTAINER -->
         <div id="toast-notification" class="fixed bottom-5 right-5 z-50 hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 px-4 py-3 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 flex items-center gap-3 max-w-sm">
             <div id="toast-icon-bg" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
-                <i id="toast-icon" data-lucide="check" class="w-4 h-4"></i>
+                <svg id="toast-icon-success" class="w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <svg id="toast-icon-error" class="w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
             <div class="text-left">
                 <h5 id="toast-title" class="text-xs font-bold">Notifikasi</h5>
@@ -184,7 +185,9 @@
         <script src="https://unpkg.com/lucide@latest"></script>
         <script>
             // Initialize Lucide Icons
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
 
             // Global Toast helper function
             function showToast(title, message, type = 'success') {
@@ -192,7 +195,8 @@
                 const titleEl = document.getElementById('toast-title');
                 const messageEl = document.getElementById('toast-message');
                 const iconBg = document.getElementById('toast-icon-bg');
-                const icon = document.getElementById('toast-icon');
+                const successIcon = document.getElementById('toast-icon-success');
+                const errorIcon = document.getElementById('toast-icon-error');
                 
                 if (!toast) return;
 
@@ -201,14 +205,12 @@
 
                 if (type === 'success') {
                     iconBg.className = 'w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0';
-                    icon.setAttribute('data-lucide', 'check');
+                    successIcon.classList.remove('hidden');
+                    errorIcon.classList.add('hidden');
                 } else {
                     iconBg.className = 'w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0';
-                    icon.setAttribute('data-lucide', 'alert-circle');
-                }
-
-                if (window.lucide) {
-                    window.lucide.createIcons();
+                    errorIcon.classList.remove('hidden');
+                    successIcon.classList.add('hidden');
                 }
 
                 toast.classList.remove('hidden');
@@ -522,8 +524,8 @@
                     const input = e.target;
                     if (!input.closest('form')) return;
                     
-                    // Check if it's a select or a month input that triggers submit
-                    const isAutoSubmit = input.tagName === 'SELECT' || (input.tagName === 'INPUT' && input.getAttribute('type') === 'month');
+                    // Only trigger loader if the element actually has an onchange handler that submits the form
+                    const isAutoSubmit = input.hasAttribute('onchange') && input.getAttribute('onchange').includes('submit');
                     if (isAutoSubmit && input.closest('form').getAttribute('target') !== '_blank') {
                         loader.classList.remove('hidden');
                     }

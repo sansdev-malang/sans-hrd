@@ -189,39 +189,4 @@
             }
         }
     </script>
-
-    <!-- TOAST NOTIFICATION SCRIPT -->
-    @if(session('success'))
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const toast = document.getElementById('toast-notification');
-                if (toast) {
-                    const toastText = toast.querySelector('p');
-                    if (toastText) {
-                        toastText.textContent = "{{ session('success') }}";
-                    }
-                    
-                    // Show notification with anim
-                    toast.classList.remove('hidden');
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateY(20px)';
-                    
-                    setTimeout(() => {
-                        toast.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-                        toast.style.opacity = '1';
-                        toast.style.transform = 'translateY(0)';
-                    }, 50);
-
-                    // Auto hide
-                    setTimeout(() => {
-                        toast.style.opacity = '0';
-                        toast.style.transform = 'translateY(20px)';
-                        setTimeout(() => {
-                            toast.classList.add('hidden');
-                        }, 300);
-                    }, 5000);
-                }
-            });
-        </script>
-    @endif
 </x-admin-layout>
