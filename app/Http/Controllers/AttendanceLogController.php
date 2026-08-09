@@ -160,16 +160,6 @@ class AttendanceLogController extends Controller
                         }
                     }
                 }
-                if ($isOnLeave) {
-                    $dailyDetails[$dateStr] = [
-                        'status' => 'Cuti/Izin', 
-                        'leave_code' => $leaveCode, 
-                        'leave_type' => $originalType
-                    ];
-                    $currentDate->addDay();
-                    continue;
-                }
-
                 $hasShiftToday = false;
                 $isOffShift = false;
                 $shiftStartTime = null;
@@ -177,6 +167,8 @@ class AttendanceLogController extends Controller
                 $shiftKey = $unit . '_' . $empId;
                 
                 $isShiftWorker = false;
+                $checkInLog = null;
+                $checkOutLog = null;
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
@@ -248,9 +240,9 @@ class AttendanceLogController extends Controller
                             $diffIn = \Carbon\Carbon::parse($checkInLog)->diffInMinutes($expectedIn);
                             $diffOut = \Carbon\Carbon::parse($checkOutLog)->diffInMinutes($expectedOut);
                             if ($diffIn < $diffOut) {
-                                $checkOutLog = null; 
+                                $checkOutLog = null;
                             } else {
-                                $checkInLog = null; 
+                                $checkInLog = null;
                             }
                         }
 
@@ -289,6 +281,16 @@ class AttendanceLogController extends Controller
                     if ($dayOfWeek == 0) { // Sunday
                         $dailyDetails[$dateStr] = ['status' => 'Libur'];
                     }
+                }
+
+                if ($isOnLeave) {
+                    $dailyDetails[$dateStr] = [
+                        'status' => 'Cuti/Izin',
+                        'leave_code' => $leaveCode,
+                        'leave_type' => $originalType,
+                        'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
+                        'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
+                    ];
                 }
 
                 $currentDate->addDay();

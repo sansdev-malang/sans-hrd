@@ -221,7 +221,16 @@
                                                 ];
                                                 $colorClass = $colorMap[$leaveCode] ?? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
                                             @endphp
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center rounded font-bold text-[10px] {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</div>
+                                            @if(!empty($detail['check_in']))
+                                                <div class="flex flex-col gap-0.5 items-center justify-center">
+                                                    <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}" title="Masuk">{{ $detail['check_in'] }}</span>
+                                                    <div class="w-full flex justify-center scale-90">
+                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</span>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center rounded font-bold text-[10px] {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</div>
+                                            @endif
                                         @else
                                             <div class="text-xs text-slate-300">-</div>
                                         @endif
@@ -440,15 +449,21 @@
 
                                                 <!-- Cuti/Izin -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Cuti/Izin'">
-                                                    <div class="w-full py-0.5 text-center rounded text-[7px] font-bold"
-                                                         :class="[
-                                                             selectedReport.daily_details[day.dateStr].leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400' : '',
-                                                             selectedReport.daily_details[day.dateStr].leave_code === 'I' ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400' : '',
-                                                             selectedReport.daily_details[day.dateStr].leave_code === 'C' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400' : '',
-                                                             selectedReport.daily_details[day.dateStr].leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' : ''
-                                                         ]"
-                                                         :title="selectedReport.daily_details[day.dateStr].leave_type"
-                                                         x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
+                                                    <div class="flex flex-col items-center gap-0.5 w-full">
+                                                        <template x-if="selectedReport.daily_details[day.dateStr].check_in">
+                                                            <span class="text-[8px] font-bold text-emerald-600 dark:text-emerald-400 scale-[0.85] leading-none" 
+                                                                  x-text="selectedReport.daily_details[day.dateStr].check_in"></span>
+                                                        </template>
+                                                        <div class="w-full py-0.5 text-center rounded text-[7px] font-bold"
+                                                             :class="[
+                                                                 selectedReport.daily_details[day.dateStr].leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400' : '',
+                                                                 selectedReport.daily_details[day.dateStr].leave_code === 'I' ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400' : '',
+                                                                 selectedReport.daily_details[day.dateStr].leave_code === 'C' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400' : '',
+                                                                 selectedReport.daily_details[day.dateStr].leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' : ''
+                                                             ]"
+                                                             :title="selectedReport.daily_details[day.dateStr].leave_type"
+                                                             x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
+                                                    </div>
                                                 </template>
 
                                                 <!-- Libur -->
