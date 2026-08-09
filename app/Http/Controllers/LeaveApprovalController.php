@@ -20,6 +20,9 @@ class LeaveApprovalController extends Controller
             $readIds = session('read_leave_ids_' . auth()->id(), []);
             $newReadIds = array_unique(array_merge($readIds, $recentIds));
             session(['read_leave_ids_' . auth()->id() => $newReadIds]);
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true]);
+            }
             return redirect()->route('leave-approvals.index');
         }
 

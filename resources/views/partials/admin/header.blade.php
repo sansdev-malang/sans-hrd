@@ -27,16 +27,44 @@
         </button>
 
         <!-- Notification container with Alpine dropdown -->
-        <div class="relative" x-data="{ open: false }">
+        <div class="relative" x-data="{ 
+            open: false, 
+            pendingCount: {{ $pendingLeavesCount ?? 0 }},
+            clearAllNotifications() {
+                fetch('{{ route('leave-approvals.index', ['clear_all' => 1]) }}', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        this.pendingCount = 0;
+                        const listContainer = this.$refs.notificationList;
+                        if (listContainer) {
+                            listContainer.innerHTML = `
+                                <div class='p-6 text-center text-slate-400'>
+                                    <i data-lucide='bell-off' class='w-6 h-6 mx-auto mb-1 text-slate-300 dark:text-slate-750'></i>
+                                    <p class='text-[10px]'>Tidak ada izin baru baru-baru ini.</p>
+                                </div>
+                            `;
+                            if (window.lucide) {
+                                window.lucide.createIcons();
+                            }
+                        }
+                    }
+                })
+                .catch(err => console.error(err));
+            }
+        }">
             <button @click="open = !open" id="notify-btn"
                 class="relative p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-205 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md cursor-pointer transition-colors"
                 title="Notifikasi">
                 <i data-lucide="bell" class="w-4 h-4"></i>
                 
                 <!-- Display badge if there are notifications -->
-                @if(isset($pendingLeavesCount) && $pendingLeavesCount > 0)
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-rose-600 dark:bg-rose-400 rounded-full ring-2 ring-white dark:ring-[#09090b]"></span>
-                @endif
+                <span x-show="pendingCount > 0" style="display: none;" class="absolute top-1 right-1 w-2 h-2 bg-rose-600 dark:bg-rose-400 rounded-full ring-2 ring-white dark:ring-[#09090b]"></span>
             </button>
             
             <!-- Dropdown Menu -->
@@ -52,14 +80,12 @@
                 
                 <div class="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/20">
                     <span class="font-bold text-slate-900 dark:text-slate-100">Notifikasi</span>
-                    @if(isset($pendingLeavesCount) && $pendingLeavesCount > 0)
-                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/40">
-                            {{ $pendingLeavesCount }} Baru
-                        </span>
-                    @endif
+                    <template x-if="pendingCount > 0">
+                        <span x-text="pendingCount + ' Baru'" class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/40"></span>
+                    </template>
                 </div>
                 
-                <div class="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+                <div x-ref="notificationList" class="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                     @if(isset($pendingLeaves) && count($pendingLeaves) > 0)
                         @foreach($pendingLeaves as $item)
                             <a href="{{ route('leave-approvals.index', ['read_id' => $item->id]) }}" class="flex items-start gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
@@ -79,13 +105,11 @@
                         </div>
                     @endif
                 </div>
-                @if(isset($pendingLeavesCount) && $pendingLeavesCount > 0)
-                    <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-800 text-center bg-slate-50/30 dark:bg-slate-900/10">
-                        <a href="{{ route('leave-approvals.index', ['clear_all' => 1]) }}" class="text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold hover:underline">
-                            Tandai Semua Sudah Dibaca
-                        </a>
-                    </div>
-                @endif
+                <div x-show="pendingCount > 0" style="display: none;" class="px-4 py-2 border-t border-slate-100 dark:border-slate-800 text-center bg-slate-50/30 dark:bg-slate-900/10">
+                    <button type="button" @click="clearAllNotifications()" class="text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold hover:underline cursor-pointer bg-transparent border-0">
+                        Tandai Semua Sudah Dibaca
+                    </button>
+                </div>
             </div>
         </div>
     </div>
