@@ -34,7 +34,7 @@
             let stats = { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 };
             if (!report || !report.daily_details) return stats;
             
-            Object.values(report.daily_details).forEach(day => {
+            Object.values(report.daily_details).forEach(function(day) {
                 if (day.status === 'Hadir') {
                     stats.hadir++;
                     if (day.is_late) {
@@ -63,7 +63,7 @@
             }
             
             // Add all dates from the cycle
-            cycleDates.forEach(d => {
+            cycleDates.forEach(function(d) {
                 days.push({ day: d.day, isCurrentMonth: true, dateStr: d.dateStr });
             });
             
@@ -211,13 +211,13 @@
                                 $isToday = $date->isToday();
                                 $isSunday = $date->isSunday();
                             @endphp
-                            <th class="py-2 px-1 text-center sticky top-0 z-30 bg-slate-50 dark:bg-slate-900 min-w-[32px] border-r border-slate-100 dark:border-slate-800/60">
+                            <th class="py-2 px-1 text-center sticky top-0 z-30 min-w-[32px] border-r border-slate-100 dark:border-slate-800/60 {{ $isSunday ? 'bg-red-50 dark:bg-red-950/20' : 'bg-slate-50 dark:bg-slate-900' }}">
                                 <div class="flex flex-col items-center justify-center gap-1 py-0.5">
-                                    <span class="text-[9px] font-semibold {{ $isSunday && !$isToday ? 'text-red-400' : ($isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500') }} uppercase tracking-wider leading-none">
+                                    <span class="text-[9px] font-semibold {{ $isSunday && !$isToday ? 'text-red-500' : ($isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500') }} uppercase tracking-wider leading-none">
                                         {{ $date->translatedFormat('D') }}
                                     </span>
                                     <div class="flex items-center justify-center w-6 h-6 {{ $isToday ? 'bg-indigo-600 dark:bg-indigo-500 rounded-full' : '' }}">
-                                        <span class="text-[11px] font-bold leading-none {{ $isSunday && !$isToday ? 'text-red-500 dark:text-red-400' : ($isToday ? 'text-white' : 'text-slate-700 dark:text-slate-200') }}">
+                                        <span class="text-[11px] font-bold leading-none {{ $isSunday && !$isToday ? 'text-red-550 dark:text-red-400' : ($isToday ? 'text-white' : 'text-slate-700 dark:text-slate-200') }}">
                                             {{ $date->format('d') }}
                                         </span>
                                     </div>
@@ -262,7 +262,7 @@
                                     $dateStr = $date->format('Y-m-d');
                                     $detail = $report['daily_details'][$dateStr] ?? null;
                                 @endphp
-                                <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30">
+                                <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30 {{ $date->isSunday() ? 'bg-red-50/30 dark:bg-red-950/10' : '' }}">
                                     @if($detail)
                                         @if($detail['status'] === 'Hadir')
                                             <div class="flex flex-col gap-0.5 items-center justify-center">
