@@ -142,24 +142,26 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-3 text-right">
-                                    <div class="flex items-center justify-end gap-2">
+                                                                   <div class="flex gap-2 justify-end">
                                         @if($emp['payslip'])
                                             <a href="{{ Storage::url($emp['payslip']->file_path) }}" target="_blank"
-                                               class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Lihat Slip">
-                                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                               class="h-8 px-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer flex items-center gap-1" title="Lihat Slip">
+                                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                                Lihat
                                             </a>
                                             <form method="POST" action="{{ route('payslips.destroy', $emp['payslip']->id) }}" onsubmit="return confirm('Hapus slip gaji ini?');" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                        class="p-2 text-rose-550 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors cursor-pointer" title="Hapus">
-                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                        class="h-8 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer flex items-center gap-1" title="Hapus">
+                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                    Hapus
                                                 </button>
                                             </form>
                                         @else
                                             <button onclick="openUploadModal('{{ $emp['id'] }}', '{{ $emp['unit_id'] }}', '{{ addslashes($emp['name']) }}')"
-                                                    class="inline-flex items-center gap-1.5 h-9 px-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors cursor-pointer shadow-sm">
-                                                <i data-lucide="upload" class="w-4 h-4"></i>
+                                                    class="h-8 px-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:hover:bg-indigo-900/40 text-indigo-750 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200/30 dark:border-indigo-900/30 transition-all cursor-pointer flex items-center gap-1">
+                                                <i data-lucide="upload" class="w-3.5 h-3.5"></i>
                                                 Upload
                                             </button>
                                         @endif

@@ -121,7 +121,7 @@
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[240px]">Jabatan</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40 whitespace-nowrap">Kontak</th>
                             @if(auth()->user()->role === 'super_admin')
-                                <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-28">ZK ID</th>
+                                <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[120px] w-36">ZK ID</th>
                             @endif
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Status</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Aksi</th>

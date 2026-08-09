@@ -383,19 +383,23 @@
                 showGlobalConfirmModal(message, function () {
                     if (triggerEl) {
                         const form = triggerEl.closest('form');
+                        const loader = document.getElementById('global-loading-overlay');
                         if (form) {
                             form.dataset.confirmed = 'true';
                             const originalOnsubmit = form.getAttribute('onsubmit');
                             form.removeAttribute('onsubmit');
+                            if (loader) loader.classList.remove('hidden');
                             form.submit();
                             if (originalOnsubmit) {
                                 form.setAttribute('onsubmit', originalOnsubmit);
                             }
                         } else if (triggerEl.tagName === 'A') {
+                            if (loader) loader.classList.remove('hidden');
                             window.location.href = triggerEl.href;
                         } else {
                             const origOnclick = triggerEl.getAttribute('onclick');
                             triggerEl.removeAttribute('onclick');
+                            if (loader) loader.classList.remove('hidden');
                             triggerEl.click();
                             if (origOnclick) triggerEl.setAttribute('onclick', origOnclick);
                         }
@@ -515,6 +519,8 @@
 
                 // Handle form submit events
                 document.addEventListener('submit', function (e) {
+                    if (e.defaultPrevented) return;
+                    
                     const form = e.target.closest('form');
                     if (!form) return;
                     if (form.getAttribute('target') === '_blank') return;
