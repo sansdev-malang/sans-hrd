@@ -275,13 +275,8 @@
 
         <!-- LEGEND / STATUS EXPLANATION -->
         <div class="flex flex-wrap gap-4 items-center justify-center text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-4 px-2">
-            <span class="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">Keterangan:</span>
-            
-            <!-- Dapat Bonus -->
-            <div class="flex items-center gap-1.5">
-                <div class="w-8 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 rounded font-bold text-[9px]">10k</div>
-                <span>Nominal disesuaikan tingkat ketepatan waktu hadir sesuai jadwal shift</span>
-            </div>
+            <span class="font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider text-[10px]">Keterangan:</span>
+            <span class="text-slate-650 dark:text-slate-400">Nominal disesuaikan tingkat ketepatan waktu hadir sesuai jadwal shift</span>
         </div>
 
         <!-- CALENDAR DETAIL MODAL -->
