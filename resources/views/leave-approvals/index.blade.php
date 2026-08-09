@@ -4,30 +4,19 @@
         selectedEmp: null
     }">
 
-        <!-- SUCCESS/ERROR ALERTS -->
-        @if(session('success'))
-            <div class="bg-emerald-50 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                </div>
-                <div class="text-left">
-                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Sukses!</h5>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ session('success') }}</p>
-                </div>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="bg-rose-50 dark:bg-rose-900/40 border border-rose-200 dark:border-rose-900/60 rounded-xl p-4 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                </div>
-                <div class="text-left">
-                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Perhatian!</h5>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ session('error') }}</p>
-                </div>
-            </div>
-        @endif
+        @php
+            if (!function_exists('getInitials')) {
+                function getInitials($name) {
+                    if (empty($name)) return '?';
+                    $words = explode(' ', $name);
+                    if (count($words) >= 2) {
+                        return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+                    }
+                    return strtoupper(substr($name, 0, 2));
+                }
+            }
+            $colors = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#14b8a6', '#f43f5e', '#0ea5e9', '#d946ef'];
+        @endphp
 
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left ">
@@ -46,7 +35,7 @@
                     <div x-data="{ searchVal: '{{ request('search') }}' }" class="relative w-full search-container">
                         <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
                             style="padding-left: 0.75rem; padding-right: 2.25rem;"
-                            class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
+                            class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-55 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
                         <button type="submit" 
                             :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
                             class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
@@ -109,8 +98,7 @@
                 <table class="w-full text-xs">
                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-505 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
-                            <th class="px-6 py-3 text-left">Pegawai</th>
-                            <th class="px-6 py-3 text-left">Unit</th>
+                            <th class="px-6 py-3 text-left min-w-[200px]">Profil Pegawai</th>
                             <th class="px-6 py-3 text-center">Jenis Izin</th>
                             <th class="px-6 py-3 text-center">Tanggal Mulai</th>
                             <th class="px-6 py-3 text-center">Tanggal Selesai</th>
@@ -118,27 +106,34 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
-                        @forelse($paginatedLeaves as $leave)
-                            <tr>
-                                <td class="px-6 py-4 text-left">
+                        @forelse($paginatedLeaves as $index => $leave)
+                            @php
+                                $empName = $leave->employee_name ?? 'Tidak Diketahui';
+                                $color = $colors[$index % count($colors)];
+                                $initial = getInitials($empName);
+                                $unitName = $leave->schoolUnit ? $leave->schoolUnit->name : '-';
+                            @endphp
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
+                                <td class="px-6 py-3 text-left">
                                     <div class="flex items-center gap-3">
-                                        @if(!empty($leave->employee_photo) && !empty($leave->employee_unit_url))
-                                            @php
-                                                $photoPath = str_contains($leave->employee_photo, 'photos/') ? $leave->employee_photo : 'photos/' . $leave->employee_photo;
-                                                $photoUrl = rtrim($leave->employee_unit_url, '/') . '/storage/' . $photoPath;
-                                            @endphp
-                                            <img src="{{ $photoUrl }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
-                                        @else
-                                            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0">
-                                                {{ strtoupper(substr($leave->employee_name, 0, 2)) }}
-                                            </div>
-                                        @endif
-                                        <div>
+                                        <!-- Photo/Avatar -->
+                                        <div class="shrink-0">
+                                            @if(!empty($leave->employee_photo) && !empty($leave->employee_unit_url))
+                                                @php
+                                                    $photoPath = str_contains($leave->employee_photo, 'photos/') ? $leave->employee_photo : 'photos/' . $leave->employee_photo;
+                                                    $photoUrl = rtrim($leave->employee_unit_url, '/') . '/storage/' . $photoPath;
+                                                @endphp
+                                                <img src="{{ $photoUrl }}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200/50 dark:border-slate-800/40">
+                                            @else
+                                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm shrink-0" style="background:{{ $color }}">{{ $initial }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="flex flex-col min-w-0">
                                              <span @click="selectedEmp = {
                                                 name: '{{ $leave->employee_name }}',
                                                 nuptk_nip_nik: '{{ $leave->employee_nip }}',
                                                 subject_position: '{{ $leave->employee_position }}',
-                                                unit: '{{ strtoupper($leave->schoolUnit ? $leave->schoolUnit->name : '-') }}',
+                                                unit: '{{ strtoupper($unitName) }}',
                                                 email: '{{ $leave->employee_email }}',
                                                 gender: '{{ $leave->employee_gender }}',
                                                 employment_status: '{{ $leave->employee_status }}',
@@ -151,17 +146,15 @@
                                                 status_code: '{{ $leave->status_code ?? 'I' }}',
                                                 gets_presence_bonus: {{ $leave->gets_presence_bonus ? 'true' : 'false' }},
                                                 leave_status: '{{ $leave->status }}'
-                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-200 font-bold tracking-tight inline-block cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.03] transform transition-all duration-200 origin-left">{{ $leave->employee_name }}</span>
-                                            <span class="text-[10px] text-slate-500 dark:text-slate-450 block mt-0.5">{{ $leave->employee_position }}</span>
+                                            }; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-200 font-bold tracking-tight inline-block cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.01] transform transition-all duration-200 origin-left truncate">{{ $empName }}</span>
+                                             <div class="flex flex-col gap-0.5 mt-0.5 min-w-0">
+                                                 <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $unitName }}</span>
+                                                 <span class="text-[10px] text-slate-500 dark:text-slate-450 block truncate max-w-[180px]" title="{{ $leave->employee_position }}">{{ $leave->employee_position }}</span>
+                                             </div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-left font-nasalization">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30 uppercase">
-                                        {{ $leave->schoolUnit ? $leave->schoolUnit->name : '-' }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-3 text-center">
                                     <div class="flex items-center gap-1.5 justify-center">
                                         @php
                                             $statusCode = $leave->status_code ?? 'I';
@@ -179,17 +172,17 @@
                                         <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase {{ $badgeClasses }}" title="Kode Status: {{ $statusCode }}">
                                             {{ $statusCode }}
                                         </span>
-                                        <span class="text-xs text-slate-700 dark:text-slate-350 font-bold uppercase tracking-tight">{{ $leave->type }}</span>
+                                        <span class="text-xs text-slate-700 dark:text-slate-355 font-bold uppercase tracking-tight">{{ $leave->type }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center font-mono">
-                                    {{ $leave->start_date->format('d M Y') }}
+                                <td class="px-6 py-3 text-center font-mono">
+                                    {{ $leave->start_date->translatedFormat('d M Y') }}
                                 </td>
-                                <td class="px-6 py-4 text-center font-mono">
-                                    {{ $leave->end_date->format('d M Y') }}
+                                <td class="px-6 py-3 text-center font-mono">
+                                    {{ $leave->end_date->translatedFormat('d M Y') }}
                                 </td>
-                                <td class="px-6 py-4 text-left">
-                                    <span class="text-slate-600 dark:text-slate-400 block">{{ $leave->reason ?? '-' }}</span>
+                                <td class="px-6 py-3 text-left">
+                                    <span class="text-slate-600 dark:text-slate-400 block truncate max-w-xs" title="{{ $leave->reason ?? '-' }}">{{ $leave->reason ?? '-' }}</span>
                                     @if($leave->attachment)
                                         <div class="mt-1">
                                             @php
@@ -197,8 +190,8 @@
                                                     $leave->employee_unit_url ? rtrim($leave->employee_unit_url, '/') . '/storage/' . $leave->attachment : '#'
                                                 );
                                             @endphp
-                                            <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold underline">
-                                                <i data-lucide="paperclip" class="w-3 h-3"></i>
+                                            <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-650 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold underline">
+                                                <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
                                                 Lihat Lampiran
                                             </a>
                                         </div>
@@ -207,7 +200,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                                <td colspan="5" class="px-6 py-16 text-center text-slate-500 dark:text-slate-400">
                                     Belum ada data riwayat izin pegawai.
                                 </td>
                             </tr>
@@ -217,109 +210,33 @@
             </div>
 
             <!-- PAGINATION -->
-            @if($paginatedLeaves->hasPages() || $paginatedLeaves->total() > 0)
-                <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-4 bg-white dark:bg-slate-900">
-                    <!-- Mobile view (compact) -->
-                    <div class="flex flex-1 justify-between sm:hidden items-center">
-                        @if($paginatedLeaves->onFirstPage())
-                            <span class="px-3 py-1.5 text-xs font-semibold text-slate-350 dark:text-slate-600 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/40 rounded-lg cursor-not-allowed">Sebelumnya</span>
+            @if($paginatedLeaves instanceof \Illuminate\Pagination\LengthAwarePaginator && $paginatedLeaves->total() > 0)
+                <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        Menampilkan
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedLeaves->firstItem() }}</span>
+                        sampai
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedLeaves->lastItem() }}</span>
+                        dari
+                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedLeaves->total() }}</span>
+                        data riwayat izin
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        @if ($paginatedLeaves->onFirstPage())
+                            <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-655 flex items-center justify-center cursor-not-allowed select-none">Sebelumnya</span>
                         @else
-                            <a href="{{ $paginatedLeaves->previousPageUrl() }}" class="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors">Sebelumnya</a>
+                            <a href="{{ $paginatedLeaves->appends(request()->query())->previousPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Sebelumnya</a>
                         @endif
 
-                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <span class="px-2 font-semibold text-slate-600 dark:text-slate-400">
                             Halaman {{ $paginatedLeaves->currentPage() }} dari {{ $paginatedLeaves->lastPage() }}
                         </span>
 
-                        @if($paginatedLeaves->hasMorePages())
-                            <a href="{{ $paginatedLeaves->nextPageUrl() }}" class="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors">Berikutnya</a>
+                        @if ($paginatedLeaves->hasMorePages())
+                            <a href="{{ $paginatedLeaves->appends(request()->query())->nextPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Berikutnya</a>
                         @else
-                            <span class="px-3 py-1.5 text-xs font-semibold text-slate-350 dark:text-slate-600 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/40 rounded-lg cursor-not-allowed">Berikutnya</span>
+                            <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-655 flex items-center justify-center cursor-not-allowed select-none">Berikutnya</span>
                         @endif
-                    </div>
-
-                    <!-- Desktop view -->
-                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                                Menampilkan
-                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedLeaves->firstItem() ?? 0 }}</span>
-                                sampai
-                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedLeaves->lastItem() ?? 0 }}</span>
-                                dari
-                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $paginatedLeaves->total() }}</span>
-                                data riwayat izin
-                            </p>
-                        </div>
-
-                        <div>
-                            <nav class="isolate inline-flex -space-x-px rounded-lg shadow-2xs" aria-label="Pagination">
-                                {{-- Previous Page Link --}}
-                                @if ($paginatedLeaves->onFirstPage())
-                                    <span class="relative inline-flex items-center rounded-l-lg px-2 py-1.5 text-slate-350 dark:text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-not-allowed">
-                                        <span class="sr-only">Sebelumnya</span>
-                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-                                        </svg>
-                                    </span>
-                                @else
-                                    <a href="{{ $paginatedLeaves->previousPageUrl() }}" class="relative inline-flex items-center rounded-l-lg px-2 py-1.5 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                        <span class="sr-only">Sebelumnya</span>
-                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-                                @endif
-
-                                {{-- Page numbers --}}
-                                @php
-                                    $startPage = max($paginatedLeaves->currentPage() - 2, 1);
-                                    $endPage = min($startPage + 4, $paginatedLeaves->lastPage());
-                                    if ($endPage - $startPage < 4) {
-                                        $startPage = max($endPage - 4, 1);
-                                    }
-                                @endphp
-
-                                @if ($startPage > 1)
-                                    <a href="{{ $paginatedLeaves->url(1) }}" class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
-                                    @if ($startPage > 2)
-                                        <span class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-default">...</span>
-                                    @endif
-                                @endif
-
-                                @for ($p = $startPage; $p <= $endPage; $p++)
-                                    @if ($p == $paginatedLeaves->currentPage())
-                                        <span aria-current="page" class="relative z-10 inline-flex items-center bg-indigo-50 dark:bg-indigo-950 px-3 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900 focus:z-20">{{ $p }}</span>
-                                    @else
-                                        <a href="{{ $paginatedLeaves->url($p) }}" class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
-                                    @endif
-                                @endfor
-
-                                @if ($endPage < $paginatedLeaves->lastPage())
-                                    @if ($endPage < $paginatedLeaves->lastPage() - 1)
-                                        <span class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-default">...</span>
-                                    @endif
-                                    <a href="{{ $paginatedLeaves->url($paginatedLeaves->lastPage()) }}" class="relative inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $paginatedLeaves->lastPage() }}</a>
-                                @endif
-
-                                {{-- Next Page Link --}}
-                                @if ($paginatedLeaves->hasMorePages())
-                                    <a href="{{ $paginatedLeaves->nextPageUrl() }}" class="relative inline-flex items-center rounded-r-lg px-2 py-1.5 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                        <span class="sr-only">Berikutnya</span>
-                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-                                @else
-                                    <span class="relative inline-flex items-center rounded-r-lg px-2 py-1.5 text-slate-350 dark:text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-not-allowed">
-                                        <span class="sr-only">Berikutnya</span>
-                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-                                        </svg>
-                                    </span>
-                                @endif
-                            </nav>
-                        </div>
                     </div>
                 </div>
             @endif
