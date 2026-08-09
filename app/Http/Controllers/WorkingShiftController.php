@@ -24,6 +24,12 @@ class WorkingShiftController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->has('code')) {
+            $request->merge([
+                'code' => strtolower(preg_replace('/[^a-zA-Z0-9_]/', '_', $request->input('code')))
+            ]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255|unique:working_shifts,code',
