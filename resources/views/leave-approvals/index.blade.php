@@ -155,24 +155,39 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-3 text-center">
-                                    <div class="flex items-center gap-1.5 justify-center">
-                                        @php
-                                            $statusCode = $leave->status_code ?? 'I';
-                                            $badgeClasses = 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800';
-                                            if ($statusCode === 'S') {
-                                                $badgeClasses = 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-450 dark:border-rose-900/50';
-                                            } elseif ($statusCode === 'I') {
-                                                $badgeClasses = 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-450 dark:border-amber-900/50';
-                                            } elseif ($statusCode === 'C') {
-                                                $badgeClasses = 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-450 dark:border-sky-900/50';
-                                            } elseif ($statusCode === 'H') {
-                                                $badgeClasses = 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-450 dark:border-emerald-900/50';
-                                            }
-                                        @endphp
-                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase {{ $badgeClasses }}" title="Kode Status: {{ $statusCode }}">
-                                            {{ $statusCode }}
-                                        </span>
-                                        <span class="text-xs text-slate-700 dark:text-slate-355 font-bold uppercase tracking-tight">{{ $leave->type }}</span>
+                                    <div class="flex flex-col items-center justify-center gap-1">
+                                        <div class="flex items-center gap-1.5 justify-center">
+                                            @php
+                                                $statusCode = $leave->status_code ?? 'I';
+                                                $badgeClasses = 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800';
+                                                if ($statusCode === 'S') {
+                                                    $badgeClasses = 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-450 dark:border-rose-900/50';
+                                                } elseif ($statusCode === 'I') {
+                                                    $badgeClasses = 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-450 dark:border-amber-900/50';
+                                                } elseif ($statusCode === 'C') {
+                                                    $badgeClasses = 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-450 dark:border-sky-900/50';
+                                                } elseif ($statusCode === 'H') {
+                                                    $badgeClasses = 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-450 dark:border-emerald-900/50';
+                                                }
+                                            @endphp
+                                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black border uppercase {{ $badgeClasses }}" title="Kode Status: {{ $statusCode }}">
+                                                {{ $statusCode }}
+                                            </span>
+                                            <span class="text-xs text-slate-700 dark:text-slate-355 font-bold uppercase tracking-tight">{{ $leave->type }}</span>
+                                        </div>
+                                        @if($leave->attachment)
+                                            <div class="mt-1">
+                                                @php
+                                                    $attachmentUrl = str_starts_with($leave->attachment, 'http') ? $leave->attachment : (
+                                                        $leave->employee_unit_url ? rtrim($leave->employee_unit_url, '/') . '/storage/' . $leave->attachment : '#'
+                                                    );
+                                                @endphp
+                                                <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] text-indigo-700 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 transition-all shadow-2xs hover:shadow-xs">
+                                                    <i data-lucide="paperclip" class="w-3 h-3"></i>
+                                                    Lampiran
+                                                </a>
+                                            </div>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-6 py-3 text-center font-mono">
@@ -183,19 +198,6 @@
                                 </td>
                                 <td class="px-6 py-3 text-left">
                                     <span class="text-slate-600 dark:text-slate-400 block truncate max-w-xs" title="{{ $leave->reason ?? '-' }}">{{ $leave->reason ?? '-' }}</span>
-                                    @if($leave->attachment)
-                                        <div class="mt-1">
-                                            @php
-                                                $attachmentUrl = str_starts_with($leave->attachment, 'http') ? $leave->attachment : (
-                                                    $leave->employee_unit_url ? rtrim($leave->employee_unit_url, '/') . '/storage/' . $leave->attachment : '#'
-                                                );
-                                            @endphp
-                                            <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-650 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold underline">
-                                                <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
-                                                Lihat Lampiran
-                                            </a>
-                                        </div>
-                                    @endif
                                 </td>
                             </tr>
                         @empty
