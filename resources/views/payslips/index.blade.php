@@ -70,28 +70,7 @@
             </form>
         </section>
 
-        <!-- ALERTS -->
-        @if(session('success'))
-            <div class="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-700 dark:text-emerald-400 text-sm flex items-center gap-2">
-                <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="p-4 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-700 dark:text-rose-400 text-sm flex items-center gap-2">
-                <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
-                {{ session('error') }}
-            </div>
-        @endif
-        @if($errors->any())
-            <div class="p-4 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-700 dark:text-rose-400 text-sm">
-                <ul class="list-disc pl-5 space-y-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+
 
         @php
             if (!function_exists('getInitials')) {
