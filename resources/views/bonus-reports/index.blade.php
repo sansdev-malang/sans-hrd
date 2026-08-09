@@ -405,14 +405,18 @@
             },
             calculateStats(report) {
                 let stats = { totalBonus: 0, bonusDays: 0 };
-                if (!report || !report.daily_details) return stats;
+                if (!report) return stats;
                 
-                Object.values(report.daily_details).forEach(function(day) {
-                    if (day.bonus_nominal && day.bonus_nominal > 0) {
-                        stats.totalBonus += day.bonus_nominal;
-                        stats.bonusDays++;
-                    }
-                });
+                stats.totalBonus = parseFloat(report.bonus_nominal) || 0;
+                
+                if (report.daily_details) {
+                    Object.values(report.daily_details).forEach(function(day) {
+                        const nominal = parseFloat(day.bonus_nominal);
+                        if (!isNaN(nominal) && nominal > 0) {
+                            stats.bonusDays++;
+                        }
+                    });
+                }
                 return stats;
             },
             buildCutOffCalendar(cycleDates) {
