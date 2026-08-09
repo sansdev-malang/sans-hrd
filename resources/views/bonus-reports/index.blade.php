@@ -273,6 +273,27 @@
             @endif
         </section>
 
+        <!-- LEGEND / STATUS EXPLANATION -->
+        <div class="flex flex-wrap gap-4 items-center justify-center text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-4 px-2">
+            <span class="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">Keterangan:</span>
+            
+            <!-- Dapat Bonus -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-8 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 rounded font-bold text-[9px]">10k</div>
+                <span>Mendapatkan Bonus Kehadiran</span>
+            </div>
+            <!-- Tanpa Bonus -->
+            <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500">-</span>
+                <span>Tidak Mendapatkan Bonus / Tanpa Kehadiran</span>
+            </div>
+            <!-- Hari Minggu -->
+            <div class="flex items-center gap-1.5">
+                <div class="w-5 h-5 bg-red-50 dark:bg-red-955/20 border border-red-100 dark:border-red-900/30 rounded"></div>
+                <span>Hari Minggu (Kolom Merah)</span>
+            </div>
+        </div>
+
         <!-- CALENDAR DETAIL MODAL -->
         <div x-show="showCalendarModal" 
              class="fixed inset-0 z-50 overflow-y-auto" 
