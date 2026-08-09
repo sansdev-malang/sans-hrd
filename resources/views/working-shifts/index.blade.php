@@ -1,14 +1,14 @@
 <x-admin-layout>
     <div class="p-6 space-y-6" x-data="{ 
-        showAddModal: false,
-        showEditModal: false,
+        showAddModal: {{ $errors->any() && !old('_method') ? 'true' : 'false' }},
+        showEditModal: {{ $errors->any() && old('_method') === 'PUT' ? 'true' : 'false' }},
         showDeleteModal: false,
-        editId: null,
-        editName: '',
-        editCode: '',
-        editShortCode: '',
-        editIsShift: false,
-        editDescription: '',
+        editId: {{ old('edit_id') ? old('edit_id') : 'null' }},
+        editName: '{{ old('name') && old('_method') === 'PUT' ? old('name') : '' }}',
+        editCode: '{{ old('code') && old('_method') === 'PUT' ? old('code') : '' }}',
+        editShortCode: '{{ old('short_code') && old('_method') === 'PUT' ? old('short_code') : '' }}',
+        editIsShift: {{ old('is_shift') && old('_method') === 'PUT' ? 'true' : 'false' }},
+        editDescription: '{{ old('description') && old('_method') === 'PUT' ? old('description') : '' }}',
         deleteShift: null,
         days: [
             { name: 'Minggu', start_time: '', end_time: '', is_off: true },
@@ -19,6 +19,20 @@
             { name: 'Jumat', start_time: '', end_time: '', is_off: false },
             { name: 'Sabtu', start_time: '', end_time: '', is_off: false }
         ],
+        init() {
+            @if($errors->any() && old('days'))
+                let oldDays = @json(old('days'));
+                this.days = Object.keys(oldDays).map(key => {
+                    let d = oldDays[key];
+                    return {
+                        name: d.name || '',
+                        start_time: d.start_time || '',
+                        end_time: d.end_time || '',
+                        is_off: d.is_off == '1' || d.is_off === true
+                    };
+                });
+            @endif
+        },
         openEdit(shift) {
             this.editId = shift.id;
             this.editName = shift.name;
@@ -77,27 +91,12 @@
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     Sync Ulang ke Unit
                 </a>
-                <button @click="resetAdd()" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
+                <button @click="resetAdd()" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-855 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     Tambah Shift Baru
                 </button>
             </div>
         </header>
-
-        <!-- ERROR MESSAGES -->
-        @if($errors->any())
-            <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 rounded-xl p-4 text-xs text-rose-800 dark:text-rose-400 mb-2 text-left flex gap-3 items-start animate-fade-in">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <div>
-                    <h5 class="font-bold mb-1">Gagal menyimpan data:</h5>
-                    <ul class="list-disc pl-4 space-y-0.5 font-medium">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        @endif
 
         <!-- CARDS GRID -->
         <section class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 text-left">
@@ -153,7 +152,7 @@
                             <i data-lucide="edit" class="w-3.5 h-3.5"></i>
                             Edit Shift
                         </button>
-                        <button type="button" @click="confirmDelete({{ json_encode($shift) }})" class="h-8 px-3 bg-rose-50/50 hover:bg-rose-100/60 text-rose-700 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100 dark:border-rose-900/30 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1.5">
+                        <button type="button" @click="confirmDelete({{ json_encode($shift) }})" class="h-8 px-3 bg-rose-50/50 hover:bg-rose-100/60 text-rose-700 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100 dark:border-rose-900/30 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1.5">
                             <i data-lucide="trash" class="w-3.5 h-3.5"></i>
                             Hapus
                         </button>
@@ -189,7 +188,7 @@
                     <!-- Header -->
                     <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 shrink-0">
                         <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-650 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-655 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
                             <span>Tambah Template Shift Baru</span>
                         </h3>
                         <button type="button" @click="showAddModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-transparent border-0 cursor-pointer flex items-center justify-center">
@@ -200,31 +199,47 @@
                     <form method="POST" action="{{ route('working-shifts.store') }}" class="flex flex-col flex-1 overflow-hidden">
                         @csrf
                         <div class="flex-1 overflow-y-auto p-5 space-y-5 text-left">
+                            
+                            <!-- Validation Errors inside Modal -->
+                            @if($errors->any() && !old('_method'))
+                                <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 rounded-xl p-4 text-xs text-rose-800 dark:text-rose-400 text-left flex gap-3 items-start animate-fade-in shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    <div>
+                                        <h5 class="font-bold mb-1">Gagal menyimpan data:</h5>
+                                        <ul class="list-disc pl-4 space-y-0.5 font-medium">
+                                            @foreach($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            @endif
+
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Shift</label>
-                                <input type="text" name="name" required placeholder="Contoh: Salehmart Shift 1" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all">
+                                <input type="text" name="name" required value="{{ old('name') && !old('_method') ? old('name') : '' }}" placeholder="Contoh: Salehmart Shift 1" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
                             </div>
  
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kode Unik Shift</label>
-                                    <input type="text" name="code" required placeholder="Contoh: salehmart_s1" 
+                                    <input type="text" name="code" required value="{{ old('code') && !old('_method') ? old('code') : '' }}" placeholder="Contoh: salehmart_s1" 
                                         oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_')"
-                                        class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all font-mono">
+                                        class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all font-mono">
                                 </div>
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kode Singkat (Max 5)</label>
-                                    <input type="text" name="short_code" maxlength="5" placeholder="Cth: S1, P, M" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all font-mono uppercase">
+                                    <input type="text" name="short_code" value="{{ old('short_code') && !old('_method') ? old('short_code') : '' }}" maxlength="5" placeholder="Cth: S1, P, M" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all font-mono uppercase">
                                 </div>
                                 <div class="flex items-center pt-1 col-span-2">
-                                    <input type="checkbox" id="is_shift" name="is_shift" value="1" class="rounded border-slate-300 dark:border-slate-700 text-indigo-650 focus:ring-indigo-500 focus:ring-offset-0 w-4 h-4 cursor-pointer">
+                                    <input type="checkbox" id="is_shift" name="is_shift" value="1" {{ old('is_shift') && !old('_method') ? 'checked' : '' }} class="rounded border-slate-300 dark:border-slate-700 text-indigo-650 focus:ring-indigo-500 focus:ring-offset-0 w-4 h-4 cursor-pointer">
                                     <label for="is_shift" class="ml-2 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">Merupakan Shift Bergulir (Gantian)</label>
                                 </div>
                             </div>
  
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Deskripsi</label>
-                                <textarea name="description" rows="2" placeholder="Keterangan singkat jam kerja..." class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all"></textarea>
+                                <textarea name="description" rows="2" placeholder="Keterangan singkat jam kerja..." class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">{{ old('description') && !old('_method') ? old('description') : '' }}</textarea>
                             </div>
  
                             <!-- Day Configs -->
@@ -239,7 +254,7 @@
                                     <div class="col-span-3 text-center">Jam Pulang</div>
                                 </div>
  
-                                <div class="space-y-3 bg-slate-50/50 dark:bg-slate-950/20 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+                                <div class="space-y-3 bg-slate-50/50 dark:bg-slate-955/20 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80">
                                     <template x-for="(day, index) in days" :key="index">
                                         <div class="flex flex-col sm:grid sm:grid-cols-12 items-start sm:items-center gap-2 sm:gap-3 border-b border-slate-100/85 dark:border-slate-800/60 last:border-0 pb-3 last:pb-0 transition-opacity"
                                             :class="day.is_off ? 'opacity-60' : ''">
@@ -251,7 +266,7 @@
                                             <div class="col-span-3 flex items-center mt-0.5 sm:mt-0">
                                                 <!-- Hidden input to guarantee value submits when unchecked -->
                                                 <input type="hidden" :name="`days[${index}][is_off]`" value="0">
-                                                <input type="checkbox" :name="`days[${index}][is_off]`" value="1" x-model="day.is_off" class="rounded border-slate-300 dark:border-slate-700 text-rose-500 w-4.5 h-4.5 focus:ring-rose-400 focus:ring-offset-0 cursor-pointer">
+                                                <input type="checkbox" :name="`days[${index}][is_off]`" value="1" x-model="day.is_off" class="rounded border-slate-300 dark:border-slate-700 text-rose-550 w-4.5 h-4.5 focus:ring-rose-400 focus:ring-offset-0 cursor-pointer">
                                                 <span class="ml-2 text-rose-600 dark:text-rose-400 font-semibold uppercase text-[9px] tracking-wider cursor-pointer" @click="day.is_off = !day.is_off">Libur</span>
                                             </div>
                                             
@@ -259,11 +274,11 @@
                                             <div class="col-span-6 grid grid-cols-2 gap-2 w-full mt-1.5 sm:mt-0">
                                                 <div class="flex flex-col gap-1">
                                                     <span class="text-[8px] text-slate-400 uppercase font-bold sm:hidden">Jam Masuk</span>
-                                                    <input type="time" :name="`days[${index}][start_time]`" x-model="day.start_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all">
+                                                    <input type="time" :name="`days[${index}][start_time]`" x-model="day.start_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
                                                 </div>
                                                 <div class="flex flex-col gap-1">
                                                     <span class="text-[8px] text-slate-400 uppercase font-bold sm:hidden">Jam Pulang</span>
-                                                    <input type="time" :name="`days[${index}][end_time]`" x-model="day.end_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all">
+                                                    <input type="time" :name="`days[${index}][end_time]`" x-model="day.end_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
                                                 </div>
                                             </div>
                                         </div>
@@ -276,7 +291,7 @@
                             <button type="button" @click="showAddModal = false" class="h-9 px-4 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-lg cursor-pointer transition-colors shadow-2xs hover:shadow-xs">
                                 Batal
                             </button>
-                            <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-lg shadow-sm transition-all cursor-pointer">
+                            <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-855 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-lg shadow-sm transition-all cursor-pointer">
                                 Simpan Shift
                             </button>
                         </div>
@@ -318,10 +333,28 @@
                     <form method="POST" :action="`{{ url('working-shifts') }}/${editId}`" class="flex flex-col flex-1 overflow-hidden">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="edit_id" :value="editId">
+                        
                         <div class="flex-1 overflow-y-auto p-5 space-y-5 text-left">
+                            
+                            <!-- Validation Errors inside Modal -->
+                            @if($errors->any() && old('_method') === 'PUT')
+                                <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 rounded-xl p-4 text-xs text-rose-800 dark:text-rose-400 text-left flex gap-3 items-start animate-fade-in shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    <div>
+                                        <h5 class="font-bold mb-1">Gagal menyimpan data:</h5>
+                                        <ul class="list-disc pl-4 space-y-0.5 font-medium">
+                                            @foreach($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            @endif
+
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Shift</label>
-                                <input type="text" name="name" required x-model="editName" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all">
+                                <input type="text" name="name" required x-model="editName" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
                             </div>
  
                             <div class="grid grid-cols-2 gap-4">
@@ -331,7 +364,7 @@
                                 </div>
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kode Singkat (Max 5)</label>
-                                    <input type="text" name="short_code" maxlength="5" x-model="editShortCode" placeholder="Cth: S1, P, M" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all font-mono uppercase">
+                                    <input type="text" name="short_code" maxlength="5" x-model="editShortCode" placeholder="Cth: S1, P, M" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all font-mono uppercase">
                                 </div>
                                 <div class="flex items-center pt-1 col-span-2">
                                     <input type="checkbox" id="edit_is_shift" name="is_shift" value="1" x-model="editIsShift" class="rounded border-slate-300 dark:border-slate-700 text-indigo-650 focus:ring-indigo-500 focus:ring-offset-0 w-4 h-4 cursor-pointer">
@@ -341,7 +374,7 @@
  
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Deskripsi</label>
-                                <textarea name="description" rows="2" x-model="editDescription" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all"></textarea>
+                                <textarea name="description" rows="2" x-model="editDescription" class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all"></textarea>
                             </div>
  
                             <!-- Day Configs -->
@@ -356,7 +389,7 @@
                                     <div class="col-span-3 text-center">Jam Pulang</div>
                                 </div>
  
-                                <div class="space-y-3 bg-slate-50/50 dark:bg-slate-950/20 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+                                <div class="space-y-3 bg-slate-50/50 dark:bg-slate-955/20 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80">
                                     <template x-for="(day, index) in days" :key="index">
                                         <div class="flex flex-col sm:grid sm:grid-cols-12 items-start sm:items-center gap-2 sm:gap-3 border-b border-slate-100/85 dark:border-slate-800/60 last:border-0 pb-3 last:pb-0 transition-opacity"
                                             :class="day.is_off ? 'opacity-60' : ''">
@@ -368,7 +401,7 @@
                                             <div class="col-span-3 flex items-center mt-0.5 sm:mt-0">
                                                 <!-- Hidden input to guarantee value submits when unchecked -->
                                                 <input type="hidden" :name="`days[${index}][is_off]`" value="0">
-                                                <input type="checkbox" :name="`days[${index}][is_off]`" value="1" x-model="day.is_off" class="rounded border-slate-300 dark:border-slate-700 text-rose-500 w-4.5 h-4.5 focus:ring-rose-400 focus:ring-offset-0 cursor-pointer">
+                                                <input type="checkbox" :name="`days[${index}][is_off]`" value="1" x-model="day.is_off" class="rounded border-slate-300 dark:border-slate-700 text-rose-550 w-4.5 h-4.5 focus:ring-rose-400 focus:ring-offset-0 cursor-pointer">
                                                 <span class="ml-2 text-rose-600 dark:text-rose-400 font-semibold uppercase text-[9px] tracking-wider cursor-pointer" @click="day.is_off = !day.is_off">Libur</span>
                                             </div>
                                             
@@ -376,11 +409,11 @@
                                             <div class="col-span-6 grid grid-cols-2 gap-2 w-full mt-1.5 sm:mt-0">
                                                 <div class="flex flex-col gap-1">
                                                     <span class="text-[8px] text-slate-400 uppercase font-bold sm:hidden">Jam Masuk</span>
-                                                    <input type="time" :name="`days[${index}][start_time]`" x-model="day.start_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all">
+                                                    <input type="time" :name="`days[${index}][start_time]`" x-model="day.start_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
                                                 </div>
                                                 <div class="flex flex-col gap-1">
                                                     <span class="text-[8px] text-slate-400 uppercase font-bold sm:hidden">Jam Pulang</span>
-                                                    <input type="time" :name="`days[${index}][end_time]`" x-model="day.end_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/30 transition-all">
+                                                    <input type="time" :name="`days[${index}][end_time]`" x-model="day.end_time" :disabled="day.is_off" class="w-full text-xs px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-center disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-950/80 disabled:cursor-not-allowed font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-955/30 transition-all">
                                                 </div>
                                             </div>
                                         </div>
@@ -393,7 +426,7 @@
                             <button type="button" @click="showEditModal = false" class="h-9 px-4 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-lg cursor-pointer transition-colors shadow-2xs hover:shadow-xs">
                                 Batal
                             </button>
-                            <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-lg shadow-sm transition-all cursor-pointer">
+                            <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-855 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-lg shadow-sm transition-all cursor-pointer">
                                 Simpan Perubahan
                             </button>
                         </div>
