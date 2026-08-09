@@ -144,7 +144,7 @@
                                 $isToday = $date->isToday();
                                 $isSunday = $date->isSunday();
                             @endphp
-                            <th class="py-2 px-1 text-center sticky top-0 z-30 min-w-[32px] border-r border-slate-100 dark:border-slate-800/60 {{ $isSunday ? 'bg-red-50 dark:bg-red-950/20' : 'bg-slate-50 dark:bg-slate-900' }}">
+                            <th class="py-2 px-1 text-center sticky top-0 z-30 min-w-[32px] border-r border-slate-100 dark:border-slate-800/60 {{ $isSunday ? 'bg-red-50 dark:bg-red-950' : 'bg-slate-50 dark:bg-slate-900' }}">
                                 <div class="flex flex-col items-center justify-center gap-1 py-0.5">
                                     <span class="text-[9px] font-semibold {{ $isSunday && !$isToday ? 'text-red-500' : ($isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500') }} uppercase tracking-wider leading-none">
                                         {{ $date->translatedFormat('D') }}
@@ -222,6 +222,7 @@
                                                 $colorClass = $colorMap[$leaveCode] ?? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
                                             @endphp
                                             @if(!empty($detail['check_in']) && empty($detail['check_out']))
+                                                <!-- Only Check-In -->
                                                 <div class="flex flex-col gap-0.5 items-center justify-center">
                                                     <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}" title="Masuk">{{ $detail['check_in'] }}</span>
                                                     <div class="w-full flex justify-center scale-90">
@@ -229,21 +230,15 @@
                                                     </div>
                                                 </div>
                                             @elseif(!empty($detail['check_out']) && empty($detail['check_in']))
+                                                <!-- Only Check-Out -->
                                                 <div class="flex flex-col gap-0.5 items-center justify-center">
                                                     <div class="w-full flex justify-center scale-90">
                                                         <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</span>
                                                     </div>
                                                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500" title="Pulang">{{ $detail['check_out'] }}</span>
                                                 </div>
-                                            @elseif(!empty($detail['check_in']) && !empty($detail['check_out']))
-                                                <div class="flex flex-col gap-0.5 items-center justify-center">
-                                                    <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}" title="Masuk">{{ $detail['check_in'] }}</span>
-                                                    <div class="flex items-center gap-1">
-                                                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 font-bold" title="Pulang">{{ $detail['check_out'] }}</span>
-                                                        <span class="px-1 py-0.2 rounded font-extrabold text-[7px] leading-none uppercase {{ $colorClass }} scale-75" title="{{ $leaveName }}">{{ $leaveCode }}</span>
-                                                    </div>
-                                                </div>
                                             @else
+                                                <!-- Neither or Both (If both, we don't show the clock hours as requested) -->
                                                 <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center rounded font-bold text-[10px] {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</div>
                                             @endif
                                         @else
@@ -465,7 +460,7 @@
                                                 <!-- Cuti/Izin -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Cuti/Izin'">
                                                     <div class="flex flex-col items-center gap-0.5 w-full">
-                                                        <!-- Only Check-In -->
+                                                <!-- Only Check-In -->
                                                         <template x-if="selectedReport.daily_details[day.dateStr].check_in && !selectedReport.daily_details[day.dateStr].check_out">
                                                             <div class="flex flex-col items-center w-full">
                                                                 <span class="text-[8px] font-bold text-emerald-600 dark:text-emerald-400 scale-[0.85] leading-none" 
@@ -497,18 +492,8 @@
                                                             </div>
                                                         </template>
 
-                                                        <!-- Both Check-In and Check-Out -->
-                                                        <template x-if="selectedReport.daily_details[day.dateStr].check_in && selectedReport.daily_details[day.dateStr].check_out">
-                                                            <div class="flex flex-col items-center leading-none scale-[0.85] origin-bottom">
-                                                                <span class="text-[8px] font-bold text-emerald-600 dark:text-emerald-400" 
-                                                                      x-text="selectedReport.daily_details[day.dateStr].check_in"></span>
-                                                                <span class="text-[8px] text-slate-400 dark:text-slate-500" 
-                                                                      x-text="selectedReport.daily_details[day.dateStr].check_out"></span>
-                                                            </div>
-                                                        </template>
-
-                                                        <!-- Neither -->
-                                                        <template x-if="!selectedReport.daily_details[day.dateStr].check_in && !selectedReport.daily_details[day.dateStr].check_out">
+                                                        <!-- Neither or Both -->
+                                                        <template x-if="(!selectedReport.daily_details[day.dateStr].check_in && !selectedReport.daily_details[day.dateStr].check_out) || (selectedReport.daily_details[day.dateStr].check_in && selectedReport.daily_details[day.dateStr].check_out)">
                                                             <div class="w-full py-0.5 text-center rounded text-[7px] font-bold"
                                                                  :class="[
                                                                      selectedReport.daily_details[day.dateStr].leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400' : '',
