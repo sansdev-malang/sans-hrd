@@ -285,7 +285,7 @@ class AttendanceBonusReportController extends Controller
                 // Convert array to a length-aware paginator for the view
         $total = count($reports);
         
-        $perPageReq = $request->query('per_page', 15);
+        $perPageReq = $request->query('per_page', 50);
         $perPage = $perPageReq === 'all' ? ($total > 0 ? $total : 1) : (int) $perPageReq;
         
         $page = $request->query('page', 1);

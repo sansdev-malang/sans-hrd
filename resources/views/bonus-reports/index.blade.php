@@ -87,7 +87,7 @@
                         @endforeach
                     </select>
 
-                    @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != now()->format('Y-m') || request()->filled('per_page') && request('per_page') != 15)
+                    @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != now()->format('Y-m') || request()->filled('per_page') && request('per_page') != 50)
                         <a href="{{ route('bonus-reports.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </a>
@@ -98,9 +98,11 @@
                 <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
                     <select name="per_page" onchange="this.form.submit()"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
-                        <option value="15" {{ request('per_page', '15') == '15' ? 'selected' : '' }}>15 baris</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 baris</option>
+                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                        <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
                         <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
                         <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
                     </select>
                 </div>
