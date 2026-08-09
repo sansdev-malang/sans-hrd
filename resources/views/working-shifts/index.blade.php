@@ -8,6 +8,7 @@
         addShortCode: '{{ old('short_code') && !old('_method') ? old('short_code') : '' }}',
         addIsShift: {{ old('is_shift') && !old('_method') ? 'true' : 'false' }},
         addDescription: '{{ old('description') && !old('_method') ? old('description') : '' }}',
+        isCodeManuallyEdited: false,
         editId: {{ old('edit_id') ? old('edit_id') : 'null' }},
         editName: '{{ old('name') && old('_method') === 'PUT' ? old('name') : '' }}',
         editCode: '{{ old('code') && old('_method') === 'PUT' ? old('code') : '' }}',
@@ -25,6 +26,15 @@
             { name: 'Sabtu', start_time: '', end_time: '', is_off: false }
         ],
         init() {
+            this.$watch('addName', value => {
+                if (!this.isCodeManuallyEdited) {
+                    this.addCode = value.toLowerCase()
+                                        .replace(/[^a-z0-9_]/g, '_')
+                                        .replace(/_+/g, '_')
+                                        .replace(/^_+|_+$/g, '');
+                }
+            });
+
             @if($errors->any() && old('days'))
                 let oldDays = @json(old('days'));
                 this.days = Object.keys(oldDays).map(key => {
@@ -77,6 +87,7 @@
             this.addShortCode = '';
             this.addIsShift = false;
             this.addDescription = '';
+            this.isCodeManuallyEdited = false;
             this.days = [
                 { name: 'Minggu', start_time: '', end_time: '', is_off: true },
                 { name: 'Senin', start_time: '', end_time: '', is_off: false },
@@ -234,6 +245,7 @@
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kode Unik Shift</label>
                                     <input type="text" name="code" required x-model="addCode" placeholder="Contoh: salehmart_s1" 
+                                        @input="isCodeManuallyEdited = true"
                                         oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_')"
                                         class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono">
                                 </div>

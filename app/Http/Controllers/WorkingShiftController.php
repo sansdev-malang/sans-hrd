@@ -24,7 +24,11 @@ class WorkingShiftController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->has('code')) {
+        if (!$request->filled('code') && $request->filled('name')) {
+            $request->merge([
+                'code' => strtolower(preg_replace('/[^a-zA-Z0-9_]/', '_', $request->input('name')))
+            ]);
+        } elseif ($request->filled('code')) {
             $request->merge([
                 'code' => strtolower(preg_replace('/[^a-zA-Z0-9_]/', '_', $request->input('code')))
             ]);
