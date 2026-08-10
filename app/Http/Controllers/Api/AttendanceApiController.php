@@ -515,7 +515,7 @@ class AttendanceApiController extends Controller
             $employeeShifts = $assignedShifts[$shiftKey] ?? collect();
             foreach ($employeeShifts as $assignment) {
                 $ws = $assignment->workingShift;
-                if ($ws) {
+                if ($ws && !isset($activeShiftsData[$ws->id])) {
                     $details = [];
                     foreach ($ws->details->sortBy('day_of_week') as $dt) {
                         $details[] = [
@@ -525,13 +525,14 @@ class AttendanceApiController extends Controller
                             'end_time' => $dt->end_time ? substr($dt->end_time, 0, 5) : null,
                         ];
                     }
-                    $activeShiftsData[] = [
+                    $activeShiftsData[$ws->id] = [
                         'name' => $ws->name,
                         'description' => $ws->description,
                         'details' => $details,
                     ];
                 }
             }
+            $activeShiftsData = array_values($activeShiftsData);
 
             $reports[] = [
                 'employee' => $emp,
