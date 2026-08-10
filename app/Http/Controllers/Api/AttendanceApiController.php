@@ -385,6 +385,10 @@ class AttendanceApiController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) - 6 (Sat)
 
+                $shiftStartTime = null;
+                $shiftEndTime = null;
+                $shiftName = null;
+
                 // Skip Holidays
                 if (in_array($dateStr, $holidayDates)) {
                     $currentDate->addDay();
@@ -426,6 +430,8 @@ class AttendanceApiController extends Controller
                             if ($detail && !$detail->is_off) {
                                 $hasShiftToday = true;
                                 $shiftStartTime = $detail->start_time;
+                                $shiftEndTime = $detail->end_time;
+                                $shiftName = $assignment->workingShift->name;
                                 $currentAssignment = $assignment;
                             }
                             break;
@@ -492,7 +498,9 @@ class AttendanceApiController extends Controller
 
                     $dailyDetails[$dateStr] = [
                         'date' => $dateStr,
+                        'shift_name' => $shiftName,
                         'shift_start' => $shiftStartTime,
+                        'shift_end' => $shiftEndTime,
                         'check_in' => $dailyCheckIn,
                         'late_minutes' => $dailyLateMinutes,
                         'status' => $dailyStatus,
@@ -503,12 +511,35 @@ class AttendanceApiController extends Controller
                 $currentDate->addDay();
             }
 
+            $activeShiftsData = [];
+            $employeeShifts = $assignedShifts[$shiftKey] ?? collect();
+            foreach ($employeeShifts as $assignment) {
+                $ws = $assignment->workingShift;
+                if ($ws) {
+                    $details = [];
+                    foreach ($ws->details->sortBy('day_of_week') as $dt) {
+                        $details[] = [
+                            'day_of_week' => $dt->day_of_week,
+                            'is_off' => (bool)$dt->is_off,
+                            'start_time' => $dt->start_time ? substr($dt->start_time, 0, 5) : null,
+                            'end_time' => $dt->end_time ? substr($dt->end_time, 0, 5) : null,
+                        ];
+                    }
+                    $activeShiftsData[] = [
+                        'name' => $ws->name,
+                        'description' => $ws->description,
+                        'details' => $details,
+                    ];
+                }
+            }
+
             $reports[] = [
                 'employee' => $emp,
                 'total_present' => $totalPresent,
                 'total_late_minutes' => $totalLateMinutes,
                 'total_absent' => $totalAbsent,
                 'bonus_nominal' => $totalBonusNominal,
+                'active_shifts' => $activeShiftsData,
                 'daily_details' => $dailyDetails,
             ];
         }
