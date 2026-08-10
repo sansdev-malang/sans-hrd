@@ -82,6 +82,9 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
 
     // Raw Attendance Logs
     Route::get('raw-attendance-logs', [\App\Http\Controllers\RawAttendanceLogController::class, 'index'])->name('raw-attendance-logs.index');
+    Route::post('raw-attendance-logs', [\App\Http\Controllers\RawAttendanceLogController::class, 'store'])->name('raw-attendance-logs.store');
+    Route::put('raw-attendance-logs/{id}', [\App\Http\Controllers\RawAttendanceLogController::class, 'update'])->name('raw-attendance-logs.update');
+    Route::delete('raw-attendance-logs/{id}', [\App\Http\Controllers\RawAttendanceLogController::class, 'destroy'])->name('raw-attendance-logs.destroy');
 
     // Attendance Logs
     Route::post('attendance-logs/sync', [\App\Http\Controllers\AttendanceLogController::class, 'sync'])->name('attendance-logs.sync');
