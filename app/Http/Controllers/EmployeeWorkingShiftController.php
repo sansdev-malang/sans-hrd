@@ -27,6 +27,7 @@ class EmployeeWorkingShiftController extends Controller
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
         $shifts = WorkingShift::orderBy('name')->get();
+        $bonusSchemas = BonusSchema::orderBy('name')->get();
         
         $selectedUnitId = $request->query('unit_id');
         
@@ -158,6 +159,7 @@ class EmployeeWorkingShiftController extends Controller
             'batches' => $paginatedBatches,
             'units' => $units,
             'shifts' => $shifts,
+            'bonusSchemas' => $bonusSchemas,
             'selectedUnitId' => $selectedUnitId,
             'perPage' => $perPageQuery
         ]);
