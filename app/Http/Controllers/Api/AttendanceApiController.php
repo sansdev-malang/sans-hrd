@@ -217,7 +217,7 @@ class AttendanceApiController extends Controller
                     if ($checkInLog || $checkOutLog) {
                         $isLate = false;
                         if ($checkInLog) {
-                            if (\Carbon\Carbon::parse($checkInLog) > $expectedIn) {
+                            if (\Carbon\Carbon::parse($checkInLog)->second(0) > $expectedIn->second(0)) {
                                 $isLate = true;
                             }
                         }
@@ -453,7 +453,7 @@ class AttendanceApiController extends Controller
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
                             $dailyCheckIn = $checkInCarbon->format('H:i:s');
     
-                            if ($checkInCarbon > $expectedStart) {
+                            if ($checkInCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
                                 $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
                                 $dailyLateMinutes = $diff;
                                 $totalLateMinutes += $diff;

@@ -231,7 +231,7 @@ class AttendanceLogController extends Controller
                     if ($checkInLog || $checkOutLog) {
                         $isLate = false;
                         if ($checkInLog) {
-                            if (\Carbon\Carbon::parse($checkInLog) > $expectedIn) {
+                            if (\Carbon\Carbon::parse($checkInLog)->second(0) > $expectedIn->second(0)) {
                                 $isLate = true;
                             }
                         }

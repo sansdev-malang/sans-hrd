@@ -222,7 +222,7 @@ class AttendanceBonusReportController extends Controller
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
                             $dailyCheckIn = $checkInCarbon->format('H:i:s');
 
-                            if ($checkInCarbon > $expectedStart) {
+                            if ($checkInCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
                                 $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
                                 $dailyLateMinutes = $diff;
                                 $totalLateMinutes += $diff;
@@ -474,7 +474,7 @@ class AttendanceBonusReportController extends Controller
                             $checkInCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
                             $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
 
-                            if ($checkInCarbon > $expectedStart) {
+                            if ($checkInCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
                                 $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
                                 $dailyLateMinutes = $diff;
                                 $totalLateMinutes += $diff;
