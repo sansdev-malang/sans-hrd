@@ -411,6 +411,34 @@ class AttendanceApiController extends Controller
                     }
                 }
                 if ($isOnLeave && $leaveType !== 'Dinas') {
+                    $shiftName = null;
+                    $shiftStartTime = null;
+                    $shiftEndTime = null;
+                    if (isset($assignedShifts[$shiftKey])) {
+                        foreach ($assignedShifts[$shiftKey] as $assignment) {
+                            $assignStartDate = substr($assignment->start_date, 0, 10);
+                            $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                            if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                                $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
+                                if ($detail) {
+                                    $shiftName = $assignment->workingShift->name;
+                                    $shiftStartTime = $detail->start_time;
+                                    $shiftEndTime = $detail->end_time;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    $dailyDetails[$dateStr] = [
+                        'date' => $dateStr,
+                        'shift_name' => $shiftName,
+                        'shift_start' => $shiftStartTime,
+                        'shift_end' => $shiftEndTime,
+                        'check_in' => null,
+                        'late_minutes' => 0,
+                        'status' => $leaveType ?? 'Izin',
+                        'bonus_nominal' => 0,
+                    ];
                     $currentDate->addDay();
                     continue;
                 }
@@ -418,6 +446,8 @@ class AttendanceApiController extends Controller
                 // Check Shift Assignment
                 $hasShiftToday = false;
                 $shiftStartTime = null;
+                $shiftEndTime = null;
+                $shiftName = null;
                 $currentAssignment = null;
                 $shiftKey = $unit . '_' . $empId;
 
@@ -427,12 +457,14 @@ class AttendanceApiController extends Controller
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
-                            if ($detail && !$detail->is_off) {
-                                $hasShiftToday = true;
-                                $shiftStartTime = $detail->start_time;
-                                $shiftEndTime = $detail->end_time;
+                            if ($detail) {
                                 $shiftName = $assignment->workingShift->name;
                                 $currentAssignment = $assignment;
+                                if (!$detail->is_off) {
+                                    $hasShiftToday = true;
+                                    $shiftStartTime = $detail->start_time;
+                                    $shiftEndTime = $detail->end_time;
+                                }
                             }
                             break;
                         }
@@ -505,6 +537,17 @@ class AttendanceApiController extends Controller
                         'late_minutes' => $dailyLateMinutes,
                         'status' => $dailyStatus,
                         'bonus_nominal' => $dailyBonus,
+                    ];
+                } else {
+                    $dailyDetails[$dateStr] = [
+                        'date' => $dateStr,
+                        'shift_name' => $shiftName,
+                        'shift_start' => null,
+                        'shift_end' => null,
+                        'check_in' => null,
+                        'late_minutes' => 0,
+                        'status' => 'Off',
+                        'bonus_nominal' => 0,
                     ];
                 }
 
