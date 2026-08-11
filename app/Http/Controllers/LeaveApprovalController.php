@@ -15,11 +15,16 @@ class LeaveApprovalController extends Controller
      */
     public function index(Request $request)
     {
+        $cookieName = 'read_leave_ids_' . auth()->id();
         if ($request->has('clear_all')) {
             $recentIds = LeaveRequest::where('created_at', '>=', now()->subDays(3))->pluck('id')->toArray();
-            $readIds = session('read_leave_ids_' . auth()->id(), []);
+            $readIds = $request->cookie($cookieName);
+            $readIds = $readIds ? json_decode($readIds, true) : [];
+            if (!is_array($readIds)) {
+                $readIds = [];
+            }
             $newReadIds = array_unique(array_merge($readIds, $recentIds));
-            session(['read_leave_ids_' . auth()->id() => $newReadIds]);
+            cookie()->queue($cookieName, json_encode($newReadIds), 60 * 24 * 30); // 30 days
             if ($request->expectsJson()) {
                 return response()->json(['success' => true]);
             }
@@ -27,9 +32,13 @@ class LeaveApprovalController extends Controller
         }
 
         if ($request->has('read_id')) {
-            $readIds = session('read_leave_ids_' . auth()->id(), []);
+            $readIds = $request->cookie($cookieName);
+            $readIds = $readIds ? json_decode($readIds, true) : [];
+            if (!is_array($readIds)) {
+                $readIds = [];
+            }
             $readIds[] = (int) $request->input('read_id');
-            session(['read_leave_ids_' . auth()->id() => array_unique($readIds)]);
+            cookie()->queue($cookieName, json_encode(array_unique($readIds)), 60 * 24 * 30); // 30 days
         }
         // 1. Pull latest leave requests from all active units and sync locally
         $this->pullLeaveRequestsFromUnits();
@@ -43,6 +52,10 @@ class LeaveApprovalController extends Controller
 
         if ($request->filled('type')) {
             $query->where('type', $request->input('type'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
         }
 
         $leavesCollection = $query->get();
@@ -206,6 +219,22 @@ class LeaveApprovalController extends Controller
                     $remoteLeaves = $response->json() ?? [];
 
                     foreach ($remoteLeaves as $rL) {
+                        $statusCode = $rL['status_code'] ?? null;
+                        $status = $rL['status'];
+                        
+                        $isNewOrPendingH = false;
+                        if ($statusCode === 'H') {
+                            // Check if it already exists and is approved in our local DB
+                            $exists = LeaveRequest::where('school_unit_id', $unit->id)
+                                ->where('remote_leave_id', $rL['id'])
+                                ->first();
+                            
+                            if (!$exists || $exists->status !== 'Approved') {
+                                $isNewOrPendingH = true;
+                            }
+                            $status = 'Approved';
+                        }
+
                         // We check by school_unit_id and remote_leave_id
                         LeaveRequest::updateOrCreate(
                             [
@@ -218,14 +247,29 @@ class LeaveApprovalController extends Controller
                                 'start_date' => $rL['start_date'],
                                 'end_date' => $rL['end_date'],
                                 'type' => $rL['type'],
-                                'status_code' => $rL['status_code'] ?? null,
+                                'status_code' => $statusCode,
                                 'gets_presence_bonus' => $rL['gets_presence_bonus'] ?? false,
                                 'reason' => $rL['reason'],
-                                'status' => $rL['status'],
-                                'notes' => $rL['notes'] ?? null,
+                                'status' => $status,
+                                'notes' => $rL['notes'] ?? ($statusCode === 'H' ? 'Disetujui otomatis oleh HRD Pusat (Dinas).' : null),
                                 'attachment' => $rL['attachment'] ?? null,
                             ]
                         );
+
+                        if ($isNewOrPendingH) {
+                            try {
+                                Http::withHeaders([
+                                    'X-API-TOKEN' => $unit->api_token,
+                                    'Accept' => 'application/json',
+                                ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
+                                    'leave_id' => $rL['id'],
+                                    'status' => 'Approved',
+                                    'notes' => 'Disetujui otomatis oleh HRD Pusat (Dinas).',
+                                ]);
+                            } catch (\Exception $e) {
+                                Log::error("Failed to send auto-approval for H leave to unit {$unit->name}: " . $e->getMessage());
+                            }
+                        }
                     }
                 }
             } catch (\Exception $e) {

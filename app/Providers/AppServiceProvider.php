@@ -38,7 +38,19 @@ class AppServiceProvider extends ServiceProvider
                         }
                     }
 
-                    $readIds = session('read_leave_ids_' . $user->id, []);
+                    $cookieName = 'read_leave_ids_' . $user->id;
+                    $readIds = request()->cookie($cookieName);
+                    $readIds = $readIds ? json_decode($readIds, true) : [];
+                    if (!is_array($readIds)) {
+                        $readIds = [];
+                    }
+                    if (request()->has('read_id')) {
+                        $readIds[] = (int) request()->input('read_id');
+                    }
+                    if (request()->has('clear_all')) {
+                        $recentIds = \App\Models\LeaveRequest::where('created_at', '>=', now()->subDays(3))->pluck('id')->toArray();
+                        $readIds = array_merge($readIds, $recentIds);
+                    }
                     $pendingLeavesQuery = \App\Models\LeaveRequest::where('created_at', '>=', now()->subDays(3))
                         ->whereNotIn('id', $readIds);
                     $pendingLeavesCount = (clone $pendingLeavesQuery)->count();
