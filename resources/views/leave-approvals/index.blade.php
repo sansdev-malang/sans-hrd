@@ -26,10 +26,52 @@
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left ">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-200 font-nasalization">Riwayat Izin Pegawai</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-205 font-nasalization">Riwayat Izin Pegawai</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Daftar riwayat izin, sakit, dan cuti pegawai yang dihimpun dari seluruh unit sekolah.</p>
             </div>
         </header>
+
+        <!-- STATS SECTION -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Menunggu Approval -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Menunggu Approval</span>
+                    <span class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1 block">
+                        <span>{{ $pendingCount }}</span> <span class="text-xs font-medium text-slate-400">Pengajuan</span>
+                    </span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="clock" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <!-- Total Diproses -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Total Diproses</span>
+                    <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1 block">
+                        <span>{{ $processedCount }}</span> <span class="text-xs font-medium text-slate-400">Izin</span>
+                    </span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="file-signature" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <!-- Rasio Persetujuan -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Rasio Persetujuan</span>
+                    <span class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
+                        <span>{{ $approvalRate }}%</span>
+                    </span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="percent" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </section>
 
         <!-- FILTERS & SEARCH -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
@@ -42,7 +84,7 @@
                             style="padding-left: 0.75rem; padding-right: 2.25rem;"
                             class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-55 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
                         <button type="submit" 
-                            :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
+                            :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-505'"
                             class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </button>
@@ -117,7 +159,8 @@
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-center w-32">Tanggal Mulai</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-center w-32">Tanggal Selesai</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-left w-auto min-w-[120px]">Keterangan</th>
-                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-right w-40 min-w-[150px]">Status / Aksi</th>
+                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-center w-28">Status</th>
+                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-center w-28">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
@@ -166,12 +209,12 @@
                                             @endif
                                         </div>
                                         <div class="flex flex-col min-w-0">
-                                              <span @click="selectedEmp = {{ json_encode($leaveData) }}; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-200 font-bold tracking-tight inline-block cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.01] transform transition-all duration-200 origin-left truncate" title="Klik untuk melihat detail lengkap">{{ $empName }}</span>
-                                             <div class="flex flex-col gap-0.5 mt-0.5 min-w-0">
-                                                 <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $unitName }}</span>
-                                                 <span class="text-[10px] text-slate-500 dark:text-slate-450 block truncate max-w-[180px]" title="{{ $leave->employee_position }}">{{ $leave->employee_position }}</span>
-                                                 <span class="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 font-medium">Diajukan: {{ $leave->created_at ? $leave->created_at->translatedFormat('d M Y H:i') : '-' }}</span>
-                                             </div>
+                                            <span @click="selectedEmp = {{ json_encode($leaveData) }}; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-200 font-bold tracking-tight inline-block cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.01] transform transition-all duration-200 origin-left truncate text-left" title="Klik untuk melihat detail lengkap">{{ $empName }}</span>
+                                            <div class="flex flex-col gap-0.5 mt-0.5 min-w-0 text-left">
+                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-655 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $unitName }}</span>
+                                                <span class="text-[10px] text-slate-500 dark:text-slate-450 block truncate max-w-[180px]" title="{{ $leave->employee_position }}">{{ $leave->employee_position }}</span>
+                                                <span class="text-[9px] text-slate-400 dark:text-slate-550 mt-0.5 font-medium">Diajukan: {{ $leave->created_at ? $leave->created_at->translatedFormat('d M Y H:i') : '-' }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -224,12 +267,32 @@
                                         {{ \Illuminate\Support\Str::limit($leave->reason ?? '-', 40) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-3 text-right">
+                                <td class="px-6 py-3 text-center">
                                     @if($leave->status === 'Pending')
-                                        <div class="flex items-center justify-end gap-1.5">
-                                            <button @click="selectedEmp = {{ json_encode($leaveData) }}; showEmpDetailModal = true" class="inline-flex items-center justify-center w-6 h-6 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Lihat Detail">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
-                                            </button>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-955/30 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30 uppercase">
+                                            Pending
+                                        </span>
+                                    @elseif($leave->status === 'Approved')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-955/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 dark:border-emerald-900/30 uppercase">
+                                            Disetujui
+                                        </span>
+                                    @else
+                                        <div class="flex flex-col items-center gap-0.5">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-455 border border-rose-200/30 dark:border-rose-900/30 uppercase" title="Alasan: {{ $leave->notes ?? '-' }}">
+                                                Ditolak
+                                            </span>
+                                            @if($leave->notes)
+                                                <span class="text-[9px] text-slate-400 dark:text-slate-500 italic max-w-[100px] truncate" title="{{ $leave->notes }}">{{ $leave->notes }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-3 text-center">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <button @click="selectedEmp = {{ json_encode($leaveData) }}; showEmpDetailModal = true" class="inline-flex items-center justify-center w-6 h-6 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-655 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Lihat Detail">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </button>
+                                        @if($leave->status === 'Pending')
                                             <form action="{{ route('leave-approvals.approve', $leave->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-200/30 dark:border-emerald-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs">
@@ -237,67 +300,28 @@
                                                     Setujui
                                                 </button>
                                             </form>
-                                            <button @click="selectedLeaveId = '{{ $leave->id }}'; selectedLeaveEmployee = '{{ $leave->employee_name }}'; showRejectModal = true" class="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-[10px] font-bold rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs">
+                                            <button @click="selectedLeaveId = '{{ $leave->id }}'; selectedLeaveEmployee = '{{ $leave->employee_name }}'; showRejectModal = true" class="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/30 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-455 text-[10px] font-bold rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                                                 Tolak
                                             </button>
-                                            <form action="{{ route('leave-approvals.destroy', $leave->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data izin ini? Data di unit sekolah asal akan otomatis diubah menjadi Ditolak.')" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center justify-center w-6 h-6 bg-rose-50/50 hover:bg-rose-100/60 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Hapus Izin">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @elseif($leave->status === 'Approved')
-                                        <div class="flex items-center justify-end gap-1.5">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 dark:border-emerald-900/30 uppercase">
-                                                Disetujui
-                                            </span>
-                                            <button @click="selectedEmp = {{ json_encode($leaveData) }}; showEmpDetailModal = true" class="inline-flex items-center justify-center w-6 h-6 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Lihat Detail">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
-                                            </button>
-                                            <button @click="editLeave = { id: '{{ $leave->id }}', status: '{{ $leave->status }}', notes: {{ json_encode($leave->notes ?? '') }}, name: {{ json_encode($leave->employee_name) }} }; showEditModal = true" class="inline-flex items-center justify-center w-6 h-6 bg-amber-50/60 hover:bg-amber-100/60 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-200/30 dark:border-amber-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Edit Keputusan">
+                                        @else
+                                            <button @click="editLeave = { id: '{{ $leave->id }}', status: '{{ $leave->status }}', notes: {{ json_encode($leave->notes ?? '') }}, name: {{ json_encode($leave->employee_name) }} }; showEditModal = true" class="inline-flex items-center justify-center w-6 h-6 bg-amber-50/60 hover:bg-amber-100/60 dark:bg-amber-955/20 dark:hover:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-200/30 dark:border-amber-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Edit Keputusan">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                                             </button>
-                                            <form action="{{ route('leave-approvals.destroy', $leave->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data izin ini? Data di unit sekolah asal akan otomatis diubah menjadi Ditolak.')" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center justify-center w-6 h-6 bg-rose-50/50 hover:bg-rose-100/60 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Hapus Izin">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @else
-                                        <div class="flex items-center justify-end gap-1.5">
-                                            <div class="flex flex-col items-end gap-0.5">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border border-rose-200/30 dark:border-rose-900/30 uppercase" title="Alasan: {{ $leave->notes ?? '-' }}">
-                                                    Ditolak
-                                                </span>
-                                                @if($leave->notes)
-                                                    <span class="text-[9px] text-slate-400 dark:text-slate-500 italic max-w-[100px] truncate" title="{{ $leave->notes }}">{{ $leave->notes }}</span>
-                                                @endif
-                                            </div>
-                                            <button @click="selectedEmp = {{ json_encode($leaveData) }}; showEmpDetailModal = true" class="inline-flex items-center justify-center w-6 h-6 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Lihat Detail">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        @endif
+                                        <form action="{{ route('leave-approvals.destroy', $leave->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data izin ini? Data di unit sekolah asal akan otomatis diubah menjadi Ditolak.')" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center justify-center w-6 h-6 bg-rose-50/50 hover:bg-rose-100/60 dark:bg-rose-955/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-455 rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Hapus Izin">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                                             </button>
-                                            <button @click="editLeave = { id: '{{ $leave->id }}', status: '{{ $leave->status }}', notes: {{ json_encode($leave->notes ?? '') }}, name: {{ json_encode($leave->employee_name) }} }; showEditModal = true" class="inline-flex items-center justify-center w-6 h-6 bg-amber-50/60 hover:bg-amber-100/60 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-200/30 dark:border-amber-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Edit Keputusan">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                            </button>
-                                            <form action="{{ route('leave-approvals.destroy', $leave->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data izin ini? Data di unit sekolah asal akan otomatis diubah menjadi Ditolak.')" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center justify-center w-6 h-6 bg-rose-50/50 hover:bg-rose-100/60 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all cursor-pointer shadow-2xs hover:shadow-xs" title="Hapus Izin">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @endif
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-16 text-center text-slate-500 dark:text-slate-400">
+                                <td colspan="7" class="px-6 py-16 text-center text-slate-500 dark:text-slate-400">
                                     Belum ada data riwayat izin pegawai.
                                 </td>
                             </tr>
@@ -382,9 +406,9 @@
                     <template x-if="selectedEmp">
                         <div class="rounded-lg p-3 border text-[11px] font-medium flex items-center gap-2 animate-fade-in"
                             :class="{
-                                'bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40': selectedEmp.leave_status === 'Approved',
-                                'bg-rose-50/50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-400 border-rose-100 dark:border-rose-900/40': selectedEmp.leave_status === 'Rejected',
-                                'bg-amber-50/50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-400 border-amber-100 dark:border-amber-900/40': selectedEmp.leave_status === 'Pending'
+                                'bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-450 border-emerald-100 dark:border-emerald-900/40': selectedEmp.leave_status === 'Approved',
+                                'bg-rose-50/50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-450 border-rose-100 dark:border-rose-900/40': selectedEmp.leave_status === 'Rejected',
+                                'bg-amber-50/50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-450 border-amber-100 dark:border-amber-900/40': selectedEmp.leave_status === 'Pending'
                             }">
                             <span class="w-2 h-2 rounded-full"
                                 :class="{
@@ -412,12 +436,12 @@
                                                 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-455 dark:border-rose-900/50': selectedEmp.status_code === 'S',
                                                 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900/50': selectedEmp.status_code === 'I',
                                                 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-900/50': selectedEmp.status_code === 'C',
-                                                'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900/50': selectedEmp.status_code === 'H'
+                                                'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-455 dark:border-emerald-900/50': selectedEmp.status_code === 'H'
                                             }"
                                             x-text="selectedEmp.status_code"></span>
                                         
                                         <!-- Type Name -->
-                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-950 text-slate-850 dark:text-slate-200 border border-slate-200/50 dark:border-slate-800 capitalize" x-text="selectedEmp.leave_type"></span>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-955 text-slate-850 dark:text-slate-200 border border-slate-200/50 dark:border-slate-800 capitalize" x-text="selectedEmp.leave_type"></span>
                                     </div>
                                 </template>
                             </div>
@@ -433,7 +457,7 @@
 
                         <div class="col-span-2 pt-1">
                             <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Keterangan / Alasan</span>
-                            <div class="bg-slate-50/50 dark:bg-slate-950/30 rounded-xl p-3 border border-slate-100 dark:border-slate-800/80">
+                            <div class="bg-slate-50/50 dark:bg-slate-955/30 rounded-xl p-3 border border-slate-100 dark:border-slate-800/80">
                                 <p class="text-slate-600 dark:text-slate-350 italic font-medium leading-relaxed" x-text="selectedEmp ? selectedEmp.leave_reason : ''"></p>
                             </div>
                         </div>
@@ -452,7 +476,7 @@
                         </template>
                     </div>
 
-                    <!-- Additional Details Collapsible -->
+                    <!-- Additional Details -->
                     <div class="pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4 text-[10px] text-left">
                         <div>
                             <span class="block text-slate-450 dark:text-slate-500 font-medium">Status Kepegawaian</span>
@@ -474,7 +498,7 @@
                         </template>
                         <template x-if="selectedEmp && selectedEmp.leave_status !== 'Pending' && selectedEmp.processed_by && selectedEmp.processed_by !== '-'">
                             <div class="col-span-2">
-                                <span class="block text-slate-450 dark:text-slate-500 font-medium">Diproses Oleh</span>
+                                <span class="block text-slate-455 dark:text-slate-500 font-medium">Diproses Oleh</span>
                                 <span class="font-bold text-slate-600 dark:text-slate-350" x-text="selectedEmp.processed_by"></span>
                             </div>
                         </template>
@@ -482,7 +506,7 @@
                 </div>
 
                 <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50 dark:bg-slate-900/40 shrink-0">
-                    <button @click="showEmpDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-850 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-2xs hover:shadow-xs transition-all cursor-pointer">Tutup</button>
+                    <button @click="showEmpDetailModal = false" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-855 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold rounded-lg shadow-2xs hover:shadow-xs transition-all cursor-pointer">Tutup</button>
                 </div>
             </div>
             </div>
@@ -492,7 +516,7 @@
         <template x-teleport="body">
             <div x-show="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" style="display: none; margin-top: 0px !important; z-index: 9999;">
             <div @click.outside="showRejectModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-sm p-6 text-left animate-in fade-in duration-200">
-                <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-3 mb-4">
+                <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-855 pb-3 mb-4">
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization">Tolak Pengajuan Izin</h3>
                         <p class="text-[10px] text-slate-400 dark:text-slate-55 mt-0.5" x-text="selectedLeaveEmployee"></p>
@@ -510,7 +534,7 @@
                     </div>
 
                     <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800 justify-end">
-                        <button type="button" @click="showRejectModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer">
+                        <button type="button" @click="showRejectModal = false" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-855 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all cursor-pointer">
                             Batal
                         </button>
                         <button type="submit" class="h-9 px-4 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold rounded-lg shadow-xs hover:shadow-sm transition-all cursor-pointer">
@@ -548,9 +572,9 @@
                         </div>
 
                         <div>
-                            <label for="edit-status" class="block font-semibold text-slate-750 dark:text-slate-300 mb-1.5">Keputusan Status</label>
-                            <select id="edit-status" name="status" x-model="editLeave.status" 
-                                class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-950/30 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-1 focus:ring-indigo-500">
+                            <label class="block font-semibold text-slate-750 dark:text-slate-300 mb-1.5">Keputusan Status</label>
+                            <select name="status" x-model="editLeave.status" 
+                                class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-955/30 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-1 focus:ring-indigo-500">
                                 <option value="Pending">Menunggu Persetujuan (Pending)</option>
                                 <option value="Approved">Disetujui (Approved)</option>
                                 <option value="Rejected">Ditolak (Rejected)</option>
@@ -558,9 +582,9 @@
                         </div>
 
                         <div>
-                            <label for="edit-notes" class="block font-semibold text-slate-750 dark:text-slate-300 mb-1.5">Catatan / Alasan</label>
-                            <textarea id="edit-notes" name="notes" x-model="editLeave.notes" rows="3" placeholder="Masukkan catatan atau alasan keputusan..."
-                                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950/30 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-1 focus:ring-indigo-500 resize-none"></textarea>
+                            <label class="block font-semibold text-slate-755 dark:text-slate-300 mb-1.5">Catatan / Alasan</label>
+                            <textarea name="notes" x-model="editLeave.notes" rows="3" placeholder="Masukkan catatan atau alasan keputusan..."
+                                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-955/30 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-1 focus:ring-indigo-500 resize-none"></textarea>
                         </div>
 
                         <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800 justify-end">

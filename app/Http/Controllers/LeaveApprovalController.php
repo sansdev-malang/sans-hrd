@@ -120,7 +120,19 @@ class LeaveApprovalController extends Controller
         $schoolUnits = SchoolUnit::where('is_active', true)->orderBy('name')->get();
         $leaveTypes = LeaveRequest::distinct()->pluck('type')->filter()->sort()->values();
 
-        return view('leave-approvals.index', compact('paginatedLeaves', 'schoolUnits', 'leaveTypes'));
+        $pendingCount = LeaveRequest::where('status', 'Pending')->count();
+        $processedCount = LeaveRequest::whereIn('status', ['Approved', 'Rejected'])->count();
+        $approvedCount = LeaveRequest::where('status', 'Approved')->count();
+        $approvalRate = $processedCount > 0 ? round(($approvedCount / $processedCount) * 100) : 0;
+
+        return view('leave-approvals.index', compact(
+            'paginatedLeaves',
+            'schoolUnits',
+            'leaveTypes',
+            'pendingCount',
+            'processedCount',
+            'approvalRate'
+        ));
     }
 
     /**
