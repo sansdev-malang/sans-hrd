@@ -152,6 +152,7 @@ class LeaveApprovalController extends Controller
                 'leave_id' => $leave->remote_leave_id ?? $leave->employee_id, // Fallback to employee_id if remote_leave_id is null
                 'status' => 'Approved',
                 'notes' => 'Disetujui oleh HRD Pusat.',
+                'processed_by' => auth()->user()->name . ' (HRD Pusat)',
             ]);
 
             if ($response->successful()) {
@@ -195,6 +196,7 @@ class LeaveApprovalController extends Controller
                 'leave_id' => $leave->remote_leave_id ?? $leave->employee_id, // Fallback
                 'status' => 'Rejected',
                 'notes' => $validated['notes'],
+                'processed_by' => auth()->user()->name . ' (HRD Pusat)',
             ]);
 
             if ($response->successful()) {
@@ -223,6 +225,7 @@ class LeaveApprovalController extends Controller
         $validated = $request->validate([
             'status' => 'required|in:Pending,Approved,Rejected',
             'notes' => 'nullable|string|max:255',
+            'type' => 'required|string',
         ]);
 
         $leave = LeaveRequest::findOrFail($id);
@@ -237,12 +240,36 @@ class LeaveApprovalController extends Controller
                 'leave_id' => $leave->remote_leave_id ?? $leave->employee_id,
                 'status' => $validated['status'],
                 'notes' => $validated['notes'] ?? '',
+                'type' => $validated['type'],
+                'processed_by' => auth()->user()->name . ' (HRD Pusat)',
             ]);
 
             if ($response->successful()) {
+                $statusCode = 'I';
+                $getsPresenceBonus = false;
+                
+                $existingType = LeaveRequest::where('type', $validated['type'])->first();
+                if ($existingType) {
+                    $statusCode = $existingType->status_code;
+                    $getsPresenceBonus = (bool) $existingType->gets_presence_bonus;
+                } else {
+                    $typeLower = strtolower($validated['type']);
+                    if (str_contains($typeLower, 'sakit')) {
+                        $statusCode = 'S';
+                    } elseif (str_contains($typeLower, 'cuti')) {
+                        $statusCode = 'C';
+                    } elseif (str_contains($typeLower, 'dinas') || str_contains($typeLower, 'kedinasan')) {
+                        $statusCode = 'H';
+                        $getsPresenceBonus = true;
+                    }
+                }
+
                 $leave->update([
                     'status' => $validated['status'],
                     'notes' => $validated['notes'],
+                    'type' => $validated['type'],
+                    'status_code' => $statusCode,
+                    'gets_presence_bonus' => $getsPresenceBonus,
                     'processed_by' => auth()->user()->name,
                 ]);
 
@@ -335,6 +362,38 @@ class LeaveApprovalController extends Controller
                             $status = 'Approved';
                         }
 
+                        $notes = $rL['notes'] ?? ($statusCode === 'H' ? 'Disetujui otomatis oleh HRD Pusat (Dinas).' : null);
+                        $processedBy = $rL['processed_by'] ?? (($statusCode === 'H') ? 'Sistem (Otomatis)' : null);
+
+                        if (empty($processedBy) && $notes) {
+                            $lowerNotes = strtolower($notes);
+                            if (
+                                str_starts_with($lowerNotes, 'disetujui oleh ') ||
+                                str_starts_with($lowerNotes, 'ditolak oleh ') ||
+                                str_starts_with($lowerNotes, 'disetujui otomatis oleh ')
+                            ) {
+                                $parts = explode('oleh ', $notes);
+                                $processedBy = preg_replace('/[\s.]+$/', '', end($parts));
+                            } elseif (preg_match('/\((Keputusan|Ditolak|Disetujui)\s+oleh\s+(.*?)\)/i', $notes, $matches)) {
+                                $processedBy = trim($matches[2]);
+                            }
+                        }
+
+                        if ($notes) {
+                            // Clean notes from decision maker signature
+                            $notes = preg_replace('/\s*\((Keputusan|Ditolak|Disetujui)\s+oleh.*?\)/i', '', $notes);
+                            
+                            // If notes is just automatic text like "Disetujui oleh...", make it null
+                            $lowerNotes = strtolower(trim($notes));
+                            if (
+                                str_starts_with($lowerNotes, 'disetujui oleh') || 
+                                str_starts_with($lowerNotes, 'ditolak oleh') || 
+                                str_starts_with($lowerNotes, 'disetujui otomatis oleh')
+                            ) {
+                                $notes = null;
+                            }
+                        }
+
                         $updateData = [
                             'employee_id' => $rL['employee_id'],
                             'employee_name' => $rL['employee_name'] ?? null,
@@ -345,12 +404,12 @@ class LeaveApprovalController extends Controller
                             'gets_presence_bonus' => $rL['gets_presence_bonus'] ?? false,
                             'reason' => $rL['reason'],
                             'status' => $status,
-                            'notes' => $rL['notes'] ?? ($statusCode === 'H' ? 'Disetujui otomatis oleh HRD Pusat (Dinas).' : null),
+                            'notes' => $notes,
                             'attachment' => $rL['attachment'] ?? null,
                         ];
 
-                        if ($statusCode === 'H') {
-                            $updateData['processed_by'] = 'Sistem (Otomatis)';
+                        if ($processedBy) {
+                            $updateData['processed_by'] = $processedBy;
                         }
 
                         // We check by school_unit_id and remote_leave_id
@@ -382,5 +441,28 @@ class LeaveApprovalController extends Controller
                 Log::error("Failed pulling leave requests from unit {$unit->name}: " . $e->getMessage());
             }
         }
+    }
+
+    /**
+     * Fetch leave types directly from school unit API.
+     */
+    public function getUnitLeaveTypes($unit_id)
+    {
+        $unit = SchoolUnit::findOrFail($unit_id);
+        
+        try {
+            $response = Http::withHeaders([
+                'X-API-TOKEN' => $unit->api_token,
+                'Accept' => 'application/json',
+            ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/leave-types');
+            
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed fetching leave types from unit {$unit->name}: " . $e->getMessage());
+        }
+        
+        return response()->json([]);
     }
 }

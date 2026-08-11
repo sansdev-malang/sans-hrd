@@ -71,6 +71,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::put('settings/adms', [\App\Http\Controllers\SettingController::class, 'updateAdms'])->name('settings.update-adms');
 
     // Leave Request Approvals
+    Route::get('leave-approvals/units/{unit_id}/leave-types', [\App\Http\Controllers\LeaveApprovalController::class, 'getUnitLeaveTypes'])->name('leave-approvals.unit-leave-types');
     Route::get('leave-approvals', [\App\Http\Controllers\LeaveApprovalController::class, 'index'])->name('leave-approvals.index');
     Route::post('leave-approvals/{id}/approve', [\App\Http\Controllers\LeaveApprovalController::class, 'approve'])->name('leave-approvals.approve');
     Route::post('leave-approvals/{id}/reject', [\App\Http\Controllers\LeaveApprovalController::class, 'reject'])->name('leave-approvals.reject');
