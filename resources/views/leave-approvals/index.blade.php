@@ -170,6 +170,16 @@
                                 $color = $colors[$index % count($colors)];
                                 $initial = getInitials($empName);
                                 $unitName = $leave->schoolUnit ? $leave->schoolUnit->name : '-';
+                                $processedBy = $leave->processed_by;
+                                if (empty($processedBy) || $processedBy === '-') {
+                                    if ($leave->notes && str_contains($leave->notes, 'oleh ')) {
+                                        $parts = explode('oleh ', $leave->notes);
+                                        $processedBy = rtrim(end($parts), '.) ');
+                                    } else {
+                                        $processedBy = '-';
+                                    }
+                                }
+
                                 $leaveData = [
                                     'name' => $leave->employee_name,
                                     'nuptk_nip_nik' => $leave->employee_nip ?? '-',
@@ -190,7 +200,7 @@
                                     'notes' => $leave->notes ?? '',
                                     'created_at' => $leave->created_at ? $leave->created_at->translatedFormat('d M Y H:i') : '-',
                                     'updated_at' => $leave->updated_at ? $leave->updated_at->translatedFormat('d M Y H:i') : '-',
-                                    'processed_by' => $leave->processed_by ?? '-',
+                                    'processed_by' => $processedBy,
                                 ];
                             @endphp
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
