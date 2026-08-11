@@ -74,6 +74,8 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('leave-approvals', [\App\Http\Controllers\LeaveApprovalController::class, 'index'])->name('leave-approvals.index');
     Route::post('leave-approvals/{id}/approve', [\App\Http\Controllers\LeaveApprovalController::class, 'approve'])->name('leave-approvals.approve');
     Route::post('leave-approvals/{id}/reject', [\App\Http\Controllers\LeaveApprovalController::class, 'reject'])->name('leave-approvals.reject');
+    Route::put('leave-approvals/{id}', [\App\Http\Controllers\LeaveApprovalController::class, 'update'])->name('leave-approvals.update');
+    Route::delete('leave-approvals/{id}', [\App\Http\Controllers\LeaveApprovalController::class, 'destroy'])->name('leave-approvals.destroy');
 
     // ZKTeco Device Management
     Route::post('zkteco-devices/{zktecoDevice}/pull', [\App\Http\Controllers\ZktecoDeviceController::class, 'pullLogs'])->name('zkteco-devices.pull');

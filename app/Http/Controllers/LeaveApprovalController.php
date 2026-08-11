@@ -146,6 +146,7 @@ class LeaveApprovalController extends Controller
                 $leave->update([
                     'status' => 'Approved',
                     'notes' => 'Disetujui oleh HRD Pusat.',
+                    'processed_by' => auth()->user()->name,
                 ]);
 
                 return redirect()->route('leave-approvals.index')
@@ -188,6 +189,7 @@ class LeaveApprovalController extends Controller
                 $leave->update([
                     'status' => 'Rejected',
                     'notes' => $validated['notes'],
+                    'processed_by' => auth()->user()->name,
                 ]);
 
                 return redirect()->route('leave-approvals.index')
@@ -199,6 +201,82 @@ class LeaveApprovalController extends Controller
 
         return redirect()->route('leave-approvals.index')
             ->with('error', 'Gagal memproses penolakan izin ke unit sekolah.');
+    }
+
+    /**
+     * Update a leave request decision (Edit status/notes).
+     */
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:Pending,Approved,Rejected',
+            'notes' => 'nullable|string|max:255',
+        ]);
+
+        $leave = LeaveRequest::findOrFail($id);
+        $unit = SchoolUnit::findOrFail($leave->school_unit_id);
+
+        try {
+            // Send new decision to unit API
+            $response = Http::withHeaders([
+                'X-API-TOKEN' => $unit->api_token,
+                'Accept' => 'application/json',
+            ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
+                'leave_id' => $leave->remote_leave_id ?? $leave->employee_id,
+                'status' => $validated['status'],
+                'notes' => $validated['notes'] ?? '',
+            ]);
+
+            if ($response->successful()) {
+                $leave->update([
+                    'status' => $validated['status'],
+                    'notes' => $validated['notes'],
+                    'processed_by' => auth()->user()->name,
+                ]);
+
+                return redirect()->route('leave-approvals.index')
+                    ->with('success', 'Keputusan izin berhasil diperbarui.');
+            }
+        } catch (\Exception $e) {
+            Log::error("Error updating leave decision: " . $e->getMessage());
+        }
+
+        return redirect()->route('leave-approvals.index')
+            ->with('error', 'Gagal memproses pembaruan keputusan izin ke unit sekolah.');
+    }
+
+    /**
+     * Delete a leave request (Soft Delete and Reject on Remote Unit).
+     */
+    public function destroy($id)
+    {
+        $leave = LeaveRequest::findOrFail($id);
+        $unit = SchoolUnit::findOrFail($leave->school_unit_id);
+
+        try {
+            // Reject on remote unit
+            $response = Http::withHeaders([
+                'X-API-TOKEN' => $unit->api_token,
+                'Accept' => 'application/json',
+            ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
+                'leave_id' => $leave->remote_leave_id ?? $leave->employee_id,
+                'status' => 'Rejected',
+                'notes' => 'Dihapus oleh HRD Pusat.',
+            ]);
+
+            if ($response->successful()) {
+                // Soft delete locally
+                $leave->delete();
+
+                return redirect()->route('leave-approvals.index')
+                    ->with('success', 'Pengajuan izin berhasil dihapus.');
+            }
+        } catch (\Exception $e) {
+            Log::error("Error deleting leave: " . $e->getMessage());
+        }
+
+        return redirect()->route('leave-approvals.index')
+            ->with('error', 'Gagal menyinkronkan penghapusan izin ke unit sekolah.');
     }
 
     /**
@@ -219,6 +297,16 @@ class LeaveApprovalController extends Controller
                     $remoteLeaves = $response->json() ?? [];
 
                     foreach ($remoteLeaves as $rL) {
+                        // Check if this record is soft-deleted
+                        $existingTrashed = LeaveRequest::onlyTrashed()
+                            ->where('school_unit_id', $unit->id)
+                            ->where('remote_leave_id', $rL['id'])
+                            ->exists();
+                        
+                        if ($existingTrashed) {
+                            continue; // Skip soft-deleted records
+                        }
+
                         $statusCode = $rL['status_code'] ?? null;
                         $status = $rL['status'];
                         
@@ -235,25 +323,31 @@ class LeaveApprovalController extends Controller
                             $status = 'Approved';
                         }
 
+                        $updateData = [
+                            'employee_id' => $rL['employee_id'],
+                            'employee_name' => $rL['employee_name'] ?? null,
+                            'start_date' => $rL['start_date'],
+                            'end_date' => $rL['end_date'],
+                            'type' => $rL['type'],
+                            'status_code' => $statusCode,
+                            'gets_presence_bonus' => $rL['gets_presence_bonus'] ?? false,
+                            'reason' => $rL['reason'],
+                            'status' => $status,
+                            'notes' => $rL['notes'] ?? ($statusCode === 'H' ? 'Disetujui otomatis oleh HRD Pusat (Dinas).' : null),
+                            'attachment' => $rL['attachment'] ?? null,
+                        ];
+
+                        if ($statusCode === 'H') {
+                            $updateData['processed_by'] = 'Sistem (Otomatis)';
+                        }
+
                         // We check by school_unit_id and remote_leave_id
                         LeaveRequest::updateOrCreate(
                             [
                                 'school_unit_id' => $unit->id,
                                 'remote_leave_id' => $rL['id'],
                             ],
-                            [
-                                'employee_id' => $rL['employee_id'],
-                                'employee_name' => $rL['employee_name'] ?? null,
-                                'start_date' => $rL['start_date'],
-                                'end_date' => $rL['end_date'],
-                                'type' => $rL['type'],
-                                'status_code' => $statusCode,
-                                'gets_presence_bonus' => $rL['gets_presence_bonus'] ?? false,
-                                'reason' => $rL['reason'],
-                                'status' => $status,
-                                'notes' => $rL['notes'] ?? ($statusCode === 'H' ? 'Disetujui otomatis oleh HRD Pusat (Dinas).' : null),
-                                'attachment' => $rL['attachment'] ?? null,
-                            ]
+                            $updateData
                         );
 
                         if ($isNewOrPendingH) {

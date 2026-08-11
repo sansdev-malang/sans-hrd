@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LeaveRequest extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'remote_leave_id',
@@ -23,6 +24,7 @@ class LeaveRequest extends Model
         'status',
         'notes',
         'attachment',
+        'processed_by',
     ];
 
     protected $casts = [
