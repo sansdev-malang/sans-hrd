@@ -211,8 +211,10 @@
                                         <div class="flex flex-col min-w-0">
                                             <span @click="selectedEmp = {{ json_encode($leaveData) }}; showEmpDetailModal = true" class="text-slate-900 dark:text-slate-200 font-bold tracking-tight inline-block cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.01] transform transition-all duration-200 origin-left truncate text-left" title="Klik untuk melihat detail lengkap">{{ $empName }}</span>
                                             <div class="flex flex-col gap-0.5 mt-0.5 min-w-0 text-left">
-                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-655 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $unitName }}</span>
-                                                <span class="text-[10px] text-slate-500 dark:text-slate-450 block truncate max-w-[180px]" title="{{ $leave->employee_position }}">{{ $leave->employee_position }}</span>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-655 dark:text-slate-300 uppercase shrink-0">{{ $unitName }}</span>
+                                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold truncate max-w-[140px]" title="{{ $leave->employee_position }}">{{ $leave->employee_position }}</span>
+                                                </div>
                                                 <span class="text-[9px] text-slate-400 dark:text-slate-550 mt-0.5 font-medium">Diajukan: {{ $leave->created_at ? $leave->created_at->translatedFormat('d M Y H:i') : '-' }}</span>
                                             </div>
                                         </div>
