@@ -65,6 +65,7 @@
                         Pengumuman
                     </span>
                 </a>
+                @if(auth()->user()->hasRole('super_admin'))
                 <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('coming-soon') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
                     <div class="flex items-center gap-3">
                         <i data-lucide="award" class="menu-icon w-4 h-4"></i>
@@ -85,7 +86,7 @@
                         Prestasi Pegawai
                     </span>
                 </a>
-                <a href="{{ route('performance-reports.index') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('performance-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
+                <a href="{{ route('performance-reports.index') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('performance-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-550 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
                     <div class="flex items-center gap-3">
                         <i data-lucide="bar-chart-2" class="menu-icon w-4 h-4"></i>
                         <span class="menu-text">Rapor Kinerja</span>
@@ -95,6 +96,7 @@
                         Rapor Kinerja
                     </span>
                 </a>
+                @endif
             </nav>
 
             <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN ABSENSI</h3>
