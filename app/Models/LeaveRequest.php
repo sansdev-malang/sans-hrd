@@ -36,12 +36,12 @@ class LeaveRequest extends Model
         return $this->belongsTo(SchoolUnit::class);
     }
 
-    public function getTypeNameAttribute()
+    public function getRemoteData()
     {
-        static $unitTypes = [];
+        static $remoteLeaves = [];
 
-        if (!isset($unitTypes[$this->school_unit_id])) {
-            $unitTypes[$this->school_unit_id] = [];
+        if (!isset($remoteLeaves[$this->school_unit_id])) {
+            $remoteLeaves[$this->school_unit_id] = [];
             $unit = $this->schoolUnit ?? SchoolUnit::find($this->school_unit_id);
             if ($unit) {
                 try {
@@ -51,16 +51,37 @@ class LeaveRequest extends Model
                     ])->get(rtrim($unit->api_url, '/') . '/leave-requests');
                     if ($response->successful()) {
                         foreach ($response->json() as $rL) {
-                            $unitTypes[$this->school_unit_id][$rL['id']] = $rL['type'] ?? null;
+                            $remoteLeaves[$this->school_unit_id][$rL['id']] = $rL;
                         }
                     }
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("Failed to fetch leave types for unit {$unit->name}: " . $e->getMessage());
+                    \Illuminate\Support\Facades\Log::error("Failed to fetch remote leaves for unit {$unit->name}: " . $e->getMessage());
                 }
             }
         }
 
+        return $remoteLeaves[$this->school_unit_id][$this->remote_leave_id] ?? null;
+    }
+
+    public function getTypeNameAttribute()
+    {
+        $remote = $this->getRemoteData();
+        if ($remote && isset($remote['type'])) {
+            return $remote['type'];
+        }
         $codeToNameMap = ['S' => 'Sakit', 'I' => 'Izin', 'C' => 'Cuti', 'H' => 'Dinas'];
-        return $unitTypes[$this->school_unit_id][$this->remote_leave_id] ?? ($codeToNameMap[$this->status_code] ?? 'Izin');
+        return $codeToNameMap[$this->status_code] ?? 'Izin';
+    }
+
+    public function getReasonAttribute()
+    {
+        $remote = $this->getRemoteData();
+        return $remote['reason'] ?? '-';
+    }
+
+    public function getAttachmentAttribute()
+    {
+        $remote = $this->getRemoteData();
+        return $remote['attachment'] ?? null;
     }
 }
