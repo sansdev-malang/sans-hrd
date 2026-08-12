@@ -24,14 +24,14 @@
             </div>
             
             <!-- EXPORT DROPDOWN -->
-            <div x-data="{ open: false }" class="relative w-full md:w-auto self-stretch md:self-auto flex justify-end">
+            <div x-data="{ open: false }" class="relative inline-block text-left w-full md:w-auto">
                 <button type="button" @click="open = !open" @click.outside="open = false" class="w-full md:w-auto justify-center h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
                     <i data-lucide="download" class="w-4 h-4"></i>
                     <span>Ekspor Data</span>
                     <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                 </button>
                 
-                <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
                     <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                         <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                         Excel (.xlsx)
@@ -50,26 +50,24 @@
                 
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
-                    <!-- Search Box -->
-                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="relative w-full search-container">
+                    <!-- Search Box Welded with Cari Button (Premium Input Group) -->
+                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
                         <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
-                            style="padding-left: 0.75rem; padding-right: 2.25rem;"
-                            class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
-                        <button type="submit" 
-                            :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
-                            class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
-                            <i data-lucide="search" class="w-4 h-4"></i>
+                            style="border: none !important; outline: none !important; box-shadow: none !important;"
+                            class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
+                        <button type="submit" class="h-9 px-4 bg-slate-55 dark:bg-slate-855 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-l border-slate-200 dark:border-slate-800">
+                            Cari
                         </button>
                     </div>
 
                     <!-- Bulan -->
                     <input type="month" name="month" value="{{ request('month', $month) }}" onchange="this.form.submit()"
-                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer shadow-inner">
+                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700">
 
                     <!-- Filter Unit -->
                     @if(isset($schoolUnits) && count($schoolUnits) > 0)
                         <select name="unit_id" onchange="this.form.submit()"
-                            class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                            class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="">Semua Unit Sekolah</option>
                             @foreach($schoolUnits as $unit)
                                 <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
@@ -81,7 +79,7 @@
 
                     <!-- Jabatan -->
                     <select name="position" onchange="this.form.submit()"
-                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Jabatan</option>
                         @foreach($positions as $pos)
                             <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
@@ -98,7 +96,7 @@
                 <!-- Right Side: Per Page Options -->
                 <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
                     <select name="per_page" onchange="this.form.submit()"
-                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
                         <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
@@ -189,64 +187,161 @@
                                 </td>
                                 
                                 
-                                                                <!-- KOLOM 3+: TANGGAL -->
+                                <!-- KOLOM 3+: TANGGAL -->
                                 @foreach($dates as $date)
                                 @php
                                     $dateStr = $date->format('Y-m-d');
                                     $detail = $report['daily_details'][$dateStr] ?? null;
+                                    
+                                    $cellTooltip = '';
+                                    if ($detail) {
+                                        if ($detail['status'] === 'Hadir') {
+                                            $cellTooltip = "Hadir | Masuk: " . ($detail['check_in'] ?? '-') . " | Pulang: " . ($detail['check_out'] ?? '-');
+                                            if (!empty($detail['is_late'])) {
+                                                $cellTooltip .= " (Terlambat)";
+                                            }
+                                            if (!empty($detail['rejected_leave'])) {
+                                                $cellTooltip .= " | Ditolak: " . $detail['rejected_leave']['leave_type'];
+                                            }
+                                        } elseif ($detail['status'] === 'Alfa') {
+                                            $cellTooltip = "Alfa (Tanpa Keterangan)";
+                                            if (!empty($detail['rejected_leave'])) {
+                                                $cellTooltip .= " | Ditolak: " . $detail['rejected_leave']['leave_type'];
+                                            }
+                                        } elseif ($detail['status'] === 'Libur') {
+                                            $cellTooltip = "Hari Libur";
+                                        } elseif ($detail['status'] === 'Off') {
+                                            $cellTooltip = "Jadwal Off Kerja";
+                                        } elseif ($detail['status'] === 'Cuti/Izin') {
+                                            $leaveName = $detail['leave_type'] ?? 'Izin/Cuti';
+                                            $isPending = !empty($detail['is_pending']);
+                                            $prefix = $isPending ? 'Pending: ' : 'Disetujui: ';
+                                            
+                                            if (!empty($detail['check_in']) || !empty($detail['check_out'])) {
+                                                $cellTooltip = $prefix . $leaveName . " | Masuk: " . ($detail['check_in'] ?? '-') . " | Pulang: " . ($detail['check_out'] ?? '-');
+                                                if (!empty($detail['is_late'])) {
+                                                    $cellTooltip .= " (Terlambat)";
+                                                }
+                                            } else {
+                                                $cellTooltip = $prefix . $leaveName . " (Tidak Scan)";
+                                            }
+                                        }
+                                    } elseif ($date->isSunday()) {
+                                        $cellTooltip = "Hari Minggu";
+                                    }
                                 @endphp
-                                <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30 {{ $date->isSunday() ? 'bg-red-50/30 dark:bg-red-950/10' : '' }}">
+                                <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30 {{ $date->isSunday() ? 'bg-red-50/30 dark:bg-red-950/10' : '' }}" title="{{ $cellTooltip }}">
                                     @if($detail)
                                         @if($detail['status'] === 'Hadir')
                                             <div class="flex flex-col gap-0.5 items-center justify-center">
-                                                <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}" title="Masuk">{{ $detail['check_in'] ?? '-' }}</span>
-                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500" title="Pulang">{{ $detail['check_out'] ?? '-' }}</span>
+                                                <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}">{{ $detail['check_in'] ?? '-' }}</span>
+                                                @if(!empty($detail['pending_leave']))
+                                                    @php
+                                                        $pCode = $detail['pending_leave']['leave_code'];
+                                                        $colorMap = [
+                                                            'S' => 'bg-amber-50/40 dark:bg-amber-955/10 text-amber-500 dark:text-amber-500 border border-dashed border-amber-200/50',
+                                                            'I' => 'bg-purple-50/40 dark:bg-purple-955/10 text-purple-500 dark:text-purple-500 border border-dashed border-purple-200/50',
+                                                            'C' => 'bg-blue-50/40 dark:bg-blue-955/10 text-blue-500 dark:text-blue-500 border border-dashed border-blue-200/50',
+                                                            'H' => 'bg-emerald-50/40 dark:bg-emerald-955/10 text-emerald-500 dark:text-emerald-500 border border-dashed border-emerald-200/50'
+                                                        ];
+                                                        $pColorClass = $colorMap[$pCode] ?? 'bg-slate-50/40 text-slate-500 border border-dashed border-slate-200/50';
+                                                    @endphp
+                                                    <div class="w-full flex justify-center scale-75 opacity-60">
+                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $pColorClass }}">{{ $pCode }}</span>
+                                                    </div>
+                                                @endif
+                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">{{ $detail['check_out'] ?? '-' }}</span>
                                             </div>
                                         @elseif($detail['status'] === 'Alfa')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded font-bold text-[10px]" title="Alfa (Tanpa Keterangan)">A</div>
+                                            <div class="flex flex-col gap-0.5 items-center justify-center">
+                                                <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded font-bold text-[10px]">A</div>
+                                                @if(!empty($detail['pending_leave']))
+                                                    @php
+                                                        $pCode = $detail['pending_leave']['leave_code'];
+                                                        $colorMap = [
+                                                            'S' => 'bg-amber-50/40 dark:bg-amber-955/10 text-amber-500 dark:text-amber-500 border border-dashed border-amber-200/50',
+                                                            'I' => 'bg-purple-50/40 dark:bg-purple-955/10 text-purple-500 dark:text-purple-500 border border-dashed border-purple-200/50',
+                                                            'C' => 'bg-blue-50/40 dark:bg-blue-955/10 text-blue-500 dark:text-blue-500 border border-dashed border-blue-200/50',
+                                                            'H' => 'bg-emerald-50/40 dark:bg-emerald-955/10 text-emerald-500 dark:text-emerald-500 border border-dashed border-emerald-200/50'
+                                                        ];
+                                                        $pColorClass = $colorMap[$pCode] ?? 'bg-slate-50/40 text-slate-500 border border-dashed border-slate-200/50';
+                                                    @endphp
+                                                    <div class="w-full flex justify-center scale-75 opacity-60">
+                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $pColorClass }}">{{ $pCode }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
                                         @elseif($detail['status'] === 'Libur')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center text-red-200 dark:text-red-900/30 font-bold text-xs" title="Libur">-</div>
+                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center text-red-200 dark:text-red-900/30 font-bold text-xs">-</div>
                                         @elseif($detail['status'] === 'Off')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-50 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[9px]" title="Jadwal Libur Kerja (Off)">OFF</div>
+                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-50 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[9px]">OFF</div>
                                         @elseif($detail['status'] === 'Cuti/Izin')
                                             @php
                                                 $leaveCode = $detail['leave_code'] ?? 'I';
-                                                $leaveName = $detail['leave_type'] ?? 'Izin/Cuti';
+                                                $isPending = !empty($detail['is_pending']);
                                                 
-                                                $colorMap = [
-                                                    'S' => 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30',
-                                                    'I' => 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30',
-                                                    'C' => 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30',
-                                                    'H' => 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
-                                                ];
+                                                if ($isPending) {
+                                                    $colorMap = [
+                                                        'S' => 'bg-amber-50/40 dark:bg-amber-955/10 text-amber-500 dark:text-amber-500 border border-dashed border-amber-200/50',
+                                                        'I' => 'bg-purple-50/40 dark:bg-purple-955/10 text-purple-500 dark:text-purple-500 border border-dashed border-purple-200/50',
+                                                        'C' => 'bg-blue-50/40 dark:bg-blue-955/10 text-blue-500 dark:text-blue-500 border border-dashed border-blue-200/50',
+                                                        'H' => 'bg-emerald-50/40 dark:bg-emerald-955/10 text-emerald-500 dark:text-emerald-500 border border-dashed border-emerald-200/50'
+                                                    ];
+                                                } else {
+                                                    $colorMap = [
+                                                        'S' => 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30',
+                                                        'I' => 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30',
+                                                        'C' => 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30',
+                                                        'H' => 'bg-emerald-50 dark:bg-emerald-955/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                                                    ];
+                                                }
                                                 $colorClass = $colorMap[$leaveCode] ?? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
                                             @endphp
-                                            @if(!empty($detail['check_in']) && empty($detail['check_out']))
+                                            @if(!empty($detail['check_in']) && !empty($detail['check_out']))
+                                                <!-- Both Check-In and Check-Out -->
+                                                <div class="flex flex-col gap-0.5 items-center justify-center">
+                                                    <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}">{{ $detail['check_in'] }}</span>
+                                                    <div class="w-full flex justify-center scale-90">
+                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}">{{ $leaveCode }}</span>
+                                                    </div>
+                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">{{ $detail['check_out'] }}</span>
+                                                </div>
+                                            @elseif(!empty($detail['check_in']) && empty($detail['check_out']))
                                                 <!-- Only Check-In -->
                                                 <div class="flex flex-col gap-0.5 items-center justify-center">
-                                                    <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}" title="Masuk">{{ $detail['check_in'] }}</span>
+                                                    <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}">{{ $detail['check_in'] }}</span>
                                                     <div class="w-full flex justify-center scale-90">
-                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</span>
+                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}">{{ $leaveCode }}</span>
                                                     </div>
+                                                    <span class="text-[10px] font-bold text-slate-350 dark:text-slate-650">-</span>
                                                 </div>
                                             @elseif(!empty($detail['check_out']) && empty($detail['check_in']))
                                                 <!-- Only Check-Out -->
                                                 <div class="flex flex-col gap-0.5 items-center justify-center">
+                                                    <span class="text-[10px] font-bold text-slate-350 dark:text-slate-650">-</span>
                                                     <div class="w-full flex justify-center scale-90">
-                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</span>
+                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}">{{ $leaveCode }}</span>
                                                     </div>
-                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500" title="Pulang">{{ $detail['check_out'] }}</span>
+                                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">{{ $detail['check_out'] }}</span>
+                                                </div>
+                                            @elseif($isPending)
+                                                <!-- Pending and Neither Check-In nor Check-Out -->
+                                                <div class="flex flex-col gap-0.5 items-center justify-center py-0.5">
+                                                    <div class="w-full flex justify-center scale-90">
+                                                        <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}">{{ $leaveCode }}</span>
+                                                    </div>
+                                                    <span class="text-[10px] font-bold text-slate-350 dark:text-slate-650">-</span>
                                                 </div>
                                             @else
-                                                <!-- Neither or Both (If both, we don't show the clock hours as requested) -->
-                                                <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center rounded font-bold text-[10px] {{ $colorClass }}" title="{{ $leaveName }}">{{ $leaveCode }}</div>
+                                                <!-- Approved and Neither -->
+                                                <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center rounded font-bold text-[10px] {{ $colorClass }}">{{ $leaveCode }}</div>
                                             @endif
                                         @else
                                             <div class="text-xs text-slate-300">-</div>
                                         @endif
                                     @else
                                         @if($date->isSunday())
-                                            <div class="mx-auto flex items-center justify-center text-red-200 dark:text-red-900/30 font-bold text-xs" title="Minggu">-</div>
+                                            <div class="mx-auto flex items-center justify-center text-red-200 dark:text-red-900/30 font-bold text-xs">-</div>
                                         @else
                                             <div class="mx-auto flex items-center justify-center text-slate-100 dark:text-slate-800/50 font-bold text-[10px]">-</div>
                                         @endif
@@ -359,7 +454,7 @@
 
             <!-- Modal Wrapper -->
             <div class="flex min-h-full items-center justify-center p-4 text-center">
-                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all w-full max-w-md border border-slate-200 dark:border-slate-800"
+                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all w-full max-w-lg border border-slate-200 dark:border-slate-800"
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -420,13 +515,13 @@
                         <!-- Calendar Grid -->
                         <div class="grid grid-cols-7 gap-1">
                             <template x-for="day in calendarDays" :key="day.dateStr">
-                                <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between"
+                                <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-1 sm:p-1.5 flex flex-col justify-between"
                                      :class="[
                                          day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40'
                                      ]">
                                      
                                     <!-- Day Number -->
-                                    <span class="text-[9px] font-semibold"
+                                    <span class="text-[10px] font-bold"
                                           :class="[
                                               day.isCurrentMonth ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400',
                                               (new Date(day.dateStr).getDay() === 0) ? 'text-red-500 font-bold' : ''
@@ -439,76 +534,81 @@
                                             <div class="w-full">
                                                 <!-- Present -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Hadir'">
-                                                    <div class="flex flex-col items-center leading-none scale-[0.85] origin-bottom">
-                                                        <span class="text-[8px] font-bold" 
+                                                    <div class="flex flex-col items-center leading-none">
+                                                        <span class="text-[10px] font-bold" 
                                                               :class="selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'"
                                                               x-text="selectedReport.daily_details[day.dateStr].check_in || '-'"></span>
-                                                        <span class="text-[8px] text-slate-450 dark:text-slate-550" x-text="selectedReport.daily_details[day.dateStr].check_out || '-'"></span>
+                                                        <span class="text-[10px] font-semibold text-slate-450 dark:text-slate-550" x-text="selectedReport.daily_details[day.dateStr].check_out || '-'"></span>
                                                     </div>
                                                 </template>
-
+ 
                                                 <!-- Alfa -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Alfa'">
-                                                    <div class="w-full py-0.5 text-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded text-[7px] font-bold">A</div>
+                                                    <div class="w-full py-1 text-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-md text-[9px] font-extrabold">A</div>
                                                 </template>
-
+ 
                                                 <!-- Off -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Off'">
-                                                    <div class="w-full py-0.5 text-center bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-550 rounded text-[7px] font-bold">OFF</div>
+                                                    <div class="w-full py-1 text-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md text-[9px] font-extrabold">OFF</div>
                                                 </template>
-
+ 
                                                 <!-- Cuti/Izin -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Cuti/Izin'">
                                                     <div class="flex flex-col items-center gap-0.5 w-full">
-                                                <!-- Only Check-In -->
-                                                        <template x-if="selectedReport.daily_details[day.dateStr].check_in && !selectedReport.daily_details[day.dateStr].check_out">
-                                                            <div class="flex flex-col items-center w-full">
-                                                                <span class="text-[8px] font-bold text-emerald-600 dark:text-emerald-400 scale-[0.85] leading-none" 
+                                                        <!-- Both Check-In and Check-Out -->
+                                                        <template x-if="selectedReport.daily_details[day.dateStr].check_in && selectedReport.daily_details[day.dateStr].check_out">
+                                                            <div class="flex flex-col items-center w-full leading-none">
+                                                                <span class="text-[10px] font-bold" 
+                                                                      :class="selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'"
                                                                       x-text="selectedReport.daily_details[day.dateStr].check_in"></span>
-                                                                <div class="w-full py-0.5 text-center rounded text-[7px] font-bold"
-                                                                     :class="[
-                                                                         selectedReport.daily_details[day.dateStr].leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400' : '',
-                                                                         selectedReport.daily_details[day.dateStr].leave_code === 'I' ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400' : '',
-                                                                         selectedReport.daily_details[day.dateStr].leave_code === 'C' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400' : '',
-                                                                         selectedReport.daily_details[day.dateStr].leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' : ''
-                                                                     ]"
+                                                                <div class="w-full py-0.5 text-center rounded text-[9px] font-extrabold"
+                                                                     :class="getClassForLeave(selectedReport.daily_details[day.dateStr])"
                                                                      x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
+                                                                <span class="text-[10px] text-slate-450 dark:text-slate-550" x-text="selectedReport.daily_details[day.dateStr].check_out"></span>
+                                                            </div>
+                                                        </template>
+                                                        
+                                                        <!-- Only Check-In -->
+                                                        <template x-if="selectedReport.daily_details[day.dateStr].check_in && !selectedReport.daily_details[day.dateStr].check_out">
+                                                            <div class="flex flex-col items-center w-full leading-none">
+                                                                <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400" 
+                                                                      x-text="selectedReport.daily_details[day.dateStr].check_in"></span>
+                                                                <div class="w-full py-0.5 text-center rounded text-[9px] font-extrabold"
+                                                                     :class="getClassForLeave(selectedReport.daily_details[day.dateStr])"
+                                                                     x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
+                                                                <span class="text-[10px] text-slate-350 dark:text-slate-650">-</span>
                                                             </div>
                                                         </template>
                                                         
                                                         <!-- Only Check-Out -->
                                                         <template x-if="selectedReport.daily_details[day.dateStr].check_out && !selectedReport.daily_details[day.dateStr].check_in">
-                                                            <div class="flex flex-col items-center w-full">
-                                                                <div class="w-full py-0.5 text-center rounded text-[7px] font-bold"
-                                                                     :class="[
-                                                                         selectedReport.daily_details[day.dateStr].leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400' : '',
-                                                                         selectedReport.daily_details[day.dateStr].leave_code === 'I' ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400' : '',
-                                                                         selectedReport.daily_details[day.dateStr].leave_code === 'C' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400' : '',
-                                                                         selectedReport.daily_details[day.dateStr].leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' : ''
-                                                                     ]"
+                                                            <div class="flex flex-col items-center w-full leading-none">
+                                                                <span class="text-[10px] text-slate-350 dark:text-slate-650">-</span>
+                                                                <div class="w-full py-0.5 text-center rounded text-[9px] font-extrabold"
+                                                                     :class="getClassForLeave(selectedReport.daily_details[day.dateStr])"
                                                                      x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
-                                                                <span class="text-[8px] font-bold text-slate-400 dark:text-slate-500 scale-[0.85] leading-none" 
+                                                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500" 
                                                                       x-text="selectedReport.daily_details[day.dateStr].check_out"></span>
                                                             </div>
                                                         </template>
-
-                                                        <!-- Neither or Both -->
-                                                        <template x-if="(!selectedReport.daily_details[day.dateStr].check_in && !selectedReport.daily_details[day.dateStr].check_out) || (selectedReport.daily_details[day.dateStr].check_in && selectedReport.daily_details[day.dateStr].check_out)">
-                                                            <div class="w-full py-0.5 text-center rounded text-[7px] font-bold"
-                                                                 :class="[
-                                                                     selectedReport.daily_details[day.dateStr].leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400' : '',
-                                                                     selectedReport.daily_details[day.dateStr].leave_code === 'I' ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400' : '',
-                                                                     selectedReport.daily_details[day.dateStr].leave_code === 'C' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400' : '',
-                                                                     selectedReport.daily_details[day.dateStr].leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' : ''
-                                                                 ]"
-                                                                 x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
+ 
+                                                        <!-- Neither -->
+                                                        <template x-if="!selectedReport.daily_details[day.dateStr].check_in && !selectedReport.daily_details[day.dateStr].check_out">
+                                                            <div class="flex flex-col items-center w-full leading-none">
+                                                                <div class="w-full py-1 text-center rounded-md text-[9px] font-extrabold"
+                                                                     :class="getClassForLeave(selectedReport.daily_details[day.dateStr])"
+                                                                     x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
+                                                                <template x-if="selectedReport.daily_details[day.dateStr].is_pending">
+                                                                    <span class="text-[10px] font-bold text-slate-350 dark:text-slate-650 mt-0.5">-</span>
+                                                                </template>
+                                                            </div>
                                                         </template>
                                                     </div>
                                                 </template>
-
+ 
                                                 <!-- Libur -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Libur'">
-                                                    <div class="text-center text-red-300 dark:text-red-900/30 text-[8px] font-bold">-</div>
+                                                    <div class="text-center text-red-300 dark:text-red-900/30 text-[10px] font-bold">-</div>
                                                 </template>
                                             </div>
                                         </template>
@@ -557,6 +657,19 @@
             calendarDays: [],
             stats: { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 },
             
+            getClassForLeave(day) {
+                if (!day) return '';
+                if (day.is_pending) {
+                    return day.leave_code === 'S' ? 'bg-amber-50/40 text-amber-500 border border-dashed border-amber-200/50' :
+                           day.leave_code === 'I' ? 'bg-purple-50/40 text-purple-500 border border-dashed border-purple-200/50' :
+                           day.leave_code === 'C' ? 'bg-blue-50/40 text-blue-500 border border-dashed border-blue-200/50' :
+                           day.leave_code === 'H' ? 'bg-emerald-50/40 text-emerald-500 border border-dashed border-emerald-200/50' : '';
+                }
+                return day.leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30' :
+                       day.leave_code === 'I' ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30' :
+                       day.leave_code === 'C' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30' :
+                       day.leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' : '';
+            },
             openCalendarModal(report) {
                 this.selectedReport = report;
                 this.calendarDays = this.buildCutOffCalendar(this.cycleDates);
@@ -618,3 +731,21 @@
         }));
     });
 </script>
+<style>
+    @media (min-width: 768px) {
+        .search-container {
+            max-width: 280px !important;
+        }
+    }
+    .search-container button:hover {
+        background-color: #0f172a !important; /* bg-slate-900 */
+        color: #ffffff !important; /* text-white */
+    }
+    .dark .search-container button:hover {
+        background-color: #f8fafc !important; /* bg-slate-105 */
+        color: #0f172a !important; /* text-slate-900 */
+    }
+    .dark input[type="month"]::-webkit-calendar-picker-indicator {
+        filter: invert(1) !important;
+    }
+</style>

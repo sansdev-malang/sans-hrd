@@ -138,14 +138,14 @@ class AttendancePercentageReportController extends Controller
                         $leaveEnd = substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
-                            $getsBonus = $leave->gets_presence_bonus || ($leave->type === 'Dinas');
-                            $statusCode = $leave->status_code;
-                            if (!$statusCode) {
-                                if ($leave->type === 'Sakit') $statusCode = 'S';
-                                elseif ($leave->type === 'Cuti') $statusCode = 'C';
-                                elseif ($leave->type === 'Dinas') $statusCode = 'H';
-                                else $statusCode = 'I';
-                            }
+                             $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
+                             $statusCode = $leave->status_code;
+                             if (!$statusCode) {
+                                 if ($leave->type_name === 'Sakit') $statusCode = 'S';
+                                 elseif ($leave->type_name === 'Cuti') $statusCode = 'C';
+                                 elseif ($leave->type_name === 'Dinas') $statusCode = 'H';
+                                 else $statusCode = 'I';
+                             }
                             break;
                         }
                     }
@@ -174,7 +174,9 @@ class AttendancePercentageReportController extends Controller
                     $logKey = $uid . '_' . $dateStr;
                     $hasScan = isset($attendanceLogs[$logKey]);
 
-                    if ($isOnLeave) {
+                    if ($hasScan) {
+                        $totalPresent++;
+                    } elseif ($isOnLeave) {
                         if ($statusCode === 'S') {
                             $totalSakit++;
                         } elseif ($statusCode === 'C') {
@@ -184,8 +186,6 @@ class AttendancePercentageReportController extends Controller
                         } else {
                             $totalIzin++;
                         }
-                    } elseif ($hasScan) {
-                        $totalPresent++;
                     } else {
                         $totalAbsent++;
                     }

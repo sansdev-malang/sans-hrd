@@ -65,12 +65,21 @@ class AttendanceApiController extends Controller
         $leavesData = \App\Models\LeaveRequest::where(function($q) use ($startDate, $endDate) {
             $q->whereBetween('start_date', [$startDate, $endDate])
               ->orWhereBetween('end_date', [$startDate, $endDate]);
-        })->where('status', 'approved')->get();
+        })->get();
 
         $leaves = [];
         foreach ($leavesData as $l) {
             $key = $l->school_unit_id . '_' . $l->employee_id;
             $leaves[$key][] = $l;
+        }
+
+        foreach ($leaves as $key => $empLeaves) {
+            usort($leaves[$key], function($a, $b) {
+                $statusOrder = ['Approved' => 1, 'Pending' => 2, 'Rejected' => 3];
+                $orderA = $statusOrder[$a->status] ?? 4;
+                $orderB = $statusOrder[$b->status] ?? 4;
+                return $orderA <=> $orderB;
+            });
         }
 
         $shiftsData = \App\Models\EmployeeWorkingShift::with('workingShift.details')
@@ -103,21 +112,25 @@ class AttendanceApiController extends Controller
         }
 
         $reports = [];
+        $lastDay = clone $endDate;
+        if ($endDate > now()) {
+            $lastDay = now()->endOfDay();
+        }
+
         foreach ($employeesCollection as $emp) {
             $uid = $emp['zkteco_uid'] ?? null;
             $empId = $emp['id'] ?? null;
             $unit = $emp['unit_id'] ?? null;
 
             if (!$uid || !$empId) continue;
+            $userLogs = $attendanceLogs[(string)$uid] ?? [];
 
             $dailyDetails = [];
-            
-            $lastDay = $endDate > now() ? now()->endOfDay() : $endDate;
             $currentDate = $startDate->copy();
             
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeek;
+                $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) to 6 (Sat)
 
                 if (in_array($dateStr, $holidayDates)) {
                     $dailyDetails[$dateStr] = ['status' => 'Libur'];
@@ -126,7 +139,10 @@ class AttendanceApiController extends Controller
                 }
 
                 $isOnLeave = false;
-                $leaveType = 'IZIN';
+                $leaveCode = 'I';
+                $originalType = 'Izin';
+                $hasRequiresAttendanceLeave = false;
+                $activeLeave = null;
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -134,18 +150,14 @@ class AttendanceApiController extends Controller
                         $leaveEnd = substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
-                            $leaveType = strtoupper($leave->type ?? 'IZIN');
+                            $leaveCode = $leave->status_code ?? 'I';
+                            $originalType = $leave->type_name;
+                            $hasRequiresAttendanceLeave = (bool) $leave->requires_attendance;
+                            $activeLeave = $leave;
                             break;
                         }
                     }
                 }
-                if ($isOnLeave) {
-                    $displayType = strlen($leaveType) > 6 ? substr($leaveType, 0, 5) . '.' : $leaveType;
-                    $dailyDetails[$dateStr] = ['status' => 'Cuti/Izin', 'leave_type' => $displayType];
-                    $currentDate->addDay();
-                    continue;
-                }
-
                 $hasShiftToday = false;
                 $isOffShift = false;
                 $shiftStartTime = null;
@@ -153,6 +165,8 @@ class AttendanceApiController extends Controller
                 $shiftKey = $unit . '_' . $empId;
                 
                 $isShiftWorker = false;
+                $checkInLog = null;
+                $checkOutLog = null;
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
@@ -198,8 +212,6 @@ class AttendanceApiController extends Controller
                     $checkInLog = null;
                     $checkOutLog = null;
 
-                    $userLogs = $attendanceLogs[(string)$uid] ?? [];
-
                     foreach ($userLogs as $tsStr) {
                         $ts = \Carbon\Carbon::parse($tsStr);
                         if ($ts->between($inStart, $inEnd)) {
@@ -226,9 +238,9 @@ class AttendanceApiController extends Controller
                             $diffIn = \Carbon\Carbon::parse($checkInLog)->diffInMinutes($expectedIn);
                             $diffOut = \Carbon\Carbon::parse($checkOutLog)->diffInMinutes($expectedOut);
                             if ($diffIn < $diffOut) {
-                                $checkOutLog = null; 
+                                $checkOutLog = null;
                             } else {
-                                $checkInLog = null; 
+                                $checkInLog = null;
                             }
                         }
 
@@ -266,6 +278,37 @@ class AttendanceApiController extends Controller
                 } else {
                     if ($dayOfWeek == 0) { // Sunday
                         $dailyDetails[$dateStr] = ['status' => 'Libur'];
+                    }
+                }
+
+                if ($isOnLeave && $activeLeave) {
+                    // Opsi A: Jangan timpa status jika hari ini adalah hari libur terjadwal (Sunday tanpa shift atau off-shift)
+                    $isRestDay = $isOffShift || ($dayOfWeek == 0 && !$hasShiftToday);
+
+                    if (!$isRestDay && ($activeLeave->status === 'Approved' || $activeLeave->status === 'Pending')) {
+                        $isLateForLeave = false;
+                        if ($activeLeave->status === 'Approved') {
+                            if ($hasRequiresAttendanceLeave && ($activeLeave->gets_presence_bonus || $activeLeave->status_code === 'H')) {
+                                $isLateForLeave = $isLate ?? false;
+                            }
+                        } else {
+                            $isLateForLeave = $isLate ?? false;
+                        }
+
+                        $dailyDetails[$dateStr] = [
+                            'status' => 'Cuti/Izin',
+                            'is_pending' => ($activeLeave->status === 'Pending'),
+                            'leave_code' => $leaveCode,
+                            'leave_type' => $originalType,
+                            'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
+                            'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
+                            'is_late' => $isLateForLeave,
+                        ];
+                    } elseif ($activeLeave->status === 'Rejected') {
+                        $dailyDetails[$dateStr]['rejected_leave'] = [
+                            'leave_code' => $leaveCode,
+                            'leave_type' => $originalType,
+                        ];
                     }
                 }
 
@@ -395,9 +438,12 @@ class AttendanceApiController extends Controller
                     continue;
                 }
 
-                // Skip Leaves
+                // Skip Leaves (except Dinas, those getting presence bonus, or those requiring attendance)
                 $isOnLeave = false;
                 $leaveType = null;
+                $getsBonus = false;
+                $hasRequiresAttendanceLeave = false;
+                $activeLeave = null;
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -405,40 +451,15 @@ class AttendanceApiController extends Controller
                         $leaveEnd = substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
-                            $leaveType = $leave->type ?? 'Izin';
+                            $leaveType = $leave->type_name;
+                            $getsBonus = $leave->gets_presence_bonus || ($leaveType === 'Dinas') || ($leave->status_code === 'H');
+                            $hasRequiresAttendanceLeave = (bool) $leave->requires_attendance;
+                            $activeLeave = $leave;
                             break;
                         }
                     }
                 }
-                if ($isOnLeave && $leaveType !== 'Dinas') {
-                    $shiftName = null;
-                    $shiftStartTime = null;
-                    $shiftEndTime = null;
-                    if (isset($assignedShifts[$shiftKey])) {
-                        foreach ($assignedShifts[$shiftKey] as $assignment) {
-                            $assignStartDate = substr($assignment->start_date, 0, 10);
-                            $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
-                            if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
-                                $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
-                                if ($detail) {
-                                    $shiftName = $assignment->workingShift->name;
-                                    $shiftStartTime = $detail->start_time;
-                                    $shiftEndTime = $detail->end_time;
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    $dailyDetails[$dateStr] = [
-                        'date' => $dateStr,
-                        'shift_name' => $shiftName,
-                        'shift_start' => $shiftStartTime,
-                        'shift_end' => $shiftEndTime,
-                        'check_in' => null,
-                        'late_minutes' => 0,
-                        'status' => $leaveType ?? 'Izin',
-                        'bonus_nominal' => 0,
-                    ];
+                if ($isOnLeave && !$getsBonus && !$hasRequiresAttendanceLeave) {
                     $currentDate->addDay();
                     continue;
                 }
@@ -479,10 +500,10 @@ class AttendanceApiController extends Controller
                     $dailyTierLevel = null;
 
                     $logKey = $uid . '_' . $dateStr;
-                    $isDinas = ($isOnLeave && $leaveType === 'Dinas');
+                    $isDinas = ($isOnLeave && $getsBonus && !$hasRequiresAttendanceLeave);
 
                     if (isset($attendanceLogs[$logKey]) || $isDinas) {
-                        $dailyStatus = $isDinas ? 'Dinas' : 'Present';
+                        $dailyStatus = $isDinas ? ($leaveType ?: 'Dinas') : 'Present';
                         $totalPresent++;
                         
                         if (isset($attendanceLogs[$logKey]) && !$isDinas) {
@@ -491,13 +512,20 @@ class AttendanceApiController extends Controller
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
                             $dailyCheckIn = $checkInCarbon->format('H:i:s');
     
-                            if ($checkInCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
-                                $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
-                                $dailyLateMinutes = $diff;
-                                $totalLateMinutes += $diff;
+                            $isForgiven = $hasRequiresAttendanceLeave && $activeLeave && (!$activeLeave->gets_presence_bonus && $activeLeave->status_code !== 'H');
+
+                            if ($isForgiven) {
+                                $dailyLateMinutes = 0;
+                            } else {
+                                if ($checkInCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
+                                    $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
+                                    $dailyLateMinutes = $diff;
+                                    $totalLateMinutes += $diff;
+                                }
                             }
                         } else {
-                            $dailyCheckIn = null;
+                            $dailyLateMinutes = 0;
+                            $dailyCheckIn = 'DINAS';
                         }
 
                         $currentSchema = ($currentAssignment && $currentAssignment->bonus_schema_id) 
@@ -755,13 +783,15 @@ class AttendanceApiController extends Controller
             ->where('status', 'Approved')
             ->first();
 
+        $hasRequiresAttendanceLeave = $leave && $leave->requires_attendance;
+
         // 4. Calculate Status and Bonus
         $status = null;
         $calculatedBonus = 0.00;
 
-        if ($leave) {
-            $status = $leave->type === 'Sakit' ? 'Sick' : 'Leave';
-            if ($leave->type === 'Dinas') {
+        if ($leave && !$hasRequiresAttendanceLeave) {
+            $status = ($leave->status_code === 'S' || $leave->type_name === 'Sakit') ? 'Sick' : 'Leave';
+            if ($leave->type_name === 'Dinas' || $leave->status_code === 'H' || $leave->gets_presence_bonus) {
                 $currentSchemaId = ($activeShiftAssigned && $activeShiftAssigned->bonus_schema_id) 
                                     ? $activeShiftAssigned->bonus_schema_id 
                                     : (BonusSchema::where('is_active', true)->first()->id ?? null);
@@ -806,8 +836,13 @@ class AttendanceApiController extends Controller
                     $actualIn = Carbon::parse($date . ' ' . $clockIn);
 
                     if ($actualIn->gt($shiftStart)) {
-                        $lateMinutes = $actualIn->diffInMinutes($shiftStart);
-                        $status = 'Late';
+                        $isForgiven = $hasRequiresAttendanceLeave && $leave && (!$leave->gets_presence_bonus && $leave->status_code !== 'H');
+                        if ($isForgiven) {
+                            $lateMinutes = 0;
+                        } else {
+                            $lateMinutes = $actualIn->diffInMinutes($shiftStart);
+                            $status = 'Late';
+                        }
                     }
                 }
 

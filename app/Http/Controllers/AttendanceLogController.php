@@ -66,12 +66,21 @@ class AttendanceLogController extends Controller
         $leavesData = \App\Models\LeaveRequest::where(function($q) use ($startDate, $endDate) {
             $q->whereBetween('start_date', [$startDate, $endDate])
               ->orWhereBetween('end_date', [$startDate, $endDate]);
-        })->where('status', 'approved')->get();
+        })->get();
 
         $leaves = [];
         foreach ($leavesData as $l) {
             $key = $l->school_unit_id . '_' . $l->employee_id;
             $leaves[$key][] = $l;
+        }
+
+        foreach ($leaves as $key => $empLeaves) {
+            usort($leaves[$key], function($a, $b) {
+                $statusOrder = ['Approved' => 1, 'Pending' => 2, 'Rejected' => 3];
+                $orderA = $statusOrder[$a->status] ?? 4;
+                $orderB = $statusOrder[$b->status] ?? 4;
+                return $orderA <=> $orderB;
+            });
         }
 
         $shiftsData = \App\Models\EmployeeWorkingShift::with('workingShift.details')
@@ -138,6 +147,8 @@ class AttendanceLogController extends Controller
                 $isOnLeave = false;
                 $leaveCode = 'I';
                 $originalType = 'Izin';
+                $hasRequiresAttendanceLeave = false;
+                $activeLeave = null;
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -145,17 +156,10 @@ class AttendanceLogController extends Controller
                         $leaveEnd = substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
-                            $originalType = $leave->type ?? 'Izin';
-                            $rawType = strtolower($originalType);
-                            if (str_contains($rawType, 'sakit')) {
-                                $leaveCode = 'S';
-                            } elseif (str_contains($rawType, 'cuti')) {
-                                $leaveCode = 'C';
-                            } elseif (str_contains($rawType, 'dinas') || str_contains($rawType, 'dispensasi')) {
-                                $leaveCode = 'H';
-                            } else {
-                                $leaveCode = 'I';
-                            }
+                            $leaveCode = $leave->status_code ?? 'I';
+                            $originalType = $leave->type_name;
+                            $hasRequiresAttendanceLeave = (bool) $leave->requires_attendance;
+                            $activeLeave = $leave;
                             break;
                         }
                     }
@@ -283,14 +287,35 @@ class AttendanceLogController extends Controller
                     }
                 }
 
-                if ($isOnLeave) {
-                    $dailyDetails[$dateStr] = [
-                        'status' => 'Cuti/Izin',
-                        'leave_code' => $leaveCode,
-                        'leave_type' => $originalType,
-                        'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
-                        'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
-                    ];
+                if ($isOnLeave && $activeLeave) {
+                    // Opsi A: Jangan timpa status jika hari ini adalah hari libur terjadwal (Sunday tanpa shift atau off-shift)
+                    $isRestDay = $isOffShift || ($dayOfWeek == 0 && !$hasShiftToday);
+
+                    if (!$isRestDay && ($activeLeave->status === 'Approved' || $activeLeave->status === 'Pending')) {
+                        $isLateForLeave = false;
+                        if ($activeLeave->status === 'Approved') {
+                            if ($hasRequiresAttendanceLeave && ($activeLeave->gets_presence_bonus || $activeLeave->status_code === 'H')) {
+                                $isLateForLeave = $isLate ?? false;
+                            }
+                        } else {
+                            $isLateForLeave = $isLate ?? false;
+                        }
+
+                        $dailyDetails[$dateStr] = [
+                            'status' => 'Cuti/Izin',
+                            'is_pending' => ($activeLeave->status === 'Pending'),
+                            'leave_code' => $leaveCode,
+                            'leave_type' => $originalType,
+                            'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
+                            'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
+                            'is_late' => $isLateForLeave,
+                        ];
+                    } elseif ($activeLeave->status === 'Rejected') {
+                        $dailyDetails[$dateStr]['rejected_leave'] = [
+                            'leave_code' => $leaveCode,
+                            'leave_type' => $originalType,
+                        ];
+                    }
                 }
 
                 $currentDate->addDay();
@@ -448,21 +473,33 @@ class AttendanceLogController extends Controller
                 
                 $cellValue = '-';
                 if ($detail) {
+                    $sheet->getStyle($colLetter . $row)->getAlignment()->setWrapText(true)->setHorizontal('center')->setVertical('center');
+                    
                     if ($detail['status'] === 'Hadir') {
                         $in = $detail['check_in'] ?? '-';
                         $out = $detail['check_out'] ?? '-';
-                        $cellValue = $in . "\n" . $out;
-                        // Center align and wrap text
-                        $sheet->getStyle($colLetter . $row)->getAlignment()
-                              ->setWrapText(true)
-                              ->setHorizontal('center')
-                              ->setVertical('center');
+                        if (!empty($detail['pending_leave'])) {
+                            $cellValue = $in . "\n" . $detail['pending_leave']['leave_code'] . "\n" . $out;
+                        } else {
+                            $cellValue = $in . "\n" . $out;
+                        }
                     } elseif ($detail['status'] === 'Alfa') {
                         $cellValue = 'A';
+                        if (!empty($detail['pending_leave'])) {
+                            $cellValue = "A\n" . $detail['pending_leave']['leave_code'];
+                        }
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
                     } elseif ($detail['status'] === 'Cuti/Izin') {
                         $leaveCode = $detail['leave_code'] ?? 'I';
-                        $cellValue = $leaveCode;
+                        $isPending = !empty($detail['is_pending']);
+                        $in = $detail['check_in'] ?? null;
+                        $out = $detail['check_out'] ?? null;
+                        
+                        if ($in || $out) {
+                            $cellValue = ($in ?: '-') . "\n" . $leaveCode . ($isPending ? ' (P)' : '') . "\n" . ($out ?: '-');
+                        } else {
+                            $cellValue = $leaveCode . ($isPending ? ' (P)' : '');
+                        }
                         
                         $excelColorMap = [
                             'S' => 'FFE28743', // Warm Amber
@@ -472,6 +509,9 @@ class AttendanceLogController extends Controller
                         ];
                         $colorHex = $excelColorMap[$leaveCode] ?? 'FF1F75FE';
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($colorHex));
+                        if ($isPending) {
+                            $sheet->getStyle($colLetter . $row)->getFont()->setItalic(true);
+                        }
                     } elseif ($detail['status'] === 'Libur') {
                         $cellValue = '-';
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));

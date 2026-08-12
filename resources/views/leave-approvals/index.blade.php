@@ -174,7 +174,6 @@
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-left w-48 min-w-[150px]">Jenis Izin</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-center w-32">Tanggal Mulai</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-center w-32">Tanggal Selesai</th>
-                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-left w-auto min-w-[120px]">Keterangan</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-left w-auto min-w-[120px]">Catatan / Alasan</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-center w-28">Status</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-6 py-3 text-center w-28">Aksi</th>
@@ -290,19 +289,7 @@
                                             </span>
                                             <span class="text-xs text-slate-700 dark:text-slate-300 font-bold capitalize tracking-tight">{{ $leave->type }}</span>
                                         </div>
-                                        @if($leave->attachment)
-                                            <div class="mt-1">
-                                                @php
-                                                    $attachmentUrl = str_starts_with($leave->attachment, 'http') ? $leave->attachment : (
-                                                        $leave->employee_unit_url ? rtrim($leave->employee_unit_url, '/') . '/storage/' . $leave->attachment : '#'
-                                                    );
-                                                @endphp
-                                                <a href="{{ $attachmentUrl }}" target="_blank" class="inline-flex items-center gap-1 text-[9px] text-indigo-700 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 px-1.5 py-0.5 rounded transition-all shadow-2xs hover:shadow-xs">
-                                                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
-                                                    Lampiran
-                                                </a>
-                                            </div>
-                                        @endif
+
                                     </div>
                                 </td>
                                 <td class="px-6 py-3 text-center font-mono">
@@ -311,13 +298,7 @@
                                 <td class="px-6 py-3 text-center font-mono">
                                     {{ $leave->end_date->translatedFormat('d M Y') }}
                                 </td>
-                                <td class="px-6 py-3 text-left">
-                                    <span @click="selectedEmp = {{ json_encode($leaveData) }}; showEmpDetailModal = true"
-                                          class="text-slate-600 dark:text-slate-400 block truncate max-w-[150px] lg:max-w-[250px] cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-[1.01] transform transition-all duration-200 origin-left"
-                                          title="Klik untuk melihat detail lengkap">
-                                        {{ \Illuminate\Support\Str::limit($leave->reason ?? '-', 40) }}
-                                    </span>
-                                </td>
+
                                 <td class="px-6 py-3 text-left">
                                     <span class="text-slate-600 dark:text-slate-400 block truncate max-w-[150px] lg:max-w-[200px]"
                                           title="{{ $leave->notes ?? '-' }}">
@@ -513,25 +494,7 @@
                             </div>
                         </div>
 
-                        <div class="col-span-2 pt-1">
-                            <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Keterangan / Alasan</span>
-                            <div class="bg-slate-50/50 dark:bg-slate-900/30 rounded-xl p-3 border border-slate-100 dark:border-slate-800/80">
-                                <p class="text-slate-600 dark:text-slate-300 italic font-medium leading-relaxed" x-text="selectedEmp ? selectedEmp.leave_reason : ''"></p>
-                            </div>
-                        </div>
 
-                        <template x-if="selectedEmp && selectedEmp.leave_attachment">
-                            <div class="col-span-2 pt-1">
-                                <span class="block text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-tight mb-1">Berkas Lampiran</span>
-                                @php
-                                    $modalAttachmentUrl = "selectedEmp.leave_attachment.startsWith('http') ? selectedEmp.leave_attachment : (selectedEmp.photo_url ? selectedEmp.photo_url.split('/storage')[0] + '/storage/' + selectedEmp.leave_attachment : '#')";
-                                @endphp
-                                <a :href="{{ $modalAttachmentUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] text-indigo-600 hover:text-indigo-750 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 transition-all shadow-2xs hover:shadow-xs">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                    Lihat Lampiran Dokumen
-                                </a>
-                            </div>
-                        </template>
                     </div>
 
                     <!-- Additional Details -->

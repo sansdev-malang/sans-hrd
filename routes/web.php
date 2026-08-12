@@ -115,6 +115,8 @@ Route::prefix('api')->group(function () {
     Route::get('attendances/summary', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'attendanceSummary']);
     Route::post('auth/verify-credential', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'verifyCredential']);
     Route::post('performance-reports', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'receivePerformanceReport']);
+    Route::post('sync/leave-request', [\App\Http\Controllers\Api\LeaveSyncApiController::class, 'storeOrUpdate']);
+    Route::post('sync/leave-request/delete', [\App\Http\Controllers\Api\LeaveSyncApiController::class, 'destroy']);
 });
 
 // ZKTeco ADMS Endpoints (Must bypass CSRF)

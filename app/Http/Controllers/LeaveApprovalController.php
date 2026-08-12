@@ -51,7 +51,11 @@ class LeaveApprovalController extends Controller
         }
 
         if ($request->filled('type')) {
-            $query->where('type', $request->input('type'));
+            $type = $request->input('type');
+            $codeMap = ['Sakit' => 'S', 'Izin' => 'I', 'Cuti' => 'C', 'Dinas' => 'H'];
+            if (isset($codeMap[$type])) {
+                $query->where('status_code', $codeMap[$type]);
+            }
         }
 
         if ($request->filled('status')) {
@@ -68,8 +72,10 @@ class LeaveApprovalController extends Controller
 
         $search = $request->query('search');
         $mappedLeaves = [];
+        $codeToNameMap = ['S' => 'Sakit', 'I' => 'Izin', 'C' => 'Cuti', 'H' => 'Dinas'];
 
         foreach ($leavesCollection as $leave) {
+            $leave->type = $leave->type_name;
             $key = $leave->school_unit_id . '-' . $leave->employee_id;
             if (isset($employeeMap[$key])) {
                 $leave->employee_name = $employeeMap[$key]['name'];
@@ -118,7 +124,7 @@ class LeaveApprovalController extends Controller
         );
 
         $schoolUnits = SchoolUnit::where('is_active', true)->orderBy('name')->get();
-        $leaveTypes = LeaveRequest::distinct()->pluck('type')->filter()->sort()->values();
+        $leaveTypes = ['Sakit', 'Izin', 'Cuti', 'Dinas'];
 
         $pendingCount = LeaveRequest::where('status', 'Pending')->count();
         $processedCount = LeaveRequest::whereIn('status', ['Approved', 'Rejected'])->count();
@@ -159,7 +165,6 @@ class LeaveApprovalController extends Controller
                 $leave->update([
                     'status' => 'Approved',
                     'notes' => 'Disetujui oleh HRD Pusat.',
-                    'processed_by' => auth()->user()->name,
                 ]);
 
                 return redirect()->route('leave-approvals.index')
@@ -203,7 +208,6 @@ class LeaveApprovalController extends Controller
                 $leave->update([
                     'status' => 'Rejected',
                     'notes' => $validated['notes'],
-                    'processed_by' => auth()->user()->name,
                 ]);
 
                 return redirect()->route('leave-approvals.index')
@@ -245,32 +249,24 @@ class LeaveApprovalController extends Controller
             ]);
 
             if ($response->successful()) {
-                $statusCode = 'I';
+                $typeLower = strtolower($validated['type']);
                 $getsPresenceBonus = false;
-                
-                $existingType = LeaveRequest::where('type', $validated['type'])->first();
-                if ($existingType) {
-                    $statusCode = $existingType->status_code;
-                    $getsPresenceBonus = (bool) $existingType->gets_presence_bonus;
+                if (str_contains($typeLower, 'sakit')) {
+                    $statusCode = 'S';
+                } elseif (str_contains($typeLower, 'cuti')) {
+                    $statusCode = 'C';
+                } elseif (str_contains($typeLower, 'dinas') || str_contains($typeLower, 'kedinasan') || $typeLower === 'h') {
+                    $statusCode = 'H';
+                    $getsPresenceBonus = true;
                 } else {
-                    $typeLower = strtolower($validated['type']);
-                    if (str_contains($typeLower, 'sakit')) {
-                        $statusCode = 'S';
-                    } elseif (str_contains($typeLower, 'cuti')) {
-                        $statusCode = 'C';
-                    } elseif (str_contains($typeLower, 'dinas') || str_contains($typeLower, 'kedinasan')) {
-                        $statusCode = 'H';
-                        $getsPresenceBonus = true;
-                    }
+                    $statusCode = 'I';
                 }
 
                 $leave->update([
                     'status' => $validated['status'],
                     'notes' => $validated['notes'],
-                    'type' => $validated['type'],
                     'status_code' => $statusCode,
                     'gets_presence_bonus' => $getsPresenceBonus,
-                    'processed_by' => auth()->user()->name,
                 ]);
 
                 return redirect()->route('leave-approvals.index')
@@ -396,21 +392,15 @@ class LeaveApprovalController extends Controller
 
                         $updateData = [
                             'employee_id' => $rL['employee_id'],
-                            'employee_name' => $rL['employee_name'] ?? null,
                             'start_date' => $rL['start_date'],
                             'end_date' => $rL['end_date'],
-                            'type' => $rL['type'],
                             'status_code' => $statusCode,
                             'gets_presence_bonus' => $rL['gets_presence_bonus'] ?? false,
-                            'reason' => $rL['reason'],
+                            'requires_attendance' => $rL['requires_attendance'] ?? true,
+                            'requires_approval' => $rL['requires_approval'] ?? true,
                             'status' => $status,
                             'notes' => $notes,
-                            'attachment' => $rL['attachment'] ?? null,
                         ];
-
-                        if ($processedBy) {
-                            $updateData['processed_by'] = $processedBy;
-                        }
 
                         // We check by school_unit_id and remote_leave_id
                         LeaveRequest::updateOrCreate(
