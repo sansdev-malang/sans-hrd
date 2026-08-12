@@ -107,15 +107,71 @@
                                         'PAUD' => 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/40',
                                     ][$unitName] ?? 'bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-350 border-slate-200';
                                 @endphp
-                                <a href="{{ route('leave-approvals.index') }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
-                                    <div class="flex items-center justify-between mb-1">
-                                        <p class="font-semibold text-sm text-slate-900 dark:text-slate-100 text-left">{{ $leave->employee_name ?? 'Pegawai' }}</p>
-                                        <span class="text-[9px] font-bold px-2 py-0.5 rounded border uppercase {{ $unitBadge }}">Unit {{ $unitName }}</span>
+                                <a href="{{ route('leave-approvals.index') }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-all border-b last:border-b-0 border-slate-100 dark:border-slate-800/40">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <!-- Left Side: Employee Details & Leave Info -->
+                                        <div class="flex-1 min-w-0 text-left">
+                                            <div class="flex items-center gap-2.5 mb-1.5">
+                                                <p class="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-indigo-600 transition-colors truncate">
+                                                    {{ $leave->employee_name ?? 'Pegawai' }}
+                                                </p>
+                                                <!-- Unit Badge -->
+                                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider {{ $unitBadge }}">
+                                                    Unit {{ $unitName }}
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Leave description & date range -->
+                                            @php
+                                                $start = \Carbon\Carbon::parse($leave->start_date);
+                                                $end = \Carbon\Carbon::parse($leave->end_date);
+                                                $diff = $start->diffInDays($end) + 1;
+                                                $rangeString = $start->format('d M Y');
+                                                if ($start->format('Y-m-d') !== $end->format('Y-m-d')) {
+                                                    $rangeString .= ' s/d ' . $end->format('d M Y');
+                                                }
+                                            @endphp
+                                            <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-600 dark:text-slate-400">
+                                                <span class="flex items-center gap-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                                    Mengajukan <strong class="text-slate-850 dark:text-slate-200 font-semibold">{{ $leave->type }}</strong>
+                                                </span>
+                                                <span class="text-slate-300 dark:text-slate-700">|</span>
+                                                <span class="text-slate-500 dark:text-slate-400">
+                                                    {{ $rangeString }} <span class="font-semibold text-slate-700 dark:text-slate-300">({{ $diff }} Hari)</span>
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Created At (Tanggal & Jam Pengajuan) -->
+                                            <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-2 flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 text-slate-450 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Diajukan pada: <span class="font-mono text-slate-500 dark:text-slate-400 font-semibold">{{ \Carbon\Carbon::parse($leave->created_at)->format('d M Y, H:i') }} WIB</span>
+                                            </p>
+                                        </div>
+
+                                        <!-- Right Side: Status Badge & Actions -->
+                                        <div class="flex items-center md:items-end justify-between md:justify-center md:flex-col gap-2 shrink-0">
+                                            <!-- Status Badge -->
+                                            @php
+                                                $statusClass = [
+                                                    'Pending' => 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200/60 dark:border-amber-900/40',
+                                                    'Approved' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-900/40',
+                                                    'Rejected' => 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200/60 dark:border-rose-900/40',
+                                                ][$leave->status] ?? 'bg-slate-50 text-slate-700 border-slate-200';
+                                            @endphp
+                                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1.5 tracking-wider {{ $statusClass }}">
+                                                <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ $leave->status === 'Pending' ? 'bg-amber-500' : ($leave->status === 'Approved' ? 'bg-emerald-500' : 'bg-rose-500') }}"></span>
+                                                {{ $leave->status }}
+                                            </span>
+                                            
+                                            <!-- Details note if exists -->
+                                            @if($leave->notes)
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[150px] italic">
+                                                    "{{ $leave->notes }}"
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 text-left">
-                                        Mengajukan <span class="font-semibold text-slate-750 dark:text-slate-300">{{ $leave->type }}</span> pada {{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}
-                                    </p>
-                                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 italic text-left"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i>{{ $leave->reason }}</p>
                                 </a>
                             @endforeach
                         @else
