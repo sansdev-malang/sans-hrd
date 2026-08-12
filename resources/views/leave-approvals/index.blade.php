@@ -289,6 +289,14 @@
                                             </span>
                                             <span class="text-xs text-slate-700 dark:text-slate-300 font-bold capitalize tracking-tight">{{ $leave->type }}</span>
                                         </div>
+                                        @if($leave->attachment)
+                                            <div class="mt-1">
+                                                <a href="{{ $leave->attachment }}" target="_blank" class="inline-flex items-center gap-1 text-[9px] text-indigo-700 hover:text-indigo-850 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold bg-indigo-50/50 dark:bg-indigo-905/20 border border-indigo-100 dark:border-indigo-900/30 px-1.5 py-0.5 rounded transition-all shadow-2xs hover:shadow-xs">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                                    Lampiran
+                                                </a>
+                                            </div>
+                                        @endif
 
                                     </div>
                                 </td>
