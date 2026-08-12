@@ -181,6 +181,28 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        try {
+            $employees = $this->schoolService->getSdEmployees();
+            $employeeMap = collect($employees)->keyBy(function ($item) {
+                return $item['unit_id'] . '-' . $item['id'];
+            })->toArray();
+
+            foreach ($recentLeaves as $leave) {
+                $leave->type = $leave->type_name;
+                $key = $leave->school_unit_id . '-' . $leave->employee_id;
+                if (isset($employeeMap[$key])) {
+                    $leave->employee_name = $employeeMap[$key]['name'];
+                } else {
+                    $leave->employee_name = 'Pegawai #' . $leave->employee_id;
+                }
+            }
+        } catch (\Exception $e) {
+            foreach ($recentLeaves as $leave) {
+                $leave->employee_name = 'Pegawai #' . $leave->employee_id;
+                $leave->type = $leave->type_name;
+            }
+        }
+
         // Fetch latest announcements
         $latestAnnouncements = \App\Models\Announcement::with('creator')
             ->orderBy('created_at', 'desc')
