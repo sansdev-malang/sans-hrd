@@ -56,6 +56,28 @@ class AppServiceProvider extends ServiceProvider
                     $pendingLeavesCount = (clone $pendingLeavesQuery)->count();
                     $pendingLeaves = $pendingLeavesQuery->latest()->limit(5)->get();
                     
+                    try {
+                        $employees = (new \App\Services\SchoolUnitService)->getSdEmployees();
+                        $employeeMap = collect($employees)->keyBy(function ($item) {
+                            return $item['unit_id'] . '-' . $item['id'];
+                        })->toArray();
+
+                        foreach ($pendingLeaves as $leave) {
+                            $leave->type = $leave->type_name;
+                            $key = $leave->school_unit_id . '-' . $leave->employee_id;
+                            if (isset($employeeMap[$key])) {
+                                $leave->employee_name = $employeeMap[$key]['name'];
+                            } else {
+                                $leave->employee_name = 'Pegawai #' . $leave->employee_id;
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        foreach ($pendingLeaves as $leave) {
+                            $leave->employee_name = 'Pegawai #' . $leave->employee_id;
+                            $leave->type = $leave->type_name;
+                        }
+                    }
+                    
                     $view->with(compact('pendingLeaves', 'pendingLeavesCount'));
                 }
             }
