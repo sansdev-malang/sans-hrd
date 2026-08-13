@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ setting('app_name', 'SANS HRD') }} - Log In</title>
+    <title>{{ setting('app_name', 'SANS HRD') }}</title>
     @if(setting('app_favicon'))
         <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . setting('app_favicon')) }}">
     @else

@@ -43,15 +43,13 @@
             <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
-                    <!-- Search Box -->
-                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="relative w-full search-container">
+                    <!-- Search Box Welded with Cari Button (Premium Input Group) -->
+                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
                         <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
-                            style="padding-left: 0.75rem; padding-right: 2.25rem;"
-                            class="w-full h-9 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 focus:border-slate-400 dark:focus:border-slate-600 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 transition-all shadow-inner">
-                        <button type="submit" 
-                            :class="searchVal.trim() !== '' ? 'text-indigo-600 dark:text-indigo-400 scale-105' : 'text-slate-400 dark:text-slate-500'"
-                            class="absolute right-0 top-0 h-full w-9 flex items-center justify-center hover:text-indigo-750 dark:hover:text-indigo-300 transition-all duration-200 cursor-pointer bg-transparent border-0">
-                            <i data-lucide="search" class="w-4 h-4"></i>
+                            style="border: none !important; outline: none !important; box-shadow: none !important;"
+                            class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
+                        <button type="submit" class="h-9 px-4 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-l border-slate-200 dark:border-slate-800">
+                            Cari
                         </button>
                     </div>
 
@@ -1470,6 +1468,14 @@
         .search-container {
             max-width: 280px !important;
         }
+    }
+    .search-container button:hover {
+        background-color: #0f172a !important; /* bg-slate-900 */
+        color: #ffffff !important; /* text-white */
+    }
+    .dark .search-container button:hover {
+        background-color: #f8fafc !important; /* bg-slate-105 */
+        color: #0f172a !important; /* text-slate-900 */
     }
 </style>
 </x-admin-layout>
