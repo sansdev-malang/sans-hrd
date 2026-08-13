@@ -1,5 +1,5 @@
 <aside id="sidebar"
-    class="fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white dark:bg-[#09090b] border-r border-slate-200 dark:border-slate-800 p-3 shrink-0 transition-transform duration-300 -translate-x-full md:translate-x-0 md:relative md:z-20 shadow-sm md:shadow-none">
+    class="fixed inset-y-0 left-0 z-[60] md:z-20 flex flex-col w-64 bg-white dark:bg-[#09090b] border-r border-slate-200 dark:border-slate-800 p-3 shrink-0 transition-transform duration-300 -translate-x-full md:translate-x-0 md:relative shadow-sm md:shadow-none">
 
     <!-- Workspace Selector -->
     <div
