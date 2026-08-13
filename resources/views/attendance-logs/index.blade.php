@@ -55,7 +55,7 @@
                         <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
                             style="border: none !important; outline: none !important; box-shadow: none !important;"
                             class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
-                        <button type="submit" class="h-9 px-4 bg-slate-55 dark:bg-slate-855 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-l border-slate-200 dark:border-slate-800">
+                        <button type="submit" class="h-9 px-4 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-l border-slate-200 dark:border-slate-800">
                             Cari
                         </button>
                     </div>
@@ -130,7 +130,7 @@
                 <table class="w-full text-xs border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 z-30 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
+                            <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-left sticky top-0 md:left-0 z-30 md:z-40 border-r border-slate-200 dark:border-slate-800 min-w-[150px]">
                                 <div class="grid grid-cols-2">
                                     <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profil Pegawai</span>
                                     <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap text-right">Siklus: <br><strong class="text-slate-700 dark:text-slate-300 text-xs">{{ \Carbon\Carbon::parse($startDateReq)->format('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->format('d M') }}</strong></span>
@@ -166,7 +166,7 @@
                             @endphp
                             <tr class="group hover:bg-slate-50/60 dark:hover:bg-slate-900/30 transition-colors">
                                 <!-- KOLOM 1: PROFIL -->
-                                <td class="px-4 py-2 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
+                                <td class="px-4 py-2 static md:sticky md:left-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50/60 dark:group-hover:bg-slate-900/30 border-r border-slate-100 dark:border-slate-800/60 transition-colors">
                                     <div class="flex items-center gap-3">
                                         <!-- Clickable Photo/Avatar -->
                                         <div @click='openCalendarModal(@json($report))' class="cursor-pointer hover:scale-105 transform transition-all active:scale-95 duration-150 shrink-0">
@@ -496,7 +496,7 @@
                     <div class="p-4">
                         <!-- Calendar Header (Month Name) -->
                         <div class="text-center mb-3">
-                            <h4 class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">
+                            <h4 class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                                 Periode Kehadiran &bull; <span x-text="startDateStr" class="text-indigo-650 dark:text-indigo-405"></span> - <span x-text="endDateStr" class="text-indigo-650 dark:text-indigo-405"></span>
                             </h4>
                         </div>
@@ -538,7 +538,7 @@
                                                         <span class="text-[10px] font-bold" 
                                                               :class="selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'"
                                                               x-text="selectedReport.daily_details[day.dateStr].check_in || '-'"></span>
-                                                        <span class="text-[10px] font-semibold text-slate-450 dark:text-slate-550" x-text="selectedReport.daily_details[day.dateStr].check_out || '-'"></span>
+                                                        <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400" x-text="selectedReport.daily_details[day.dateStr].check_out || '-'"></span>
                                                     </div>
                                                 </template>
  
@@ -564,7 +564,7 @@
                                                                 <div class="w-full py-0.5 text-center rounded text-[9px] font-extrabold"
                                                                      :class="getClassForLeave(selectedReport.daily_details[day.dateStr])"
                                                                      x-text="selectedReport.daily_details[day.dateStr].leave_code"></div>
-                                                                <span class="text-[10px] text-slate-450 dark:text-slate-550" x-text="selectedReport.daily_details[day.dateStr].check_out"></span>
+                                                                <span class="text-[10px] text-slate-400 dark:text-slate-400" x-text="selectedReport.daily_details[day.dateStr].check_out"></span>
                                                             </div>
                                                         </template>
                                                         
