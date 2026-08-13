@@ -23,13 +23,22 @@
             <!-- FILTER & SEARCH BAR -->
             <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <form action="{{ route('raw-attendance-logs.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
-                    <!-- SEARCH -->
-                    <div class="relative w-64">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
-                        </span>
-                        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama atau UID..." 
-                            class="w-full pl-9 pr-4 h-9 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors text-slate-900 dark:text-slate-100">
+                    <div x-data="{ searchVal: '{{ $search }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
+                        <input type="text" name="search" x-model="searchVal" placeholder="Cari nama atau UID..."
+                            style="border: none !important; outline: none !important; box-shadow: none !important;"
+                            class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
+                        
+                        <!-- Clear Button (x) -->
+                        <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $el.closest('form').submit();" class="h-9 px-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center" title="Bersihkan pencarian">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+
+                        <button type="submit" 
+                            :class="searchVal.trim() !== '' ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300'"
+                            class="h-9 px-4 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-l border-slate-200 dark:border-slate-800">
+                            Cari
+                        </button>
+                    </div>
                     </div>
 
                     <!-- UNIT FILTER -->
