@@ -111,6 +111,99 @@
         selectedEmps: [],
         selectAllEmp: false,
         showAssignmentModal: false,
+
+        showEditModal: false,
+        editUnitId: '',
+        editWorkingShiftId: '',
+        editBonusSchemaId: '',
+        editStartDate: '',
+        editEndDate: '',
+        editOldUnitId: '',
+        editOldWorkingShiftId: '',
+        editOldStartDate: '',
+        editOldEndDate: '',
+        editEmployees: [],
+        editSelectedEmps: [],
+        editSearchQuery: '',
+        editSelectAll: false,
+        editSelectedPosition: '',
+        isLoadingEditEmployees: false,
+
+        async openEditModal(batch) {
+            this.editOldUnitId = batch.school_unit_id;
+            this.editOldWorkingShiftId = batch.working_shift_id;
+            this.editOldStartDate = batch.start_date ? new Date(batch.start_date).toISOString().split('T')[0] : '';
+            this.editOldEndDate = batch.end_date ? new Date(batch.end_date).toISOString().split('T')[0] : 'null';
+
+            this.editUnitId = batch.school_unit_id;
+            this.editWorkingShiftId = batch.working_shift_id;
+            this.editBonusSchemaId = batch.bonus_schema_id || '';
+            this.editStartDate = this.editOldStartDate;
+            this.editEndDate = batch.end_date ? this.editOldEndDate : '';
+            
+            this.editSearchQuery = '';
+            this.editSelectedPosition = '';
+            this.editEmployees = [];
+            this.editSelectedEmps = batch.employees.map(e => e.id);
+            this.editSelectAll = false;
+            
+            this.showEditModal = true;
+            this.isLoadingEditEmployees = true;
+            try {
+                let response = await fetch(`/employee-working-shifts/unit/${this.editUnitId}/employees`);
+                if (response.ok) {
+                    this.editEmployees = await response.json();
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isLoadingEditEmployees = false;
+            }
+        },
+
+        async loadEditEmployeesForUnit() {
+            if (!this.editUnitId) { this.editEmployees = []; return; }
+            this.isLoadingEditEmployees = true;
+            try {
+                const response = await fetch(`/employee-working-shifts/unit/${this.editUnitId}/employees`);
+                if (response.ok) {
+                    this.editEmployees = await response.json();
+                } else {
+                    this.editEmployees = [];
+                }
+            } catch (e) {
+                console.error(e);
+                this.editEmployees = [];
+            }
+            this.isLoadingEditEmployees = false;
+        },
+
+        toggleEditAll() {
+            const filteredIds = this.filteredEditEmployees.map(e => e.id);
+            if (this.editSelectAll) {
+                this.editSelectedEmps = Array.from(new Set([...this.editSelectedEmps, ...filteredIds]));
+            } else {
+                this.editSelectedEmps = this.editSelectedEmps.filter(id => !filteredIds.includes(id));
+            }
+        },
+
+        get uniqueEditPositions() {
+            const posSet = new Set();
+            this.editEmployees.forEach(e => {
+                const p = e.position || e.subject_position || '-';
+                if (p) posSet.add(p);
+            });
+            return Array.from(posSet).sort();
+        },
+
+        get filteredEditEmployees() { 
+            return this.editEmployees.filter(e => {
+                const matchesSearch = !this.editSearchQuery || e.name.toLowerCase().includes(this.editSearchQuery.toLowerCase());
+                const pos = e.position || e.subject_position || '-';
+                const matchesPosition = !this.editSelectedPosition || pos === this.editSelectedPosition;
+                return matchesSearch && matchesPosition;
+            });
+        },
     
         openModal(batch) {
             this.selectedBatch = batch;
@@ -150,6 +243,24 @@
                     this.empSearch = '';
                     this.selectedEmps = [];
                     this.selectAllEmp = false;
+                }
+            });
+            this.$watch('showEditModal', value => {
+                if (!value) {
+                    this.editUnitId = '';
+                    this.editWorkingShiftId = '';
+                    this.editBonusSchemaId = '';
+                    this.editStartDate = '';
+                    this.editEndDate = '';
+                    this.editOldUnitId = '';
+                    this.editOldWorkingShiftId = '';
+                    this.editOldStartDate = '';
+                    this.editOldEndDate = '';
+                    this.editEmployees = [];
+                    this.editSelectedEmps = [];
+                    this.editSearchQuery = '';
+                    this.editSelectAll = false;
+                    this.editSelectedPosition = '';
                 }
             });
         }
@@ -387,6 +498,7 @@
                                             <form action="{{ route('employee-working-shifts.destroy-roster') }}"
                                                 method="POST"
                                                 onsubmit="return confirm('Apakah Anda yakin ingin menghapus roster bulanan ini?')"
+                                                data-no-loader
                                                 class="inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -440,20 +552,16 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-end gap-1.5">
-                                            <a href="{{ route('employee-working-shifts.edit-batch', [
-                                                'unit_id' => $batch['school_unit_id'],
-                                                'shift_id' => $batch['working_shift_id'],
-                                                'start_date' => \Carbon\Carbon::parse($batch['start_date'])->format('Y-m-d'),
-                                                'end_date' => $batch['end_date'] ? \Carbon\Carbon::parse($batch['end_date'])->format('Y-m-d') : 'null',
-                                            ]) }}"
-                                                class="h-8 w-8 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
+                                            <button type="button" @click="openEditModal({{ json_encode($batch) }})"
+                                                class="h-8 w-8 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
                                                 title="Edit Penugasan">
                                                 <i data-lucide="edit-3" class="w-4 h-4"></i>
-                                            </a>
+                                            </button>
  
                                             <form action="{{ route('employee-working-shifts.destroy-batch') }}"
                                                 method="POST"
                                                 onsubmit="return confirm('Apakah Anda yakin ingin membatalkan/menghapus seluruh penugasan shift pada grup ini?')"
+                                                data-no-loader
                                                 class="inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -892,6 +1000,200 @@
                              <button type="submit"
                                  class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition-all cursor-pointer flex items-center justify-center dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:text-white">
                                  Simpan Penugasan Jadwal Tetap
+                             </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- MODAL EDIT BATCH SHIFT -->
+        <template x-teleport="body">
+            <div x-cloak x-show="showEditModal" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @keydown.escape.window="showEditModal = false"
+                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
+                
+                <!-- Backdrop overlay -->
+                <div class="fixed inset-0 transition-opacity" 
+                     style="background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);" 
+                     @click="showEditModal = false"></div>
+                
+                <!-- Content Box -->
+                <div x-show="showEditModal"
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
+                    
+                    <!-- Header -->
+                    <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
+                        <div>
+                             <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                 <span>Edit Batch Penugasan Shift</span>
+                             </h3>
+                             <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Ubah tanggal, shift, atau tambah/kurangi pegawai dalam grup jadwal ini.</p>
+                         </div>
+                         <button type="button" @click="showEditModal = false" class="text-slate-400 dark:text-slate-500 hover:text-slate-655 dark:hover:text-slate-350 bg-transparent border-0 cursor-pointer flex items-center justify-center p-1 rounded-lg">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                         </button>
+                    </div>
+
+                    <form method="POST" action="{{ route('employee-working-shifts.update-batch') }}" 
+                          @submit.prevent="if (editSelectedEmps.length === 0) { alert('Silakan centang minimal satu pegawai sebelum menyimpan perubahan.'); } else { $el.submit(); }"
+                          class="flex flex-col flex-1 overflow-hidden">
+                        @csrf
+                        @method('PUT')
+
+                        <input type="hidden" name="old_school_unit_id" :value="editOldUnitId">
+                        <input type="hidden" name="old_working_shift_id" :value="editOldWorkingShiftId">
+                        <input type="hidden" name="old_start_date" :value="editOldStartDate">
+                        <input type="hidden" name="old_end_date" :value="editOldEndDate">
+
+                        <!-- Scrollable Body -->
+                        <div class="flex-1 overflow-y-auto p-5 space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-4">
+                                    <!-- Unit Sekolah -->
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Sekolah</label>
+                                        <select name="school_unit_id" required x-model="editUnitId" @change="loadEditEmployeesForUnit()"
+                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            <option value="">Pilih Unit Sekolah</option>
+                                            @foreach ($units as $unit)
+                                                <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <!-- Template Jadwal Tetap -->
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Template Shift Kerja</label>
+                                            <select name="working_shift_id" required x-model="editWorkingShiftId"
+                                                class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                                <option value="">Pilih Template Shift</option>
+                                                @foreach ($shifts as $shift)
+                                                    <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Bonus Schema -->
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Skema Bonus (Opsional)</label>
+                                            <select name="bonus_schema_id" x-model="editBonusSchemaId"
+                                                class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                                <option value="">Ikuti Default/Aktif</option>
+                                                @if (isset($bonusSchemas))
+                                                    @foreach ($bonusSchemas as $schema)
+                                                        <option value="{{ $schema->id }}">{{ $schema->name }} {{ $schema->is_active ? '(Aktif)' : '' }}</option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dates -->
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Mulai</label>
+                                            <input type="date" name="start_date" required x-model="editStartDate"
+                                                x-bind:style="document.documentElement.classList.contains('dark') ? 'color-scheme: dark !important;' : ''"
+                                                class="text-xs w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono dark:[color-scheme:dark]">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Selesai (Opsional)</label>
+                                            <input type="date" name="end_date" x-model="editEndDate"
+                                                x-bind:style="document.documentElement.classList.contains('dark') ? 'color-scheme: dark !important;' : ''"
+                                                class="text-xs w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono dark:[color-scheme:dark]">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pegawai List -->
+                                <div class="flex flex-col h-full">
+                                    <label class="font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center shrink-0">
+                                        <span>
+                                            Pilih Pegawai
+                                            <span x-show="isLoadingEditEmployees" class="text-[10px] text-indigo-500 ml-2 animate-pulse font-normal">Memuat data...</span>
+                                        </span>
+                                        <label x-show="editEmployees.length > 0" class="flex items-center gap-1.5 cursor-pointer text-[11px] text-indigo-650 dark:text-indigo-400 hover:underline">
+                                            <input type="checkbox" x-model="editSelectAll" @change="toggleEditAll()" class="rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer">
+                                            Pilih Semua
+                                        </label>
+                                    </label>
+
+                                    <div class="flex flex-col bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex-1 min-h-[280px]">
+                                        <!-- Search & Filter Bar -->
+                                        <div class="p-2 border-b border-slate-200/60 dark:border-slate-800/80 shrink-0 bg-white dark:bg-slate-900/40 space-y-2">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                <!-- Search Input -->
+                                                <div class="relative flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                                    <input type="text" x-model="editSearchQuery" x-ref="editSearchQueryInput" :disabled="editEmployees.length === 0" placeholder="Cari nama..."
+                                                        style="border: none !important; outline: none !important; box-shadow: none !important;"
+                                                        class="text-xs w-full h-8 px-2.5 pl-8 pr-8 bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-0">
+                                                    <button type="button" x-show="editSearchQuery.trim() !== ''" @click="editSearchQuery = ''; $refs.editSearchQueryInput.focus();" class="absolute right-2 h-8 px-1 text-slate-400 hover:text-slate-600 transition-colors border-0 bg-transparent cursor-pointer flex items-center justify-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                                
+                                                <!-- Position Filter -->
+                                                <select x-model="editSelectedPosition" :disabled="editEmployees.length === 0"
+                                                    class="text-xs h-8 px-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                                                    <option value="">Semua Jabatan</option>
+                                                    <template x-for="pos in uniqueEditPositions" :key="pos">
+                                                        <option :value="pos" x-text="pos"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- List -->
+                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[250px] flex-1">
+                                            <div x-show="editEmployees.length === 0 && !isLoadingEditEmployees" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-550 italic text-[11px] py-12">
+                                                Silakan pilih unit sekolah terlebih dahulu.
+                                            </div>
+
+                                            <div x-show="editEmployees.length > 0 && filteredEditEmployees.length === 0" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-555 italic text-[11px] py-12">
+                                                Pegawai tidak ditemukan.
+                                            </div>
+                                            
+                                            <template x-for="emp in filteredEditEmployees" :key="emp.id">
+                                                <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/80 border border-slate-200 dark:border-slate-900 rounded-xl transition-all shadow-2xs hover:border-slate-300 dark:hover:border-slate-800">
+                                                    <input type="checkbox" name="employee_ids[]" :value="emp.id" x-model="editSelectedEmps"
+                                                        class="employee-checkbox w-4.5 h-4.5 rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 shrink-0 cursor-pointer">
+                                                    <div class="flex flex-col min-w-0">
+                                                        <span class="text-xs text-slate-900 dark:text-slate-100 font-bold leading-snug truncate" x-text="emp.name"></span>
+                                                        <span class="text-[10px] text-slate-450 mt-0.5 truncate" x-text="emp.position || emp.subject_position || '-'"></span>
+                                                    </div>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex gap-2.5 justify-end bg-slate-50 dark:bg-slate-900/40 shrink-0">
+                             <button type="button" @click="showEditModal = false"
+                                 class="h-9 px-4 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-lg cursor-pointer transition-colors shadow-2xs hover:shadow-xs">
+                                 Batal
+                             </button>
+                             <button type="submit"
+                                 class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition-all cursor-pointer flex items-center justify-center dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:text-white">
+                                 Simpan Perubahan
                              </button>
                         </div>
                     </form>

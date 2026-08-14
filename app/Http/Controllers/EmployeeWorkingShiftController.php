@@ -198,34 +198,7 @@ class EmployeeWorkingShiftController extends Controller
 
     public function editBatch(Request $request)
     {
-        $unit_id = $request->query('unit_id');
-        $shift_id = $request->query('shift_id');
-        $start = $request->query('start_date');
-        $end = $request->query('end_date');
-
-        if (!$unit_id || !$shift_id || !$start) {
-            abort(404);
-        }
-
-        $endVal = $end === 'null' ? null : $end;
-
-        $assignments = EmployeeWorkingShift::where('school_unit_id', $unit_id)
-            ->where('working_shift_id', $shift_id)
-            ->where('start_date', $start)
-            ->when($endVal !== null, function($q) use ($endVal) {
-                return $q->where('end_date', $endVal);
-            }, function($q) {
-                return $q->whereNull('end_date');
-            })->get();
-
-        $employeeIds = $assignments->pluck('employee_id')->toArray();
-        $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
-        $shifts = WorkingShift::where('is_shift', false)->orderBy('name')->get();
-
-        $bonusSchemas = \App\Models\BonusSchema::all();
-        $bonus_schema_id = $assignments->first()->bonus_schema_id ?? null;
-
-        return view('employee-working-shifts.edit', compact('unit_id', 'shift_id', 'start', 'end', 'employeeIds', 'units', 'shifts', 'bonusSchemas', 'bonus_schema_id'));
+        return redirect()->route('employee-working-shifts.index');
     }
 
     public function updateBatch(Request $request)

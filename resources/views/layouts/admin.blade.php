@@ -99,6 +99,7 @@
 
                 // Start progress on standard link navigation clicks instantly
                 document.addEventListener("click", (e) => {
+                    if (e.defaultPrevented) return;
                     const link = e.target.closest("a");
                     if (!link) return;
                     const href = link.getAttribute("href");
@@ -116,8 +117,9 @@
 
                 // Start progress on form submissions
                 document.addEventListener("submit", (e) => {
+                    if (e.defaultPrevented) return;
                     const form = e.target.closest("form");
-                    if (!form || form.getAttribute("target") === "_blank") return;
+                    if (!form || form.getAttribute("target") === "_blank" || form.hasAttribute("data-no-loader")) return;
                     
                     if (typeof NProgress !== "undefined") {
                         NProgress.start();
@@ -610,7 +612,7 @@
                     
                     const form = e.target.closest('form');
                     if (!form) return;
-                    if (form.getAttribute('target') === '_blank') return;
+                    if (form.getAttribute('target') === '_blank' || form.hasAttribute('data-no-loader')) return;
                     
                     loader.classList.remove('hidden');
                 });
