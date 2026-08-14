@@ -12,10 +12,10 @@ class PayslipApiController extends Controller
 {
     public function index(Request $request)
     {
-        $unitCode = $request->query('unit_id'); // e.g., 'smp' or 'sd'
+        $unitCode = $request->query('unit_id') ?? $request->query('school_unit_id'); // e.g., 'smp' or 'sd'
         
         if (!$unitCode) {
-            return response()->json(['error' => 'Missing unit_id parameter'], 400);
+            return response()->json(['error' => 'Missing unit_id or school_unit_id parameter'], 400);
         }
 
         // Map short code to actual name in DB
