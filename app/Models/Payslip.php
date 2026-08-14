@@ -14,6 +14,7 @@ class Payslip extends Model
         'school_unit_id',
         'period',
         'file_path',
+        'attachment_path',
     ];
 
     public function schoolUnit()

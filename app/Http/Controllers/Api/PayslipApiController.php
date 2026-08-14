@@ -40,6 +40,7 @@ class PayslipApiController extends Controller
                 'employee_id' => $p->employee_id,
                 'period' => $p->period,
                 'file_url' => url(Storage::url($p->file_path)),
+                'attachment_url' => $p->attachment_path ? url(Storage::url($p->attachment_path)) : null,
             ];
         })->keyBy('employee_id');
 

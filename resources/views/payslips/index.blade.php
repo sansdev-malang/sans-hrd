@@ -42,7 +42,7 @@
                     <!-- Filter Unit -->
                     <select name="unit_id" onchange="this.form.submit()"
                         class="h-10 pl-3 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-bold bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-ellipsis overflow-hidden whitespace-nowrap">
-                        <option value="">Semua Unit Sekolah</option>
+                        <option value="">Semua Unit</option>
                         @foreach($units as $u)
                             <option value="{{ $u->id }}" {{ $unitId == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
                         @endforeach
@@ -154,15 +154,22 @@
                                      <div class="flex gap-2 justify-end">
                                          @if($emp['payslip'])
                                              <a href="{{ Storage::url($emp['payslip']->file_path) }}" target="_blank"
-                                                class="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-750 dark:text-slate-350 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1" title="Lihat Slip">
+                                                class="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-855 dark:hover:bg-slate-800 text-slate-750 dark:text-slate-350 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1" title="Lihat Slip">
                                                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                                  Lihat
                                              </a>
+                                             @if($emp['payslip']->attachment_path)
+                                                 <a href="{{ Storage::url($emp['payslip']->attachment_path) }}" target="_blank"
+                                                    class="h-8 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:hover:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 text-xs font-bold rounded-lg border border-indigo-100/30 dark:border-indigo-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Lihat Lampiran">
+                                                     <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+                                                     Lampiran
+                                                 </a>
+                                             @endif
                                              <form method="POST" action="{{ route('payslips.destroy', $emp['payslip']->id) }}" onsubmit="return confirm('Hapus slip gaji ini?');" class="inline">
                                                  @csrf
                                                  @method('DELETE')
                                                  <button type="submit"
-                                                         class="h-8 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-650 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Hapus">
+                                                         class="h-8 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/30 dark:hover:bg-rose-955/50 text-rose-650 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Hapus">
                                                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                      Hapus
                                                  </button>
@@ -246,10 +253,17 @@
                 </div>
 
                 <div class="text-left">
-                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File PDF <span class="text-rose-500">*</span></label>
+                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File PDF Slip Gaji <span class="text-rose-500">*</span></label>
                     <input type="file" name="payslip_file" accept=".pdf" required
                            class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-850 rounded-xl cursor-pointer bg-white dark:bg-slate-950 p-1.5">
-                    <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Hanya file PDF (Maks. 1MB)</p>
+                    <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Hanya file PDF (Maks. 500KB)</p>
+                </div>
+
+                <div class="text-left">
+                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Lampiran Tambahan <span class="text-slate-400 dark:text-slate-500 font-medium">(Opsional)</span></label>
+                    <input type="file" name="attachment_file" accept=".pdf,.png,.jpg,.jpeg"
+                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-855 rounded-xl cursor-pointer bg-white dark:bg-slate-955 p-1.5">
+                    <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Bisa PDF atau Gambar (Maks. 2MB)</p>
                 </div>
 
                 <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">

@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PayslipController extends Controller
 {
@@ -98,7 +100,8 @@ class PayslipController extends Controller
             'employee_id' => 'required|integer',
             'school_unit_id' => 'required|integer',
             'period' => 'required|string|size:7', // YYYY-MM
-            'payslip_file' => 'required|mimes:pdf|max:1024', // 5MB max
+            'payslip_file' => 'required|mimes:pdf|max:512', // 512 KB max
+            'attachment_file' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:2048', // 2MB max
         ]);
 
         try {
@@ -123,6 +126,41 @@ class PayslipController extends Controller
             }
 
             $payslip->file_path = $path;
+
+            // Handle optional attachment file
+            if ($request->hasFile('attachment_file')) {
+                // Delete old attachment file if exists
+                if ($payslip->exists && $payslip->attachment_path && Storage::disk('public')->exists($payslip->attachment_path)) {
+                    Storage::disk('public')->delete($payslip->attachment_path);
+                }
+
+                $attachmentFile = $request->file('attachment_file');
+                $ext = strtolower($attachmentFile->getClientOriginalExtension());
+                
+                if (in_array($ext, ['png', 'jpg', 'jpeg'])) {
+                    // Compress Image using Intervention Image (v4)
+                    $attachmentFilename = 'payslip_attachment_' . $request->school_unit_id . '_' . $request->employee_id . '_' . $request->period . '_' . time() . '.jpg';
+                    $attachmentPath = 'payslips/' . $request->period . '/' . $attachmentFilename;
+
+                    $manager = new ImageManager(new Driver());
+                    $img = $manager->read($attachmentFile->getPathname());
+                    
+                    // Resize/scale to maximum width of 1200px (preserving aspect ratio)
+                    $img->scale(width: 1200);
+                    
+                    // Encode to JPEG at 70% quality
+                    $encoded = $img->toJpg(70);
+                    
+                    Storage::disk('public')->put($attachmentPath, (string) $encoded);
+                } else {
+                    // PDF attachment - store as is
+                    $attachmentFilename = 'payslip_attachment_' . $request->school_unit_id . '_' . $request->employee_id . '_' . $request->period . '_' . time() . '.' . $ext;
+                    $attachmentPath = $attachmentFile->storeAs('payslips/' . $request->period, $attachmentFilename, 'public');
+                }
+
+                $payslip->attachment_path = $attachmentPath;
+            }
+
             $payslip->save();
 
             // Notify the unit application about the new payslip
@@ -144,6 +182,7 @@ class PayslipController extends Controller
         if (!$unit) return;
 
         $fileUrl = asset('storage/' . $payslip->file_path);
+        $attachmentUrl = $payslip->attachment_path ? asset('storage/' . $payslip->attachment_path) : null;
 
         try {
             Http::withHeaders([
@@ -153,6 +192,7 @@ class PayslipController extends Controller
                 'employee_id' => $payslip->employee_id,
                 'period' => $payslip->period,
                 'file_url' => $fileUrl,
+                'attachment_url' => $attachmentUrl,
             ]);
         } catch (\Exception $e) {
             Log::error("Failed to send payslip notification to unit {$unit->name}: " . $e->getMessage());
@@ -164,6 +204,9 @@ class PayslipController extends Controller
         try {
             if ($payslip->file_path && Storage::disk('public')->exists($payslip->file_path)) {
                 Storage::disk('public')->delete($payslip->file_path);
+            }
+            if ($payslip->attachment_path && Storage::disk('public')->exists($payslip->attachment_path)) {
+                Storage::disk('public')->delete($payslip->attachment_path);
             }
             $payslip->delete();
             
