@@ -127,9 +127,9 @@
                                         </div>
                                         <div class="flex flex-col min-w-0 text-left">
                                             <span class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{{ $empName }}</span>
-                                            <div class="flex flex-col gap-0.5 mt-0.5">
-                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $emp['unit_name'] ?? '-' }}</span>
-                                                <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate" title="{{ $emp['position'] ?? '-' }}">{{ $emp['position'] ?? '-' }}</span>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-bold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max shrink-0">{{ $emp['unit_name'] ?? '-' }}</span>
+                                                <span class="text-[10px] text-slate-500 dark:text-slate-450 truncate" title="{{ $emp['position'] ?? '-' }}">{{ $emp['position'] ?? '-' }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -255,14 +255,14 @@
                 <div class="text-left">
                     <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File PDF Slip Gaji <span class="text-rose-500">*</span></label>
                     <input type="file" name="payslip_file" accept=".pdf" required
-                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer bg-white dark:bg-slate-955 p-1.5">
+                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer bg-white dark:bg-slate-950 p-1.5">
                     <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Hanya file PDF (Maks. 500KB)</p>
                 </div>
 
                 <div class="text-left">
                     <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Lampiran Tambahan <span class="text-slate-400 dark:text-slate-500 font-medium">(Opsional)</span></label>
                     <input type="file" name="attachment_file" accept=".pdf,.png,.jpg,.jpeg"
-                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer bg-white dark:bg-slate-955 p-1.5">
+                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer bg-white dark:bg-slate-950 p-1.5">
                     <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Bisa PDF atau Gambar (Maks. 2MB)</p>
                 </div>
 
