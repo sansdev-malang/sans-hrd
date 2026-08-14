@@ -11,18 +11,6 @@
             </div>
         </header>
 
-        <!-- SUCCESS ALERT -->
-        @if(session('success'))
-            <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 rounded-xl p-4 flex items-center gap-3 w-full max-w-md text-left">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-450 flex items-center justify-center shrink-0">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                </div>
-                <div class="text-left">
-                    <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Sukses!</h5>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ session('success') }}</p>
-                </div>
-            </div>
-        @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full hover:shadow-md transition-all duration-200">
