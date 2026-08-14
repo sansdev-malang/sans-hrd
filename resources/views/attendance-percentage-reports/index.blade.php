@@ -115,8 +115,20 @@
             @endforeach
         </div>
 
+        <!-- FORMULA INFO ALERT -->
+        <div class="flex items-start gap-3 p-4 bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-100/50 dark:border-indigo-900/30 rounded-xl text-left">
+            <i data-lucide="info" class="w-4 h-4 text-indigo-600 dark:text-indigo-400 mt-0.5 shrink-0"></i>
+            <div class="space-y-1">
+                <span class="text-xs font-bold text-indigo-900 dark:text-indigo-300 block">Informasi Perhitungan Persentase Kehadiran</span>
+                <p class="text-[11px] text-slate-650 dark:text-slate-400 leading-relaxed">
+                    Persentase dihitung dengan rumus: <strong class="font-mono text-indigo-900 dark:text-indigo-300">Hadir / (Hadir + Alpa) &times; 100%</strong>.<br>
+                    Hari <strong class="font-semibold text-slate-800 dark:text-slate-200">Sakit, Izin, dan Cuti</strong> resmi yang disetujui dikecualikan dari pembagi sehingga <strong class="font-semibold text-indigo-650 dark:text-indigo-400">tidak memotong nilai persentase kehadiran pegawai</strong>.
+                </p>
+            </div>
+        </div>
+
         <!-- TABLE SECTION -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-880 rounded-xl shadow-sm overflow-hidden w-full text-left">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
             <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
                 <table class="w-full text-xs border-collapse">
                     <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900 z-10 shadow-xs">
@@ -158,20 +170,31 @@
                                 <td class="px-6 py-4 text-center font-bold font-mono text-slate-800 dark:text-slate-300">
                                     {{ $rep['total_work_days'] }} Hari
                                 </td>
-                                <td class="px-6 py-4 text-center font-bold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50/10 dark:bg-emerald-950/5">
-                                    {{ $rep['total_present'] }}
+                                <td class="px-6 py-4 text-center bg-emerald-50/10 dark:bg-emerald-950/5">
+                                    <span class="font-bold font-mono text-emerald-600 dark:text-emerald-400 block">{{ $rep['total_present'] }}</span>
+                                    @if($rep['dinas_count'] > 0)
+                                        <span class="block text-[9px] text-slate-400 dark:text-slate-550 font-normal mt-0.5" title="{{ $rep['actual_scan_count'] }} Hari Tap Mesin Fisik dan {{ $rep['dinas_count'] }} Hari Izin Dinas/Tugas Luar">({{ $rep['actual_scan_count'] }} Tap &bull; {{ $rep['dinas_count'] }} Dinas)</span>
+                                    @endif
                                 </td>
-                                <td class="px-6 py-4 text-center font-bold font-mono text-red-500 dark:text-red-400 bg-red-50/10 dark:bg-red-950/5">
-                                    {{ $rep['total_sakit'] }}
+                                <td class="px-6 py-4 text-center bg-red-50/10 dark:bg-red-950/5">
+                                    <span class="font-bold font-mono text-red-500 dark:text-red-400" @if(!empty($rep['sakit_dates'])) title="Tanggal Sakit: {{ implode(', ', $rep['sakit_dates']) }}" style="text-decoration: underline dotted; cursor: help;" @endif>
+                                        {{ $rep['total_sakit'] }}
+                                    </span>
                                 </td>
-                                <td class="px-6 py-4 text-center font-bold font-mono text-amber-500 dark:text-amber-400 bg-amber-50/10 dark:bg-amber-950/5">
-                                    {{ $rep['total_izin'] }}
+                                <td class="px-6 py-4 text-center bg-amber-50/10 dark:bg-amber-950/5">
+                                    <span class="font-bold font-mono text-amber-500 dark:text-amber-400" @if(!empty($rep['izin_dates'])) title="Tanggal Izin: {{ implode(', ', $rep['izin_dates']) }}" style="text-decoration: underline dotted; cursor: help;" @endif>
+                                        {{ $rep['total_izin'] }}
+                                    </span>
                                 </td>
-                                <td class="px-6 py-4 text-center font-bold font-mono text-blue-500 dark:text-blue-400 bg-blue-50/10 dark:bg-blue-950/5">
-                                    {{ $rep['total_cuti'] }}
+                                <td class="px-6 py-4 text-center bg-blue-50/10 dark:bg-blue-950/5">
+                                    <span class="font-bold font-mono text-blue-500 dark:text-blue-400" @if(!empty($rep['cuti_dates'])) title="Tanggal Cuti: {{ implode(', ', $rep['cuti_dates']) }}" style="text-decoration: underline dotted; cursor: help;" @endif>
+                                        {{ $rep['total_cuti'] }}
+                                    </span>
                                 </td>
-                                <td class="px-6 py-4 text-center font-bold font-mono text-rose-600 dark:text-rose-400 bg-rose-50/10 dark:bg-rose-950/5">
-                                    {{ $rep['total_absent'] }}
+                                <td class="px-6 py-4 text-center bg-rose-50/10 dark:bg-rose-950/5">
+                                    <span class="font-bold font-mono text-rose-600 dark:text-rose-400" @if(!empty($rep['absent_dates'])) title="Tanggal Alpa: {{ implode(', ', $rep['absent_dates']) }}" style="text-decoration: underline dotted; cursor: help;" @endif>
+                                        {{ $rep['total_absent'] }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     @php

@@ -119,10 +119,17 @@ class AttendancePercentageReportController extends Controller
 
             $totalWorkDays = 0;
             $totalPresent = 0; // Physical scan OR gets_presence_bonus leaves
+            $actualScanCount = 0; // Physical scan tap
+            $dinasCount = 0; // Dinas/Tugas/Excused presence
             $totalSakit = 0;
             $totalIzin = 0;
             $totalCuti = 0;
             $totalAbsent = 0;
+
+            $sakitDates = [];
+            $izinDates = [];
+            $cutiDates = [];
+            $absentDates = [];
 
             // Loop through each day of the month
             $currentDate = $startDate->copy();
@@ -182,21 +189,28 @@ class AttendancePercentageReportController extends Controller
                     $totalWorkDays++;
                     $logKey = $uid . '_' . $dateStr;
                     $hasScan = isset($attendanceLogs[$logKey]);
+                    $formattedDate = Carbon::parse($dateStr)->format('d M');
 
                     if ($hasScan) {
                         $totalPresent++;
+                        $actualScanCount++;
                     } elseif ($isOnLeave) {
                         if ($statusCode === 'S') {
                             $totalSakit++;
+                            $sakitDates[] = $formattedDate;
                         } elseif ($statusCode === 'C') {
                             $totalCuti++;
+                            $cutiDates[] = $formattedDate;
                         } elseif ($statusCode === 'H' || $getsBonus) {
                             $totalPresent++;
+                            $dinasCount++;
                         } else {
                             $totalIzin++;
+                            $izinDates[] = $formattedDate;
                         }
                     } else {
                         $totalAbsent++;
+                        $absentDates[] = $formattedDate;
                     }
                 }
 
@@ -211,10 +225,16 @@ class AttendancePercentageReportController extends Controller
                 'employee' => $emp,
                 'total_work_days' => $totalWorkDays,
                 'total_present' => $totalPresent,
+                'actual_scan_count' => $actualScanCount,
+                'dinas_count' => $dinasCount,
                 'total_sakit' => $totalSakit,
+                'sakit_dates' => $sakitDates,
                 'total_izin' => $totalIzin,
+                'izin_dates' => $izinDates,
                 'total_cuti' => $totalCuti,
+                'cuti_dates' => $cutiDates,
                 'total_absent' => $totalAbsent,
+                'absent_dates' => $absentDates,
                 'percentage' => $percentage,
             ];
         }
