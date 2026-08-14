@@ -332,16 +332,6 @@ class LeaveApprovalController extends Controller
                     $remoteLeaves = $response->json() ?? [];
 
                     foreach ($remoteLeaves as $rL) {
-                        // Check if this record is soft-deleted
-                        $existingTrashed = LeaveRequest::onlyTrashed()
-                            ->where('school_unit_id', $unit->id)
-                            ->where('remote_leave_id', $rL['id'])
-                            ->exists();
-                        
-                        if ($existingTrashed) {
-                            continue; // Skip soft-deleted records
-                        }
-
                         $statusCode = $rL['status_code'] ?? null;
                         $status = $rL['status'];
                         

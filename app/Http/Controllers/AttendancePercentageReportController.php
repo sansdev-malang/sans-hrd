@@ -107,6 +107,13 @@ class AttendancePercentageReportController extends Controller
                 return $leave->school_unit_id . '_' . $leave->employee_id;
             });
 
+        \Illuminate\Support\Facades\Log::info("DEBUG PERCENTAGE REPORT: " . json_encode([
+            'employee_ids' => $employeeIds,
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d'),
+            'leaves_keys' => array_keys($leaves->toArray()),
+        ]));
+
         // Calculate Report
         $reports = [];
 
@@ -150,18 +157,18 @@ class AttendancePercentageReportController extends Controller
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
-                        $leaveStart = substr($leave->start_date, 0, 10);
-                        $leaveEnd = substr($leave->end_date, 0, 10);
+                        $leaveStart = $leave->start_date instanceof \Carbon\Carbon ? $leave->start_date->format('Y-m-d') : substr($leave->start_date, 0, 10);
+                        $leaveEnd = $leave->end_date instanceof \Carbon\Carbon ? $leave->end_date->format('Y-m-d') : substr($leave->end_date, 0, 10);
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
-                             $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
-                             $statusCode = $leave->status_code;
-                             if (!$statusCode) {
-                                 if ($leave->type_name === 'Sakit') $statusCode = 'S';
-                                 elseif ($leave->type_name === 'Cuti') $statusCode = 'C';
-                                 elseif ($leave->type_name === 'Dinas') $statusCode = 'H';
-                                 else $statusCode = 'I';
-                             }
+                            $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
+                            $statusCode = $leave->status_code;
+                            if (!$statusCode) {
+                                if ($leave->type_name === 'Sakit') $statusCode = 'S';
+                                elseif ($leave->type_name === 'Cuti') $statusCode = 'C';
+                                elseif ($leave->type_name === 'Dinas') $statusCode = 'H';
+                                else $statusCode = 'I';
+                            }
                             break;
                         }
                     }
@@ -173,8 +180,8 @@ class AttendancePercentageReportController extends Controller
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
-                        $assignStartDate = substr($assignment->start_date, 0, 10);
-                        $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                        $assignStartDate = $assignment->start_date instanceof \Carbon\Carbon ? $assignment->start_date->format('Y-m-d') : substr($assignment->start_date, 0, 10);
+                        $assignEndDate = $assignment->end_date ? ($assignment->end_date instanceof \Carbon\Carbon ? $assignment->end_date->format('Y-m-d') : substr($assignment->end_date, 0, 10)) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
                             if ($detail && !$detail->is_off) {
