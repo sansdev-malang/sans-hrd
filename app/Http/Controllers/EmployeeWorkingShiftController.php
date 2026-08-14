@@ -186,13 +186,48 @@ class EmployeeWorkingShiftController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
+        // Fetch neglected employees (employees without active shift schedules today)
+        $todayStr = date('Y-m-d');
+        $activeAssignments = EmployeeWorkingShift::where('start_date', '<=', $todayStr)
+            ->where(function($q) use ($todayStr) {
+                $q->whereNull('end_date')
+                  ->orWhere('end_date', '>=', $todayStr);
+            })
+            ->get()
+            ->groupBy(function($item) {
+                return $item->school_unit_id . '-' . $item->employee_id;
+            });
+
+        $neglectedEmployees = [];
+        foreach ($employees as $emp) {
+            $key = $emp['unit_id'] . '-' . $emp['id'];
+            if (!isset($activeAssignments[$key])) {
+                $neglectedEmployees[] = [
+                    'id' => $emp['id'],
+                    'name' => $emp['name'],
+                    'nip' => $emp['nuptk_nip_nik'] ?? '-',
+                    'unit_id' => $emp['unit_id'],
+                    'unit_name' => $emp['unit_name'] ?? 'Unknown',
+                    'position' => $emp['position'] ?? $emp['subject_position'] ?? '-',
+                ];
+            }
+        }
+
+        if ($selectedUnitId) {
+            $neglectedEmployees = array_filter($neglectedEmployees, function($emp) use ($selectedUnitId) {
+                return $emp['unit_id'] == $selectedUnitId;
+            });
+            $neglectedEmployees = array_values($neglectedEmployees);
+        }
+
         return view('employee-working-shifts.index', [
             'batches' => $paginatedBatches,
             'units' => $units,
             'shifts' => $shifts,
             'bonusSchemas' => $bonusSchemas,
             'selectedUnitId' => $selectedUnitId,
-            'perPage' => $perPageQuery
+            'perPage' => $perPageQuery,
+            'neglectedEmployees' => $neglectedEmployees
         ]);
     }
 
