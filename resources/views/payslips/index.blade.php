@@ -232,7 +232,7 @@
     </div>
 
     <!-- Upload Modal -->
-    <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-950/40 dark:bg-slate-955/70 backdrop-blur-sm transition-opacity duration-300">
+    <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/50 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200 dark:border-slate-800 transform scale-95 opacity-0 transition-all duration-300" id="uploadModalContent">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3.5 mb-5">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 uppercase tracking-wider">Upload Slip Gaji</h3>
@@ -249,20 +249,20 @@
 
                 <div class="text-left">
                     <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Nama Pegawai</label>
-                    <div id="modal_employee_name" class="p-3 bg-slate-50 dark:bg-slate-955 rounded-xl text-slate-800 dark:text-slate-200 font-semibold border border-slate-200/50 dark:border-slate-850 text-xs"></div>
+                    <div id="modal_employee_name" class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl text-slate-800 dark:text-slate-200 font-semibold border border-slate-200/50 dark:border-slate-800 text-xs"></div>
                 </div>
 
                 <div class="text-left">
                     <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File PDF Slip Gaji <span class="text-rose-500">*</span></label>
                     <input type="file" name="payslip_file" accept=".pdf" required
-                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-850 rounded-xl cursor-pointer bg-white dark:bg-slate-950 p-1.5">
+                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer bg-white dark:bg-slate-955 p-1.5">
                     <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Hanya file PDF (Maks. 500KB)</p>
                 </div>
 
                 <div class="text-left">
                     <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Lampiran Tambahan <span class="text-slate-400 dark:text-slate-500 font-medium">(Opsional)</span></label>
                     <input type="file" name="attachment_file" accept=".pdf,.png,.jpg,.jpeg"
-                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-855 rounded-xl cursor-pointer bg-white dark:bg-slate-955 p-1.5">
+                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer bg-white dark:bg-slate-955 p-1.5">
                     <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Bisa PDF atau Gambar (Maks. 2MB)</p>
                 </div>
 
@@ -303,6 +303,13 @@
                 document.getElementById('uploadForm').reset();
             }, 300);
         }
+
+        // Close modal when clicking outside the content box
+        document.getElementById('uploadModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeUploadModal();
+            }
+        });
     </script>
 </x-admin-layout>
 
