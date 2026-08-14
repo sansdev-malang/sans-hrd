@@ -110,6 +110,34 @@
         empSearch: '',
         selectedEmps: [],
         selectAllEmp: false,
+        createSelectedPosition: '',
+
+        toggleCreateAll() {
+            const filteredIds = this.filteredCreateEmployees.map(e => e.id);
+            if (this.selectAllEmp) {
+                this.selectedEmps = Array.from(new Set([...this.selectedEmps, ...filteredIds]));
+            } else {
+                this.selectedEmps = this.selectedEmps.filter(id => !filteredIds.includes(id));
+            }
+        },
+
+        get uniqueCreatePositions() {
+            const posSet = new Set();
+            this.empList.forEach(e => {
+                const p = e.position || e.subject_position || '-';
+                if (p) posSet.add(p);
+            });
+            return Array.from(posSet).sort();
+        },
+
+        get filteredCreateEmployees() { 
+            return this.empList.filter(e => {
+                const matchesSearch = !this.empSearch || e.name.toLowerCase().includes(this.empSearch.toLowerCase());
+                const pos = e.position || e.subject_position || '-';
+                const matchesPosition = !this.createSelectedPosition || pos === this.createSelectedPosition;
+                return matchesSearch && matchesPosition;
+            });
+        },
         showAssignmentModal: false,
 
         showEditModal: false,
@@ -229,13 +257,6 @@
         },
     
         init() {
-            this.$watch('selectAllEmp', value => {
-                if (value) {
-                    this.selectedEmps = this.empList.map(e => e.id);
-                } else {
-                    this.selectedEmps = [];
-                }
-            });
             this.$watch('showCreateModal', value => {
                 if (!value) {
                     this.createUnitId = '{{ $units->first()->id ?? '' }}';
@@ -243,6 +264,7 @@
                     this.empSearch = '';
                     this.selectedEmps = [];
                     this.selectAllEmp = false;
+                    this.createSelectedPosition = '';
                 }
             });
             this.$watch('showEditModal', value => {
@@ -1226,9 +1248,11 @@
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
-                     class="relative w-full sm:max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
+                     class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
                     
-                    <form action="{{ route('employee-working-shifts.roster') }}" method="GET" class="flex flex-col flex-1 overflow-hidden">
+                    <form action="{{ route('employee-working-shifts.roster') }}" method="GET" 
+                          @submit.prevent="if (selectedEmps.length === 0) { alert('Silakan centang minimal satu pegawai sebelum membuat jadwal.'); } else { $el.submit(); }"
+                          class="flex flex-col flex-1 overflow-hidden">
                         <!-- Header -->
                         <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
                              <div>
@@ -1244,86 +1268,125 @@
                         </div>
 
                         <!-- Scrollable Body -->
-                        <div class="flex-1 overflow-y-auto p-5 space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Sekolah</label>
-                                    <select x-model="createUnitId" name="unit_id" @change="loadEmployeesForUnit()"
-                                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
-                                        @foreach ($units as $unit)
-                                            <option value="{{ $unit->id }}">{{ $unit->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Roster <span class="text-rose-500">*</span></label>
-                                    <input type="text" name="roster_name" required placeholder="Misal: Roster Satpam"
-                                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Bulan</label>
-                                    <select name="month"
-                                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
-                                        @php
-                                            $bulanIndo = [
-                                                '',
-                                                'Januari',
-                                                'Februari',
-                                                'Maret',
-                                                'April',
-                                                'Mei',
-                                                'Juni',
-                                                'Juli',
-                                                'Agustus',
-                                                'September',
-                                                'Oktober',
-                                                'November',
-                                                'Desember',
-                                            ];
-                                        @endphp
-                                        @for ($i = 1; $i <= 12; $i++)
-                                            <option value="{{ $i }}" {{ date('m') == $i ? 'selected' : '' }}>{{ $bulanIndo[$i] }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun</label>
-                                    <input type="number" name="year" value="{{ date('Y') }}"
-                                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono">
-                                </div>
-                            </div>
+                        <div class="flex-1 overflow-y-auto p-5 space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-4">
+                                    <!-- Unit Sekolah -->
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Sekolah</label>
+                                        <select x-model="createUnitId" name="unit_id" @change="loadEmployeesForUnit()"
+                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            @foreach ($units as $unit)
+                                                <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                            <div>
-                                <div class="flex justify-between items-center mb-1.5">
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300">Pilih Pegawai</label>
-                                    <div class="flex items-center gap-2">
-                                        <div class="relative flex items-center">
-                                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2 pointer-events-none"></i>
-                                            <input type="text" x-model="empSearch" placeholder="Cari..."
-                                                class="w-32 pl-7 pr-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-medium font-semibold">
+                                    <!-- Nama Roster -->
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Roster <span class="text-rose-500">*</span></label>
+                                        <input type="text" name="roster_name" required placeholder="Misal: Roster Satpam"
+                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <!-- Bulan -->
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Bulan</label>
+                                            <select name="month"
+                                                class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                                @php
+                                                    $bulanIndo = [
+                                                        '',
+                                                        'Januari',
+                                                        'Februari',
+                                                        'Maret',
+                                                        'April',
+                                                        'Mei',
+                                                        'Juni',
+                                                        'Juli',
+                                                        'Agustus',
+                                                        'September',
+                                                        'Oktober',
+                                                        'November',
+                                                        'Desember',
+                                                    ];
+                                                @endphp
+                                                @for ($i = 1; $i <= 12; $i++)
+                                                    <option value="{{ $i }}" {{ date('m') == $i ? 'selected' : '' }}>{{ $bulanIndo[$i] }}</option>
+                                                @endfor
+                                            </select>
                                         </div>
-                                        <button type="button" @click="selectAllEmp = !selectAllEmp"
-                                            class="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold hover:underline bg-transparent border-0 cursor-pointer">Pilih Semua</button>
+
+                                        <!-- Tahun -->
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun</label>
+                                            <input type="number" name="year" value="{{ date('Y') }}"
+                                                class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900 h-44 overflow-y-auto p-2.5 custom-scrollbar">
-                                    <div x-show="loadingEmp" class="text-center py-8 text-xs text-slate-450 animate-pulse font-medium">
-                                        Memuat data pegawai...
-                                    </div>
-                                    <div x-show="!loadingEmp && empList.length === 0" class="text-center py-8 text-xs text-slate-400 italic">
-                                        Tidak ada pegawai di unit ini.
-                                    </div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                        <template x-for="emp in empList" :key="emp.id">
-                                            <label x-show="empSearch === '' || emp.name.toLowerCase().includes(empSearch.toLowerCase())"
-                                                class="flex items-center gap-2.5 p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl cursor-pointer transition-all border border-transparent hover:border-slate-200/50 dark:hover:border-slate-800">
-                                                <input type="checkbox" name="emp_ids[]" :value="emp.id" x-model="selectedEmps"
-                                                    class="w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 dark:focus:ring-offset-slate-900 cursor-pointer">
-                                                <span class="text-xs text-slate-700 dark:text-slate-300 font-semibold truncate" x-text="emp.name"></span>
-                                            </label>
-                                        </template>
+
+                                <!-- Pegawai List -->
+                                <div class="flex flex-col h-full">
+                                    <label class="font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center shrink-0">
+                                        <span>
+                                            Pilih Pegawai
+                                            <span x-show="loadingEmp" class="text-[10px] text-indigo-500 ml-2 animate-pulse font-normal">Memuat data...</span>
+                                        </span>
+                                        <label x-show="empList.length > 0" class="flex items-center gap-1.5 cursor-pointer text-[11px] text-indigo-650 dark:text-indigo-400 hover:underline">
+                                            <input type="checkbox" x-model="selectAllEmp" @change="toggleCreateAll()" class="rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer">
+                                            Pilih Semua
+                                        </label>
+                                    </label>
+
+                                    <div class="flex flex-col bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex-1 min-h-[280px]">
+                                        <!-- Search & Filter Bar -->
+                                        <div class="p-2 border-b border-slate-200/60 dark:border-slate-800/80 shrink-0 bg-white dark:bg-slate-900/40 space-y-2">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                <!-- Search Input -->
+                                                <div class="relative flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                                    <input type="text" x-model="empSearch" x-ref="createSearchQueryInput" :disabled="empList.length === 0" placeholder="Cari nama..."
+                                                        style="border: none !important; outline: none !important; box-shadow: none !important;"
+                                                        class="text-xs w-full h-8 px-2.5 pl-8 pr-8 bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-0">
+                                                    <button type="button" x-show="empSearch.trim() !== ''" @click="empSearch = ''; $refs.createSearchQueryInput.focus();" class="absolute right-2 h-8 px-1 text-slate-400 hover:text-slate-660 transition-colors border-0 bg-transparent cursor-pointer flex items-center justify-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                                
+                                                <!-- Position Filter -->
+                                                <select x-model="createSelectedPosition" :disabled="empList.length === 0"
+                                                    class="text-xs h-8 px-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                                                    <option value="">Semua Jabatan</option>
+                                                    <template x-for="pos in uniqueCreatePositions" :key="pos">
+                                                        <option :value="pos" x-text="pos"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- List -->
+                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[250px] flex-1">
+                                            <div x-show="empList.length === 0 && !loadingEmp" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-550 italic text-[11px] py-12">
+                                                Silakan pilih unit sekolah terlebih dahulu.
+                                            </div>
+
+                                            <div x-show="empList.length > 0 && filteredCreateEmployees.length === 0" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-555 italic text-[11px] py-12">
+                                                Pegawai tidak ditemukan.
+                                            </div>
+                                            
+                                            <template x-for="emp in filteredCreateEmployees" :key="emp.id">
+                                                <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/80 border border-slate-200 dark:border-slate-900 rounded-xl transition-all shadow-2xs hover:border-slate-300 dark:hover:border-slate-800">
+                                                    <input type="checkbox" name="emp_ids[]" :value="emp.id" x-model="selectedEmps"
+                                                        class="employee-checkbox w-4.5 h-4.5 rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 shrink-0 cursor-pointer">
+                                                    <div class="flex flex-col min-w-0">
+                                                        <span class="text-xs text-slate-900 dark:text-slate-100 font-bold leading-snug truncate" x-text="emp.name"></span>
+                                                        <span class="text-[10px] text-slate-450 mt-0.5 truncate" x-text="emp.position || emp.subject_position || '-'"></span>
+                                                    </div>
+                                                </label>
+                                            </template>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
