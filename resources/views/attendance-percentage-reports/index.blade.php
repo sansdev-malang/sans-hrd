@@ -177,22 +177,22 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-center bg-red-50/10 dark:bg-red-950/5">
-                                    <span class="font-bold font-mono text-red-500 dark:text-red-400" @if(!empty($rep['sakit_dates'])) title="Tanggal Sakit: {{ implode(', ', $rep['sakit_dates']) }}" style="text-decoration: underline dotted; cursor: help;" @endif>
+                                    <span class="font-bold font-mono text-red-500 dark:text-red-400 {{ !empty($rep['sakit_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" title="{{ !empty($rep['sakit_dates']) ? 'Tanggal Sakit: ' . implode(', ', $rep['sakit_dates']) : '' }}">
                                         {{ $rep['total_sakit'] }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center bg-amber-50/10 dark:bg-amber-950/5">
-                                    <span class="font-bold font-mono text-amber-500 dark:text-amber-400" @if(!empty($rep['izin_dates'])) title="Tanggal Izin: {{ implode(', ', $rep['izin_dates']) }}" style="text-decoration: underline dotted; cursor: help;" @endif>
+                                    <span class="font-bold font-mono text-amber-500 dark:text-amber-400 {{ !empty($rep['izin_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" title="{{ !empty($rep['izin_dates']) ? 'Tanggal Izin: ' . implode(', ', $rep['izin_dates']) : '' }}">
                                         {{ $rep['total_izin'] }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center bg-blue-50/10 dark:bg-blue-950/5">
-                                    <span class="font-bold font-mono text-blue-500 dark:text-blue-400" @if(!empty($rep['cuti_dates'])) title="Tanggal Cuti: {{ implode(', ', $rep['cuti_dates']) }}" style="text-decoration: underline dotted; cursor: help;" @endif>
+                                    <span class="font-bold font-mono text-blue-500 dark:text-blue-400 {{ !empty($rep['cuti_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" title="{{ !empty($rep['cuti_dates']) ? 'Tanggal Cuti: ' . implode(', ', $rep['cuti_dates']) : '' }}">
                                         {{ $rep['total_cuti'] }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center bg-rose-50/10 dark:bg-rose-950/5">
-                                    <span class="font-bold font-mono text-rose-600 dark:text-rose-400" @if(!empty($rep['absent_dates'])) title="Tanggal Alpa: {{ implode(', ', $rep['absent_dates']) }}" style="text-decoration: underline dotted; cursor: help;" @endif>
+                                    <span class="font-bold font-mono text-rose-600 dark:text-rose-400 {{ !empty($rep['absent_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" title="{{ !empty($rep['absent_dates']) ? 'Tanggal Alpa: ' . implode(', ', $rep['absent_dates']) : '' }}">
                                         {{ $rep['total_absent'] }}
                                     </span>
                                 </td>
