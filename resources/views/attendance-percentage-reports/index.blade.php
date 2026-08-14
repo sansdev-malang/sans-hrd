@@ -1,5 +1,28 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6">
+    <div class="p-6 space-y-6 relative" x-data="{
+        tooltip: {
+            show: false,
+            title: '',
+            dates: [],
+            x: 0,
+            y: 0
+        },
+        showTooltip(e, title, dates) {
+            if (!dates || dates.length === 0) return;
+            this.tooltip.title = title;
+            this.tooltip.dates = dates;
+            
+            const containerRect = this.$refs.container.getBoundingClientRect();
+            const targetRect = e.currentTarget.getBoundingClientRect();
+            
+            this.tooltip.x = targetRect.left - containerRect.left + (targetRect.width / 2);
+            this.tooltip.y = targetRect.top - containerRect.top - 8;
+            this.tooltip.show = true;
+        },
+        hideTooltip() {
+            this.tooltip.show = false;
+        }
+    }" x-ref="container">
         
         <!-- HEADER -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
@@ -177,22 +200,30 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-center bg-red-50/10 dark:bg-red-950/5">
-                                    <span class="font-bold font-mono text-red-500 dark:text-red-400 {{ !empty($rep['sakit_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" title="{!! !empty($rep['sakit_dates']) ? 'Tanggal Sakit:&#10;• ' . implode('&#10;• ', $rep['sakit_dates']) : '' !!}">
+                                    <span class="font-bold font-mono text-red-500 dark:text-red-400 {{ !empty($rep['sakit_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" 
+                                          @mouseenter="showTooltip($event, 'Tanggal Sakit', {{ json_encode($rep['sakit_dates']) }})" 
+                                          @mouseleave="hideTooltip()">
                                         {{ $rep['total_sakit'] }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center bg-amber-50/10 dark:bg-amber-950/5">
-                                    <span class="font-bold font-mono text-amber-500 dark:text-amber-400 {{ !empty($rep['izin_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" title="{!! !empty($rep['izin_dates']) ? 'Tanggal Izin:&#10;• ' . implode('&#10;• ', $rep['izin_dates']) : '' !!}">
+                                    <span class="font-bold font-mono text-amber-500 dark:text-amber-400 {{ !empty($rep['izin_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" 
+                                          @mouseenter="showTooltip($event, 'Tanggal Izin', {{ json_encode($rep['izin_dates']) }})" 
+                                          @mouseleave="hideTooltip()">
                                         {{ $rep['total_izin'] }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center bg-blue-50/10 dark:bg-blue-950/5">
-                                    <span class="font-bold font-mono text-blue-500 dark:text-blue-400 {{ !empty($rep['cuti_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" title="{!! !empty($rep['cuti_dates']) ? 'Tanggal Cuti:&#10;• ' . implode('&#10;• ', $rep['cuti_dates']) : '' !!}">
+                                    <span class="font-bold font-mono text-blue-500 dark:text-blue-400 {{ !empty($rep['cuti_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" 
+                                          @mouseenter="showTooltip($event, 'Tanggal Cuti', {{ json_encode($rep['cuti_dates']) }})" 
+                                          @mouseleave="hideTooltip()">
                                         {{ $rep['total_cuti'] }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center bg-rose-50/10 dark:bg-rose-950/5">
-                                    <span class="font-bold font-mono text-rose-600 dark:text-rose-400 {{ !empty($rep['absent_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" title="{!! !empty($rep['absent_dates']) ? 'Tanggal Alpa:&#10;• ' . implode('&#10;• ', $rep['absent_dates']) : '' !!}">
+                                    <span class="font-bold font-mono text-rose-600 dark:text-rose-400 {{ !empty($rep['absent_dates']) ? 'underline decoration-dotted cursor-help' : '' }}" 
+                                          @mouseenter="showTooltip($event, 'Tanggal Alpa', {{ json_encode($rep['absent_dates']) }})" 
+                                          @mouseleave="hideTooltip()">
                                         {{ $rep['total_absent'] }}
                                     </span>
                                 </td>
@@ -247,6 +278,30 @@
                 </ul>
             </div>
         </section>
+
+        <!-- RICH TOOLTIP CARD -->
+        <div 
+            x-show="tooltip.show"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            :style="`left: ${tooltip.x}px; top: ${tooltip.y}px; transform: translate(-50%, -100%);`"
+            class="absolute z-50 pointer-events-none min-w-[160px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-3 text-left text-xs transition-all duration-150"
+            style="display: none;"
+        >
+            <div class="font-bold text-slate-900 dark:text-slate-100 pb-1 mb-1.5 border-b border-slate-100 dark:border-slate-800" x-text="tooltip.title"></div>
+            <div class="space-y-1 max-h-[150px] overflow-y-auto pr-1">
+                <template x-for="date in tooltip.dates">
+                    <div class="flex items-center gap-1.5">
+                        <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+                        <span x-text="date" class="font-bold font-mono text-[10px] text-slate-600 dark:text-slate-400"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
 
     </div>
 </x-admin-layout>
