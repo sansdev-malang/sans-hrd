@@ -7,25 +7,23 @@
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Laporan Persentase Kehadiran</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Bahan evaluasi kehadiran, kedisplinan, dan pemenuhan hari kerja pegawai untuk pimpinan unit sekolah.</p>
             </div>
-            <div class="flex items-center gap-2 text-xs text-slate-500">
-                <span>Periode Cutoff: <strong class="text-slate-700 dark:text-slate-300 font-semibold">{{ \Carbon\Carbon::parse($startDateReq)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($endDateReq)->format('d M Y') }}</strong></span>
-            </div>
         </section>
 
         <!-- FILTERS -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-880 rounded-xl shadow-sm p-4 w-full text-left">
-            <form method="GET" action="{{ route('attendance-percentage-reports.index') }}" class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3 w-full">
+            <form method="GET" action="{{ route('attendance-percentage-reports.index') }}" class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-start gap-3 w-full">
                 
                 <!-- Bulan -->
-                <div class="space-y-1 w-full sm:w-40">
-                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
+                <div class="space-y-1 w-full sm:w-auto">
                     <input type="month" name="month" value="{{ request('month', $month) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer">
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 pt-0.5 pl-1">
+                        Periode Cutoff: <strong class="text-slate-700 dark:text-slate-300 font-semibold">{{ \Carbon\Carbon::parse($startDateReq)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($endDateReq)->format('d M Y') }}</strong>
+                    </div>
                 </div>
 
                 <!-- Filter Unit -->
                 @if(isset($schoolUnits) && count($schoolUnits) > 0)
                 <div class="space-y-1 w-full sm:w-48">
-                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Filter Unit</label>
                     <select name="unit_id" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer">
                         <option value="">Semua Unit</option>
                         @foreach($schoolUnits as $unit)
@@ -37,8 +35,10 @@
                 </div>
                 @endif
 
+                <!-- Search -->
+                <div class="space-y-1 w-full sm:w-64">
                     <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
-                        <input type="text" name="search" x-model="searchVal" placeholder="Cari nama atau NIP..."
+                        <input type="text" name="search" x-model="searchVal" placeholder="Cari nama pegawai..."
                             style="border: none !important; outline: none !important; box-shadow: none !important;"
                             class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
                         
@@ -53,13 +53,14 @@
                             Cari
                         </button>
                     </div>
+                </div>
 
                 <!-- Apply Buttons -->
                 <div class="flex items-center gap-2.5">
                     <button type="submit" class="w-full sm:w-auto h-9 px-5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer whitespace-nowrap">
                         Terapkan
                     </button>
-                    @if(request()->hasAny(['unit_id', 'search']) && count(request()->except('page')) > 0)
+                    @if(request()->hasAny(['unit_id', 'search', 'month']) && count(request()->except('page')) > 0)
                         <a href="{{ route('attendance-percentage-reports.index') }}" class="w-full sm:w-auto inline-flex items-center justify-center h-9 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors">
                             Reset
                         </a>
