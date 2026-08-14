@@ -562,10 +562,13 @@
                         <!-- Body -->
                         <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4 flex flex-col min-h-0">
                             <!-- Search -->
-                            <div class="relative flex items-center shrink-0">
+                            <div class="relative flex items-center shrink-0 w-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-450 dark:text-slate-550 absolute left-3.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                                <input type="text" x-model="searchModal" placeholder="Cari nama atau NIP pegawai..."
-                                    class="w-full text-xs px-3.5 py-2.5 pl-9 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all">
+                                <input type="text" x-model="searchModal" x-ref="searchModalInput" placeholder="Cari nama pegawai..."
+                                    class="w-full text-xs px-3.5 py-2.5 pl-9 pr-9 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all">
+                                <button type="button" x-show="searchModal.trim() !== ''" @click="searchModal = ''; $refs.searchModalInput.focus();" class="absolute right-3 h-8 px-1 text-slate-400 hover:text-slate-650 dark:hover:text-slate-350 transition-colors border-0 bg-transparent cursor-pointer flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
                             </div>
 
                             <!-- List -->
@@ -586,8 +589,7 @@
                                              <!-- Identity Info -->
                                              <div class="flex flex-col min-w-0">
                                                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate" x-text="emp.name"></span>
-                                                 <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold truncate mt-0.5" x-text="emp.position ? `Jabatan: ${emp.position}` : 'Jabatan: Staf'"></span>
-                                                 <span class="text-[9px] font-mono text-slate-450 mt-0.5 truncate" x-text="emp.nip ? `NIP/NIK: ${emp.nip}` : 'NIP/NIK: -'"></span>
+                                                 <span class="text-[10px] text-slate-500 dark:text-slate-455 mt-0.5 truncate" x-text="emp.position || emp.subject_position || '-'"></span>
                                              </div>
                                         </div>
                                     </template>
@@ -856,7 +858,7 @@
                                                         class="employee-checkbox w-4.5 h-4.5 rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 shrink-0 cursor-pointer">
                                                     <div class="flex flex-col min-w-0">
                                                         <span class="text-xs text-slate-900 dark:text-slate-100 font-bold leading-snug truncate" x-text="emp.name"></span>
-                                                        <span class="text-[10px] text-slate-450 mt-0.5 truncate" x-text="`Jabatan: ${emp.position || emp.subject_position || 'Staf'}`"></span>
+                                                        <span class="text-[10px] text-slate-450 mt-0.5 truncate" x-text="emp.position || emp.subject_position || '-'"></span>
                                                     </div>
                                                 </label>
                                             </template>
