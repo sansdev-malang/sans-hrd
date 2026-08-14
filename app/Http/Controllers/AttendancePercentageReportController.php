@@ -21,19 +21,28 @@ class AttendancePercentageReportController extends Controller
 
     public function index(Request $request)
     {
-        $month = $request->query('month', date('Y-m'));
         $unitId = $request->query('unit_id');
+        $startDateReq = $request->query('start_date');
+        $endDateReq = $request->query('end_date');
+        $month = $request->query('month');
 
         // Fetch cutoff date from settings, default to 26
         $cutoffDate = (int) Setting::get('payroll_cutoff_date', 26);
 
-        // Determine Start and End dates based on the selected month and cutoff date
-        $monthCarbon = Carbon::createFromFormat('Y-m', $month);
-        $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
-        $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
+        if (!empty($startDateReq) && !empty($endDateReq)) {
+            $startDate = Carbon::parse($startDateReq)->startOfDay();
+            $endDate = Carbon::parse($endDateReq)->endOfDay();
+        } else {
+            if (empty($month)) {
+                $month = date('Y-m');
+            }
+            $monthCarbon = Carbon::createFromFormat('Y-m', $month);
+            $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
+            $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
 
-        $startDateReq = $startDate->format('Y-m-d');
-        $endDateReq = $endDate->format('Y-m-d');
+            $startDateReq = $startDate->format('Y-m-d');
+            $endDateReq = $endDate->format('Y-m-d');
+        }
 
         // Fetch Employees (Filter by unit if needed)
         $rawEmployees = $this->service->getSdEmployees();
