@@ -75,7 +75,7 @@ class EmployeeWorkingShiftController extends Controller
                     'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-',
                     'photo' => $employeeMap[$empKey]['photo'] ?? null,
                     'unit_url' => $employeeMap[$empKey]['unit_url'] ?? null,
-                    'position' => $employeeMap[$empKey]['position'] ?? $employeeMap[$empKey]['subject_position'] ?? 'Staf',
+                    'position' => $employeeMap[$empKey]['position'] ?? $employeeMap[$empKey]['subject_position'] ?? null,
                 ];
             } else {
                 // Roster Shifts
@@ -108,7 +108,7 @@ class EmployeeWorkingShiftController extends Controller
                         'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-',
                         'photo' => $employeeMap[$empKey]['photo'] ?? null,
                         'unit_url' => $employeeMap[$empKey]['unit_url'] ?? null,
-                        'position' => $employeeMap[$empKey]['position'] ?? $employeeMap[$empKey]['subject_position'] ?? 'Staf',
+                        'position' => $employeeMap[$empKey]['position'] ?? $employeeMap[$empKey]['subject_position'] ?? null,
                     ];
                 }
             }
