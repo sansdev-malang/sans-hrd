@@ -357,7 +357,25 @@
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization">Jadwal Kerja Pegawai</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Atur penugasan dan rotasi shift kerja secara kolektif per unit sekolah.</p>
             </div>
-            <div class="flex items-center gap-2">
+
+            @if(count($neglectedEmployees) > 0)
+                <div @click="showNeglectedModal = true" class="flex-1 max-w-md mx-0 md:mx-4 px-3 py-1.5 bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 rounded-xl flex items-center justify-between gap-3 text-left shadow-3xs hover:bg-rose-100/60 dark:hover:bg-rose-900/35 transition-all cursor-pointer">
+                    <div class="flex items-center gap-2.5">
+                        <span class="p-1 bg-rose-500/10 text-rose-600 dark:text-rose-455 rounded-lg shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </span>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-rose-800 dark:text-rose-400 leading-tight">Peringatan Penjadwalan</span>
+                            <span class="text-[9.5px] text-slate-500 dark:text-slate-400 leading-tight">Terdapat {{ count($neglectedEmployees) }} pegawai tanpa jadwal hari ini.</span>
+                        </div>
+                    </div>
+                    <span class="text-[9.5px] font-bold text-rose-600 dark:text-rose-400 shrink-0 flex items-center gap-0.5">
+                        Lihat <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </div>
+            @endif
+
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
                 <button type="button" @click="showCreateModal = true"
                     class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
                     <i data-lucide="calendar-range" class="w-4.5 h-4.5"></i>
@@ -422,23 +440,7 @@
             </div>
         </section>
 
-        @if(count($neglectedEmployees) > 0)
-            <!-- WARNING BANNER FOR NEGLECTED EMPLOYEES -->
-            <div class="p-4 bg-rose-50/50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left w-full">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-rose-500/10 text-rose-600 dark:text-rose-450 rounded-lg shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </div>
-                    <div>
-                        <h5 class="text-xs font-bold text-rose-800 dark:text-rose-400">Peringatan Penjadwalan</h5>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Terdapat <span class="font-bold text-rose-600 dark:text-rose-400">{{ count($neglectedEmployees) }} pegawai</span> di unit aktif yang tidak memiliki jadwal kerja hari ini.</p>
-                    </div>
-                </div>
-                <button type="button" @click="showNeglectedModal = true" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 text-white dark:text-rose-400 text-xs font-bold rounded-lg border-0 transition-colors shadow-sm cursor-pointer shrink-0">
-                    Lihat Pegawai
-                </button>
-            </div>
-        @endif
+
 
         <!-- FILTERS & SEARCH (MODERN COMMAND BAR STYLE) -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
