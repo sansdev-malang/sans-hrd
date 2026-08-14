@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'verify_school_unit_token' => \App\Http\Middleware\VerifySchoolUnitToken::class,
+            'verify_pkg_api_token' => \App\Http\Middleware\VerifyPkgApiToken::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [

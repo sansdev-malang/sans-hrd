@@ -31,7 +31,7 @@ class ZktecoDeviceSeeder extends Seeder
         ];
 
         foreach ($devices as $device) {
-            ZktecoDevice::firstOrCreate(["ip_address" => $device["ip_address"]], $device);
+            ZktecoDevice::firstOrCreate(["sn" => $device["sn"]], $device);
         }
     }
 }

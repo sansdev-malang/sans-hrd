@@ -55,19 +55,33 @@ class HolidayController extends Controller
         $validated = $request->validate([
             'holiday_id' => 'required|exists:holidays,id',
             'adjusted_date' => 'required|date',
-            'school_unit_id' => 'nullable|exists:school_units,id',
+            'school_unit_ids' => 'nullable|array',
+            'school_unit_ids.*' => 'exists:school_units,id',
             'reason' => 'nullable|string',
         ]);
 
         $holiday = Holiday::findOrFail($validated['holiday_id']);
+        $schoolUnitIds = $request->input('school_unit_ids');
 
-        HolidayAdjustment::create([
-            'holiday_id' => $holiday->id,
-            'original_date' => $holiday->original_date,
-            'adjusted_date' => $validated['adjusted_date'],
-            'school_unit_id' => $validated['school_unit_id'] ?? null,
-            'reason' => $validated['reason'] ?? null,
-        ]);
+        if (empty($schoolUnitIds)) {
+            HolidayAdjustment::create([
+                'holiday_id' => $holiday->id,
+                'original_date' => $holiday->original_date,
+                'adjusted_date' => $validated['adjusted_date'],
+                'school_unit_id' => null,
+                'reason' => $validated['reason'] ?? null,
+            ]);
+        } else {
+            foreach ($schoolUnitIds as $unitId) {
+                HolidayAdjustment::create([
+                    'holiday_id' => $holiday->id,
+                    'original_date' => $holiday->original_date,
+                    'adjusted_date' => $validated['adjusted_date'],
+                    'school_unit_id' => $unitId,
+                    'reason' => $validated['reason'] ?? null,
+                ]);
+            }
+        }
 
         // Auto sync
         $this->syncHolidaysToUnits();

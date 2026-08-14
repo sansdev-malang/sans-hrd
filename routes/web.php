@@ -103,20 +103,25 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('performance-reports/{id}', [\App\Http\Controllers\PerformanceReportController::class, 'show'])->name('performance-reports.show');
 });
 
-// Unit API access (unprotected internally for simplicity, or protect later if exposed publicly)
-Route::prefix('api')->group(function () {
+// Unit API access - PROTECTED with School Unit Token
+Route::middleware(['throttle:60,1', 'verify_school_unit_token'])->prefix('api')->group(function () {
+    // Attendance & Bonus Reports (Unit sync endpoints)
     Route::get('attendance-matrix', [\App\Http\Controllers\Api\AttendanceApiController::class, 'matrixReport']);
     Route::get('attendances', [\App\Http\Controllers\Api\AttendanceApiController::class, 'index']);
     Route::get('bonus-reports', [\App\Http\Controllers\Api\AttendanceApiController::class, 'bonusReport']);
     Route::get('payslips', [\App\Http\Controllers\Api\PayslipApiController::class, 'index']);
 
-    // PKG Integration Endpoints
+    // Leave Request Sync Endpoints (from units)
+    Route::post('sync/leave-request', [\App\Http\Controllers\Api\LeaveSyncApiController::class, 'storeOrUpdate']);
+    Route::post('sync/leave-request/delete', [\App\Http\Controllers\Api\LeaveSyncApiController::class, 'destroy']);
+});
+
+// PKG Integration API - PROTECTED with PKG Token
+Route::middleware(['throttle:60,1', 'verify_pkg_api_token'])->prefix('api')->group(function () {
     Route::get('employees', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'employees']);
     Route::get('attendances/summary', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'attendanceSummary']);
     Route::post('auth/verify-credential', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'verifyCredential']);
     Route::post('performance-reports', [\App\Http\Controllers\Api\PkgIntegrationApiController::class, 'receivePerformanceReport']);
-    Route::post('sync/leave-request', [\App\Http\Controllers\Api\LeaveSyncApiController::class, 'storeOrUpdate']);
-    Route::post('sync/leave-request/delete', [\App\Http\Controllers\Api\LeaveSyncApiController::class, 'destroy']);
 });
 
 // ZKTeco ADMS Endpoints (Must bypass CSRF)
@@ -135,7 +140,7 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/coming-soon', function () { return view('admin.coming-soon'); })->name('coming-soon');
-    
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

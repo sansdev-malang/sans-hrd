@@ -37,16 +37,43 @@ class LeaveSyncApiController extends Controller
                 $validated
             );
 
+            Log::info('Leave request synced successfully', [
+                'unit_id' => $validated['school_unit_id'],
+                'remote_leave_id' => $validated['remote_leave_id'],
+                'leave_id' => $leave->id,
+                'employee_id' => $validated['employee_id'],
+                'status' => $validated['status']
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Leave request synced successfully.',
                 'data' => $leave
             ]);
-        } catch (\Exception $e) {
-            Log::error("Failed to sync leave request from unit: " . $e->getMessage());
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            Log::error('Leave request sync: Unique constraint violation', [
+                'unit_id' => $validated['school_unit_id'] ?? null,
+                'remote_leave_id' => $validated['remote_leave_id'] ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to sync leave request.'
+                'message' => 'Duplicate leave request for this unit.'
+            ], 409);
+        } catch (\Exception $e) {
+            Log::error('Leave request sync failed', [
+                'unit_id' => $validated['school_unit_id'] ?? null,
+                'remote_leave_id' => $validated['remote_leave_id'] ?? null,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to sync leave request. Please try again.'
             ], 500);
         }
     }
@@ -64,17 +91,36 @@ class LeaveSyncApiController extends Controller
         try {
             $deleted = LeaveRequest::where('school_unit_id', $validated['school_unit_id'])
                 ->where('remote_leave_id', $validated['remote_leave_id'])
-                ->delete(); // Hard delete because soft deletes are dropped
+                ->delete();
+
+            if ($deleted) {
+                Log::info('Leave request deleted successfully', [
+                    'unit_id' => $validated['school_unit_id'],
+                    'remote_leave_id' => $validated['remote_leave_id'],
+                    'rows_deleted' => $deleted
+                ]);
+            } else {
+                Log::warning('Leave request deletion: Record not found', [
+                    'unit_id' => $validated['school_unit_id'],
+                    'remote_leave_id' => $validated['remote_leave_id']
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => $deleted ? 'Leave request deleted successfully.' : 'Leave request not found or already deleted.'
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to delete synced leave request: " . $e->getMessage());
+            Log::error('Leave request deletion failed', [
+                'unit_id' => $validated['school_unit_id'] ?? null,
+                'remote_leave_id' => $validated['remote_leave_id'] ?? null,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete synced leave request.'
+                'message' => 'Failed to delete leave request. Please try again.'
             ], 500);
         }
     }

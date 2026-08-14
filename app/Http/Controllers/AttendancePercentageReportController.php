@@ -89,11 +89,41 @@ class AttendancePercentageReportController extends Controller
                 return $shift->school_unit_id . '_' . $shift->employee_id;
             });
 
-        // Pre-fetch Holidays
-        $holidays = \App\Models\Holiday::with('adjustments')
-            ->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->get();
-        $holidayDates = $holidays->pluck('original_date')->toArray();
+        // Pre-fetch Holidays and Adjustments
+        $holidays = \App\Models\Holiday::all();
+        $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+
+        // Build active holiday dates per unit
+        $schoolUnitsList = SchoolUnit::where('is_active', true)->get();
+        $unitHolidays = [];
+
+        foreach ($schoolUnitsList as $unitModel) {
+            $uId = $unitModel->id;
+            $unitHolidays[$uId] = [];
+
+            // Add global/national holidays first
+            foreach ($holidays as $h) {
+                if ($h->is_global) {
+                    $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
+                }
+            }
+
+            // Apply adjustments/reschedules for this unit (or global adjustments)
+            foreach ($holidayAdjustments as $adj) {
+                if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
+                    $origStr = $adj->original_date->format('Y-m-d');
+                    $adjStr = $adj->adjusted_date->format('Y-m-d');
+
+                    // Original date is no longer a holiday
+                    if (isset($unitHolidays[$uId][$origStr])) {
+                        unset($unitHolidays[$uId][$origStr]);
+                    }
+
+                    // Adjusted date becomes the new holiday
+                    $unitHolidays[$uId][$adjStr] = true;
+                }
+            }
+        }
 
         // Pre-fetch Leave Requests (Approved)
         $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
@@ -137,15 +167,28 @@ class AttendancePercentageReportController extends Controller
             $izinDates = [];
             $cutiDates = [];
             $absentDates = [];
+            $scanDates = [];
+            $dinasDates = [];
+            $dayDetails = [];
 
             // Loop through each day of the month
+            $lastDay = $endDate->greaterThan(Carbon::now()) ? Carbon::now()->endOfDay() : $endDate;
             $currentDate = $startDate->copy();
-            while ($currentDate <= $endDate) {
+            while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
+                $formattedDate = Carbon::parse($dateStr)->translatedFormat('l, d M Y'); // e.g. Senin, 10 Agt 2026
                 $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
-                // Skip Holidays
-                if (in_array($dateStr, $holidayDates)) {
+                // Skip Holidays based on employee's unit
+                $isHoliday = isset($unitHolidays[$unit][$dateStr]) ?? false;
+                if ($isHoliday) {
+                    $dayDetails[] = [
+                        'date' => $formattedDate,
+                        'status' => 'Libur',
+                        'label' => 'Hari Libur Resmi',
+                        'detail' => 'Libur Nasional / Yayasan',
+                        'color' => 'slate'
+                    ];
                     $currentDate->addDay();
                     continue;
                 }
@@ -154,6 +197,7 @@ class AttendancePercentageReportController extends Controller
                 $isOnLeave = false;
                 $getsBonus = false;
                 $statusCode = null;
+                $leaveReason = '';
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
@@ -163,6 +207,7 @@ class AttendancePercentageReportController extends Controller
                             $isOnLeave = true;
                             $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
                             $statusCode = $leave->status_code;
+                            $leaveReason = $leave->notes ?? $leave->reason ?? 'Izin disetujui';
                             if (!$statusCode) {
                                 if ($leave->type_name === 'Sakit') $statusCode = 'S';
                                 elseif ($leave->type_name === 'Cuti') $statusCode = 'C';
@@ -177,6 +222,7 @@ class AttendancePercentageReportController extends Controller
                 // Check Shift Assignment
                 $hasShiftToday = false;
                 $shiftKey = $unit . '_' . $empId;
+                $shiftName = 'Shift Kerja';
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
@@ -186,6 +232,7 @@ class AttendancePercentageReportController extends Controller
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
                             if ($detail && !$detail->is_off) {
                                 $hasShiftToday = true;
+                                $shiftName = $assignment->workingShift->name;
                             }
                             break;
                         }
@@ -196,29 +243,84 @@ class AttendancePercentageReportController extends Controller
                     $totalWorkDays++;
                     $logKey = $uid . '_' . $dateStr;
                     $hasScan = isset($attendanceLogs[$logKey]);
-                    $formattedDate = Carbon::parse($dateStr)->format('d M');
 
                     if ($hasScan) {
                         $totalPresent++;
                         $actualScanCount++;
+                        $scanDates[] = $currentDate->translatedFormat('d M');
+                        
+                        $firstLog = $attendanceLogs[$logKey]->sortBy('timestamp')->first();
+                        $scanTime = Carbon::parse($firstLog->timestamp)->format('H:i');
+
+                        $dayDetails[] = [
+                            'date' => $formattedDate,
+                            'status' => 'Hadir',
+                            'label' => "Hadir (Scan: {$scanTime})",
+                            'detail' => "Shift: $shiftName",
+                            'color' => 'emerald'
+                        ];
                     } elseif ($isOnLeave) {
                         if ($statusCode === 'S') {
                             $totalSakit++;
-                            $sakitDates[] = $formattedDate;
+                            $sakitDates[] = $currentDate->translatedFormat('d M');
+                            $dayDetails[] = [
+                                'date' => $formattedDate,
+                                'status' => 'Sakit',
+                                'label' => 'Sakit',
+                                'detail' => $leaveReason,
+                                'color' => 'red'
+                            ];
                         } elseif ($statusCode === 'C') {
                             $totalCuti++;
-                            $cutiDates[] = $formattedDate;
+                            $cutiDates[] = $currentDate->translatedFormat('d M');
+                            $dayDetails[] = [
+                                'date' => $formattedDate,
+                                'status' => 'Cuti',
+                                'label' => 'Cuti Tahunan',
+                                'detail' => $leaveReason,
+                                'color' => 'blue'
+                            ];
                         } elseif ($statusCode === 'H' || $getsBonus) {
                             $totalPresent++;
                             $dinasCount++;
+                            $dinasDates[] = $currentDate->translatedFormat('d M');
+                            $dayDetails[] = [
+                                'date' => $formattedDate,
+                                'status' => 'Dinas',
+                                'label' => 'Dinas / Tugas Luar',
+                                'detail' => $leaveReason,
+                                'color' => 'indigo'
+                            ];
                         } else {
                             $totalIzin++;
-                            $izinDates[] = $formattedDate;
+                            $izinDates[] = $currentDate->translatedFormat('d M');
+                            $dayDetails[] = [
+                                'date' => $formattedDate,
+                                'status' => 'Izin',
+                                'label' => 'Izin Pribadi',
+                                'detail' => $leaveReason,
+                                'color' => 'amber'
+                            ];
                         }
                     } else {
                         $totalAbsent++;
-                        $absentDates[] = $formattedDate;
+                        $absentDates[] = $currentDate->translatedFormat('d M');
+                        $dayDetails[] = [
+                            'date' => $formattedDate,
+                            'status' => 'Alpa',
+                            'label' => 'Alpa / Tanpa Keterangan',
+                            'detail' => "Tidak masuk pada jadwal $shiftName",
+                            'color' => 'rose'
+                        ];
                     }
+                } else {
+                    $dayDetails[] = [
+                        'date' => $formattedDate,
+                        'status' => 'Off',
+                        'label' => 'Hari Libur Jadwal (Off)',
+                        'detail' => "Jadwal Libur Pekan/Shift",
+                        'color' => 'slate'
+                    ];
                 }
 
                 $currentDate->addDay();
@@ -233,7 +335,9 @@ class AttendancePercentageReportController extends Controller
                 'total_work_days' => $totalWorkDays,
                 'total_present' => $totalPresent,
                 'actual_scan_count' => $actualScanCount,
+                'scan_dates' => $scanDates,
                 'dinas_count' => $dinasCount,
+                'dinas_dates' => $dinasDates,
                 'total_sakit' => $totalSakit,
                 'sakit_dates' => $sakitDates,
                 'total_izin' => $totalIzin,
@@ -243,6 +347,7 @@ class AttendancePercentageReportController extends Controller
                 'total_absent' => $totalAbsent,
                 'absent_dates' => $absentDates,
                 'percentage' => $percentage,
+                'day_details' => $dayDetails,
             ];
         }
 

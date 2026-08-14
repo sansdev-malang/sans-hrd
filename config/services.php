@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'pkg' => [
+        'api_token' => env('PKG_API_TOKEN'),
+    ],
+
 ];

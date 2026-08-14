@@ -19,11 +19,18 @@ class PkgIntegrationApiController extends Controller
 
     /**
      * Verify API Token helper.
+     * This is now redundant with middleware but kept for defense-in-depth.
      */
     protected function authorizeRequest(Request $request)
     {
         $token = $request->header('X-API-TOKEN');
-        $configuredToken = env('PKG_API_TOKEN', 'secret_token_pkg');
+        $configuredToken = config('services.pkg.api_token');
+
+        if (!$configuredToken) {
+            \Illuminate\Support\Facades\Log::error('PKG_API_TOKEN not configured', ['endpoint' => $request->getPathInfo()]);
+            return false;
+        }
+
         return $token === $configuredToken;
     }
 
@@ -130,7 +137,14 @@ class PkgIntegrationApiController extends Controller
                         }
                     }
                 } catch (\Exception $e) {
-                    // Try next unit if connection fails
+                    \Illuminate\Support\Facades\Log::warning('PKG: Auth verification failed for unit', [
+                        'unit_id' => $unit->id,
+                        'unit_name' => $unit->name,
+                        'email' => $email,
+                        'exception' => $e::class,
+                        'message' => $e->getMessage()
+                    ]);
+                    // Continue to next unit if connection fails
                 }
             }
         }
