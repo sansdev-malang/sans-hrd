@@ -143,13 +143,13 @@ class PayslipController extends Controller
                     $attachmentPath = 'payslips/' . $request->period . '/' . $attachmentFilename;
 
                     $manager = new ImageManager(new Driver());
-                    $img = $manager->read($attachmentFile->getPathname());
+                    $img = $manager->decode($attachmentFile->getPathname());
                     
                     // Resize/scale to maximum width of 1200px (preserving aspect ratio)
                     $img->scale(width: 1200);
                     
                     // Encode to JPEG at 70% quality
-                    $encoded = $img->toJpg(70);
+                    $encoded = $img->encode(new \Intervention\Image\Encoders\JpegEncoder(70));
                     
                     Storage::disk('public')->put($attachmentPath, (string) $encoded);
                 } else {
