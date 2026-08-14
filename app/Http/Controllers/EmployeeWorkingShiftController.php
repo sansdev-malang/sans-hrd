@@ -188,6 +188,9 @@ class EmployeeWorkingShiftController extends Controller
 
         // Fetch neglected employees (employees without active shift schedules today)
         $todayStr = date('Y-m-d');
+        $firstDayOfMonth = date('Y-m-01');
+        $lastDayOfMonth = date('Y-m-t');
+
         $activeAssignments = EmployeeWorkingShift::where('start_date', '<=', $todayStr)
             ->where(function($q) use ($todayStr) {
                 $q->whereNull('end_date')
@@ -198,10 +201,24 @@ class EmployeeWorkingShiftController extends Controller
                 return $item->school_unit_id . '-' . $item->employee_id;
             });
 
+        // Also query employees on roster this month (if on roster, today might be "OFF" shift so no record exists for today, but they are scheduled)
+        $rosterAssignments = EmployeeWorkingShift::whereNotNull('roster_name')
+            ->where(function($q) use ($firstDayOfMonth, $lastDayOfMonth) {
+                $q->whereBetween('start_date', [$firstDayOfMonth, $lastDayOfMonth])
+                  ->orWhereBetween('end_date', [$firstDayOfMonth, $lastDayOfMonth]);
+            })
+            ->get()
+            ->groupBy(function($item) {
+                return $item->school_unit_id . '-' . $item->employee_id;
+            });
+
         $neglectedEmployees = [];
         foreach ($employees as $emp) {
             $key = $emp['unit_id'] . '-' . $emp['id'];
-            if (!isset($activeAssignments[$key])) {
+            $hasActiveToday = isset($activeAssignments[$key]);
+            $hasRosterThisMonth = isset($rosterAssignments[$key]);
+
+            if (!$hasActiveToday && !$hasRosterThisMonth) {
                 $neglectedEmployees[] = [
                     'id' => $emp['id'],
                     'name' => $emp['name'],
