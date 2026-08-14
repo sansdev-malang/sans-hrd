@@ -88,6 +88,20 @@
         selectedBatch: null,
         searchModal: '',
         showFilters: {{ request()->filled('unit_id') || request()->filled('search') ? 'true' : 'false' }},
+
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        },
+        formatRosterPeriod(month, year) {
+            if (!month || !year) return '';
+            const months = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const mIdx = parseInt(month, 10);
+            return `${months[mIdx] || ''} ${year}`;
+        },
     
         showCreateModal: false,
         createUnitId: '{{ $units->first()->id ?? '' }}',
@@ -551,7 +565,8 @@
                                 </h3>
                                  <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5 leading-relaxed">
                                      Jadwal: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.type === 'roster' ? (selectedBatch?.roster_name || 'Roster Shift Bulanan') : (selectedBatch?.shift_name || '-')"></span><br>
-                                     Unit: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.unit_name"></span>
+                                     Unit: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.unit_name"></span><br>
+                                     Periode: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.type === 'roster' ? formatRosterPeriod(selectedBatch?.month, selectedBatch?.year) : (formatDate(selectedBatch?.start_date) + ' s/d ' + (selectedBatch?.end_date ? formatDate(selectedBatch?.end_date) : 'Seterusnya'))"></span>
                                  </p>
                             </div>
                             <button type="button" @click="showModal = false" class="p-1 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-650 dark:hover:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-850 bg-transparent border-0 cursor-pointer flex items-center justify-center">
