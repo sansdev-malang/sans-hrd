@@ -41,11 +41,11 @@
                         <div class="pl-3 text-slate-450 dark:text-slate-500">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </div>
-                        <input type="text" name="search" x-model="searchVal" placeholder="Cari nama atau jabatan pegawai..."
+                        <input type="text" name="search" x-model="searchVal" x-ref="searchInput" placeholder="Cari nama pegawai..."
                             style="border: none !important; outline: none !important; box-shadow: none !important;"
                             class="w-full h-10 px-2.5 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0">
                         
-                        <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $el.closest('form').submit();" class="h-10 px-2.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
+                        <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.focus();" class="h-10 px-2.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
                             <i data-lucide="x" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
@@ -58,9 +58,9 @@
                             class="h-10 px-4 flex items-center gap-2 text-xs font-bold border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-850 transition-all cursor-pointer">
                             <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
                             <span>Filter Lanjutan</span>
-                            @if(request()->hasAny(['unit_id', 'start_date', 'end_date']) && (request('unit_id') || request('start_date') || request('end_date')))
-                                <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-indigo-650 text-white leading-none">
-                                    {{ count(array_filter(request()->only(['unit_id', 'start_date', 'end_date']))) }}
+                            @if(request()->hasAny(['unit_id', 'start_date', 'end_date', 'position']) && (request('unit_id') || request('start_date') || request('end_date') || request('position')))
+                                <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-indigo-600 text-white leading-none">
+                                    {{ count(array_filter(request()->only(['unit_id', 'start_date', 'end_date', 'position']))) }}
                                 </span>
                             @endif
                         </button>
@@ -70,7 +70,7 @@
                             Terapkan
                         </button>
 
-                        @if(request()->hasAny(['unit_id', 'search', 'start_date', 'end_date']) && count(request()->except('page')) > 0)
+                        @if(request()->hasAny(['unit_id', 'search', 'start_date', 'end_date', 'position']) && count(request()->except('page')) > 0)
                             <a href="{{ route('attendance-percentage-reports.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5">
                                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                                 Reset
@@ -81,28 +81,43 @@
 
                 <!-- COLLAPSIBLE ADVANCED FILTER PANEL -->
                 <div x-cloak x-show="showFilters" x-collapse class="pt-4 border-t border-slate-100 dark:border-slate-800/80">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <!-- Mulai Tanggal -->
                         <div class="space-y-1.5">
                             <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Mulai Tanggal</label>
-                            <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono">
+                            <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono">
                         </div>
 
                         <!-- Selesai Tanggal -->
                         <div class="space-y-1.5">
                             <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Selesai Tanggal</label>
-                            <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono">
+                            <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono">
                         </div>
 
                         <!-- Filter Unit -->
                         @if(isset($schoolUnits) && count($schoolUnits) > 0)
                         <div class="space-y-1.5">
                             <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Unit Sekolah</label>
-                            <select name="unit_id" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                            <select name="unit_id" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                                 <option value="">Semua Unit</option>
                                 @foreach($schoolUnits as $unit)
                                     <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
                                         {{ $unit->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @endif
+
+                        <!-- Filter Jabatan -->
+                        @if(isset($positions) && count($positions) > 0)
+                        <div class="space-y-1.5">
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Jabatan / Posisi</label>
+                            <select name="position" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                                <option value="">Semua Jabatan</option>
+                                @foreach($positions as $pos)
+                                    <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>
+                                        {{ $pos }}
                                     </option>
                                 @endforeach
                             </select>

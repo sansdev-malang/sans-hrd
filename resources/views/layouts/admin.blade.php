@@ -20,7 +20,7 @@
                     'users.index' => 'Manajemen Pengguna',
                     'employees.index' => 'Data Pegawai',
                     'working-shifts.index' => 'Kelola Shift Kerja',
-                    'employee-working-shifts.index' => 'Penjadwalan Shift',
+                    'employee-working-shifts.index' => 'Jadwal Kerja',
                     'announcements.index' => 'Pengumuman',
                     'holidays.index' => 'Hari Libur',
                     'bonus-schemas.index' => 'Skema Bonus',

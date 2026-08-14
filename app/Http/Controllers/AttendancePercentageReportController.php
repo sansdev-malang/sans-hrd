@@ -48,9 +48,27 @@ class AttendancePercentageReportController extends Controller
         $rawEmployees = $this->service->getSdEmployees();
         $employeesCollection = collect($rawEmployees);
 
+        // Extract unique positions for filter
+        $positions = collect($rawEmployees)
+            ->map(fn($emp) => $emp['position'] ?? $emp['subject_position'] ?? 'Staf')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+
         if (!empty($unitId)) {
             $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
                 return ($emp['unit_id'] ?? '') == $unitId;
+            });
+        }
+
+        // Apply position filter
+        $selectedPosition = $request->query('position');
+        if (!empty($selectedPosition)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($selectedPosition) {
+                $pos = $emp['position'] ?? $emp['subject_position'] ?? 'Staf';
+                return $pos === $selectedPosition;
             });
         }
 
@@ -379,7 +397,9 @@ class AttendancePercentageReportController extends Controller
             'unitId',
             'startDateReq',
             'endDateReq',
-            'unitStats'
+            'unitStats',
+            'positions',
+            'selectedPosition'
         ));
     }
 }

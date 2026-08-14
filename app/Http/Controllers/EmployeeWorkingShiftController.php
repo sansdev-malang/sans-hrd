@@ -26,7 +26,7 @@ class EmployeeWorkingShiftController extends Controller
     public function index(Request $request)
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
-        $shifts = WorkingShift::orderBy('name')->get();
+        $shifts = WorkingShift::where('is_shift', false)->orderBy('name')->get();
         $bonusSchemas = BonusSchema::orderBy('name')->get();
         
         $selectedUnitId = $request->query('unit_id');
@@ -75,6 +75,7 @@ class EmployeeWorkingShiftController extends Controller
                     'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-',
                     'photo' => $employeeMap[$empKey]['photo'] ?? null,
                     'unit_url' => $employeeMap[$empKey]['unit_url'] ?? null,
+                    'position' => $employeeMap[$empKey]['position'] ?? $employeeMap[$empKey]['subject_position'] ?? 'Staf',
                 ];
             } else {
                 // Roster Shifts
@@ -107,6 +108,7 @@ class EmployeeWorkingShiftController extends Controller
                         'nip' => $employeeMap[$empKey]['nuptk_nip_nik'] ?? '-',
                         'photo' => $employeeMap[$empKey]['photo'] ?? null,
                         'unit_url' => $employeeMap[$empKey]['unit_url'] ?? null,
+                        'position' => $employeeMap[$empKey]['position'] ?? $employeeMap[$empKey]['subject_position'] ?? 'Staf',
                     ];
                 }
             }
@@ -119,6 +121,35 @@ class EmployeeWorkingShiftController extends Controller
         }
 
         $allBatches = array_merge(array_values($batches), array_values($rosterBatches));
+        
+        // Search Filter (Locally added filter support)
+        $searchQuery = $request->query('search');
+        if (!empty($searchQuery)) {
+            $allBatches = array_filter($allBatches, function($batch) use ($searchQuery) {
+                $searchQueryLower = strtolower($searchQuery);
+                if (str_contains(strtolower($batch['unit_name']), $searchQueryLower)) {
+                    return true;
+                }
+                if (isset($batch['roster_name']) && str_contains(strtolower($batch['roster_name']), $searchQueryLower)) {
+                    return true;
+                }
+                if (isset($batch['shift_name']) && str_contains(strtolower($batch['shift_name']), $searchQueryLower)) {
+                    return true;
+                }
+                if (isset($batch['shift_code']) && str_contains(strtolower($batch['shift_code']), $searchQueryLower)) {
+                    return true;
+                }
+                foreach ($batch['employees'] as $emp) {
+                    if (str_contains(strtolower($emp['name']), $searchQueryLower)) {
+                        return true;
+                    }
+                    if (isset($emp['nip']) && str_contains(strtolower($emp['nip']), $searchQueryLower)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
         
         // Sort by Unit Name ASC, then Type (roster > permanent), then sort_date DESC
         usort($allBatches, function($a, $b) {
@@ -189,7 +220,7 @@ class EmployeeWorkingShiftController extends Controller
 
         $employeeIds = $assignments->pluck('employee_id')->toArray();
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
-        $shifts = WorkingShift::orderBy('name')->get();
+        $shifts = WorkingShift::where('is_shift', false)->orderBy('name')->get();
 
         $bonusSchemas = \App\Models\BonusSchema::all();
         $bonus_schema_id = $assignments->first()->bonus_schema_id ?? null;
@@ -308,7 +339,7 @@ class EmployeeWorkingShiftController extends Controller
     public function create()
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
-        $shifts = WorkingShift::orderBy('name')->get();
+        $shifts = WorkingShift::where('is_shift', false)->orderBy('name')->get();
         $bonusSchemas = BonusSchema::all(); return view('employee-working-shifts.create', compact('units', 'shifts', 'bonusSchemas'));
     }
 
@@ -354,12 +385,46 @@ class EmployeeWorkingShiftController extends Controller
         ]);
 
         foreach ($validated['employee_ids'] as $employeeId) {
-            // If there's an active shift assignment overlap, close it
-            EmployeeWorkingShift::where('school_unit_id', $validated['school_unit_id'])
+            // Find active permanent shift assignment overlap (if any)
+            $activePermanent = EmployeeWorkingShift::where('school_unit_id', $validated['school_unit_id'])
                 ->where('employee_id', $employeeId)
                 ->whereNull('end_date')
-                ->update(['end_date' => date('Y-m-d', strtotime($validated['start_date'] . ' -1 day'))]);
+                ->first();
 
+            if ($activePermanent) {
+                $parentStart = $activePermanent->start_date->format('Y-m-d');
+                $hMinus1 = date('Y-m-d', strtotime($validated['start_date'] . ' -1 day'));
+                
+                if ($hMinus1 >= $parentStart) {
+                    // Close the old permanent shift at H-1 of the new shift
+                    $activePermanent->update(['end_date' => $hMinus1]);
+                    
+                    // Resume the old permanent shift starting from H+1 of the new shift's end_date
+                    if (!empty($validated['end_date'])) {
+                        EmployeeWorkingShift::create([
+                            'school_unit_id' => $validated['school_unit_id'],
+                            'employee_id' => $employeeId,
+                            'working_shift_id' => $activePermanent->working_shift_id,
+                            'bonus_schema_id' => $activePermanent->bonus_schema_id,
+                            'start_date' => date('Y-m-d', strtotime($validated['end_date'] . ' +1 day')),
+                            'end_date' => null,
+                        ]);
+                    }
+                } else {
+                    // If the new shift starts before or at the start of the old permanent shift,
+                    // we just delay the start of the old permanent shift until H+1 of the new temporary shift
+                    if (!empty($validated['end_date'])) {
+                        $activePermanent->update([
+                            'start_date' => date('Y-m-d', strtotime($validated['end_date'] . ' +1 day'))
+                      ]);
+                    } else {
+                        // If the new shift is permanent and starts before the old one, the new one completely replaces the old one
+                        $activePermanent->delete();
+                    }
+                }
+            }
+
+            // Create the new shift assignment
             EmployeeWorkingShift::create([
                 'school_unit_id' => $validated['school_unit_id'],
                 'employee_id' => $employeeId,
