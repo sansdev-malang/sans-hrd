@@ -1226,14 +1226,14 @@
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
-                     class="relative w-full sm:max-w-2xl rounded-2xl bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
+                     class="relative w-full sm:max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
                     
                     <form action="{{ route('employee-working-shifts.roster') }}" method="GET" class="flex flex-col flex-1 overflow-hidden">
                         <!-- Header -->
-                        <div class="p-5 border-b border-slate-100 dark:border-slate-855 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
+                        <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
                              <div>
                                  <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-650 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                                      <span>Buat Jadwal Bergilir (Roster) Baru</span>
                                  </h3>
                                 <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Pilih grup pegawai yang akan dibuatkan jadwal roster.</p>
@@ -1302,10 +1302,10 @@
                                         <div class="relative flex items-center">
                                             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2 pointer-events-none"></i>
                                             <input type="text" x-model="empSearch" placeholder="Cari..."
-                                                class="w-32 pl-7 pr-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-medium">
+                                                class="w-32 pl-7 pr-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-medium font-semibold">
                                         </div>
                                         <button type="button" @click="selectAllEmp = !selectAllEmp"
-                                            class="text-[11px] text-indigo-650 dark:text-indigo-400 font-bold hover:underline bg-transparent border-0 cursor-pointer">Pilih Semua</button>
+                                            class="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold hover:underline bg-transparent border-0 cursor-pointer">Pilih Semua</button>
                                     </div>
                                 </div>
                                 <div class="border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900 h-44 overflow-y-auto p-2.5 custom-scrollbar">
@@ -1318,9 +1318,9 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                         <template x-for="emp in empList" :key="emp.id">
                                             <label x-show="empSearch === '' || emp.name.toLowerCase().includes(empSearch.toLowerCase())"
-                                                class="flex items-center gap-2.5 p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl cursor-pointer transition-all border border-transparent hover:border-slate-200/50 dark:hover:border-slate-850">
+                                                class="flex items-center gap-2.5 p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl cursor-pointer transition-all border border-transparent hover:border-slate-200/50 dark:hover:border-slate-800">
                                                 <input type="checkbox" name="emp_ids[]" :value="emp.id" x-model="selectedEmps"
-                                                    class="w-4.5 h-4.5 text-indigo-650 border-slate-350 rounded focus:ring-indigo-500 dark:focus:ring-offset-slate-900 cursor-pointer">
+                                                    class="w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 dark:focus:ring-offset-slate-900 cursor-pointer">
                                                 <span class="text-xs text-slate-700 dark:text-slate-300 font-semibold truncate" x-text="emp.name"></span>
                                             </label>
                                         </template>
@@ -1330,14 +1330,14 @@
                         </div>
 
                         <!-- Footer -->
-                        <div class="p-5 border-t border-slate-100 dark:border-slate-850 flex items-center justify-end gap-2.5 bg-slate-50 dark:bg-slate-900/40 shrink-0">
+                        <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5 bg-slate-50 dark:bg-slate-900/40 shrink-0">
                             <button type="button"
-                                class="h-9 px-4 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-955 hover:bg-slate-50 dark:hover:bg-slate-900 font-bold rounded-lg cursor-pointer transition-colors shadow-2xs"
+                                class="h-9 px-4 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-lg cursor-pointer transition-colors shadow-2xs"
                                 @click="showCreateModal = false">
                                 Batal
                             </button>
                             <button type="submit"
-                                class="h-9 px-4 bg-indigo-650 hover:bg-indigo-705 text-white font-bold rounded-lg shadow-sm transition-colors cursor-pointer">
+                                class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition-colors cursor-pointer">
                                 Lanjutkan ke Grid
                             </button>
                         </div>
