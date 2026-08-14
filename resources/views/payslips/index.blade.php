@@ -254,16 +254,84 @@
 
                 <div class="text-left">
                     <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File PDF Slip Gaji <span class="text-rose-500">*</span></label>
-                    <input type="file" name="payslip_file" accept=".pdf" required
-                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer bg-white dark:bg-slate-950 p-1.5">
-                    <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Hanya file PDF (Maks. 500KB)</p>
+                    
+                    <!-- Hidden Real Input -->
+                    <input type="file" name="payslip_file" id="payslip_file_input" accept=".pdf" required class="hidden" onchange="handleFileSelected(this, 'payslip_dropzone', 'payslip_info_box', 'payslip_progress_bar', 'payslip_file_name', 'payslip_file_size', 'payslip_status_text')">
+                    
+                    <!-- Premium Dropzone Box -->
+                    <div id="payslip_dropzone" onclick="document.getElementById('payslip_file_input').click()" class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-950 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-900/30 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                        <div class="text-[11px] font-bold text-slate-700 dark:text-slate-350">Pilih atau Seret File Slip Gaji</div>
+                        <div class="text-[9px] text-slate-400 dark:text-slate-500">PDF saja (Maks. 500KB)</div>
+                    </div>
+
+                    <!-- Premium Info & Progress Box -->
+                    <div id="payslip_info_box" class="hidden p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex-col gap-2.5">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                <div class="flex flex-col min-w-0 text-left">
+                                    <span id="payslip_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.pdf</span>
+                                    <span id="payslip_file_size" class="text-[9px] text-slate-400 dark:text-slate-500 font-mono">0 KB</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="clearFileSelection('payslip_file_input', 'payslip_dropzone', 'payslip_info_box', 'payslip_progress_bar')" class="text-slate-400 hover:text-rose-500 transition-colors cursor-pointer border-0 bg-transparent shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <!-- Progress Bar Container -->
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div id="payslip_progress_bar" class="bg-indigo-600 h-full w-0 transition-all duration-300 ease-out rounded-full"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                                <span id="payslip_status_text">Mengunggah...</span>
+                                <span class="font-mono">100%</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="text-left">
                     <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Lampiran Tambahan <span class="text-slate-400 dark:text-slate-500 font-medium">(Opsional)</span></label>
-                    <input type="file" name="attachment_file" accept=".pdf,.png,.jpg,.jpeg"
-                           class="block w-full text-xs text-slate-550 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-650 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer bg-white dark:bg-slate-950 p-1.5">
-                    <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500">Bisa PDF atau Gambar (Maks. 2MB)</p>
+                    
+                    <!-- Hidden Real Input -->
+                    <input type="file" name="attachment_file" id="attachment_file_input" accept=".pdf,.png,.jpg,.jpeg" class="hidden" onchange="handleFileSelected(this, 'attachment_dropzone', 'attachment_info_box', 'attachment_progress_bar', 'attachment_file_name', 'attachment_file_size', 'attachment_status_text')">
+                    
+                    <!-- Premium Dropzone Box -->
+                    <div id="attachment_dropzone" onclick="document.getElementById('attachment_file_input').click()" class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-950 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-900/30 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        <div class="text-[11px] font-bold text-slate-700 dark:text-slate-350">Pilih atau Seret Lampiran</div>
+                        <div class="text-[9px] text-slate-400 dark:text-slate-500">PDF atau Gambar (Maks. 2MB)</div>
+                    </div>
+
+                    <!-- Premium Info & Progress Box -->
+                    <div id="attachment_info_box" class="hidden p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex-col gap-2.5">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                <div class="flex flex-col min-w-0 text-left">
+                                    <span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>
+                                    <span id="attachment_file_size" class="text-[9px] text-slate-400 dark:text-slate-500 font-mono">0 KB</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="clearFileSelection('attachment_file_input', 'attachment_dropzone', 'attachment_info_box', 'attachment_progress_bar')" class="text-slate-400 hover:text-rose-500 transition-colors cursor-pointer border-0 bg-transparent shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <!-- Progress Bar Container -->
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div id="attachment_progress_bar" class="bg-indigo-600 h-full w-0 transition-all duration-300 ease-out rounded-full"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                                <span id="attachment_status_text">Mengunggah...</span>
+                                <span class="font-mono">100%</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
@@ -301,6 +369,10 @@
             setTimeout(() => {
                 modal.classList.add('hidden');
                 document.getElementById('uploadForm').reset();
+                
+                // Clear selection styling for both inputs
+                clearFileSelection('payslip_file_input', 'payslip_dropzone', 'payslip_info_box', 'payslip_progress_bar');
+                clearFileSelection('attachment_file_input', 'attachment_dropzone', 'attachment_info_box', 'attachment_progress_bar');
             }, 300);
         }
 
@@ -310,6 +382,59 @@
                 closeUploadModal();
             }
         });
+
+        // Premium dynamic file inputs handlers
+        function handleFileSelected(input, dropzoneId, infoBoxId, progressBarId, fileNameId, fileSizeId, statusTextId) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Show Name and Size
+                document.getElementById(fileNameId).innerText = file.name;
+                
+                let sizeStr = (file.size / 1024).toFixed(1) + ' KB';
+                if (file.size > 1024 * 1024) {
+                    sizeStr = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                }
+                document.getElementById(fileSizeId).innerText = sizeStr;
+
+                // Hide dropzone and show progress box
+                document.getElementById(dropzoneId).classList.add('hidden');
+                const infoBox = document.getElementById(infoBoxId);
+                infoBox.classList.remove('hidden');
+                infoBox.classList.add('flex');
+
+                // Animate Progress Bar
+                const progressBar = document.getElementById(progressBarId);
+                const statusText = document.getElementById(statusTextId);
+                progressBar.style.width = '0%';
+                statusText.innerText = 'Membaca file...';
+                statusText.className = 'text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider';
+
+                setTimeout(() => {
+                    progressBar.style.width = '50%';
+                    statusText.innerText = 'Memverifikasi berkas...';
+                    
+                    setTimeout(() => {
+                        progressBar.style.width = '100%';
+                        statusText.innerText = 'Siap Diunggah!';
+                        statusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
+                    }, 350);
+                }, 200);
+            }
+        }
+
+        function clearFileSelection(inputId, dropzoneId, infoBoxId, progressBarId) {
+            const input = document.getElementById(inputId);
+            input.value = ''; // Reset input value
+            
+            document.getElementById(dropzoneId).classList.remove('hidden');
+            const infoBox = document.getElementById(infoBoxId);
+            infoBox.classList.add('hidden');
+            infoBox.classList.remove('flex');
+            
+            const progressBar = document.getElementById(progressBarId);
+            progressBar.style.width = '0%';
+        }
     </script>
 </x-admin-layout>
 
