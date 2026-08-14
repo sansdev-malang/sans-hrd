@@ -39,7 +39,6 @@
                             Cari
                         </button>
                     </div>
-                    </div>
 
                     <!-- UNIT FILTER -->
                     <select name="unit_id" class="h-9 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors text-slate-900 dark:text-slate-100 cursor-pointer">

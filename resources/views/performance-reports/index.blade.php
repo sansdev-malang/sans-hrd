@@ -29,7 +29,6 @@
                             Cari
                         </button>
                     </div>
-                </div>
 
                 <!-- Filter Unit -->
                 @if(isset($schoolUnits) && count($schoolUnits) > 0)
