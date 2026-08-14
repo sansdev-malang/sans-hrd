@@ -117,8 +117,9 @@
         },
     
         showCreateModal: false,
-        createUnitId: '{{ $units->first()->id ?? '' }}',
+        createUnitId: '',
         createRosterName: '',
+        createOldRosterName: '',
         createMonth: '{{ date('n') }}',
         createYear: '{{ date('Y') }}',
         empList: [],
@@ -127,6 +128,7 @@
         selectedEmps: [],
         selectAllEmp: false,
         createSelectedPosition: '',
+        selectedShifts: {{ json_encode($shifts->where('is_shift', true)->pluck('id')->toArray()) }},
 
         toggleCreateAll() {
             const filteredIds = this.filteredCreateEmployees.map(e => e.id);
@@ -263,9 +265,38 @@
             if (!this.createUnitId) return;
             this.loadingEmp = true;
             try {
-                const response = await fetch(`/employee-working-shifts/unit/${this.createUnitId}/employees`);
+                const response = await fetch(`/employee-working-shifts/unit/${this.createUnitId}/employees?month=${this.createMonth}&year=${this.createYear}`);
                 if (response.ok) {
                     this.empList = await response.json();
+                } else {
+                    this.empList = [];
+                }
+            } catch (e) {
+                console.error(e);
+                this.empList = [];
+            }
+            this.loadingEmp = false;
+        },
+
+        async openEditRosterModal(unitId, month, year, rosterName) {
+            this.createUnitId = unitId;
+            this.createMonth = month;
+            this.createYear = year;
+            this.createRosterName = rosterName;
+            this.createOldRosterName = rosterName;
+            this.showCreateModal = true;
+            
+            this.loadingEmp = true;
+            try {
+                const response = await fetch(`/employee-working-shifts/unit/${unitId}/employees?month=${month}&year=${year}`);
+                if (response.ok) {
+                    this.empList = await response.json();
+                    
+                    const activeRosterResponse = await fetch(`/employee-working-shifts/roster-employees?unit_id=${unitId}&month=${month}&year=${year}&roster_name=${encodeURIComponent(rosterName)}`);
+                    if (activeRosterResponse.ok) {
+                        const activeEmpIds = await activeRosterResponse.json();
+                        this.selectedEmps = activeEmpIds.map(id => String(id));
+                    }
                 } else {
                     this.empList = [];
                 }
@@ -279,8 +310,9 @@
         init() {
             this.$watch('showCreateModal', value => {
                 if (!value) {
-                    this.createUnitId = '{{ $units->first()->id ?? '' }}';
+                    this.createUnitId = '';
                     this.createRosterName = '';
+                    this.createOldRosterName = '';
                     this.createMonth = '{{ date('n') }}';
                     this.createYear = '{{ date('Y') }}';
                     this.empList = [];
@@ -289,6 +321,7 @@
                     this.selectAllEmp = false;
                     this.createSelectedPosition = '';
                     this.createShowError = false;
+                    this.selectedShifts = {{ json_encode($shifts->where('is_shift', true)->pluck('id')->toArray()) }};
                 }
             });
             this.$watch('showAssignmentModal', value => {
@@ -325,7 +358,7 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Atur penugasan dan rotasi shift kerja secara kolektif per unit sekolah.</p>
             </div>
             <div class="flex items-center gap-2">
-                <button type="button" @click="showCreateModal = true; loadEmployeesForUnit()"
+                <button type="button" @click="showCreateModal = true"
                     class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
                     <i data-lucide="calendar-range" class="w-4.5 h-4.5"></i>
                     Atur Jadwal Bergilir (Roster)
@@ -1315,8 +1348,9 @@
                      class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
                     
                     <form action="{{ route('employee-working-shifts.roster') }}" method="GET" 
-                          @submit.prevent="if (selectedEmps.length === 0) { createShowError = true; } else { createShowError = false; $el.submit(); }"
+                          @submit.prevent="if (!createUnitId || selectedEmps.length === 0 || selectedShifts.length === 0) { createShowError = true; } else { createShowError = false; $el.submit(); }"
                           class="flex flex-col flex-1 overflow-hidden">
+                        <input type="hidden" name="old_roster_name" x-model="createOldRosterName">
                         <!-- Header -->
                         <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
                              <div>
@@ -1337,9 +1371,13 @@
                                 <div class="space-y-4">
                                     <!-- Unit Sekolah -->
                                     <div>
-                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Sekolah</label>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center">
+                                            <span>Unit Sekolah <span class="text-rose-500">*</span></span>
+                                            <span x-show="createShowError && !createUnitId" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Wajib pilih unit</span>
+                                        </label>
                                         <select x-model="createUnitId" name="unit_id" @change="loadEmployeesForUnit()"
                                             class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            <option value="">Pilih Unit Sekolah...</option>
                                             @foreach ($units as $unit)
                                                 <option value="{{ $unit->id }}">{{ $unit->name }}</option>
                                             @endforeach
@@ -1357,7 +1395,7 @@
                                         <!-- Bulan -->
                                         <div>
                                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Bulan</label>
-                                            <select name="month" x-model="createMonth"
+                                            <select name="month" x-model="createMonth" @change="loadEmployeesForUnit()"
                                                 class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
                                                 @php
                                                     $bulanIndo = [
@@ -1385,8 +1423,58 @@
                                         <!-- Tahun -->
                                         <div>
                                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun</label>
-                                            <input type="number" name="year" x-model="createYear"
+                                            <input type="number" name="year" x-model="createYear" @change="loadEmployeesForUnit()"
                                                 class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono">
+                                        </div>
+                                    </div>
+
+                                    <!-- Pilih Shift yang Digunakan -->
+                                    <div class="mt-4 text-left">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                                <span>Pilih Shift yang Digunakan <span class="text-rose-500">*</span></span>
+                                                <span x-show="createShowError && selectedShifts.length === 0" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Pilih minimal 1 shift</span>
+                                            </label>
+                                            <div class="flex gap-2">
+                                                <button type="button" @click="selectedShifts = {{ json_encode($shifts->where('is_shift', true)->pluck('id')->toArray()) }}"
+                                                    class="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 cursor-pointer bg-transparent border-0 p-0">
+                                                    Pilih Semua
+                                                </button>
+                                                <span class="text-slate-300 dark:text-slate-700 text-[10px]">|</span>
+                                                <button type="button" @click="selectedShifts = []"
+                                                    class="text-[10px] font-bold text-slate-500 hover:text-slate-650 dark:text-slate-400 cursor-pointer bg-transparent border-0 p-0">
+                                                    Kosongkan
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl max-h-[170px] overflow-y-auto custom-scrollbar">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                @foreach($shifts->where('is_shift', true) as $s)
+                                                    <label :class="selectedShifts.includes({{ $s->id }}) 
+                                                        ? 'border-indigo-500/80 bg-indigo-50/50 dark:bg-indigo-950/20 ring-1 ring-indigo-500/20' 
+                                                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'"
+                                                        class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all duration-200 select-none group">
+                                                        <div class="flex items-center gap-2.5 min-w-0">
+                                                            <div class="flex items-center">
+                                                                <input type="checkbox" name="shift_ids[]" value="{{ $s->id }}" x-model="selectedShifts"
+                                                                    class="rounded border-slate-300 dark:border-slate-700 text-indigo-650 shadow-sm focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                                                            </div>
+                                                            <div class="flex flex-col min-w-0">
+                                                                <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate leading-tight">{{ $s->name }}</span>
+                                                                @if($s->description)
+                                                                    <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate mt-1">{{ $s->description }}</span>
+                                                                @else
+                                                                    <span class="text-[9px] text-slate-400 dark:text-slate-500 mt-1">Kode: {{ $s->short_code ?: $s->code }}</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <span :class="selectedShifts.includes({{ $s->id }}) ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-850 dark:text-slate-400'"
+                                                            class="px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wide uppercase shrink-0">
+                                                            {{ $s->short_code ?: $s->code }}
+                                                        </span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1414,12 +1502,23 @@
                                             <span>Pilih Pegawai</span>
                                             <span x-show="loadingEmp" class="text-[10px] text-indigo-500 animate-pulse font-normal" x-cloak>Memuat data...</span>
                                             <span x-show="createShowError && selectedEmps.length === 0" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Pilih minimal 1 pegawai</span>
+                                            <span x-show="createShowError && selectedEmps.some(id => { const emp = empList.find(e => e.id === id); return emp && emp.active_roster_name; })" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Terdapat pegawai bentrok</span>
                                         </span>
                                         <label x-show="empList.length > 0" class="flex items-center gap-1.5 cursor-pointer text-[11px] text-indigo-650 dark:text-indigo-400 hover:underline">
                                             <input type="checkbox" x-model="selectAllEmp" @change="toggleCreateAll()" class="rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer">
                                             Pilih Semua
                                         </label>
                                     </label>
+
+                                    <!-- Alert Pegawai Bentrok -->
+                                    <div x-show="selectedEmps.some(id => { const emp = empList.find(e => e.id === id); return emp && emp.active_roster_name; })"
+                                        class="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 rounded-xl flex items-start gap-2.5 text-left text-[10px] text-amber-700 dark:text-amber-400 shrink-0 font-medium mb-3"
+                                        x-cloak>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        <div>
+                                            <span class="font-bold text-amber-800 dark:text-amber-300">Perhatian Roster Ganda:</span> Beberapa pegawai terpilih sudah terdaftar pada roster aktif lain di bulan ini. Silakan hapus centang nama tersebut terlebih dahulu, atau edit roster yang aktif.
+                                        </div>
+                                    </div>
 
                                     <div class="flex flex-col bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex-1 min-h-[280px]">
                                         <!-- Search & Filter Bar -->
@@ -1448,7 +1547,7 @@
                                         </div>
 
                                         <!-- List -->
-                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[250px] flex-1">
+                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[480px] flex-1">
                                             <div x-show="empList.length === 0 && !loadingEmp" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-550 italic text-[11px] py-12">
                                                 Silakan pilih unit sekolah terlebih dahulu.
                                             </div>
@@ -1461,9 +1560,15 @@
                                                 <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/80 border border-slate-200 dark:border-slate-900 rounded-xl transition-all shadow-2xs hover:border-slate-300 dark:hover:border-slate-800">
                                                     <input type="checkbox" name="emp_ids[]" :value="emp.id" x-model="selectedEmps"
                                                         class="employee-checkbox w-4.5 h-4.5 rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 shrink-0 cursor-pointer">
-                                                    <div class="flex flex-col min-w-0">
+                                                    <div class="flex flex-col min-w-0 flex-1">
                                                         <span class="text-xs text-slate-900 dark:text-slate-100 font-bold leading-snug truncate" x-text="emp.name"></span>
                                                         <span class="text-[10px] text-slate-450 mt-0.5 truncate" x-text="emp.position || emp.subject_position || '-'"></span>
+                                                        <template x-if="emp.active_roster_name">
+                                                            <span class="inline-flex items-center gap-1 mt-1.5 text-[9px] font-bold text-amber-650 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 px-1.5 py-0.5 rounded w-fit">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                                                <span x-text="'Roster: ' + emp.active_roster_name" class="truncate max-w-[120px]"></span>
+                                                            </span>
+                                                        </template>
                                                     </div>
                                                 </label>
                                             </template>

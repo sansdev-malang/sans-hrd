@@ -105,6 +105,11 @@ class AttendancePercentageReportController extends Controller
             ->get()
             ->groupBy(function($shift) {
                 return $shift->school_unit_id . '_' . $shift->employee_id;
+            })
+            ->map(function($group) {
+                return $group->sortByDesc(function($shift) {
+                    return $shift->roster_name !== null ? 1 : 0;
+                });
             });
 
         // Pre-fetch Holidays and Adjustments

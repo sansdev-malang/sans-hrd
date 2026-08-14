@@ -26,7 +26,7 @@ class EmployeeWorkingShiftController extends Controller
     public function index(Request $request)
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
-        $shifts = WorkingShift::where('is_shift', false)->orderBy('name')->get();
+        $shifts = WorkingShift::orderBy('name')->get();
         $bonusSchemas = BonusSchema::orderBy('name')->get();
         
         $selectedUnitId = $request->query('unit_id');
@@ -371,7 +371,7 @@ class EmployeeWorkingShiftController extends Controller
     /**
      * Fetch employees of a specific school unit via AJAX.
      */
-    public function getEmployeesByUnit($unitId)
+    public function getEmployeesByUnit(Request $request, $unitId)
     {
         $unit = SchoolUnit::find($unitId);
         if (!$unit) {
@@ -385,13 +385,81 @@ class EmployeeWorkingShiftController extends Controller
             ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/employees');
 
             if ($response->successful()) {
-                return response()->json($response->json('data') ?? []);
+                $employees = $response->json('data') ?? [];
+                
+                $month = $request->query('month');
+                $year = $request->query('year');
+                
+                if ($month && $year) {
+                    $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+                    $lastDay = $firstDay->copy()->endOfMonth();
+                    $empIds = collect($employees)->pluck('id')->toArray();
+                    
+                    $rosters = EmployeeWorkingShift::whereIn('employee_id', $empIds)
+                        ->whereNotNull('roster_name')
+                        ->where(function($query) use ($firstDay, $lastDay) {
+                            $query->whereBetween('start_date', [$firstDay, $lastDay])
+                                  ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                                  ->orWhere(function($q) use ($firstDay, $lastDay) {
+                                      $q->where('start_date', '<', $firstDay)
+                                        ->where(function($q2) use ($lastDay) {
+                                            $q2->whereNull('end_date')->orWhere('end_date', '>=', $lastDay);
+                                        });
+                                  });
+                        })
+                        ->get()
+                        ->groupBy('employee_id');
+                        
+                    foreach ($employees as &$emp) {
+                        $empId = $emp['id'];
+                        $emp['active_roster_name'] = isset($rosters[$empId]) ? $rosters[$empId]->first()->roster_name : null;
+                    }
+                }
+                
+                return response()->json($employees);
             }
         } catch (\Exception $e) {
             Log::error("Failed to fetch employees for unit {$unitId}: " . $e->getMessage());
         }
 
         return response()->json([]);
+    }
+
+    /**
+     * Get employee IDs assigned to a specific roster.
+     */
+    public function getRosterEmployees(Request $request)
+    {
+        $unitId = $request->query('unit_id');
+        $month = $request->query('month');
+        $year = $request->query('year');
+        $rosterName = $request->query('roster_name');
+
+        if (!$unitId || !$month || !$year || !$rosterName) {
+            return response()->json([]);
+        }
+
+        $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+        $lastDay = $firstDay->copy()->endOfMonth();
+
+        $employeeIds = EmployeeWorkingShift::where('school_unit_id', $unitId)
+            ->where('roster_name', $rosterName)
+            ->where(function($query) use ($firstDay, $lastDay) {
+                $query->whereBetween('start_date', [$firstDay, $lastDay])
+                      ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                      ->orWhere(function($q) use ($firstDay, $lastDay) {
+                          $q->where('start_date', '<', $firstDay)
+                            ->where(function($q2) use ($lastDay) {
+                                $q2->whereNull('end_date')->orWhere('end_date', '>=', $lastDay);
+                            });
+                      });
+            })
+            ->pluck('employee_id')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        return response()->json($employeeIds);
     }
 
     /**
@@ -681,18 +749,46 @@ class EmployeeWorkingShiftController extends Controller
                             return !in_array($emp['id'], $permanentEmployees);
                         });
                         
-                        if (!empty($empIdsParam) && is_array($empIdsParam)) {
-                            // Only include selected employees
-                            $employees = array_filter($employees, function($emp) use ($empIdsParam) {
-                                return in_array($emp['id'], $empIdsParam);
-                            });
-                        } elseif ($rosterNameParam) {
-                            // If editing an existing roster, only include employees who already have assignments in this roster
-                            // We will fetch the assignments first to know which employees belong to this roster
-                        }
-                        
                         // Re-index array for blade
                         $employees = array_values($employees);
+
+                        if (!empty($empIdsParam)) {
+                            // Check for conflicts: employee is assigned to a DIFFERENT roster name in this month
+                            $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+                            $lastDay = $firstDay->copy()->endOfMonth();
+                            
+                            $conflictingAssignments = \App\Models\EmployeeWorkingShift::whereIn('employee_id', $empIdsParam)
+                                ->whereNotNull('roster_name')
+                                ->where('roster_name', '!=', $rosterNameParam)
+                                ->where(function($query) use ($firstDay, $lastDay) {
+                                    $query->whereBetween('start_date', [$firstDay, $lastDay])
+                                          ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                                          ->orWhere(function($q) use ($firstDay, $lastDay) {
+                                              $q->where('start_date', '<', $firstDay)
+                                                ->where(function($q2) use ($lastDay) {
+                                                    $q2->whereNull('end_date')->orWhere('end_date', '>=', $lastDay);
+                                                });
+                                          });
+                                })
+                                ->get();
+                                
+                            if ($conflictingAssignments->count() > 0) {
+                                $conflict = $conflictingAssignments->first();
+                                $conflictEmpId = $conflict->employee_id;
+                                $conflictRosterName = $conflict->roster_name;
+                                
+                                $conflictEmpName = 'Pegawai';
+                                foreach ($employees as $emp) {
+                                    if ($emp['id'] == $conflictEmpId) {
+                                        $conflictEmpName = $emp['name'];
+                                        break;
+                                    }
+                                }
+                                
+                                return redirect()->route('employee-working-shifts.index')
+                                    ->with('error', "Gagal membuat roster baru: {$conflictEmpName} sudah terdaftar pada Roster \"{$conflictRosterName}\" di bulan ini. Silakan edit roster tersebut atau keluarkan pegawai dari roster aktif tersebut terlebih dahulu.");
+                            }
+                        }
                     }
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error("Failed to fetch employees for roster: " . $e->getMessage());
@@ -725,12 +821,7 @@ class EmployeeWorkingShiftController extends Controller
                 $assignedEmployeeIds = $assignments->pluck('employee_id')->unique()->toArray();
                 $rosterName = $assignments->firstWhere('roster_name', '!=', null)->roster_name ?? ($rosterNameParam ?: 'Roster Shift Bulanan');
 
-                if ($rosterNameParam && empty($empIdsParam)) {
-                    $employees = array_filter($employees, function($emp) use ($assignedEmployeeIds) {
-                        return in_array($emp['id'], $assignedEmployeeIds);
-                    });
-                    $employees = array_values($employees);
-                }
+
 
                 // Build roster array
                 foreach ($employees as $emp) {
@@ -779,7 +870,7 @@ class EmployeeWorkingShiftController extends Controller
         
         $oldRosterName = $rosterNameParam; // To know which roster to update
 
-        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName'));
+        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName', 'assignedEmployeeIds', 'empIdsParam'));
     }
 
     /**
@@ -806,8 +897,98 @@ class EmployeeWorkingShiftController extends Controller
         $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
         $lastDay = $firstDay->copy()->endOfMonth();
 
+        // Check for conflicts: employee is assigned to a DIFFERENT roster name in this month
+        $submittedEmpIds = array_keys($rosterInput);
+        if (!empty($submittedEmpIds)) {
+            $conflictingQuery = \App\Models\EmployeeWorkingShift::whereIn('employee_id', $submittedEmpIds)
+                ->whereNotNull('roster_name')
+                ->where('roster_name', '!=', $rosterName);
+
+            if ($oldRosterName) {
+                $conflictingQuery->where('roster_name', '!=', $oldRosterName);
+            }
+
+            $conflictingAssignments = $conflictingQuery->where(function($query) use ($firstDay, $lastDay) {
+                    $query->whereBetween('start_date', [$firstDay, $lastDay])
+                          ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                          ->orWhere(function($q) use ($firstDay, $lastDay) {
+                              $q->where('start_date', '<', $firstDay)
+                                ->where(function($q2) use ($lastDay) {
+                                    $q2->whereNull('end_date')->orWhere('end_date', '>=', $lastDay);
+                                });
+                          });
+                })
+                ->get();
+                
+            if ($conflictingAssignments->count() > 0) {
+                $conflict = $conflictingAssignments->first();
+                $conflictEmpId = $conflict->employee_id;
+                $conflictRosterName = $conflict->roster_name;
+                
+                $conflictEmpName = 'Pegawai';
+                $unit = \App\Models\SchoolUnit::find($unitId);
+                if ($unit) {
+                    try {
+                        $resp = \Illuminate\Support\Facades\Http::withHeaders([
+                            'X-API-TOKEN' => $unit->api_token,
+                            'Accept' => 'application/json',
+                        ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/employees');
+                        if ($resp->successful()) {
+                            $rawEmployees = $resp->json('data') ?? [];
+                            foreach ($rawEmployees as $emp) {
+                                if ($emp['id'] == $conflictEmpId) {
+                                    $conflictEmpName = $emp['name'];
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (\Exception $e) {}
+                }
+                
+                return back()->with('error', "Gagal menyimpan roster: {$conflictEmpName} sudah terdaftar pada Roster \"{$conflictRosterName}\" di bulan ini. Silakan keluarkan pegawai dari roster aktif tersebut terlebih dahulu.");
+            }
+        }
+
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
+            if ($oldRosterName) {
+                $existingRosterEmployeeIds = \App\Models\EmployeeWorkingShift::where('school_unit_id', $unitId)
+                    ->where('roster_name', $oldRosterName)
+                    ->where(function($query) use ($firstDay, $lastDay) {
+                        $query->whereBetween('start_date', [$firstDay, $lastDay])
+                              ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                              ->orWhere(function($q) use ($firstDay, $lastDay) {
+                                  $q->where('start_date', '<', $firstDay)
+                                    ->where(function($q2) use ($lastDay) {
+                                        $q2->whereNull('end_date')->orWhere('end_date', '>=', $lastDay);
+                                    });
+                              });
+                    })
+                    ->pluck('employee_id')
+                    ->unique()
+                    ->toArray();
+
+                $submittedEmployeeIds = array_keys($rosterInput);
+                $removedEmployeeIds = array_diff($existingRosterEmployeeIds, $submittedEmployeeIds);
+
+                if (!empty($removedEmployeeIds)) {
+                    \App\Models\EmployeeWorkingShift::whereIn('employee_id', $removedEmployeeIds)
+                        ->where('school_unit_id', $unitId)
+                        ->where('roster_name', $oldRosterName)
+                        ->where(function($query) use ($firstDay, $lastDay) {
+                            $query->whereBetween('start_date', [$firstDay, $lastDay])
+                                  ->orWhereBetween('end_date', [$firstDay, $lastDay])
+                                  ->orWhere(function($q) use ($firstDay, $lastDay) {
+                                      $q->where('start_date', '<', $firstDay)
+                                        ->where(function($q2) use ($lastDay) {
+                                            $q2->whereNull('end_date')->orWhere('end_date', '>=', $lastDay);
+                                        });
+                                  });
+                        })
+                        ->delete();
+                }
+            }
+
             foreach ($rosterInput as $empId => $data) {
                 $bonusSchemaId = $data['bonus_schema_id'] ?? null;
                 $days = $data['days'] ?? [];

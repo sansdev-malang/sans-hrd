@@ -61,6 +61,11 @@ class DashboardController extends Controller
             $key = $s->school_unit_id . '_' . $s->employee_id;
             $assignedShifts[$key][] = $s;
         }
+        foreach ($assignedShifts as $key => &$shifts) {
+            usort($shifts, function($a, $b) {
+                return ($a->roster_name === null ? 0 : 1) <=> ($b->roster_name === null ? 0 : 1);
+            });
+        }
 
         // We can group the data for display
         $employeesCount = count($sdEmployees);

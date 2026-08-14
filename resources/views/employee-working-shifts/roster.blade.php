@@ -16,166 +16,144 @@
                 color: {{ $shift->hex_text }};
             }
         @endforeach
+        select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        .dark select option {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+        }
     </style>
 
-<div class="space-y-6" x-data="rosterGrid()">
-    
-    <!-- Header & Back Button -->
-    <div class="flex items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('employee-working-shifts.index') }}" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-            </a>
-            <div>
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{{ $rosterName ?: 'Roster Shift Bulanan' }}</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Atur jadwal shift harian secara visual seperti di kalender atau Excel.</p>
-                @if ($errors->any())
-                    <div class="mt-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                        <strong class="font-bold">Error!</strong>
-                        <ul class="list-disc ml-5 mt-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    @if(session('success'))
-        <div class="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-start gap-3">
-            <div class="p-1 bg-emerald-100 dark:bg-emerald-800 rounded-full text-emerald-600 dark:text-emerald-400 mt-0.5">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <p class="text-sm font-medium text-emerald-800 dark:text-emerald-200">{{ session('success') }}</p>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="p-4 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 rounded-xl flex items-start gap-3">
-            <div class="p-1 bg-rose-100 dark:bg-rose-800 rounded-full text-rose-600 dark:text-rose-400 mt-0.5">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </div>
-            <p class="text-sm font-medium text-rose-800 dark:text-rose-200">{{ session('error') }}</p>
-        </div>
-    @endif
-
-    <!-- Controls -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4">
-        <form method="GET" action="{{ route('employee-working-shifts.roster') }}" id="filterForm">
-            @if(request('emp_ids'))
-                @foreach(request('emp_ids') as $empId)
-                    <input type="hidden" name="emp_ids[]" value="{{ $empId }}">
-                @endforeach
-            @endif
-            <input type="hidden" name="roster_name" value="{{ $rosterName ?? request('roster_name') }}">
-            <div class="flex flex-wrap items-end gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Sekolah</label>
-                    <select name="unit_id" class="pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer" onchange="document.getElementById('filterForm').submit()">
-                        @foreach($units as $unit)
-                            <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>{{ $unit->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Bulan</label>
-                    <select name="month" class="pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer" onchange="document.getElementById('filterForm').submit()">
-                        @php
-                            $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                        @endphp
-                        @for($i=1; $i<=12; $i++)
-                            <option value="{{ $i }}" {{ $month == $i ? 'selected' : '' }}>{{ $bulanIndo[$i] }}</option>
-                        @endfor
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun</label>
-                    <input type="number" name="year" value="{{ $year }}" class="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="document.getElementById('filterForm').submit()">
-                </div>
-                
-                <div class="relative" x-data="{ openFilter: false }">
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tampilkan Shift</label>
-                    <button type="button" @click="openFilter = !openFilter" class="w-48 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-between text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
-                        <span class="font-medium whitespace-nowrap">{{ count($selectedShiftIds) > 0 ? count($selectedShiftIds) . ' Shift Terpilih' : 'Semua Shift' }}</span>
-                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    
-                    <div x-show="openFilter" style="display: none; width: 500px; max-width: 90vw;" @click.away="openFilter = false" class="absolute top-full left-0 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-3">
-                        <div class="gap-2 max-h-60 overflow-y-auto custom-scrollbar p-1" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));">
-                            @foreach($allShifts as $s)
-                                <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-lg transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
-                                    <div class="pt-0.5">
-                                        <input type="checkbox" name="shift_ids[]" value="{{ $s->id }}" {{ in_array($s->id, $selectedShiftIds) || count($selectedShiftIds) == 0 ? 'checked' : '' }} class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 dark:bg-slate-800 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-slate-900">
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight">{{ $s->name }}</span>
-                                        <span class="text-[10px] text-slate-500 mt-0.5">Kode: {{ $s->short_code ?: $s->code }}</span>
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-                        <div class="pt-3 mt-2 border-t border-slate-100 dark:border-slate-800">
-                            <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
-                                Terapkan Filter
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
-
-        <!-- Instructions -->
-        <div class="mt-6 mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4 flex items-start gap-3">
-            <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            <div class="text-left text-blue-800 dark:text-blue-200 text-xs">
-                <h5 class="font-bold mb-1">Panduan Pengisian Jadwal (Roster)</h5>
-                <ul class="list-disc pl-4 space-y-1">
-                    <li><strong>Mengisi Shift:</strong> Klik pada sel tanggal yang ingin diisi. Sel akan berganti shift secara berurutan sesuai dengan daftar di "Tampilkan Shift".</li>
-                    <li><strong>Meliburkan Hari (OFF):</strong> Klik terus pada sel hingga muncul tanda <strong>"OFF"</strong>. Saat disimpan, hari tersebut akan dicatat sebagai libur/kosong.</li>
-                    <li><strong>Hari Minggu:</strong> Sudah otomatis berwarna merah muda sebagai penanda hari libur, Anda tidak perlu mengisinya kecuali jika ada shift khusus.</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Legend -->
-        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/60">
-            <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Keterangan Shift</h3>
-            <div class="flex flex-wrap gap-2">
-
-                @foreach($shifts as $index => $shift)
-                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800">
-                        <div class="px-1.5 rounded-sm {{ $shift->color }} text-[10px] font-bold shadow-sm">{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</div>
-                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300">{{ $index + 1 }}: {{ $shift->name }}</span>
-                    </div>
-                @endforeach
-                
-                <!-- Legend Libur / Kosong -->
-                <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800">
-                    <div class="px-1.5 rounded-sm bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700 text-[10px] font-bold shadow-sm">OFF</div>
-                    <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Libur / Kosong</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="p-6 space-y-6 animate-fade-in" x-data="rosterGrid()">
     <form method="POST" action="{{ route('employee-working-shifts.update-roster') }}">
         @csrf
         <input type="hidden" name="school_unit_id" value="{{ $selectedUnitId }}">
         <input type="hidden" name="year" value="{{ $year }}">
         <input type="hidden" name="month" value="{{ $month }}">
         <input type="hidden" name="old_roster_name" value="{{ $oldRosterName ?? '' }}">
+    
+    <!-- Header & Back Button -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
+        <div class="flex items-center gap-3 text-left">
+            <a href="{{ route('employee-working-shifts.index') }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-3xs">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+            </a>
+            <div>
+                <div class="flex items-center gap-3 text-left">
+                    <div class="relative flex items-center">
+                        <input type="text" name="roster_name" value="{{ $rosterName }}" required placeholder="Nama Roster..."
+                            class="text-xl font-bold text-slate-900 dark:text-slate-50 bg-white dark:bg-slate-900 border-2 border-indigo-300 dark:border-indigo-500 rounded-xl pl-9 pr-3 py-1.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-105 dark:focus:ring-indigo-900/30 transition-all font-sans tracking-wide w-72 shadow-3xs"
+                            title="Klik untuk mengubah nama roster ini">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-indigo-500 dark:text-indigo-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0">Roster</span>
+                </div>
+                <!-- Context Badges -->
+                <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                    <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Unit:</span>
+                    <select id="filter_unit_id"
+                        class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-750 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500/30"
+                        @change="window.location.href = '/employee-working-shifts/roster?unit_id=' + $event.target.value + '&month={{ $month }}&year={{ $year }}&roster_name=' + encodeURIComponent(document.querySelector('input[name=roster_name]').value)">
+                        @foreach($units as $unit)
+                            <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{{ $unit->name }}</option>
+                        @endforeach
+                    </select>
+
+                    <span class="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
+                    <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Periode:</span>
+                    @php
+                        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                    @endphp
+                    <select id="filter_month"
+                        class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-750 dark:text-emerald-400 border border-emerald-100/30 dark:border-emerald-900/30 cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/30"
+                        @change="window.location.href = '/employee-working-shifts/roster?unit_id={{ $selectedUnitId }}&month=' + $event.target.value + '&year={{ $year }}&roster_name=' + encodeURIComponent(document.querySelector('input[name=roster_name]').value)">
+                        @for($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{{ $bulanIndo[$m] }}</option>
+                        @endfor
+                    </select>
+
+                    <input type="number" id="filter_year" value="{{ $year }}" required
+                        class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-750 dark:text-emerald-400 border border-emerald-100/30 dark:border-emerald-900/30 w-16 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 font-mono text-center"
+                        @change="window.location.href = '/employee-working-shifts/roster?unit_id={{ $selectedUnitId }}&month={{ $month }}&year=' + $event.target.value + '&roster_name=' + encodeURIComponent(document.querySelector('input[name=roster_name]').value)">
+
+                    <span class="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
+                    <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Jumlah:</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/40 dark:border-slate-700/40 font-bold text-[10px]">
+                        <span x-text="activeEmployeeIds.length"></span>&nbsp;Orang
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <button type="button" @click="showLegend = !showLegend" 
+            class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50/60 dark:bg-indigo-950/30 hover:bg-indigo-100/80 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-900/30 text-xs font-bold rounded-xl shadow-3xs cursor-pointer transition-all duration-150 gap-2 shrink-0 font-sans tracking-wide">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span x-text="showLegend ? 'Sembunyikan Panduan' : 'Lihat Panduan & Keterangan Roster'"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0 transition-transform duration-200 text-indigo-500" :class="showLegend ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+    </div>
+
+    <!-- Collapsible Instructions & Legend -->
+    <div x-cloak x-show="showLegend" x-collapse
+        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-5 grid grid-cols-1 md:grid-cols-2 gap-6 w-full text-left">
+        <!-- Instructions -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div class="text-left text-blue-800 dark:text-blue-200 text-xs">
+                <h5 class="font-bold mb-1">Panduan Pengisian Jadwal (Roster)</h5>
+                <ul class="list-disc pl-4 space-y-1">
+                    <li><strong>Mengisi Shift:</strong> Klik pada sel tanggal dan pilih shift yang diinginkan langsung dari dropdown. Warna sel akan berubah secara otomatis.</li>
+                    <li><strong>Meliburkan Hari (OFF):</strong> Pilih opsi <strong>"-"</strong> pada sel tanggal. Hari tersebut akan disimpan sebagai libur/kosong (OFF).</li>
+                    <li><strong>Hari Minggu:</strong> Sel tanggal berwarna merah muda sebagai penanda hari libur akhir pekan untuk mempermudah pemetaan visual Anda.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex flex-col justify-center">
+            <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">Keterangan Singkatan Shift</h3>
+            <div class="flex flex-wrap gap-2.5">
+                @foreach($shifts as $index => $shift)
+                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800">
+                        <div class="px-1.5 rounded-sm {{ $shift->color }} text-[10px] font-black shadow-sm">{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</div>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300">{{ $shift->name }}</span>
+                    </div>
+                @endforeach
+                
+                <!-- Legend Libur / Kosong -->
+                <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800">
+                    <div class="px-1.5 rounded-sm bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-350 dark:border-slate-700 text-[10px] font-black shadow-sm">OFF</div>
+                    <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Libur / Kosong</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
         
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
             <!-- Table Tools -->
-            <div class="p-4 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between">
+            <div class="p-3 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between gap-4">
                 <div class="relative w-full max-w-sm">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <input type="text" x-model="searchQuery" placeholder="Cari nama pegawai untuk disaring..." class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:border-indigo-500 focus:ring-indigo-500 text-slate-900 dark:text-slate-100">
+                    <input type="text" x-model="searchQuery" placeholder="Cari nama pegawai..." class="w-full pl-9 pr-8 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:border-indigo-500 focus:ring-indigo-500 text-slate-900 dark:text-slate-100">
+                    <button type="button" x-show="searchQuery.trim() !== ''" @click="searchQuery = ''" class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-650 transition-colors border-0 bg-transparent cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
                 </div>
+                
+                <button type="button" @click="showAddEmployeeModal = true"
+                    class="h-9 px-4 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs cursor-pointer transition-all hover:scale-[1.02] duration-150 gap-1.5 border-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a6 6 0 0 0-3.44-5.32M19 19a1 1 0 0 0 1-1v-.72A6 6 0 0 0 16.56 12m-9 6.72a6 6 0 0 1 3.44-5.32M5 19a1 1 0 0 1-1-1v-.72a6 6 0 0 1 3.44-5.32M15 9.72a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-9 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                    <span>Kelola Pegawai Roster</span>
+                </button>
             </div>
 
             <div class="overflow-x-auto">
@@ -208,12 +186,20 @@
                                 $rowData = $rosterData[$empId] ?? null;
                                 $bonusSchemaId = $rowData['bonus_schema_id'] ?? '';
                             @endphp
-                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group" x-show="'{{ addslashes(strtolower($emp['name'])) }}'.includes(searchQuery.toLowerCase())">
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group" 
+                                x-show="activeEmployeeIds.includes(String('{{ $empId }}')) && '{{ addslashes(strtolower($emp['name'])) }}'.includes(searchQuery.toLowerCase())">
                                 <td class="p-3 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-900 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)]">
-                                    <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm whitespace-nowrap">{{ $emp['name'] }}</div>
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm whitespace-nowrap">{{ $emp['name'] }}</div>
+                                        <button type="button" @click="activeEmployeeIds = activeEmployeeIds.filter(id => id !== String('{{ $empId }}'))"
+                                            class="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors border-0 bg-transparent cursor-pointer shrink-0"
+                                            title="Keluarkan Pegawai dari Roster">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2 2 0 0 1-1.995 1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td class="p-2 border-r border-slate-200 dark:border-slate-800">
-                                    <select name="roster[{{ $empId }}][bonus_schema_id]" class="w-full text-xs px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500">
+                                    <select name="roster[{{ $empId }}][bonus_schema_id]" :disabled="!activeEmployeeIds.includes(String('{{ $empId }}'))" class="w-full text-xs px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
                                         <option value="">Default/Aktif</option>
                                         @foreach($bonusSchemas as $schema)
                                             <option value="{{ $schema->id }}" {{ $bonusSchemaId == $schema->id ? 'selected' : '' }}>{{ $schema->name }}</option>
@@ -226,25 +212,23 @@
                                         $timestamp = mktime(0,0,0,$month,$d,$year);
                                         $isWeekend = (date('D', $timestamp) == 'Sun');
                                     @endphp
-                                    <td class="p-0 border-r border-slate-200 dark:border-slate-800 relative select-none transition-colors"
+                                    <td class="p-1 border-r border-slate-200 dark:border-slate-800 relative select-none transition-colors"
                                         @mouseenter="hoveredCol = {{ $d }}" @mouseleave="hoveredCol = null"
-                                        :class="{ 'bg-slate-50/50 dark:bg-slate-900/30': hoveredCol === {{ $d }} }">
-                                        <div class="w-full h-full min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer transition-colors"
-                                            :class="getCellColor('{{ $empId }}', {{ $d }}, '{{ $shiftId }}', {{ $isWeekend ? 'true' : 'false' }})"
-                                            @click="applyBrush('{{ $empId }}', {{ $d }})"
-                                            title="Klik untuk ubah">
-                                            
-                                            <!-- Hidden select for actual form submission -->
-                                            <select x-ref="sel_{{ $empId }}_{{ $d }}" name="roster[{{ $empId }}][days][{{ $d }}]" class="hidden" x-on:change="updateCellDisplay('{{ $empId }}', {{ $d }})">
-                                                <option value=""></option>
-                                                @foreach($shifts as $shift)
-                                                    <option value="{{ $shift->id }}" {{ $shiftId == $shift->id ? 'selected' : '' }}>{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</option>
-                                                @endforeach
-                                                <option value="OFF">OFF</option>
-                                            </select>
-                                            
-                                            <span x-text="getCellCode('{{ $empId }}', {{ $d }}, '{{ $shiftId }}')" class="text-[10px] font-bold"></span>
-                                        </div>
+                                        :class="{ 
+                                            'bg-slate-50/50 dark:bg-slate-900/30': hoveredCol === {{ $d }},
+                                            'bg-rose-50/30 dark:bg-rose-950/10': {{ $isWeekend ? 'true' : 'false' }} && hoveredCol !== {{ $d }}
+                                        }">
+                                        <select id="sel_{{ $empId }}_{{ $d }}" 
+                                            name="roster[{{ $empId }}][days][{{ $d }}]" 
+                                            :disabled="!activeEmployeeIds.includes(String('{{ $empId }}'))"
+                                            class="w-full h-8 min-w-[54px] text-center font-black text-[10.5px] rounded-lg border shadow-3xs focus:ring-2 focus:ring-indigo-500/40 cursor-pointer transition-all duration-150 p-0 text-slate-850 dark:text-slate-100 bg-transparent appearance-none hover:scale-[1.03] hover:shadow-2xs"
+                                            :class="getCellColor('{{ $empId }}', {{ $d }}, '{{ $shiftId }}')"
+                                            x-on:change="updateCellDisplay('{{ $empId }}', {{ $d }})">
+                                            <option value="OFF" {{ !$shiftId || $shiftId == 'OFF' ? 'selected' : '' }}>OFF</option>
+                                            @foreach($shifts as $shift)
+                                                <option value="{{ $shift->id }}" {{ $shiftId == $shift->id ? 'selected' : '' }}>{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</option>
+                                            @endforeach
+                                        </select>
                                     </td>
                                 @endfor
                             </tr>
@@ -258,23 +242,73 @@
                     </tbody>
                 </table>
             </div>
-            <div class="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center gap-4">
-                <div class="flex-1 max-w-sm">
-                    <label for="roster_name" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Roster <span class="text-rose-500">*</span></label>
-                    <input type="text" name="roster_name" id="roster_name" value="{{ $rosterName ?? '' }}" required placeholder="Contoh: Roster Satpam" class="w-full h-10 px-3 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-sm">
-                </div>
-                <div class="flex items-end gap-3 h-full pt-5">
-                    <a href="{{ route('employee-working-shifts.index') }}" onclick="return confirm('Apakah Anda yakin ingin membatalkan? Semua perubahan jadwal yang belum disimpan akan hilang.');" class="h-10 px-6 inline-flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 gap-2">
-                        Batal
-                    </a>
-                    <button type="submit" class="h-10 px-6 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 dark:focus:ring-offset-slate-900 gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        Simpan Semua Jadwal
-                    </button>
+            <div class="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex justify-end items-center gap-3">
+                <a href="{{ route('employee-working-shifts.index') }}" class="h-9 px-4 inline-flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 gap-1.5 cursor-pointer">
+                    Batal
+                </a>
+                <button type="submit" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 dark:focus:ring-offset-slate-900 gap-1.5 cursor-pointer border-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Simpan Semua Jadwal</span>
+                </button>
+            <!-- Modal Kelola Pegawai Roster -->
+            <div x-show="showAddEmployeeModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
+                <div x-show="showAddEmployeeModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+                <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4 text-center">
+                        <div x-show="showAddEmployeeModal" @click.away="showAddEmployeeModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full max-w-md border border-slate-200 dark:border-slate-800 flex flex-col max-h-[80vh]">
+                            
+                            <!-- Modal Header -->
+                            <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
+                                <div class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a6 6 0 0 0-3.44-5.32M19 19a1 1 0 0 0 1-1v-.72A6 6 0 0 0 16.56 12m-9 6.72a6 6 0 0 1 3.44-5.32M5 19a1 1 0 0 1-1-1v-.72a6 6 0 0 1 3.44-5.32M15 9.72a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-9 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">Kelola Pegawai Roster</h3>
+                                </div>
+                                <button type="button" @click="showAddEmployeeModal = false" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 bg-transparent border-0 cursor-pointer flex items-center justify-center p-1 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- Modal Body -->
+                            <div class="p-4 flex flex-col overflow-hidden min-h-[320px]">
+                                <!-- Search Employee input in Modal -->
+                                <div class="relative w-full mb-3 shrink-0">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                    </div>
+                                    <input type="text" x-model="addEmployeeSearchQuery" placeholder="Cari nama pegawai..." 
+                                        class="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:border-indigo-500 focus:ring-indigo-500 text-slate-900 dark:text-slate-100">
+                                </div>
+
+                                <!-- Employee List -->
+                                <div class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar text-xs">
+                                    @foreach($employees as $emp)
+                                        @php
+                                            $empId = $emp['id'];
+                                        @endphp
+                                        <label class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
+                                            x-show="addEmployeeSearchQuery.trim() === '' || '{{ addslashes(strtolower($emp['name'])) }}'.includes(addEmployeeSearchQuery.toLowerCase())">
+                                            <div class="flex flex-col text-left min-w-0">
+                                                <span class="font-bold text-slate-800 dark:text-slate-200 truncate">{{ $emp['name'] }}</span>
+                                                <span class="text-[10px] text-slate-450 dark:text-slate-500 truncate">{{ ($emp['position'] ?? null) ?: (($emp['subject_position'] ?? null) ?: '-') }}</span>
+                                            </div>
+                                            <input type="checkbox" :value="String('{{ $empId }}')" x-model="activeEmployeeIds"
+                                                class="rounded border-slate-350 text-indigo-650 w-4 h-4 cursor-pointer focus:ring-indigo-500">
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Modal Footer -->
+                            <div class="p-4 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800 flex justify-end shrink-0">
+                                <button type="button" @click="showAddEmployeeModal = false" class="h-9 px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm text-xs cursor-pointer transition-colors font-sans">
+                                    Selesai
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </form>
+        </form>
 </div>
 
 <script>
@@ -289,59 +323,22 @@
         Alpine.data('rosterGrid', () => ({
             searchQuery: '',
             hoveredCol: null,
-            activeBrush: null, // null means no brush active, acts as normal click cycle
-            isDragging: false,
             cellsData: {},
+            showLegend: false,
+            showAddEmployeeModal: false,
+            addEmployeeSearchQuery: '',
+            activeEmployeeIds: @json(array_values(array_map('strval', !empty($empIdsParam) ? $empIdsParam : ($assignedEmployeeIds ?? [])))),
 
-            init() {
-                // Initialize cellsData from DOM if needed, but we can just read from refs directly for performance
-                // Add window event to stop drag if mouse leaves table
-                window.addEventListener('mouseup', () => { this.stopDrag(); });
-                
-                // Keyboard events removed
-            },
+            init() {},
 
             getCellRef(empId, day) {
-                return this.$refs['sel_' + empId + '_' + day];
+                return document.getElementById('sel_' + empId + '_' + day);
             },
 
-            getVal(empId, day, initialVal) {
-                const ref = this.getCellRef(empId, day);
-                return ref ? ref.value : initialVal;
-            },
-
-            setVal(empId, day, val) {
-                const ref = this.getCellRef(empId, day);
-                if (ref && ref.value !== val) {
-                    ref.value = val;
-                    // Trigger alpine reactivity hack
-                    this.cellsData[empId + '_' + day] = val;
-                }
-            },
-
-            applyBrush(empId, day) {
-                // Pure cycle logic
-                const ref = this.getCellRef(empId, day);
-                if (ref) {
-                    const opts = Array.from(ref.options);
-                    const currIndex = opts.findIndex(o => o.selected);
-                    let nextIndex = currIndex + 1;
-                    if (nextIndex >= opts.length) nextIndex = 0;
-                    this.setVal(empId, day, opts[nextIndex].value);
-                }
-            },
-
-            getCellCode(empId, day, initialVal) {
-                // Reactive dependency
+            getCellColor(empId, day, initialVal) {
                 const val = this.cellsData[empId + '_' + day] !== undefined ? this.cellsData[empId + '_' + day] : initialVal;
-                if (!val || val === 'OFF') return 'OFF';
-                return shiftsData[val]?.code || '-';
-            },
-
-            getCellColor(empId, day, initialVal, isWeekend) {
-                const val = this.cellsData[empId + '_' + day] !== undefined ? this.cellsData[empId + '_' + day] : initialVal;
-                if (!val || val === 'OFF') return 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
-                return shiftsData[val]?.color || '';
+                if (!val || val === 'OFF') return 'bg-slate-100/80 text-slate-500 border-slate-200/60 dark:bg-slate-800/40 dark:text-slate-400 dark:border-slate-700/60';
+                return (shiftsData[val]?.color || '') + ' border-transparent';
             },
 
             updateCellDisplay(empId, day) {

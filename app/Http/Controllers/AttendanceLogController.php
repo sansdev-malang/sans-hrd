@@ -97,6 +97,11 @@ class AttendanceLogController extends Controller
             $key = $s->school_unit_id . '_' . $s->employee_id;
             $assignedShifts[$key][] = $s;
         }
+        foreach ($assignedShifts as $key => &$shifts) {
+            usort($shifts, function($a, $b) {
+                return ($b->roster_name === null ? 0 : 1) <=> ($a->roster_name === null ? 0 : 1);
+            });
+        }
 
         // Fetch logs up to next day noon to catch night shift clock outs
         $logsData = \App\Models\AttendanceLog::whereBetween('timestamp', [

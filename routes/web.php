@@ -33,6 +33,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::post('employee-working-shifts/roster', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'updateRoster'])->name('employee-working-shifts.update-roster');
     Route::delete('employee-working-shifts/roster-batch', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'destroyRoster'])->name('employee-working-shifts.destroy-roster');
     Route::get('employee-working-shifts/unit/{unitId}/employees', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'getEmployeesByUnit']);
+    Route::get('employee-working-shifts/roster-employees', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'getRosterEmployees']);
     Route::get('employee-working-shifts/batch-edit', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'editBatch'])->name('employee-working-shifts.edit-batch');
     Route::put('employee-working-shifts/batch-update', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'updateBatch'])->name('employee-working-shifts.update-batch');
     Route::delete('employee-working-shifts/batch-destroy', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'destroyBatch'])->name('employee-working-shifts.destroy-batch');

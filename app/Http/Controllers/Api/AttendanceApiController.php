@@ -96,6 +96,11 @@ class AttendanceApiController extends Controller
             $key = $s->school_unit_id . '_' . $s->employee_id;
             $assignedShifts[$key][] = $s;
         }
+        foreach ($assignedShifts as $key => &$shifts) {
+            usort($shifts, function($a, $b) {
+                return ($b->roster_name === null ? 0 : 1) <=> ($a->roster_name === null ? 0 : 1);
+            });
+        }
 
         // Fetch logs up to next day noon to catch night shift clock outs
         $logsData = \App\Models\AttendanceLog::whereBetween('timestamp', [
@@ -756,7 +761,9 @@ class AttendanceApiController extends Controller
             ->where(function ($q) use ($date) {
                 $q->whereNull('end_date')
                   ->orWhere('end_date', '>=', $date);
-            })->first();
+            })
+            ->orderByRaw('CASE WHEN roster_name IS NOT NULL THEN 1 ELSE 0 END DESC')
+            ->first();
 
         $shift = null;
         if ($activeShiftAssigned) {
