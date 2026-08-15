@@ -13,48 +13,50 @@ class SchoolUnitService
      */
     public function getSdEmployees(): array
     {
-        $activeUnits = SchoolUnit::where('is_active', true)->get();
-        $allEmployees = [];
+        return \Illuminate\Support\Facades\Cache::remember('sd_employees_all', 300, function() {
+            $activeUnits = SchoolUnit::where('is_active', true)->get();
+            $allEmployees = [];
 
-        if ($activeUnits->isEmpty()) {
-            return [];
-        }
-
-        $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($activeUnits) {
-            return $activeUnits->map(function ($unit) use ($pool) {
-                return $pool->as($unit->id)
-                    ->withHeaders([
-                        'X-API-TOKEN' => $unit->api_token,
-                        'Accept' => 'application/json',
-                    ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/employees');
-            });
-        });
-
-        foreach ($activeUnits as $unit) {
-            $response = $responses[$unit->id] ?? null;
-            
-            if ($response instanceof \Illuminate\Http\Client\Response && $response->successful()) {
-                $employees = $response->json('data') ?? [];
-                
-                $parsedUrl = parse_url($unit->api_url);
-                $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
-                if (isset($parsedUrl['port'])) {
-                    $baseUrl .= ':' . $parsedUrl['port'];
-                }
-
-                foreach ($employees as &$emp) {
-                    $emp['unit_name'] = $unit->name;
-                    $emp['unit_id'] = $unit->id;
-                    $emp['unit_url'] = $baseUrl;
-                }
-                $allEmployees = array_merge($allEmployees, $employees);
-            } else {
-                $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
-                Log::error("Failed to fetch employees from unit {$unit->name}. Status: {$status}");
+            if ($activeUnits->isEmpty()) {
+                return [];
             }
-        }
 
-        return $allEmployees;
+            $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($activeUnits) {
+                return $activeUnits->map(function ($unit) use ($pool) {
+                    return $pool->as($unit->id)
+                        ->withHeaders([
+                            'X-API-TOKEN' => $unit->api_token,
+                            'Accept' => 'application/json',
+                        ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/employees');
+                });
+            });
+
+            foreach ($activeUnits as $unit) {
+                $response = $responses[$unit->id] ?? null;
+                
+                if ($response instanceof \Illuminate\Http\Client\Response && $response->successful()) {
+                    $employees = $response->json('data') ?? [];
+                    
+                    $parsedUrl = parse_url($unit->api_url);
+                    $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+                    if (isset($parsedUrl['port'])) {
+                        $baseUrl .= ':' . $parsedUrl['port'];
+                    }
+
+                    foreach ($employees as &$emp) {
+                        $emp['unit_name'] = $unit->name;
+                        $emp['unit_id'] = $unit->id;
+                        $emp['unit_url'] = $baseUrl;
+                    }
+                    $allEmployees = array_merge($allEmployees, $employees);
+                } else {
+                    $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
+                    Log::error("Failed to fetch employees from unit {$unit->name}. Status: {$status}");
+                }
+            }
+
+            return $allEmployees;
+        });
     }
 
     /**
