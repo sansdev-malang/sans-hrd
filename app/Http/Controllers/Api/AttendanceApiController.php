@@ -338,7 +338,7 @@ class AttendanceApiController extends Controller
     public function bonusReport(Request $request)
     {
         $month = $request->query('month', date('Y-m'));
-        $unitId = $request->query('unit_id'); // Optional unit filter
+        $unitId = $request->query('unit_id') ?? $request->query('school_unit_id'); // Optional unit filter
 
         // Fetch cutoff date from settings, default to 26
         $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
