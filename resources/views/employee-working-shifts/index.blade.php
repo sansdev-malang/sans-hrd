@@ -545,6 +545,7 @@
                                                 class="inline">
                                                 @csrf
                                                 @method('DELETE')
+                                                <input type="hidden" name="tab" value="{{ $activeTab }}">
                                                 <input type="hidden" name="unit_id"
                                                     value="{{ $batch['school_unit_id'] }}">
                                                 <input type="hidden" name="month" value="{{ $batch['month'] }}">
@@ -608,6 +609,7 @@
                                                 class="inline">
                                                 @csrf
                                                 @method('DELETE')
+                                                <input type="hidden" name="tab" value="{{ $activeTab }}">
                                                 <input type="hidden" name="unit_id"
                                                     value="{{ $batch['school_unit_id'] }}">
                                                 <input type="hidden" name="shift_id"
@@ -895,6 +897,7 @@
                           @submit.prevent="if (selectedEmps.length === 0) { assignShowError = true; } else { assignShowError = false; $el.submit(); }"
                           class="flex flex-col flex-1 overflow-hidden">
                         @csrf
+                        <input type="hidden" name="tab" value="{{ $activeTab }}">
                         <!-- Scrollable Body -->
                         <div class="flex-1 overflow-y-auto p-5 space-y-5">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1096,6 +1099,7 @@
                           class="flex flex-col flex-1 overflow-hidden">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="tab" value="{{ $activeTab }}">
 
                         <input type="hidden" name="old_school_unit_id" :value="editOldUnitId">
                         <input type="hidden" name="old_working_shift_id" :value="editOldWorkingShiftId">
