@@ -369,22 +369,7 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Atur penugasan dan rotasi shift kerja secara kolektif per unit sekolah.</p>
             </div>
 
-            @if(count($neglectedEmployees) > 0)
-                <div @click="showNeglectedModal = true" class="flex-1 max-w-md mx-0 md:mx-4 px-3 py-1.5 bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 rounded-xl flex items-center justify-between gap-3 text-left shadow-3xs hover:bg-rose-100/60 dark:hover:bg-rose-900/35 transition-all cursor-pointer">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-1 bg-rose-500/10 text-rose-600 dark:text-rose-455 rounded-lg shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        </span>
-                        <div class="flex flex-col">
-                            <span class="text-[10px] font-bold text-rose-800 dark:text-rose-400 leading-tight">Peringatan</span>
-                            <span class="text-[9.5px] text-slate-500 dark:text-slate-400 leading-tight">Terdapat {{ count($neglectedEmployees) }} pegawai tanpa jadwal hari ini.</span>
-                        </div>
-                    </div>
-                    <span class="text-[9.5px] font-bold text-rose-600 dark:text-rose-400 shrink-0 flex items-center gap-0.5">
-                        Lihat <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                    </span>
-                </div>
-            @endif
+
 
             <div class="flex items-center gap-2 w-full md:w-auto justify-end">
                 <button type="button" @click="showCreateModal = true"
@@ -403,8 +388,8 @@
 
 
         <!-- TABS NAVIGATOR (MODERN SEGMENTED CONTROL) -->
-        <div class="flex items-center w-full text-left mt-2 mb-4">
-            <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-inner gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full text-left mt-2 mb-4">
+            <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-inner gap-1 shrink-0">
                 <a href="{{ route('employee-working-shifts.index', array_merge(request()->query(), ['tab' => 'roster', 'page' => 1])) }}"
                    class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer {{ $activeTab === 'roster' ? 'bg-white dark:bg-slate-800 text-indigo-650 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-700/50 font-extrabold' : 'text-slate-500 hover:text-slate-750 dark:text-slate-400 dark:hover:text-slate-350' }}">
                     <i data-lucide="calendar-range" class="w-4 h-4"></i>
@@ -416,6 +401,23 @@
                     Jadwal Kerja Tetap / Sementara (Batch)
                 </a>
             </div>
+
+            @if(count($neglectedEmployees) > 0)
+                <div @click="showNeglectedModal = true" class="w-full sm:w-auto max-w-md px-3 py-1.5 bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 rounded-xl flex items-center justify-between gap-3 text-left shadow-3xs hover:bg-rose-100/60 dark:hover:bg-rose-900/35 transition-all cursor-pointer">
+                    <div class="flex items-center gap-2.5">
+                        <span class="p-1 bg-rose-500/10 text-rose-600 dark:text-rose-455 rounded-lg shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </span>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-rose-800 dark:text-rose-400 leading-tight">Peringatan</span>
+                            <span class="text-[9.5px] text-slate-500 dark:text-slate-400 leading-tight">Terdapat {{ count($neglectedEmployees) }} pegawai tanpa jadwal hari ini.</span>
+                        </div>
+                    </div>
+                    <span class="text-[9.5px] font-bold text-rose-600 dark:text-rose-400 shrink-0 flex items-center gap-0.5">
+                        Lihat <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </div>
+            @endif
         </div>
 
         <!-- FILTERS & SEARCH (MODERN COMMAND BAR STYLE) -->
