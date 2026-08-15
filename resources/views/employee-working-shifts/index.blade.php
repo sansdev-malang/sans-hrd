@@ -337,6 +337,28 @@
                     this.editShowError = false;
                 }
             });
+
+            this.$watch('editSelectedEmps', () => {
+                if (this.filteredEditEmployees.length === 0) {
+                    this.editSelectAll = false;
+                } else {
+                    this.editSelectAll = this.filteredEditEmployees.every(e => this.editSelectedEmps.includes(e.id));
+                }
+            });
+            this.$watch('editSearchQuery', () => {
+                if (this.filteredEditEmployees.length === 0) {
+                    this.editSelectAll = false;
+                } else {
+                    this.editSelectAll = this.filteredEditEmployees.every(e => this.editSelectedEmps.includes(e.id));
+                }
+            });
+            this.$watch('editSelectedPosition', () => {
+                if (this.filteredEditEmployees.length === 0) {
+                    this.editSelectAll = false;
+                } else {
+                    this.editSelectAll = this.filteredEditEmployees.every(e => this.editSelectedEmps.includes(e.id));
+                }
+            });
         }
     }">
 
@@ -863,44 +885,44 @@
                              }
                          }
                      }"
-                      x-init="
-                          $watch('showAssignmentModal', value => {
-                              if (!value) {
-                                  selectedUnit = '';
-                                  workingShiftId = '';
-                                  bonusSchemaId = '';
-                                  startDate = '';
-                                  endDate = '';
-                                  employees = [];
-                                  searchQuery = '';
-                                  selectedPosition = '';
-                                  selectedEmps = [];
-                                  selectAll = false;
-                                  assignShowError = false;
-                              }
-                          });
-                          $watch('selectedEmps', () => {
-                              if (filteredEmployees.length === 0) {
-                                  selectAll = false;
-                              } else {
-                                  selectAll = filteredEmployees.every(e => selectedEmps.includes(e.id));
-                              }
-                          });
-                          $watch('searchQuery', () => {
-                              if (filteredEmployees.length === 0) {
-                                  selectAll = false;
-                              } else {
-                                  selectAll = filteredEmployees.every(e => selectedEmps.includes(e.id));
-                              }
-                          });
-                          $watch('selectedPosition', () => {
-                              if (filteredEmployees.length === 0) {
-                                  selectAll = false;
-                              } else {
-                                  selectAll = filteredEmployees.every(e => selectedEmps.includes(e.id));
-                              }
-                          });
-                      ">
+                     x-init="
+                           $watch('showAssignmentModal', value => {
+                               if (!value) {
+                                   this.selectedUnit = '';
+                                   this.workingShiftId = '';
+                                   this.bonusSchemaId = '';
+                                   this.startDate = '';
+                                   this.endDate = '';
+                                   this.employees = [];
+                                   this.searchQuery = '';
+                                   this.selectedPosition = '';
+                                   this.selectedEmps = [];
+                                   this.selectAll = false;
+                                   this.assignShowError = false;
+                               }
+                           });
+                           $watch('selectedEmps', () => {
+                               if (this.filteredEmployees.length === 0) {
+                                   this.selectAll = false;
+                               } else {
+                                   this.selectAll = this.filteredEmployees.every(e => this.selectedEmps.includes(e.id));
+                               }
+                           });
+                           $watch('searchQuery', () => {
+                               if (this.filteredEmployees.length === 0) {
+                                   this.selectAll = false;
+                               } else {
+                                   this.selectAll = this.filteredEmployees.every(e => this.selectedEmps.includes(e.id));
+                               }
+                           });
+                           $watch('selectedPosition', () => {
+                               if (this.filteredEmployees.length === 0) {
+                                   this.selectAll = false;
+                               } else {
+                                   this.selectAll = this.filteredEmployees.every(e => this.selectedEmps.includes(e.id));
+                               }
+                           });
+                       ">
                     
                     <!-- Header -->
                     <div class="p-5 border-b border-slate-100 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
