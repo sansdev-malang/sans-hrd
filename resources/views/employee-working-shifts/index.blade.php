@@ -863,21 +863,44 @@
                              }
                          }
                      }"
-                     x-init="$watch('showAssignmentModal', value => {
-                         if (!value) {
-                             selectedUnit = '';
-                             workingShiftId = '';
-                             bonusSchemaId = '';
-                             startDate = '';
-                             endDate = '';
-                             employees = [];
-                             searchQuery = '';
-                             selectedPosition = '';
-                             selectedEmps = [];
-                             selectAll = false;
-                             assignShowError = false;
-                         }
-                     })">
+                      x-init="
+                          $watch('showAssignmentModal', value => {
+                              if (!value) {
+                                  selectedUnit = '';
+                                  workingShiftId = '';
+                                  bonusSchemaId = '';
+                                  startDate = '';
+                                  endDate = '';
+                                  employees = [];
+                                  searchQuery = '';
+                                  selectedPosition = '';
+                                  selectedEmps = [];
+                                  selectAll = false;
+                                  assignShowError = false;
+                              }
+                          });
+                          $watch('selectedEmps', () => {
+                              if (filteredEmployees.length === 0) {
+                                  selectAll = false;
+                              } else {
+                                  selectAll = filteredEmployees.every(e => selectedEmps.includes(e.id));
+                              }
+                          });
+                          $watch('searchQuery', () => {
+                              if (filteredEmployees.length === 0) {
+                                  selectAll = false;
+                              } else {
+                                  selectAll = filteredEmployees.every(e => selectedEmps.includes(e.id));
+                              }
+                          });
+                          $watch('selectedPosition', () => {
+                              if (filteredEmployees.length === 0) {
+                                  selectAll = false;
+                              } else {
+                                  selectAll = filteredEmployees.every(e => selectedEmps.includes(e.id));
+                              }
+                          });
+                      ">
                     
                     <!-- Header -->
                     <div class="p-5 border-b border-slate-100 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
@@ -976,6 +999,7 @@
                                     <label class="font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center shrink-0">
                                         <span class="flex items-center gap-1.5">
                                             <span>Pilih Pegawai</span>
+                                            <span class="text-[11px] text-slate-500 font-normal" x-show="selectedEmps.length > 0"> (<span x-text="selectedEmps.length" class="font-bold text-indigo-650 dark:text-indigo-400"></span> terpilih)</span>
                                             <span x-show="isLoadingEmployees" class="text-[10px] text-indigo-500 animate-pulse font-normal" x-cloak>Memuat data...</span>
                                             <span x-show="assignShowError && selectedEmps.length === 0" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Pilih minimal 1 pegawai</span>
                                         </span>
@@ -985,7 +1009,7 @@
                                         </label>
                                     </label>
 
-                                    <div class="flex flex-col bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex-1 min-h-[280px]">
+                                    <div class="flex flex-col bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex-1 min-h-[420px] md:h-full">
                                         <!-- Search & Filter Bar -->
                                         <div class="p-2 border-b border-slate-200/60 dark:border-slate-800/80 shrink-0 bg-white dark:bg-slate-900/40 space-y-2">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1012,7 +1036,7 @@
                                         </div>
 
                                         <!-- List -->
-                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[250px] flex-1">
+                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[380px] md:max-h-[420px] flex-1">
                                             <div x-show="employees.length === 0 && !isLoadingEmployees" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-500 italic text-[11px] py-12">
                                                 Silakan pilih unit sekolah terlebih dahulu.
                                             </div>
