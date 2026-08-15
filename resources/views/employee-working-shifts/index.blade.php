@@ -380,9 +380,22 @@
 
 
 
+        <!-- TABS NAVIGATOR -->
+        <div class="flex items-center border-b border-slate-200 dark:border-slate-800 gap-6 w-full text-left mt-2 mb-1">
+            <a href="{{ route('employee-working-shifts.index', array_merge(request()->query(), ['tab' => 'roster', 'page' => 1])) }}"
+               class="pb-3 text-xs font-bold transition-all border-b-2 {{ $activeTab === 'roster' ? 'border-indigo-650 text-indigo-650 dark:border-indigo-400 dark:text-indigo-400 font-extrabold' : 'border-transparent text-slate-450 hover:text-slate-750 dark:hover:text-slate-350' }}">
+                Roster Bulanan
+            </a>
+            <a href="{{ route('employee-working-shifts.index', array_merge(request()->query(), ['tab' => 'batch', 'page' => 1])) }}"
+               class="pb-3 text-xs font-bold transition-all border-b-2 {{ $activeTab === 'batch' ? 'border-indigo-650 text-indigo-650 dark:border-indigo-400 dark:text-indigo-400 font-extrabold' : 'border-transparent text-slate-450 hover:text-slate-750 dark:hover:text-slate-350' }}">
+                Jadwal Kerja Tetap / Sementara (Batch)
+            </a>
+        </div>
+
         <!-- FILTERS & SEARCH (MODERN COMMAND BAR STYLE) -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('employee-working-shifts.index') }}">
+                <input type="hidden" name="tab" value="{{ $activeTab }}">
                 <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full">
                     <!-- Search Input -->
                     <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full md:w-96 shrink-0 flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
@@ -458,7 +471,11 @@
                 <table class="w-full text-xs border-collapse">
                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10">
                         <tr>
-                            <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[32%] whitespace-nowrap">Grup Penugasan</th>
+                            @if ($activeTab === 'roster')
+                                <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[32%] whitespace-nowrap">Grup Penugasan</th>
+                            @else
+                                <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[32%] whitespace-nowrap">Template Shift (Jam Kerja)</th>
+                            @endif
                             <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[18%] whitespace-nowrap">Unit Sekolah</th>
                             <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-center w-[25%] whitespace-nowrap">Periode Jadwal</th>
                             <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-center w-[13%] whitespace-nowrap">Jumlah Pegawai</th>
@@ -467,7 +484,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300 font-medium">
                         @forelse($batches as $batch)
-                            @if (isset($batch['type']) && $batch['type'] == 'roster')
+                            @if ($activeTab === 'roster')
                                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                                     <td class="px-6 py-4 text-left">
                                         <div class="flex items-center gap-3">
@@ -548,7 +565,7 @@
                                             </div>
                                             <div class="flex flex-col gap-0.5">
                                                 <span @click="openModal({{ json_encode($batch) }})" class="font-semibold text-slate-800 dark:text-slate-200 text-xs cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors duration-150" title="Klik untuk melihat rincian daftar pegawai">{{ $batch['shift_name'] }}</span>
-                                                <span class="inline-flex w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-455 border border-emerald-100/30 dark:border-emerald-900/30 uppercase tracking-wide">Kode: {{ $batch['shift_code'] }}</span>
+                                                <span class="inline-flex w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-955/30 text-emerald-700 dark:text-emerald-455 border border-emerald-100/30 dark:border-emerald-900/30 uppercase tracking-wide">Kode: {{ $batch['shift_code'] }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -579,7 +596,7 @@
                                                 title="Edit Penugasan">
                                                 <i data-lucide="edit-3" class="w-4 h-4"></i>
                                             </button>
- 
+
                                             <form action="{{ route('employee-working-shifts.destroy-batch') }}"
                                                 method="POST"
                                                 onsubmit="return confirm('Apakah Anda yakin ingin membatalkan/menghapus seluruh penugasan shift pada grup ini?')"
@@ -595,7 +612,7 @@
                                                     value="{{ \Carbon\Carbon::parse($batch['start_date'])->format('Y-m-d') }}">
                                                 <input type="hidden" name="end_date"
                                                     value="{{ $batch['end_date'] ? \Carbon\Carbon::parse($batch['end_date'])->format('Y-m-d') : 'null' }}">
- 
+
                                                 <button type="submit"
                                                     class="h-8 w-8 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
                                                     title="Hapus Penugasan">
@@ -610,7 +627,7 @@
                             <tr>
                                 <td colspan="5" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
-                                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-450">
+                                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-455">
                                             <i data-lucide="calendar-x" class="w-6 h-6"></i>
                                         </div>
                                         <div>
@@ -623,6 +640,7 @@
                         @endforelse
                     </tbody>
                 </table>
+
             </div>
             
             <!-- Pagination -->

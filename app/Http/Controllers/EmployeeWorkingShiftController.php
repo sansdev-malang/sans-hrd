@@ -121,6 +121,18 @@ class EmployeeWorkingShiftController extends Controller
         }
 
         $allBatches = array_merge(array_values($batches), array_values($rosterBatches));
+
+        // Filter based on active tab
+        $activeTab = $request->query('tab', 'roster');
+        if (!in_array($activeTab, ['roster', 'batch'])) {
+            $activeTab = 'roster';
+        }
+
+        if ($activeTab === 'roster') {
+            $allBatches = array_filter($allBatches, function($b) { return $b['type'] === 'roster'; });
+        } else {
+            $allBatches = array_filter($allBatches, function($b) { return $b['type'] === 'permanent'; });
+        }
         
         // Search Filter (Locally added filter support)
         $searchQuery = $request->query('search');
@@ -244,7 +256,8 @@ class EmployeeWorkingShiftController extends Controller
             'bonusSchemas' => $bonusSchemas,
             'selectedUnitId' => $selectedUnitId,
             'perPage' => $perPageQuery,
-            'neglectedEmployees' => $neglectedEmployees
+            'neglectedEmployees' => $neglectedEmployees,
+            'activeTab' => $activeTab
         ]);
     }
 
