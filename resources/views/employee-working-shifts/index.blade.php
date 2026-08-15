@@ -921,6 +921,10 @@
                           class="flex flex-col flex-1 overflow-hidden">
                         @csrf
                         <input type="hidden" name="tab" value="{{ $activeTab }}">
+                        <!-- Hidden inputs for selected employee IDs to ensure they are all submitted regardless of filter state -->
+                        <template x-for="empId in selectedEmps" :key="empId">
+                            <input type="hidden" name="employee_ids[]" :value="empId">
+                        </template>
                         <!-- Scrollable Body -->
                         <div class="flex-1 overflow-y-auto p-5 space-y-5">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1047,7 +1051,7 @@
                                             
                                             <template x-for="emp in filteredEmployees" :key="emp.id">
                                                 <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/80 border border-slate-200 dark:border-slate-900 rounded-xl transition-all shadow-2xs hover:border-slate-300 dark:hover:border-slate-800">
-                                                    <input type="checkbox" name="employee_ids[]" :value="emp.id" x-model="selectedEmps"
+                                                    <input type="checkbox" :value="emp.id" x-model="selectedEmps"
                                                         class="employee-checkbox w-4.5 h-4.5 rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 shrink-0 cursor-pointer">
                                                     <div class="flex flex-col min-w-0">
                                                         <span class="text-xs text-slate-900 dark:text-slate-100 font-bold leading-snug truncate" x-text="emp.name"></span>
@@ -1124,6 +1128,10 @@
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="tab" value="{{ $activeTab }}">
+                        <!-- Hidden inputs for selected employee IDs to ensure they are all submitted regardless of filter state -->
+                        <template x-for="empId in editSelectedEmps" :key="empId">
+                            <input type="hidden" name="employee_ids[]" :value="empId">
+                        </template>
 
                         <input type="hidden" name="old_school_unit_id" :value="editOldUnitId">
                         <input type="hidden" name="old_working_shift_id" :value="editOldWorkingShiftId">
@@ -1212,6 +1220,7 @@
                                     <label class="font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center shrink-0">
                                         <span class="flex items-center gap-1.5">
                                             <span>Pilih Pegawai</span>
+                                            <span class="text-[11px] text-slate-500 font-normal" x-show="editSelectedEmps.length > 0"> (<span x-text="editSelectedEmps.length" class="font-bold text-indigo-650 dark:text-indigo-400"></span> terpilih)</span>
                                             <span x-show="isLoadingEditEmployees" class="text-[10px] text-indigo-500 animate-pulse font-normal" x-cloak>Memuat data...</span>
                                             <span x-show="editShowError && editSelectedEmps.length === 0" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Pilih minimal 1 pegawai</span>
                                         </span>
@@ -1221,7 +1230,7 @@
                                         </label>
                                     </label>
 
-                                    <div class="flex flex-col bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex-1 min-h-[280px]">
+                                    <div class="flex flex-col bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex-1 min-h-[420px] md:h-full">
                                         <!-- Search & Filter Bar -->
                                         <div class="p-2 border-b border-slate-200/60 dark:border-slate-800/80 shrink-0 bg-white dark:bg-slate-900/40 space-y-2">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1248,7 +1257,7 @@
                                         </div>
 
                                         <!-- List -->
-                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[250px] flex-1">
+                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[380px] md:max-h-[420px] flex-1">
                                             <div x-show="editEmployees.length === 0 && !isLoadingEditEmployees" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-550 italic text-[11px] py-12">
                                                 Silakan pilih unit sekolah terlebih dahulu.
                                             </div>
@@ -1259,7 +1268,7 @@
                                             
                                             <template x-for="emp in filteredEditEmployees" :key="emp.id">
                                                 <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/80 border border-slate-200 dark:border-slate-900 rounded-xl transition-all shadow-2xs hover:border-slate-300 dark:hover:border-slate-800">
-                                                    <input type="checkbox" name="employee_ids[]" :value="emp.id" x-model="editSelectedEmps"
+                                                    <input type="checkbox" :value="emp.id" x-model="editSelectedEmps"
                                                         class="employee-checkbox w-4.5 h-4.5 rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 shrink-0 cursor-pointer">
                                                     <div class="flex flex-col min-w-0">
                                                         <span class="text-xs text-slate-900 dark:text-slate-100 font-bold leading-snug truncate" x-text="emp.name"></span>
