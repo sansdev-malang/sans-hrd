@@ -885,44 +885,44 @@
                              }
                          }
                      }"
-                     x-init="
-                           $watch('showAssignmentModal', value => {
-                               if (!value) {
-                                   this.selectedUnit = '';
-                                   this.workingShiftId = '';
-                                   this.bonusSchemaId = '';
-                                   this.startDate = '';
-                                   this.endDate = '';
-                                   this.employees = [];
-                                   this.searchQuery = '';
-                                   this.selectedPosition = '';
-                                   this.selectedEmps = [];
-                                   this.selectAll = false;
-                                   this.assignShowError = false;
-                               }
-                           });
-                           $watch('selectedEmps', () => {
-                               if (this.filteredEmployees.length === 0) {
-                                   this.selectAll = false;
-                               } else {
-                                   this.selectAll = this.filteredEmployees.every(e => this.selectedEmps.includes(e.id));
-                               }
-                           });
-                           $watch('searchQuery', () => {
-                               if (this.filteredEmployees.length === 0) {
-                                   this.selectAll = false;
-                               } else {
-                                   this.selectAll = this.filteredEmployees.every(e => this.selectedEmps.includes(e.id));
-                               }
-                           });
-                           $watch('selectedPosition', () => {
-                               if (this.filteredEmployees.length === 0) {
-                                   this.selectAll = false;
-                               } else {
-                                   this.selectAll = this.filteredEmployees.every(e => this.selectedEmps.includes(e.id));
-                               }
-                           });
-                       ">
+                      x-init="
+                            $watch('showAssignmentModal', value => {
+                                if (!value) {
+                                    $data.selectedUnit = '';
+                                    $data.workingShiftId = '';
+                                    $data.bonusSchemaId = '';
+                                    $data.startDate = '';
+                                    $data.endDate = '';
+                                    $data.employees = [];
+                                    $data.searchQuery = '';
+                                    $data.selectedPosition = '';
+                                    $data.selectedEmps = [];
+                                    $data.selectAll = false;
+                                    $data.assignShowError = false;
+                                }
+                            });
+                            $watch('selectedEmps', () => {
+                                if ($data.filteredEmployees.length === 0) {
+                                    $data.selectAll = false;
+                                } else {
+                                    $data.selectAll = $data.filteredEmployees.every(e => $data.selectedEmps.includes(e.id));
+                                }
+                            });
+                            $watch('searchQuery', () => {
+                                if ($data.filteredEmployees.length === 0) {
+                                    $data.selectAll = false;
+                                } else {
+                                    $data.selectAll = $data.filteredEmployees.every(e => $data.selectedEmps.includes(e.id));
+                                }
+                            });
+                            $watch('selectedPosition', () => {
+                                if ($data.filteredEmployees.length === 0) {
+                                    $data.selectAll = false;
+                                } else {
+                                    $data.selectAll = $data.filteredEmployees.every(e => $data.selectedEmps.includes(e.id));
+                                }
+                            });
+                        ">
                     
                     <!-- Header -->
                     <div class="p-5 border-b border-slate-100 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
