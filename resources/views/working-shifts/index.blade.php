@@ -27,12 +27,10 @@
         ],
         init() {
             this.$watch('addName', value => {
-                if (!this.isCodeManuallyEdited) {
-                    this.addCode = value.toLowerCase()
-                                        .replace(/[^a-z0-9_]/g, '_')
-                                        .replace(/_+/g, '_')
-                                        .replace(/^_+|_+$/g, '');
-                }
+                this.addCode = value.toLowerCase()
+                                    .replace(/[^a-z0-9_]/g, '_')
+                                    .replace(/_+/g, '_')
+                                    .replace(/^_+|_+$/g, '');
             });
 
             @if($errors->any() && old('days'))
@@ -244,10 +242,8 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kode Unik Shift</label>
-                                    <input type="text" name="code" required x-model="addCode" placeholder="Contoh: salehmart_s1" 
-                                        @input="isCodeManuallyEdited = true"
-                                        oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_')"
-                                        class="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono">
+                                    <input type="text" name="code" required x-model="addCode" readonly placeholder="Otomatis terisi dari Nama Shift..." 
+                                        class="w-full text-xs px-3.5 py-2 bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 dark:text-slate-400 focus:outline-none font-mono cursor-not-allowed select-none">
                                 </div>
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kode Singkat (Max 5)</label>
