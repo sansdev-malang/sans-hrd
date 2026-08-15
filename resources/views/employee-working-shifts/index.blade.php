@@ -77,7 +77,6 @@
         showModal: false,
         selectedBatch: null,
         searchModal: '',
-        showFilters: {{ request()->filled('unit_id') || request()->filled('search') ? 'true' : 'false' }},
 
         formatDate(dateStr) {
             if (!dateStr) return '';
@@ -383,9 +382,8 @@
 
         <!-- FILTERS & SEARCH (MODERN COMMAND BAR STYLE) -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form method="GET" action="{{ route('employee-working-shifts.index') }}" class="space-y-4">
-                <!-- TOP BAR: Unified Search + Toggle Filters -->
-                <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 justify-between">
+            <form method="GET" action="{{ route('employee-working-shifts.index') }}">
+                <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full">
                     <!-- Search Input -->
                     <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex-1 flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
                         <div class="pl-3 text-slate-400">
@@ -400,24 +398,35 @@
                         </button>
                     </div>
 
-                    <!-- Action Bar -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        <!-- Toggle Button for Advanced Filters -->
-                        <button type="button" @click="showFilters = !showFilters" 
-                            :class="showFilters ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30' : 'bg-white text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-355 dark:border-slate-800'"
-                            class="h-10 px-4 flex items-center gap-2 text-xs font-bold border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-850 transition-all cursor-pointer">
-                            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
-                            <span>Filter Lanjutan</span>
-                            @if(request()->hasAny(['unit_id', 'search']) && (request('unit_id') || request('search')))
-                                <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-indigo-600 text-white leading-none">
-                                     {{ count(array_filter(request()->only(['unit_id', 'search']))) }}
-                                 </span>
-                            @endif
-                        </button>
+                    <!-- Filter Unit -->
+                    <div class="w-full md:w-48 shrink-0">
+                        <select name="unit_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                            <option value="">Semua Unit Sekolah</option>
+                            @foreach ($units as $unit)
+                                <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>
+                                    {{ $unit->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
+                    <!-- Filter Per Page -->
+                    <div class="w-full md:w-32 shrink-0">
+                        <select name="per_page" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                            <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
+                            <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                            <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
+                            <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                            <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
+                            <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                        </select>
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="flex items-center gap-2 shrink-0">
                         <button type="submit" class="h-10 px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1.5">
                             <i data-lucide="filter" class="w-4.5 h-4.5"></i>
-                            Terapkan
+                            Cari
                         </button>
 
                         @if(request()->hasAny(['unit_id', 'search', 'per_page']) && count(request()->except('page')) > 0)
@@ -426,37 +435,6 @@
                                 Reset
                             </a>
                         @endif
-                    </div>
-                </div>
-
-                <!-- COLLAPSIBLE ADVANCED FILTER PANEL -->
-                <div x-cloak x-show="showFilters" x-collapse class="pt-4 border-t border-slate-100 dark:border-slate-800/80">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Filter Unit -->
-                        <div class="space-y-1.5">
-                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Unit Sekolah</label>
-                            <select name="unit_id" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                                <option value="">Semua Unit Sekolah</option>
-                                @foreach ($units as $unit)
-                                    <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>
-                                        {{ $unit->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Filter Per Page -->
-                        <div class="space-y-1.5">
-                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Tampilkan Baris</label>
-                            <select name="per_page" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                                <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
-                                <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
-                                <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
-                                <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
-                                <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
-                                <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
             </form>
