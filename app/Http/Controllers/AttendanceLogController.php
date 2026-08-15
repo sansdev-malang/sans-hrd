@@ -99,7 +99,20 @@ class AttendanceLogController extends Controller
         }
         foreach ($assignedShifts as $key => &$shifts) {
             usort($shifts, function($a, $b) {
-                return ($b->roster_name === null ? 0 : 1) <=> ($a->roster_name === null ? 0 : 1);
+                $scoreA = ($a->roster_name !== null && $a->roster_name !== '') ? 3 : ($a->end_date !== null ? 2 : 1);
+                $scoreB = ($b->roster_name !== null && $b->roster_name !== '') ? 3 : ($b->end_date !== null ? 2 : 1);
+                
+                if ($scoreA !== $scoreB) {
+                    return $scoreB <=> $scoreA; // Descending
+                }
+                
+                $dateA = $a->start_date instanceof \Carbon\Carbon ? $a->start_date->format('Y-m-d') : substr($a->start_date, 0, 10);
+                $dateB = $b->start_date instanceof \Carbon\Carbon ? $b->start_date->format('Y-m-d') : substr($b->start_date, 0, 10);
+                if ($dateA !== $dateB) {
+                    return strcmp($dateB, $dateA); // Descending
+                }
+                
+                return $b->id <=> $a->id; // Descending
             });
         }
 

@@ -295,6 +295,25 @@ class EmployeeWorkingShiftController extends Controller
             })->delete();
 
         foreach ($validated['employee_ids'] as $employeeId) {
+            // ONLY check and close active permanent shift if the updated shift is permanent!
+            if (empty($validated['end_date'])) {
+                $activePermanent = EmployeeWorkingShift::where('school_unit_id', $validated['school_unit_id'])
+                    ->where('employee_id', $employeeId)
+                    ->whereNull('end_date')
+                    ->first();
+
+                if ($activePermanent) {
+                    $parentStart = $activePermanent->start_date->format('Y-m-d');
+                    $hMinus1 = date('Y-m-d', strtotime($validated['start_date'] . ' -1 day'));
+                    
+                    if ($hMinus1 >= $parentStart) {
+                        $activePermanent->update(['end_date' => $hMinus1]);
+                    } else {
+                        $activePermanent->delete();
+                    }
+                }
+            }
+
             EmployeeWorkingShift::create([
                 'school_unit_id' => $validated['school_unit_id'],
                 'employee_id' => $employeeId,
@@ -491,40 +510,23 @@ class EmployeeWorkingShiftController extends Controller
         ]);
 
         foreach ($validated['employee_ids'] as $employeeId) {
-            // Find active permanent shift assignment overlap (if any)
-            $activePermanent = EmployeeWorkingShift::where('school_unit_id', $validated['school_unit_id'])
-                ->where('employee_id', $employeeId)
-                ->whereNull('end_date')
-                ->first();
+            // ONLY check and close active permanent shift if the new shift is permanent!
+            if (empty($validated['end_date'])) {
+                $activePermanent = EmployeeWorkingShift::where('school_unit_id', $validated['school_unit_id'])
+                    ->where('employee_id', $employeeId)
+                    ->whereNull('end_date')
+                    ->first();
 
-            if ($activePermanent) {
-                $parentStart = $activePermanent->start_date->format('Y-m-d');
-                $hMinus1 = date('Y-m-d', strtotime($validated['start_date'] . ' -1 day'));
-                
-                if ($hMinus1 >= $parentStart) {
-                    // Close the old permanent shift at H-1 of the new shift
-                    $activePermanent->update(['end_date' => $hMinus1]);
+                if ($activePermanent) {
+                    $parentStart = $activePermanent->start_date->format('Y-m-d');
+                    $hMinus1 = date('Y-m-d', strtotime($validated['start_date'] . ' -1 day'));
                     
-                    // Resume the old permanent shift starting from H+1 of the new shift's end_date
-                    if (!empty($validated['end_date'])) {
-                        EmployeeWorkingShift::create([
-                            'school_unit_id' => $validated['school_unit_id'],
-                            'employee_id' => $employeeId,
-                            'working_shift_id' => $activePermanent->working_shift_id,
-                            'bonus_schema_id' => $activePermanent->bonus_schema_id,
-                            'start_date' => date('Y-m-d', strtotime($validated['end_date'] . ' +1 day')),
-                            'end_date' => null,
-                        ]);
-                    }
-                } else {
-                    // If the new shift starts before or at the start of the old permanent shift,
-                    // we just delay the start of the old permanent shift until H+1 of the new temporary shift
-                    if (!empty($validated['end_date'])) {
-                        $activePermanent->update([
-                            'start_date' => date('Y-m-d', strtotime($validated['end_date'] . ' +1 day'))
-                      ]);
+                    if ($hMinus1 >= $parentStart) {
+                        // Close the old permanent shift at H-1 of the new permanent shift
+                        $activePermanent->update(['end_date' => $hMinus1]);
                     } else {
-                        // If the new shift is permanent and starts before the old one, the new one completely replaces the old one
+                        // If the new permanent shift starts before or at the start of the old one,
+                        // the new one completely replaces the old one
                         $activePermanent->delete();
                     }
                 }

@@ -107,8 +107,18 @@ class AttendancePercentageReportController extends Controller
                 return $shift->school_unit_id . '_' . $shift->employee_id;
             })
             ->map(function($group) {
-                return $group->sortByDesc(function($shift) {
-                    return $shift->roster_name !== null ? 1 : 0;
+                return $group->sort(function($a, $b) {
+                    $scoreA = ($a->roster_name !== null && $a->roster_name !== '') ? 3 : ($a->end_date !== null ? 2 : 1);
+                    $scoreB = ($b->roster_name !== null && $b->roster_name !== '') ? 3 : ($b->end_date !== null ? 2 : 1);
+                    if ($scoreA !== $scoreB) {
+                        return $scoreB <=> $scoreA; // Descending
+                    }
+                    $dateA = $a->start_date instanceof \Carbon\Carbon ? $a->start_date->format('Y-m-d') : substr($a->start_date, 0, 10);
+                    $dateB = $b->start_date instanceof \Carbon\Carbon ? $b->start_date->format('Y-m-d') : substr($b->start_date, 0, 10);
+                    if ($dateA !== $dateB) {
+                        return strcmp($dateB, $dateA); // Descending
+                    }
+                    return $b->id <=> $a->id; // Descending
                 });
             });
 
