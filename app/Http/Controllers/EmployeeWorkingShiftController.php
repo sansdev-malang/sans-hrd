@@ -61,7 +61,7 @@ class EmployeeWorkingShiftController extends Controller
                         'end_date' => $assignment->end_date,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'shift_name' => $assignment->workingShift->name ?? 'Unknown',
-                        'shift_code' => $assignment->workingShift->code ?? '-',
+                        'shift_code' => ($assignment->workingShift->short_code ?: ($assignment->workingShift->code ?? '-')),
                         
                         'employees' => [],
                         'sort_date' => $assignment->start_date->format('Y-m-d')
