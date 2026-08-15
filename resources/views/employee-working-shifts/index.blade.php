@@ -73,16 +73,6 @@
         }
     </style>
 
-    @php
-        $totalGroups = $batches instanceof \Illuminate\Pagination\LengthAwarePaginator ? $batches->total() : count($batches);
-        
-        // Count from current paginated items for statistics display
-        $currentItems = $batches instanceof \Illuminate\Pagination\LengthAwarePaginator ? $batches->items() : $batches;
-        $rosterCount = collect($currentItems)->filter(fn($b) => isset($b['type']) && $b['type'] === 'roster')->count();
-        $permanentCount = collect($currentItems)->filter(fn($b) => !isset($b['type']) || $b['type'] !== 'roster')->count();
-        $totalEmployeesScheduled = collect($currentItems)->flatMap(fn($b) => $b['employees'] ?? [])->unique('id')->count();
-    @endphp
-
     <div class="p-6 space-y-6 relative animate-fade-in" x-data="{
         showModal: false,
         selectedBatch: null,
@@ -388,57 +378,6 @@
                 </button>
             </div>
         </header>
-
-        <!-- SUMMARY STATISTICS CARDS -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full text-left">
-            <!-- Total Grup Penugasan -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl p-5 shadow-sm flex items-center justify-between text-left hover:-translate-y-0.5 hover:shadow-md transition-all duration-250">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider block">Total Grup Penugasan</span>
-                    <h4 class="text-2xl font-black font-mono text-slate-900 dark:text-slate-50 leading-none">{{ $totalGroups }}</h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Aktif terdaftar</p>
-                </div>
-                <div class="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                    <i data-lucide="layers" class="w-5 h-5"></i>
-                </div>
-            </div>
-
-            <!-- Roster Bulanan -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl p-5 shadow-sm flex items-center justify-between text-left hover:-translate-y-0.5 hover:shadow-md transition-all duration-250">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider block">Roster Bulanan</span>
-                    <h4 class="text-2xl font-black font-mono text-indigo-600 dark:text-indigo-400 leading-none">{{ $rosterCount }}</h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Halaman saat ini</p>
-                </div>
-                <div class="h-10 w-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                    <i data-lucide="calendar-range" class="w-5 h-5"></i>
-                </div>
-            </div>
-
-            <!-- Shift Kerja Tetap -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl p-5 shadow-sm flex items-center justify-between text-left hover:-translate-y-0.5 hover:shadow-md transition-all duration-250">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider block">Shift Permanen</span>
-                    <h4 class="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">{{ $permanentCount }}</h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Tanpa batas tanggal</p>
-                </div>
-                <div class="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <i data-lucide="clock" class="w-5 h-5"></i>
-                </div>
-            </div>
-
-            <!-- Pegawai Terjadwal -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl p-5 shadow-sm flex items-center justify-between text-left hover:-translate-y-0.5 hover:shadow-md transition-all duration-250">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-amber-500 uppercase tracking-wider block font-bold">Pegawai Terjadwal</span>
-                    <h4 class="text-2xl font-black font-mono text-amber-550 leading-none">{{ $totalEmployeesScheduled }}</h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Orang terdistribusi</p>
-                </div>
-                <div class="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-550">
-                    <i data-lucide="users" class="w-5 h-5"></i>
-                </div>
-            </div>
-        </section>
 
 
 
