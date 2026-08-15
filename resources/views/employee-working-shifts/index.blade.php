@@ -385,9 +385,9 @@
             <form method="GET" action="{{ route('employee-working-shifts.index') }}">
                 <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full">
                     <!-- Search Input -->
-                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex-1 flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
+                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full md:w-96 shrink-0 flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
                         <div class="pl-3 text-slate-400">
-                            <i data-lucide="search" class="w-4 h-4"></i>
+                            <i data-lucide="search" class="w-4.5 h-4.5"></i>
                         </div>
                         <input type="text" name="search" x-model="searchVal" x-ref="searchInput" placeholder="Cari nama grup roster, nama shift, kode, atau unit..."
                             style="border: none !important; outline: none !important; box-shadow: none !important;"
@@ -454,7 +454,7 @@
             </div>
 
             <!-- INDEPENDENT SCROLLABLE BODY CONTAINER -->
-            <div class="overflow-x-auto w-full relative">
+            <div class="overflow-x-auto overflow-y-auto custom-scrollbar w-full max-h-[70vh] relative">
                 <table class="w-full text-xs border-collapse">
                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10">
                         <tr>
