@@ -48,9 +48,9 @@ class EmployeeWorkingShiftController extends Controller
         $rosterBatches = [];
 
         foreach ($assignments as $assignment) {
-            if ($assignment->end_date === null) {
-                // Permanent Shifts
-                $key = 'perm|' . $assignment->school_unit_id . '|' . $assignment->working_shift_id . '|' . $assignment->start_date->format('Y-m-d');
+            if ($assignment->roster_name === null) {
+                // Permanent & Temporary Shifts (Standard Batch Assignments)
+                $key = 'perm|' . $assignment->school_unit_id . '|' . $assignment->working_shift_id . '|' . $assignment->start_date->format('Y-m-d') . '|' . ($assignment->end_date ? $assignment->end_date->format('Y-m-d') : 'null');
                 
                 if (!isset($batches[$key])) {
                     $batches[$key] = [
@@ -58,7 +58,7 @@ class EmployeeWorkingShiftController extends Controller
                         'school_unit_id' => $assignment->school_unit_id,
                         'working_shift_id' => $assignment->working_shift_id,
                         'start_date' => $assignment->start_date,
-                        'end_date' => null,
+                        'end_date' => $assignment->end_date,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'shift_name' => $assignment->workingShift->name ?? 'Unknown',
                         'shift_code' => $assignment->workingShift->code ?? '-',
