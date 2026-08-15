@@ -454,7 +454,7 @@
             </div>
 
             <!-- INDEPENDENT SCROLLABLE BODY CONTAINER -->
-            <div class="overflow-x-auto overflow-y-auto custom-scrollbar w-full max-h-[440px] relative">
+            <div class="overflow-x-auto w-full relative">
                 <table class="w-full text-xs border-collapse">
                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10">
                         <tr>
