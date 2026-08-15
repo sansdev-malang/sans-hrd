@@ -45,6 +45,7 @@
                 </a>
             </nav>
 
+            <!-- MANAJEMEN PEGAWAI -->
             <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN PEGAWAI</h3>
             <nav class="space-y-1 mb-4">
                 <a href="{{ route('employees.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
@@ -56,105 +57,193 @@
                         Data Pegawai
                     </span>
                 </a>
-                <a href="{{ route('announcements.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('announcements.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('coming-soon-sertifikat') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <i data-lucide="megaphone" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Pengumuman</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Pengumuman
-                    </span>
-                </a>
-                @if(auth()->user()->hasRole('super_admin'))
-                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('coming-soon') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
                     <div class="flex items-center gap-3">
                         <i data-lucide="award" class="menu-icon w-4 h-4"></i>
                         <span class="menu-text">Sertifikat Pegawai</span>
                     </div>
-                    <span class="menu-text text-[9px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Dev</span>
+                    <span class="menu-text text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-95">Soon</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
                         Sertifikat Pegawai
                     </span>
                 </a>
-                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('coming-soon') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
+                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('coming-soon-prestasi') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
                     <div class="flex items-center gap-3">
                         <i data-lucide="star" class="menu-icon w-4 h-4"></i>
                         <span class="menu-text">Prestasi Pegawai</span>
                     </div>
-                    <span class="menu-text text-[9px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Dev</span>
+                    <span class="menu-text text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-95">Soon</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
                         Prestasi Pegawai
                     </span>
                 </a>
-                <a href="{{ route('performance-reports.index') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg {{ Request::routeIs('performance-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-550 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }} text-xs relative group">
+                <a href="{{ route('performance-reports.index') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('performance-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
                     <div class="flex items-center gap-3">
                         <i data-lucide="bar-chart-2" class="menu-icon w-4 h-4"></i>
                         <span class="menu-text">Rapor Kinerja</span>
                     </div>
-                    <span class="menu-text text-[9px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Dev</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
                         Rapor Kinerja
                     </span>
                 </a>
-                @endif
             </nav>
 
-            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN ABSENSI</h3>
+            <!-- MANAJEMEN KEHADIRAN -->
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN KEHADIRAN</h3>
             <nav class="space-y-1 mb-4">
-                <a href="{{ route('attendance-logs.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="scan-face" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Data Absensi</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Data Absensi
-                    </span>
-                </a>
-                <a href="{{ route('leave-approvals.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="file-check" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Riwayat Izin</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Riwayat Izin
-                    </span>
-                </a>
-                <a href="{{ route('working-shifts.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('working-shifts.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="clock" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Shift Kerja</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Shift Kerja
-                    </span>
-                </a>
-                <a href="{{ route('employee-working-shifts.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('employee-working-shifts.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="calendar" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Jadwal Kerja</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Jadwal Kerja
-                    </span>
-                </a>
-                <a href="{{ route('holidays.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('holidays.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="plane" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Hari Libur</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Hari Libur
-                    </span>
-                </a>
-                <a href="{{ route('bonus-schemas.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="coins" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Skema Bonus</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Skema Bonus
-                    </span>
-                </a>
+                
+                <!-- Kehadiran Pegawai Dropdown -->
+                <div x-data="{ open: {{ Request::routeIs('attendance-logs.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="menu-item flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors relative group
+                        {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="scan-face" class="menu-icon w-4 h-4"></i>
+                            <span class="menu-text">Kehadiran Pegawai</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="chevron-icon w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                        <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
+                            Kehadiran Pegawai
+                        </span>
+                    </button>
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                        <a href="{{ route('attendance-logs.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
+                                <span>Data Kehadiran</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
+                                <span>Riwayat Kehadiran</span>
+                            </div>
+                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
+                        </a>
+                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
+                                <span>Rekap Kehadiran</span>
+                            </div>
+                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Izin Pegawai Dropdown -->
+                <div x-data="{ open: {{ Request::routeIs('leave-approvals.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="menu-item flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors relative group
+                        {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="file-check" class="menu-icon w-4 h-4"></i>
+                            <span class="menu-text">Izin Pegawai</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="chevron-icon w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                        <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
+                            Izin Pegawai
+                        </span>
+                    </button>
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                        <a href="{{ route('leave-approvals.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
+                                <span>Izin Kehadiran</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
+                                <span>Riwayat Izin</span>
+                            </div>
+                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
+                        </a>
+                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
+                                <span>Rekap Izin</span>
+                            </div>
+                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Bonus Kehadiran Dropdown -->
+                <div x-data="{ open: {{ (Request::routeIs('bonus-schemas.*') || Request::routeIs('bonus-reports.*')) ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="menu-item flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors relative group
+                        {{ (Request::routeIs('bonus-schemas.*') || Request::routeIs('bonus-reports.*')) ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="coins" class="menu-icon w-4 h-4"></i>
+                            <span class="menu-text">Bonus Kehadiran</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="chevron-icon w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                        <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
+                            Bonus Kehadiran
+                        </span>
+                    </button>
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                        <a href="{{ route('bonus-schemas.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
+                                <span>Skema Bonus</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('bonus-reports.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('bonus-reports.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('bonus-reports.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
+                                <span>Riwayat Bonus</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
+                                <span>Rekap Bonus</span>
+                            </div>
+                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Setting Kehadiran Dropdown -->
+                <div x-data="{ open: {{ (Request::routeIs('working-shifts.*') || Request::routeIs('employee-working-shifts.*') || Request::routeIs('holidays.*')) ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="menu-item flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors relative group
+                        {{ (Request::routeIs('working-shifts.*') || Request::routeIs('employee-working-shifts.*') || Request::routeIs('holidays.*')) ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="settings-2" class="menu-icon w-4 h-4"></i>
+                            <span class="menu-text">Setting Kehadiran</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="chevron-icon w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                        <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
+                            Setting Kehadiran
+                        </span>
+                    </button>
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                        <a href="{{ route('working-shifts.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('working-shifts.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('working-shifts.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
+                                <span>Shift Kerja</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('employee-working-shifts.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('employee-working-shifts.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('employee-working-shifts.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
+                                <span>Jadwal Kerja</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('holidays.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('holidays.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('holidays.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
+                                <span>Hari Libur</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Persentase Kehadiran -->
                 <a href="{{ route('attendance-percentage-reports.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('attendance-percentage-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
@@ -166,40 +255,89 @@
                 </a>
             </nav>
 
-            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">PENGGAJIAN</h3>
+            <!-- MANAJEMEN GAJI -->
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN GAJI</h3>
             <nav class="space-y-1 mb-4">
+                
+                <!-- Setting Cut-OFF -->
                 <a href="{{ route('cutoff-settings.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('cutoff-settings.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="scissors" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Pengaturan Cut-off</span>
+                    <span class="menu-text">Setting Cut-OFF</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Pengaturan Cut-off
+                        Setting Cut-OFF
                     </span>
                 </a>
-                <a href="{{ route('bonus-reports.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('bonus-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-950 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+
+                <!-- Gaji Pegawai Dropdown -->
+                <div x-data="{ open: {{ Request::routeIs('payslips.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="menu-item flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors relative group
+                        {{ Request::routeIs('payslips.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="wallet" class="menu-icon w-4 h-4"></i>
+                            <span class="menu-text">Gaji Pegawai</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="chevron-icon w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                        <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
+                            Gaji Pegawai
+                        </span>
+                    </button>
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                        <a href="{{ route('payslips.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('payslips.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('payslips.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
+                                <span>Slip Gaji</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
+                                <span>Riwayat Gaji</span>
+                            </div>
+                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
+                        </a>
+                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
+                                <span>Rekap Gaji</span>
+                            </div>
+                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- MENU LAINNYA -->
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MENU LAINNYA</h3>
+            <nav class="space-y-1 mb-4">
+                <a href="{{ route('announcements.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('announcements.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <i data-lucide="calculator" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Rekap Bonus</span>
+                    <i data-lucide="megaphone" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Pengumuman</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Rekap Bonus
+                        Pengumuman
                     </span>
                 </a>
-                <a href="{{ route('payslips.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('payslips.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('coming-soon-profil') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <i data-lucide="file-text" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Slip Gaji</span>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="user" class="menu-icon w-4 h-4"></i>
+                        <span class="menu-text">Profil</span>
+                    </div>
+                    <span class="menu-text text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-95">Soon</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Slip Gaji
+                        Profil
                     </span>
                 </a>
             </nav>
 
+            <!-- MANAJEMEN SISTEM -->
+            @if(auth()->user()->hasRole('super_admin'))
             <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN SISTEM</h3>
             <nav class="space-y-1 mb-4">
-                @if(auth()->user()->hasRole('super_admin'))
                 <a href="{{ route('school-units.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('school-units.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
@@ -209,7 +347,6 @@
                         Integrasi API Unit
                     </span>
                 </a>
-                @endif
                 
                 <a href="{{ route('settings.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('settings.index') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
@@ -220,7 +357,7 @@
                         Setting Aplikasi
                     </span>
                 </a>
-                @if(auth()->user()->hasRole('super_admin'))
+                
                 <a href="{{ route('zkteco-devices.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('zkteco-devices.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
@@ -257,8 +394,8 @@
                         Manajemen User
                     </span>
                 </a>
-                @endif
             </nav>
+            @endif
         </div>
     </div>
 
@@ -277,7 +414,7 @@
             <a href="{{ route('profile.edit') }}"
                 class="flex items-center gap-2 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                 <i data-lucide="badge-check" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
-                <span>Profil</span>
+                <span>Pengaturan Akun</span>
             </a>
 
             <div class="border-t border-slate-100 dark:border-slate-900 my-1"></div>

@@ -192,6 +192,7 @@
                 .sidebar-collapsed .menu-text,
                 .sidebar-collapsed .school-info,
                 .sidebar-collapsed .chevron-icon,
+                .sidebar-collapsed .submenu-list,
                 .sidebar-collapsed .user-info {
                     display: none !important;
                 }
