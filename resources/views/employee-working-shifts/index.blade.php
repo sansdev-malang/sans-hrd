@@ -380,16 +380,20 @@
 
 
 
-        <!-- TABS NAVIGATOR -->
-        <div class="flex items-center border-b border-slate-200 dark:border-slate-800 gap-6 w-full text-left mt-2 mb-1">
-            <a href="{{ route('employee-working-shifts.index', array_merge(request()->query(), ['tab' => 'roster', 'page' => 1])) }}"
-               class="pb-3 text-xs font-bold transition-all border-b-2 {{ $activeTab === 'roster' ? 'border-indigo-650 text-indigo-650 dark:border-indigo-400 dark:text-indigo-400 font-extrabold' : 'border-transparent text-slate-450 hover:text-slate-750 dark:hover:text-slate-350' }}">
-                Roster Bulanan
-            </a>
-            <a href="{{ route('employee-working-shifts.index', array_merge(request()->query(), ['tab' => 'batch', 'page' => 1])) }}"
-               class="pb-3 text-xs font-bold transition-all border-b-2 {{ $activeTab === 'batch' ? 'border-indigo-650 text-indigo-650 dark:border-indigo-400 dark:text-indigo-400 font-extrabold' : 'border-transparent text-slate-450 hover:text-slate-750 dark:hover:text-slate-350' }}">
-                Jadwal Kerja Tetap / Sementara (Batch)
-            </a>
+        <!-- TABS NAVIGATOR (MODERN SEGMENTED CONTROL) -->
+        <div class="flex items-center w-full text-left mt-2 mb-4">
+            <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-inner gap-1">
+                <a href="{{ route('employee-working-shifts.index', array_merge(request()->query(), ['tab' => 'roster', 'page' => 1])) }}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer {{ $activeTab === 'roster' ? 'bg-white dark:bg-slate-800 text-indigo-650 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-700/50 font-extrabold' : 'text-slate-500 hover:text-slate-750 dark:text-slate-400 dark:hover:text-slate-350' }}">
+                    <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                    Roster Bulanan
+                </a>
+                <a href="{{ route('employee-working-shifts.index', array_merge(request()->query(), ['tab' => 'batch', 'page' => 1])) }}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer {{ $activeTab === 'batch' ? 'bg-white dark:bg-slate-800 text-indigo-650 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-700/50 font-extrabold' : 'text-slate-500 hover:text-slate-750 dark:text-slate-400 dark:hover:text-slate-350' }}">
+                    <i data-lucide="clock" class="w-4 h-4"></i>
+                    Jadwal Kerja Tetap / Sementara (Batch)
+                </a>
+            </div>
         </div>
 
         <!-- FILTERS & SEARCH (MODERN COMMAND BAR STYLE) -->
