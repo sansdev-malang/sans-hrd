@@ -30,6 +30,7 @@ class EmployeeController extends Controller
     {
         $schoolUnits = SchoolUnit::where('is_active', true)->get();
         $rawEmployees = $this->service->getSdEmployees();
+        $unitCounts = collect($rawEmployees)->groupBy('unit_id')->map->count();
         
         // Extract unique positions (jabatan) from raw employee data
         $positions = collect($rawEmployees)
@@ -71,6 +72,15 @@ class EmployeeController extends Controller
             });
         }
 
+        // Sort by unit name, then alphabetically by employee name (A-Z)
+        $employeesCollection = $employeesCollection->sort(function ($a, $b) {
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
+            return strcmp($a['name'] ?? '', $b['name'] ?? '');
+        })->values();
+
         // Paginate
         $perPageRaw = $request->query('per_page', 50);
         $total = $employeesCollection->count();
@@ -101,6 +111,8 @@ class EmployeeController extends Controller
             'schoolUnits' => $schoolUnits,
             'devices' => $devices,
             'positions' => $positions,
+            'unitCounts' => $unitCounts,
+            'rawEmployees' => $rawEmployees,
         ]);
     }
 
@@ -138,6 +150,15 @@ class EmployeeController extends Controller
                 return $empPos == $position;
             });
         }
+
+        // Sort by unit name, then alphabetically by employee name (A-Z)
+        $employeesCollection = $employeesCollection->sort(function ($a, $b) {
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
+            return strcmp($a['name'] ?? '', $b['name'] ?? '');
+        })->values();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -224,6 +245,15 @@ class EmployeeController extends Controller
                 return $empPos == $position;
             });
         }
+
+        // Sort by unit name, then alphabetically by employee name (A-Z)
+        $employeesCollection = $employeesCollection->sort(function ($a, $b) {
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
+            return strcmp($a['name'] ?? '', $b['name'] ?? '');
+        })->values();
 
         $fileName = 'Data Pegawai - ' . $unitName . '.pdf';
         

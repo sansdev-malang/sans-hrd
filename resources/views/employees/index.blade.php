@@ -38,6 +38,62 @@
             </div>
         </header>
 
+        <!-- SUMMARY CARDS -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+            <!-- Total Card -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm text-left">
+                <div class="space-y-1">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Seluruh Pegawai</span>
+                    <h3 class="text-2xl font-extrabold text-slate-900 dark:text-slate-50">{{ collect($rawEmployees)->count() }} <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 ml-1">Pegawai</span></h3>
+                </div>
+                <div class="p-3 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <!-- Dynamic Unit Cards -->
+            @foreach($schoolUnits as $unit)
+                @php
+                    $count = $unitCounts[$unit->id] ?? 0;
+                    $colorClasses = match(strtolower($unit->name)) {
+                        'paud' => [
+                            'bg' => 'bg-amber-50 dark:bg-amber-950/20',
+                            'border' => 'border-amber-100 dark:border-amber-900/30',
+                            'text' => 'text-amber-600 dark:text-amber-400',
+                            'icon' => 'baby'
+                        ],
+                        'sd' => [
+                            'bg' => 'bg-emerald-50 dark:bg-emerald-950/20',
+                            'border' => 'border-emerald-100 dark:border-emerald-900/30',
+                            'text' => 'text-emerald-600 dark:text-emerald-400',
+                            'icon' => 'graduation-cap'
+                        ],
+                        'smp' => [
+                            'bg' => 'bg-blue-50 dark:bg-blue-950/20',
+                            'border' => 'border-blue-100 dark:border-blue-900/30',
+                            'text' => 'text-blue-600 dark:text-blue-400',
+                            'icon' => 'book-open'
+                        ],
+                        default => [
+                            'bg' => 'bg-slate-50 dark:bg-slate-800/30',
+                            'border' => 'border-slate-200 dark:border-slate-800/50',
+                            'text' => 'text-slate-600 dark:text-slate-400',
+                            'icon' => 'user'
+                        ]
+                    };
+                @endphp
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm text-left">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Unit {{ $unit->name }}</span>
+                        <h3 class="text-2xl font-extrabold text-slate-900 dark:text-slate-50">{{ $count }} <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 ml-1">Pegawai</span></h3>
+                    </div>
+                    <div class="p-3 {{ $colorClasses['bg'] }} {{ $colorClasses['text'] }} rounded-xl">
+                        <i data-lucide="{{ $colorClasses['icon'] }}" class="w-5 h-5"></i>
+                    </div>
+                </div>
+            @endforeach
+        </section>
+
         <!-- FILTERS & SEARCH -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
