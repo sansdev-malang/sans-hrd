@@ -29,7 +29,7 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         $schoolUnits = SchoolUnit::where('is_active', true)->get();
-        $rawEmployees = $this->service->getSdEmployees();
+        $rawEmployees = $this->service->getAllEmployees();
         $unitCounts = collect($rawEmployees)->groupBy('unit_id')->map->count();
         
         // Extract unique positions (jabatan) from raw employee data
@@ -118,7 +118,7 @@ class EmployeeController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $rawEmployees = $this->service->getSdEmployees();
+        $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees);
 
         $search = $request->query('search');
@@ -213,7 +213,7 @@ class EmployeeController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $rawEmployees = $this->service->getSdEmployees();
+        $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees);
 
         $search = $request->query('search');
