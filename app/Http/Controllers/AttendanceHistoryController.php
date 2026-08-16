@@ -639,6 +639,15 @@ class AttendanceHistoryController extends Controller
         $uids = $employeesCollection->pluck('zkteco_uid')->filter()->toArray();
         $employeeIds = $employeesCollection->pluck('id')->filter()->toArray();
 
+        $totalEmployeesToExport = count($employeesCollection);
+        $totalDays = $startDate->diffInDays($endDate) + 1;
+        $totalRows = $totalEmployeesToExport * $totalDays;
+        $format = $request->query('format', 'excel');
+
+        if ($format === 'pdf' && $totalRows > 1500) {
+            return redirect()->back()->with('error', "Jumlah data ekspor terlalu besar ({$totalRows} baris). Untuk menjaga stabilitas server, ekspor PDF dibatasi maksimal 1.500 baris. Silakan gunakan format Excel (yang dapat berjalan secara instan untuk data besar) atau perkecil rentang tanggal / pilih Unit Sekolah secara spesifik.");
+        }
+
         // 1. Fetch holidays
         $holidays = Holiday::all();
         $holidayAdjustments = HolidayAdjustment::all();

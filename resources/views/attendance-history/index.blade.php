@@ -8,7 +8,7 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Melihat, memantau, dan menyaring riwayat log absensi harian pegawai secara terperinci.</p>
             </div>
             
-            <!-- EXPORT DROPDOWN (Temporarily Disabled due to 504 Gateway Timeout)
+            <!-- EXPORT DROPDOWN -->
             <div x-data="{ open: false }" class="relative inline-block text-left w-full md:w-auto">
                 <button type="button" @click="open = !open" @click.outside="open = false" class="w-full md:w-auto justify-center h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
                     <i data-lucide="download" class="w-4 h-4"></i>
@@ -27,7 +27,6 @@
                     </a>
                 </div>
             </div>
-            -->
         </section>
 
         <!-- FILTERS & SEARCH -->
