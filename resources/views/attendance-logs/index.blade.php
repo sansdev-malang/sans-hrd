@@ -16,36 +16,36 @@
 
 <x-admin-layout>
     <div class="p-6 space-y-6" x-data="attendanceLogs">
-        <!-- HEADER -->
-        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Riwayat Absensi</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Memantau waktu kedatangan dan kepulangan pegawai secara komprehensif.</p>
-            </div>
-            
-            <!-- EXPORT DROPDOWN -->
-            <div x-data="{ open: false }" class="relative inline-block text-left w-full md:w-auto">
-                <button type="button" @click="open = !open" @click.outside="open = false" class="w-full md:w-auto justify-center h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    <span>Ekspor Data</span>
-                    <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
-                </button>
-                
-                <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
-                    <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
-                        Excel (.xlsx)
-                    </a>
-                    <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
-                        <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
-                        PDF (.pdf)
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- FILTERS & CONTROLS -->
         <div id="attendance-table-container" class="space-y-6">
+            <!-- HEADER -->
+            <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex flex-col gap-0.5">
+                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Riwayat Absensi</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Memantau waktu kedatangan dan kepulangan pegawai secara komprehensif.</p>
+                </div>
+                
+                <!-- EXPORT DROPDOWN -->
+                <div x-data="{ open: false }" class="relative inline-block text-left w-full md:w-auto">
+                    <button type="button" @click="open = !open" @click.outside="open = false" class="w-full md:w-auto justify-center h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Ekspor Data</span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
+                    </button>
+                    
+                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                        <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
+                            Excel (.xlsx)
+                        </a>
+                        <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
+                            <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
+                            PDF (.pdf)
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FILTERS & CONTROLS -->
             <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
                 <form id="attendance-filter-form" data-no-loader="true" method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                     
