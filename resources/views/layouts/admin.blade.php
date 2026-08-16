@@ -12,7 +12,7 @@
                     'dashboard' => 'Dashboard',
                     'bonus-reports.index' => 'Rekap Bonus Kehadiran',
                     'attendance-percentage-reports.index' => 'Laporan Persentase Kehadiran',
-                    'performance-reports.index' => 'Rapor Kinerja Guru',
+                    'performance-reports.index' => 'Rapor Kinerja Pegawai',
                     'performance-reports.show' => 'Detail Rapor Kinerja',
                     'attendance-logs.index' => 'Log Absensi',
                     'leaves.index' => 'Pengajuan Izin & Cuti',

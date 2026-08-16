@@ -1,21 +1,36 @@
 <x-admin-layout>
     <!-- Actions Bar (Hidden on print) -->
-    <div class="max-w-4xl mx-auto p-4 flex items-center justify-between gap-4 border-b dark:border-slate-800 border-slate-200 print:hidden text-left">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('performance-reports.index') }}" class="px-3 py-2 rounded-xl dark:bg-slate-900 bg-white border dark:border-slate-800 border-slate-200 hover:bg-slate-500/10 text-slate-650 dark:text-slate-350 transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer shadow-sm">
-                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-                Kembali
-            </a>
-            <div>
-                <h3 class="text-sm font-bold dark:text-white text-slate-900">Rapor Kinerja: {{ $employee['name'] }}</h3>
-                <p class="text-[10px] dark:text-slate-400 text-slate-500 mt-0.5">Tahun Ajaran {{ $report->academic_year }} - Semester {{ $report->semester }}</p>
+    <div class="max-w-4xl mx-auto p-4 flex flex-col gap-4 border-b dark:border-slate-800 border-slate-200 print:hidden text-left">
+        <div class="flex items-center justify-between gap-4 w-full">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('performance-reports.index') }}" class="px-3 py-2 rounded-xl dark:bg-slate-900 bg-white border dark:border-slate-800 border-slate-200 hover:bg-slate-500/10 text-slate-650 dark:text-slate-350 transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer shadow-sm">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    Kembali
+                </a>
+                <div>
+                    <h3 class="text-sm font-bold dark:text-white text-slate-900">Rapor Kinerja: {{ $employee['name'] }}</h3>
+                    <p class="text-[10px] dark:text-slate-400 text-slate-500 mt-0.5">Tahun Ajaran {{ $report->academic_year }} - Semester {{ $report->semester }}</p>
+                </div>
+            </div>
+            
+            <button onclick="window.print()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow-md cursor-pointer flex items-center gap-2 transition-all">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                Cetak Rapor (Save PDF)
+            </button>
+        </div>
+
+        <!-- INFO TAHAP PENGEMBANGAN BANNER -->
+        <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-850 rounded-xl p-4 flex items-start gap-3 shadow-sm text-left">
+            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-lg shrink-0">
+                <i data-lucide="info" class="w-5 h-5"></i>
+            </div>
+            <div class="space-y-1">
+                <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">Halaman Sedang Dalam Pengembangan</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Fitur evaluasi dan Rapor Kinerja Pegawai saat ini masih dalam tahap pengembangan dan sinkronisasi data uji coba dari SANS PKG. Beberapa nilai atau format laporan mungkin akan mengalami penyesuaian.
+                </p>
             </div>
         </div>
-        
-        <button onclick="window.print()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow-md cursor-pointer flex items-center gap-2 transition-all">
-            <i data-lucide="printer" class="w-4 h-4"></i>
-            Cetak Rapor (Save PDF)
-        </button>
     </div>
 
     <!-- Printable Area Wrapper -->
@@ -57,13 +72,13 @@
 
                 <!-- Judul Dokumen -->
                 <div class="text-center mb-6">
-                    <h3 class="text-sm font-extrabold uppercase text-slate-900 dark:text-white tracking-widest leading-none">Rapor Penilaian Kinerja Guru (PKG)</h3>
+                    <h3 class="text-sm font-extrabold uppercase text-slate-900 dark:text-white tracking-widest leading-none">Rapor Penilaian Kinerja Pegawai</h3>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wide mt-1.5">
                         Tahun Ajaran {{ $report->academic_year }} &bull; Semester {{ $report->semester == 1 ? 'Ganjil' : 'Genap' }}
                     </p>
                 </div>
 
-                <!-- Identitas Guru -->
+                <!-- Identitas Pegawai -->
                 <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-850/50 mb-6 text-left">
                     <table class="w-full text-[11px] leading-relaxed">
                         <tr>

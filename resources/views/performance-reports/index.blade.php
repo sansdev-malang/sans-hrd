@@ -4,8 +4,21 @@
         <!-- HEADER -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Rapor Kinerja Guru</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Rekapitulasi nilai evaluasi kinerja guru yang telah disinkronisasikan dari SANS PKG.</p>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Rapor Kinerja Pegawai</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Rekapitulasi nilai evaluasi kinerja pegawai yang telah disinkronisasikan dari SANS PKG.</p>
+            </div>
+        </section>
+
+        <!-- INFO TAHAP PENGEMBANGAN BANNER -->
+        <section class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-850 rounded-xl p-4 flex items-start gap-3 shadow-sm text-left">
+            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-lg shrink-0">
+                <i data-lucide="info" class="w-5 h-5"></i>
+            </div>
+            <div class="space-y-1">
+                <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">Halaman Sedang Dalam Pengembangan</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Fitur evaluasi dan Rapor Kinerja Pegawai saat ini masih dalam tahap pengembangan dan sinkronisasi data uji coba dari SANS PKG. Beberapa nilai atau format laporan mungkin akan mengalami penyesuaian.
+                </p>
             </div>
         </section>
 
@@ -14,7 +27,7 @@
             <form method="GET" action="{{ route('performance-reports.index') }}" class="flex flex-col md:flex-row items-stretch md:items-end gap-3.5 w-full">
                 
                     <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
-                        <input type="text" name="search" x-model="searchVal" placeholder="Cari nama guru..."
+                        <input type="text" name="search" x-model="searchVal" placeholder="Cari nama pegawai..."
                             style="border: none !important; outline: none !important; box-shadow: none !important;"
                             class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
                         
@@ -87,7 +100,7 @@
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-450 font-bold uppercase tracking-wider text-[10px]">
-                            <th class="py-3 px-4">Nama Guru</th>
+                            <th class="py-3 px-4">Nama Pegawai</th>
                             <th class="py-3 px-4">Unit Sekolah</th>
                             <th class="py-3 px-4">Tahun Akademik</th>
                             <th class="py-3 px-4 text-center">Semester</th>
@@ -199,7 +212,7 @@
                             <tr>
                                 <td colspan="12" class="py-12 text-center text-slate-500 dark:text-slate-400">
                                     <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-3 text-slate-350 dark:text-slate-700 animate-pulse"></i>
-                                    <p class="text-sm font-semibold">Belum ada rapor kinerja guru yang disinkronisasikan dari SANS PKG.</p>
+                                    <p class="text-sm font-semibold">Belum ada rapor kinerja pegawai yang disinkronisasikan dari SANS PKG.</p>
                                 </td>
                             </tr>
                         @endforelse
