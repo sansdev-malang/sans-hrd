@@ -639,14 +639,7 @@ class AttendanceHistoryController extends Controller
         $uids = $employeesCollection->pluck('zkteco_uid')->filter()->toArray();
         $employeeIds = $employeesCollection->pluck('id')->filter()->toArray();
 
-        $totalEmployeesToExport = count($employeesCollection);
-        $totalDays = $startDate->diffInDays($endDate) + 1;
-        $totalRows = $totalEmployeesToExport * $totalDays;
         $format = $request->query('format', 'excel');
-
-        if ($format === 'pdf' && $totalRows > 1500) {
-            return redirect()->back()->with('error', "Jumlah data ekspor terlalu besar ({$totalRows} baris). Untuk menjaga stabilitas server, ekspor PDF dibatasi maksimal 1.500 baris. Silakan gunakan format Excel (yang dapat berjalan secara instan untuk data besar) atau perkecil rentang tanggal / pilih Unit Sekolah secara spesifik.");
-        }
 
         // 1. Fetch holidays
         $holidays = Holiday::all();
@@ -1127,13 +1120,7 @@ class AttendanceHistoryController extends Controller
         $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
 
         if ($format === 'pdf') {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('attendance-history.export-pdf', compact('historyList', 'periodeStr'))
-                ->setPaper('a4', 'portrait');
-            $response = $pdf->download("Riwayat_Kehadiran_{$startDateReq}_to_{$endDateReq}.pdf");
-            if ($request->filled('download_token')) {
-                $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
-            }
-            return $response;
+            return view('attendance-history.export-pdf', compact('historyList', 'periodeStr', 'startDateReq', 'endDateReq'));
         }
 
         // Generate Excel

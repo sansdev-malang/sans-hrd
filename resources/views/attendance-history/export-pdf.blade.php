@@ -9,9 +9,25 @@
             font-size: 9px;
             color: #333;
             line-height: 1.15;
+            margin: 0;
+            padding: 0;
         }
         @page {
+            size: A4 portrait;
             margin: 1.2cm 1cm;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+            tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
         }
         h2 {
             text-align: center;
@@ -74,6 +90,14 @@
     </style>
 </head>
 <body>
+
+    <div class="no-print" style="background: #f1f5f9; padding: 12px 20px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; font-family: sans-serif; margin-bottom: 20px;">
+        <span style="font-size: 13px; font-weight: bold; color: #1e293b;">Pratinjau Cetak Laporan Absensi</span>
+        <div>
+            <button onclick="window.close();" style="padding: 6px 14px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: background 0.15s;">Tutup Halaman</button>
+            <button onclick="window.print();" style="padding: 6px 14px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 6px; transition: background 0.15s;">Cetak / Simpan PDF</button>
+        </div>
+    </div>
 
     <h2>Laporan Riwayat Kehadiran Pegawai</h2>
     <div class="subtitle">
@@ -192,5 +216,12 @@
         </table>
     </div>
 
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                window.print();
+            }, 600);
+        });
+    </script>
 </body>
 </html>

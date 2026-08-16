@@ -36,7 +36,7 @@
                         <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                         Excel (.xlsx)
                     </a>
-                    <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
+                    <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
                         <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
                         PDF (.pdf)
                     </a>

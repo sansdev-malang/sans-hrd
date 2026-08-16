@@ -455,14 +455,6 @@ class AttendanceLogController extends Controller
 
         $format = $request->query('format', 'excel');
         
-        $totalEmployeesToExport = count($reports);
-        $totalDays = $startDate->diffInDays($endDate) + 1;
-        $totalRows = $totalEmployeesToExport * $totalDays;
-
-        if ($format === 'pdf' && $totalRows > 1500) {
-            return redirect()->back()->with('error', "Jumlah data matriks ekspor terlalu besar ({$totalRows} sel). Untuk menjaga stabilitas server, ekspor PDF dibatasi maksimal 1.500 data. Silakan gunakan format Excel (yang dapat berjalan secara instan) atau perkecil rentang tanggal / pilih Unit Sekolah secara spesifik.");
-        }
-        
         $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
         $unitName = "Semua_Unit";
         if (!empty($unitId)) {
@@ -481,13 +473,7 @@ class AttendanceLogController extends Controller
         }
 
         if ($format === 'pdf') {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('attendance-logs.export-pdf', compact('reports', 'periodeStr', 'unitId', 'dates'))
-                ->setPaper('a4', 'landscape');
-            $response = $pdf->download($baseFileName . ".pdf");
-            if ($request->filled('download_token')) {
-                $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
-            }
-            return $response;
+            return view('attendance-logs.export-pdf', compact('reports', 'periodeStr', 'unitId', 'dates', 'baseFileName'));
         }
 
         // Generate Excel
