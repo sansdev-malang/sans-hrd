@@ -30,18 +30,8 @@ class PayslipController extends Controller
         $search = $request->query('search');
 
         // Fetch all employees from units
-        $allEmployees = $this->schoolUnitService->getSdEmployees(); 
+        $allEmployees = $this->schoolUnitService->getAllEmployees(); 
         
-        // Extract unique positions (jabatan)
-        $positions = collect($allEmployees)
-            ->map(function ($emp) {
-                return $emp['position'] ?? $emp['subject_position'] ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values();
-
         $employeesCollection = collect($allEmployees);
 
         if ($unitId) {
@@ -49,6 +39,16 @@ class PayslipController extends Controller
                 return ($emp['unit_id'] ?? '') == $unitId;
             });
         }
+
+        // Extract unique positions (jabatan) - adapts to selected unit!
+        $positions = $employeesCollection
+            ->map(function ($emp) {
+                return $emp['position'] ?? $emp['subject_position'] ?? null;
+            })
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
         if ($position) {
             $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
