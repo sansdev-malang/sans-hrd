@@ -22,9 +22,9 @@ class DashboardController extends Controller
     {
         $date = $request->input('date', Carbon::today()->toDateString());
 
-        // Fetch data from SD unit API
-        $sdEmployees = $this->schoolService->getSdEmployees();
-        $sdAttendances = $this->schoolService->getSdAttendances($date);
+        // Fetch data from all school unit APIs
+        $sdEmployees = $this->schoolService->getAllEmployees();
+        $sdAttendances = $this->schoolService->getAllAttendances($date);
 
         // Fetch logs from local ZKTeco records for this date
         $logs = \App\Models\AttendanceLog::with('device')->whereDate('timestamp', $date)->get();
