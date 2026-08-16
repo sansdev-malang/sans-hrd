@@ -84,9 +84,7 @@
                 class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
                 <div class="space-y-1">
                     <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Pegawai</span>
-                    <h4 class="text-2xl font-black font-mono text-slate-900 dark:text-slate-50 leading-none">
-                        {{ $countTotal }} <span class="text-xs font-bold text-slate-400 dark:text-slate-500 font-sans tracking-normal lowercase ml-1">pegawai</span>
-                    </h4>
+                    <h4 class="text-2xl font-black font-mono text-slate-900 dark:text-slate-50 leading-none">{{ $countTotal }}</h4>
                     <p class="text-[10px] text-slate-400 font-medium">Seluruh unit terfilter</p>
                 </div>
                 <div class="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
