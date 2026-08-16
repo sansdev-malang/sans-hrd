@@ -11,7 +11,7 @@ class SchoolUnitService
     /**
      * Get employees from all active school units.
      */
-    public function getSdEmployees(): array
+    public function getAllEmployees(): array
     {
         return \Illuminate\Support\Facades\Cache::remember('sd_employees_all', 86400, function() {
             $activeUnits = SchoolUnit::where('is_active', true)->get();
@@ -60,9 +60,17 @@ class SchoolUnitService
     }
 
     /**
+     * Deprecated: Use getAllEmployees() instead.
+     */
+    public function getSdEmployees(): array
+    {
+        return $this->getAllEmployees();
+    }
+
+    /**
      * Get attendances from all active school units for a specific date.
      */
-    public function getSdAttendances(string $date): array
+    public function getAllAttendances(string $date): array
     {
         $cacheKey = 'sd_attendances_' . $date;
         $isToday = ($date === date('Y-m-d'));
@@ -106,5 +114,13 @@ class SchoolUnitService
 
             return $allAttendances;
         });
+    }
+
+    /**
+     * Deprecated: Use getAllAttendances() instead.
+     */
+    public function getSdAttendances(string $date): array
+    {
+        return $this->getAllAttendances($date);
     }
 }
