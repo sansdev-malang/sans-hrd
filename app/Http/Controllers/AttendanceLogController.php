@@ -475,7 +475,11 @@ class AttendanceLogController extends Controller
         if ($format === 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('attendance-logs.export-pdf', compact('reports', 'periodeStr', 'unitId', 'dates'))
                 ->setPaper('a4', 'landscape');
-            return $pdf->download($baseFileName . ".pdf");
+            $response = $pdf->download($baseFileName . ".pdf");
+            if ($request->filled('download_token')) {
+                $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
+            }
+            return $response;
         }
 
         // Generate Excel

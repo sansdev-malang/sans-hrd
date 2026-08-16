@@ -1122,7 +1122,11 @@ class AttendanceHistoryController extends Controller
         if ($format === 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('attendance-history.export-pdf', compact('historyList', 'periodeStr'))
                 ->setPaper('a4', 'portrait');
-            return $pdf->download("Riwayat_Kehadiran_{$startDateReq}_to_{$endDateReq}.pdf");
+            $response = $pdf->download("Riwayat_Kehadiran_{$startDateReq}_to_{$endDateReq}.pdf");
+            if ($request->filled('download_token')) {
+                $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
+            }
+            return $response;
         }
 
         // Generate Excel
