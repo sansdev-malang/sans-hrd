@@ -13,7 +13,7 @@
         activeCategoryFilter: 'all',
         selectedReport: null,
         isDrawerOpen: false,
-        showFilters: {{ request()->hasAny(['unit_id', 'start_date', 'end_date']) && (request('unit_id') || request('start_date') || request('end_date')) ? 'true' : 'false' }},
+        showFormulaInfo: localStorage.getItem('hide_attendance_formula_info') !== 'true',
         openDrawer(report) {
             this.selectedReport = report;
             this.isDrawerOpen = true;
@@ -156,14 +156,14 @@
                 </div>
             </button>
 
-            <!-- Card 4: Zona Merah (Kritis - Rekomendasi SP) -->
+            <!-- Card 4: Zona Merah (Evaluasi - Kritis) -->
             <button @click="activeCategoryFilter = 'red'" 
-                :class="activeCategoryFilter === 'red' ? 'border-rose-600 dark:border-rose-450 ring-2 ring-rose-500/10' : 'border-slate-200 dark:border-slate-850 hover:border-rose-500 dark:hover:border-rose-600'"
+                :class="activeCategoryFilter === 'red' ? 'border-rose-600 dark:border-rose-455 ring-2 ring-rose-500/10' : 'border-slate-200 dark:border-slate-850 hover:border-rose-500 dark:hover:border-rose-600'"
                 class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
                 <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-rose-600 dark:text-rose-450 uppercase tracking-wider block">Kritis (< 90%) - SP</span>
+                    <span class="text-[9px] font-bold text-rose-600 dark:text-rose-455 uppercase tracking-wider block">Zona Kritis (< 90%)</span>
                     <h4 class="text-2xl font-black font-mono text-rose-600 dark:text-rose-450 leading-none">{{ $countRed }}</h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Rekomendasi surat peringatan</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Memerlukan evaluasi kehadiran</p>
                 </div>
                 <div class="h-10 w-10 rounded-lg bg-rose-50 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
                     <i data-lucide="alert-triangle" class="w-5 h-5"></i>
@@ -172,14 +172,19 @@
         </section>
 
         <!-- FORMULA INFO ALERT -->
-        <div class="flex items-start gap-3 p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/30 rounded-xl text-left">
-            <i data-lucide="info" class="w-4.5 h-4.5 text-indigo-650 dark:text-indigo-400 shrink-0 mt-0.5"></i>
-            <div class="space-y-1">
-                <span class="text-xs font-bold text-indigo-950 dark:text-indigo-300 block">Metodologi Kehadiran Aktif</span>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                    Rumus: <strong class="font-bold text-indigo-900 dark:text-indigo-300">Hadir / (Hadir + Alpa) &times; 100%</strong>. Hari <strong class="font-bold text-slate-800 dark:text-slate-200">Sakit, Izin, dan Cuti</strong> yang disetujui resmi otomatis dikecualikan dari pembagi sehingga tidak memotong nilai persentase.
-                </p>
+        <div x-show="showFormulaInfo" x-transition class="flex items-start justify-between gap-3 p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/30 rounded-xl text-left">
+            <div class="flex items-start gap-3">
+                <i data-lucide="info" class="w-4.5 h-4.5 text-indigo-650 dark:text-indigo-400 shrink-0 mt-0.5"></i>
+                <div class="space-y-1">
+                    <span class="text-xs font-bold text-indigo-950 dark:text-indigo-300 block">Metodologi Kehadiran Aktif</span>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                        Rumus: <strong class="font-bold text-indigo-900 dark:text-indigo-300">Hadir / (Hadir + Alpa) &times; 100%</strong>. Hari <strong class="font-bold text-slate-800 dark:text-slate-200">Sakit, Izin, dan Cuti</strong> yang disetujui resmi otomatis dikecualikan dari pembagi sehingga tidak memotong nilai persentase.
+                    </p>
+                </div>
             </div>
+            <button type="button" @click="localStorage.setItem('hide_attendance_formula_info', 'true'); showFormulaInfo = false;" class="text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 p-1 rounded-lg hover:bg-indigo-100/50 dark:hover:bg-slate-800 transition-all cursor-pointer">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
         </div>
 
         <!-- TABLE SECTION -->
@@ -314,7 +319,7 @@
                                             $percentClass = 'text-rose-650 dark:text-rose-455';
                                             $barColorClass = 'bg-gradient-to-r from-rose-400 to-rose-600';
                                             $badgeTheme = 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-450 border-rose-200/20';
-                                            $badgeText = 'Rekomendasi SP';
+                                            $badgeText = 'Evaluasi';
                                         }
                                     @endphp
                                     <div class="inline-flex flex-col items-end gap-1.5 min-w-[130px]">
