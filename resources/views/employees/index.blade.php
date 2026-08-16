@@ -1,5 +1,6 @@
 <x-admin-layout>
     <div class="p-6 space-y-6" x-data="{ showEmpDetailModal: false, showImportModal: false, showCreateModal: {{ $errors->any() && !old('_edit_id') ? 'true' : 'false' }}, showEditModal: {{ $errors->any() && old('_edit_id') ? 'true' : 'false' }}, showDeleteModal: false, selectedEmp: {{ old('_edit_emp_data') ? json_encode(array_merge(json_decode(old('_edit_emp_data'), true) ?? [], request()->old(), ['raw_name' => old('name', json_decode(old('_edit_emp_data'), true)['raw_name'] ?? '')])) : 'null' }} }">
+        <div id="employee-table-container" class="w-full space-y-6">
 
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
@@ -95,7 +96,6 @@
         </section>
 
         <!-- FILTERS & SEARCH & DATA TABLE WRAPPER -->
-        <div id="employee-table-container" class="w-full space-y-6">
             <!-- FILTERS & SEARCH -->
             <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
                 <form id="filter-form" data-no-loader="true" method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
