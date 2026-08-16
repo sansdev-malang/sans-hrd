@@ -107,6 +107,8 @@
                         <div class="font-bold" style="font-size: 8px;">{{ $row['shift_name'] }}</div>
                         @if($row['shift_start'])
                             <div style="font-size: 7px; color: #666;">{{ $row['shift_start'] }} - {{ $row['shift_end'] }}</div>
+                        @else
+                            <div style="font-size: 7px; color: #666;">Libur</div>
                         @endif
                     </td>
                     <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_in'] ?: '-' }}</td>

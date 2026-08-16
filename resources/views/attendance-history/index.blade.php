@@ -168,7 +168,7 @@
                                             {{ $row['shift_start'] }} - {{ $row['shift_end'] }}
                                         </div>
                                     @else
-                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">-</div>
+                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">Libur</div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-center font-mono font-medium">
