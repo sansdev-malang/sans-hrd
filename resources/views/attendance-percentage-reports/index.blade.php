@@ -1,8 +1,13 @@
 <x-admin-layout>
     <style>
         [x-cloak] { display: none !important; }
+        .dark input[type="date"] {
+            color-scheme: dark !important;
+        }
         .dark input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
+            filter: invert(1) !important;
+            opacity: 0.85 !important;
+            cursor: pointer;
         }
     </style>
     @php
@@ -35,14 +40,14 @@
 
         <!-- RATA-RATA KEHADIRAN PER UNIT -->
         @if(isset($unitStats) && count($unitStats) > 0)
-            <section class="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-4 w-full text-left flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <section class="bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-4 w-full text-left flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
                 <div class="flex items-center gap-2.5 shrink-0">
                     <div class="p-1.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-650 dark:text-indigo-400 rounded-lg">
                         <i data-lucide="building-2" class="w-4.5 h-4.5"></i>
                     </div>
                     <div>
-                        <h4 class="text-xs font-bold text-slate-800 dark:text-slate-250 leading-tight">Rata-rata Kehadiran per Unit</h4>
-                        <p class="text-[10px] text-slate-400">Persentase rata-rata seluruh pegawai terdaftar per unit sekolah</p>
+                        <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">Rata-rata Kehadiran per Unit</h4>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Persentase rata-rata seluruh pegawai terdaftar per unit sekolah</p>
                     </div>
                 </div>
                 
@@ -62,13 +67,13 @@
                                     $textColor = 'text-rose-650 dark:text-rose-455';
                                 }
                             @endphp
-                            <div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-lg shadow-2xs">
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800/50 rounded-lg shadow-2xs">
                                 <span class="w-2 h-2 rounded-full {{ $indicatorColor }}"></span>
                                 <div class="flex flex-col">
-                                    <span class="text-[9.5px] font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wide leading-none mb-0.5">{{ $stat['name'] }}</span>
+                                    <span class="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-none mb-0.5">{{ $stat['name'] }}</span>
                                     <div class="flex items-baseline gap-1">
                                         <span class="text-xs font-black font-mono {{ $textColor }}">{{ $avg }}%</span>
-                                        <span class="text-[9px] text-slate-400 font-medium">({{ $stat['count'] }} orang)</span>
+                                        <span class="text-[9px] text-slate-400 dark:text-slate-500 font-medium">({{ $stat['count'] }} orang)</span>
                                     </div>
                                 </div>
                             </div>
@@ -229,13 +234,13 @@
         <!-- TABLE SECTION -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
             <!-- Table Header Legend -->
-            <div class="px-6 py-3.5 border-b border-slate-150 dark:border-slate-800/80 bg-slate-500/5 dark:bg-slate-900/50 flex flex-wrap items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">
-                <span class="font-bold text-slate-900 dark:text-slate-150 flex items-center gap-2">
-                    <i data-lucide="table-properties" class="w-4 h-4 text-slate-500"></i>
+            <div class="px-6 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-500/5 dark:bg-slate-900/50 flex flex-wrap items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">
+                <span class="font-bold text-slate-900 dark:text-slate-200 flex items-center gap-2">
+                    <i data-lucide="table-properties" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
                     Tabel Evaluasi Kehadiran Pegawai
                 </span>
                 
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 border border-indigo-150/30">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30">
                     <i data-lucide="info" class="w-3.5 h-3.5 animate-bounce-slow"></i>
                     Klik baris pegawai untuk melihat rincian detail harian
                 </span>
