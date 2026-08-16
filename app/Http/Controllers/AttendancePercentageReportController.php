@@ -45,7 +45,7 @@ class AttendancePercentageReportController extends Controller
         }
 
         // Fetch Employees (Filter by unit if needed)
-        $rawEmployees = $this->service->getSdEmployees();
+        $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees);
 
         // Extract unique positions for filter
@@ -103,6 +103,11 @@ class AttendancePercentageReportController extends Controller
                       });
             })
             ->get()
+            ->map(function ($assignment) {
+                $assignment->formatted_start = $assignment->start_date instanceof \Carbon\Carbon ? $assignment->start_date->format('Y-m-d') : substr($assignment->start_date, 0, 10);
+                $assignment->formatted_end = $assignment->end_date ? ($assignment->end_date instanceof \Carbon\Carbon ? $assignment->end_date->format('Y-m-d') : substr($assignment->end_date, 0, 10)) : null;
+                return $assignment;
+            })
             ->groupBy(function($shift) {
                 return $shift->school_unit_id . '_' . $shift->employee_id;
             })
@@ -113,8 +118,8 @@ class AttendancePercentageReportController extends Controller
                     if ($scoreA !== $scoreB) {
                         return $scoreB <=> $scoreA; // Descending
                     }
-                    $dateA = $a->start_date instanceof \Carbon\Carbon ? $a->start_date->format('Y-m-d') : substr($a->start_date, 0, 10);
-                    $dateB = $b->start_date instanceof \Carbon\Carbon ? $b->start_date->format('Y-m-d') : substr($b->start_date, 0, 10);
+                    $dateA = $a->formatted_start;
+                    $dateB = $b->formatted_start;
                     if ($dateA !== $dateB) {
                         return strcmp($dateB, $dateA); // Descending
                     }
@@ -166,6 +171,11 @@ class AttendancePercentageReportController extends Controller
                       ->where('end_date', '>=', $startDate->format('Y-m-d'));
             })
             ->get()
+            ->map(function ($leave) {
+                $leave->formatted_start = $leave->start_date instanceof \Carbon\Carbon ? $leave->start_date->format('Y-m-d') : substr($leave->start_date, 0, 10);
+                $leave->formatted_end = $leave->end_date instanceof \Carbon\Carbon ? $leave->end_date->format('Y-m-d') : substr($leave->end_date, 0, 10);
+                return $leave;
+            })
             ->groupBy(function($leave) {
                 return $leave->school_unit_id . '_' . $leave->employee_id;
             });
@@ -209,7 +219,7 @@ class AttendancePercentageReportController extends Controller
             $currentDate = $startDate->copy();
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $formattedDate = Carbon::parse($dateStr)->translatedFormat('l, d M Y'); // e.g. Senin, 10 Agt 2026
+                $formattedDate = $currentDate->translatedFormat('l, d M Y'); // e.g. Senin, 10 Agt 2026
                 $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
                 // Skip Holidays based on employee's unit
@@ -234,8 +244,8 @@ class AttendancePercentageReportController extends Controller
                 $leaveKey = $unit . '_' . $empId;
                 if (isset($leaves[$leaveKey])) {
                     foreach ($leaves[$leaveKey] as $leave) {
-                        $leaveStart = $leave->start_date instanceof \Carbon\Carbon ? $leave->start_date->format('Y-m-d') : substr($leave->start_date, 0, 10);
-                        $leaveEnd = $leave->end_date instanceof \Carbon\Carbon ? $leave->end_date->format('Y-m-d') : substr($leave->end_date, 0, 10);
+                        $leaveStart = $leave->formatted_start;
+                        $leaveEnd = $leave->formatted_end;
                         if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
                             $isOnLeave = true;
                             $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
@@ -259,8 +269,8 @@ class AttendancePercentageReportController extends Controller
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
-                        $assignStartDate = $assignment->start_date instanceof \Carbon\Carbon ? $assignment->start_date->format('Y-m-d') : substr($assignment->start_date, 0, 10);
-                        $assignEndDate = $assignment->end_date ? ($assignment->end_date instanceof \Carbon\Carbon ? $assignment->end_date->format('Y-m-d') : substr($assignment->end_date, 0, 10)) : null;
+                        $assignStartDate = $assignment->formatted_start;
+                        $assignEndDate = $assignment->formatted_end;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
                             if ($detail && !$detail->is_off) {
