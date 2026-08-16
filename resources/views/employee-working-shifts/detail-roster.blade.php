@@ -14,10 +14,11 @@
             background-color: {{ $shift->hex_bg }}40;
             color: {{ $shift->hex_text }};
         }
-        [x-cloak] {
-            display: none !important;
-        }
-    </style>
+    @endforeach
+    [x-cloak] {
+        display: none !important;
+    }
+</style>
 <div class="p-6 space-y-6 animate-fade-in" x-data="{ 
         openExportModal: false, 
         exportType: 'pdf',
