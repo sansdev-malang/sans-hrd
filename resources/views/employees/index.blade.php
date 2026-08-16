@@ -305,7 +305,7 @@
                         @if ($employees->onFirstPage())
                             <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Sebelumnya</span>
                         @else
-                            <a href="{{ $employees->previousPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Sebelumnya</a>
+                            <a href="{{ $employees->previousPageUrl() }}" data-no-loader="true" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Sebelumnya</a>
                         @endif
 
                         <span class="px-3 py-1 font-medium text-slate-700 dark:text-slate-300">
@@ -313,7 +313,7 @@
                         </span>
 
                         @if ($employees->hasMorePages())
-                            <a href="{{ $employees->nextPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Berikutnya</a>
+                            <a href="{{ $employees->nextPageUrl() }}" data-no-loader="true" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Berikutnya</a>
                         @else
                             <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Berikutnya</span>
                         @endif
@@ -1566,6 +1566,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadTableContent(url) {
         // Show loading state
         tableContainer.classList.add('opacity-40', 'pointer-events-none');
+        if (typeof NProgress !== 'undefined') NProgress.start();
         
         try {
             const response = await fetch(url);
@@ -1593,6 +1594,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = url;
         } finally {
             tableContainer.classList.remove('opacity-40', 'pointer-events-none');
+            if (typeof NProgress !== 'undefined') NProgress.done();
         }
     }
 

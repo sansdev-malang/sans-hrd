@@ -108,7 +108,7 @@
                 document.addEventListener("click", (e) => {
                     if (e.defaultPrevented) return;
                     const link = e.target.closest("a");
-                    if (!link) return;
+                    if (!link || link.hasAttribute("data-no-loader")) return;
                     const href = link.getAttribute("href");
                     const target = link.getAttribute("target");
                     if (!href || href.startsWith("#") || href.startsWith("javascript:") || target === "_blank") return;
