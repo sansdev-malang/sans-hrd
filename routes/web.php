@@ -9,6 +9,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::resource('school-units', \App\Http\Controllers\SchoolUnitController::class);
 
     // Distributed Employee CRUD
+    Route::post('employees/sync', [\App\Http\Controllers\EmployeeController::class, 'triggerSync'])->name('employees.sync');
     Route::get('employees/download-template', [\App\Http\Controllers\EmployeeController::class, 'downloadTemplate'])->name('employees.download-template');
     Route::post('employees/import', [\App\Http\Controllers\EmployeeController::class, 'import'])->name('employees.import');
     Route::get('employees/export/excel', [\App\Http\Controllers\EmployeeController::class, 'exportExcel'])->name('employees.export.excel');
@@ -37,6 +38,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('employee-working-shifts/batch-edit', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'editBatch'])->name('employee-working-shifts.edit-batch');
     Route::put('employee-working-shifts/batch-update', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'updateBatch'])->name('employee-working-shifts.update-batch');
     Route::delete('employee-working-shifts/batch-destroy', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'destroyBatch'])->name('employee-working-shifts.destroy-batch');
+    Route::post('employee-working-shifts/sync', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'triggerSync'])->name('employee-working-shifts.sync-trigger');
     Route::resource('employee-working-shifts', \App\Http\Controllers\EmployeeWorkingShiftController::class);
 
     // Holidays & Reschedules (Adjustments)
@@ -73,6 +75,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::put('settings/adms', [\App\Http\Controllers\SettingController::class, 'updateAdms'])->name('settings.update-adms');
 
     // Leave Request Approvals
+    Route::post('leave-approvals/sync', [\App\Http\Controllers\LeaveApprovalController::class, 'triggerSync'])->name('leave-approvals.sync');
     Route::get('leave-approvals/units/{unit_id}/leave-types', [\App\Http\Controllers\LeaveApprovalController::class, 'getUnitLeaveTypes'])->name('leave-approvals.unit-leave-types');
     Route::get('leave-approvals', [\App\Http\Controllers\LeaveApprovalController::class, 'index'])->name('leave-approvals.index');
     Route::post('leave-approvals/{id}/approve', [\App\Http\Controllers\LeaveApprovalController::class, 'approve'])->name('leave-approvals.approve');

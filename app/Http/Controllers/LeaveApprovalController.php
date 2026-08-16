@@ -151,7 +151,7 @@ class LeaveApprovalController extends Controller
 
         try {
             // Send decision to unit API
-            $response = Http::withHeaders([
+            $response = Http::timeout(3)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
@@ -194,7 +194,7 @@ class LeaveApprovalController extends Controller
 
         try {
             // Send decision to unit API
-            $response = Http::withHeaders([
+            $response = Http::timeout(3)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
@@ -237,7 +237,7 @@ class LeaveApprovalController extends Controller
 
         try {
             // Send new decision to unit API
-            $response = Http::withHeaders([
+            $response = Http::timeout(3)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
@@ -290,7 +290,7 @@ class LeaveApprovalController extends Controller
 
         try {
             // Reject on remote unit
-            $response = Http::withHeaders([
+            $response = Http::timeout(3)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
@@ -415,7 +415,7 @@ class LeaveApprovalController extends Controller
 
                         if ($isNewOrPendingH) {
                             try {
-                                Http::withHeaders([
+                                Http::timeout(3)->withHeaders([
                                     'X-API-TOKEN' => $unit->api_token,
                                     'Accept' => 'application/json',
                                 ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
@@ -459,5 +459,14 @@ class LeaveApprovalController extends Controller
         }
         
         return response()->json([]);
+    }
+
+    /**
+     * Trigger manual pull sync of leave requests from all active units.
+     */
+    public function triggerSync()
+    {
+        $this->pullLeaveRequestsFromUnits();
+        return redirect()->route('leave-approvals.index')->with('success', 'Sinkronisasi permohonan cuti/izin dari seluruh unit sekolah berhasil dilakukan.');
     }
 }

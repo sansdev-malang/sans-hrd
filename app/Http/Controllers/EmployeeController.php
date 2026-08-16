@@ -298,7 +298,7 @@ class EmployeeController extends Controller
             $prefix = 2000;
         }
 
-        $response = Http::withHeaders([
+        $response = Http::timeout(5)->withHeaders([
             'X-API-TOKEN' => $unit->api_token,
             'Accept' => 'application/json',
         ])->get(rtrim($unit->api_url, '/') . '/employees');
@@ -406,7 +406,7 @@ class EmployeeController extends Controller
         $apiData['unit'] = $unitCode;
 
         // Call the unit's API
-        $req = Http::withHeaders([
+        $req = Http::timeout(5)->withHeaders([
             'X-API-TOKEN' => $unit->api_token,
             'Accept' => 'application/json',
         ]);
@@ -470,7 +470,7 @@ class EmployeeController extends Controller
         $unit = SchoolUnit::findOrFail($unitId);
 
         // Fetch all employees from the unit and find the specific one
-        $response = Http::withHeaders([
+        $response = Http::timeout(5)->withHeaders([
             'X-API-TOKEN' => $unit->api_token,
             'Accept' => 'application/json',
         ])->get(rtrim($unit->api_url, '/') . '/employees');
@@ -573,7 +573,7 @@ class EmployeeController extends Controller
         $apiData['unit'] = $unitCode;
 
         // Call the unit's API
-        $req = Http::withHeaders([
+        $req = Http::timeout(5)->withHeaders([
             'X-API-TOKEN' => $unit->api_token,
             'Accept' => 'application/json',
         ]);
@@ -642,7 +642,7 @@ class EmployeeController extends Controller
         $zkteco_uid = $request->input('zkteco_uid');
 
         // Call the unit's API to delete the employee
-        $deleteResponse = Http::withHeaders([
+        $deleteResponse = Http::timeout(5)->withHeaders([
             'X-API-TOKEN' => $unit->api_token,
             'Accept' => 'application/json',
         ])->delete(rtrim($unit->api_url, '/') . '/employees/' . $id);
@@ -827,7 +827,7 @@ class EmployeeController extends Controller
                 'status' => $status,
             ];
 
-            $req = Http::withHeaders([
+            $req = Http::timeout(5)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ]);
@@ -871,7 +871,7 @@ class EmployeeController extends Controller
     {
         $unit = SchoolUnit::findOrFail($id);
         try {
-            $response = Http::withHeaders([
+            $response = Http::timeout(3)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->get(rtrim($unit->api_url, '/') . '/employee-types');
@@ -888,6 +888,15 @@ class EmployeeController extends Controller
             ['code' => 'employee', 'name' => 'Staf / Karyawan'],
             ['code' => 'management', 'name' => 'Manajemen']
         ]);
+    }
+
+    /**
+     * Trigger manual synchronization (clear cache) for employees.
+     */
+    public function triggerSync(Request $request)
+    {
+        \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
+        return redirect()->back()->with('success', 'Cache data pegawai dibersihkan. Menarik ulang data pegawai dari seluruh unit sekolah secara instan.');
     }
 }
 

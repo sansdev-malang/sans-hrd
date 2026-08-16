@@ -28,6 +28,13 @@
                         </a>
                     </div>
                 </div>
+                <form action="{{ route('employees.sync') }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').disabled = true; this.querySelector('i').classList.add('animate-spin');">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer w-full sm:w-auto border-0 shadow-3xs">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        Sync Ulang Data
+                    </button>
+                </form>
                 <button @click="showImportModal = true" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-100 cursor-pointer w-full sm:w-auto">
                     <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-slate-500"></i>
                     Impor Pegawai

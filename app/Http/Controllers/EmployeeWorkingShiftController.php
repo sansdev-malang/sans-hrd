@@ -592,7 +592,7 @@ class EmployeeWorkingShiftController extends Controller
         // Fetch employees of this unit to map NIP/NIK
         $employees = [];
         try {
-            $resp = Http::withHeaders([
+            $resp = Http::timeout(5)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->get(rtrim($unit->api_url, '/') . '/employees');
@@ -620,7 +620,7 @@ class EmployeeWorkingShiftController extends Controller
         }
 
         try {
-            Http::withHeaders([
+            Http::timeout(5)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->post(rtrim($unit->api_url, '/') . '/sync/schedules', [
@@ -1466,5 +1466,20 @@ class EmployeeWorkingShiftController extends Controller
         return response()->download($tempFile, $fileName, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Trigger manual synchronization of schedules for a given unit.
+     */
+    public function triggerSync(Request $request)
+    {
+        $unitId = $request->input('unit_id');
+        if (!$unitId) {
+            return redirect()->back()->with('error', 'Unit sekolah wajib dipilih untuk sinkronisasi.');
+        }
+
+        $this->syncSchedulesToUnit($unitId);
+
+        return redirect()->back()->with('success', 'Sinkronisasi jadwal roster ke unit sekolah berhasil dipicu.');
     }
 }

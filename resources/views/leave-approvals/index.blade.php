@@ -45,6 +45,15 @@
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-200 font-nasalization">Riwayat Izin Pegawai</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Daftar riwayat izin, sakit, dan cuti pegawai yang dihimpun dari seluruh unit sekolah.</p>
             </div>
+            <div>
+                <form action="{{ route('leave-approvals.sync') }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').disabled = true; this.querySelector('i').classList.add('animate-spin');">
+                    @csrf
+                    <button type="submit" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2 border-0 shadow-3xs">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        Sync Ulang Cuti
+                    </button>
+                </form>
+            </div>
         </header>
 
         <!-- STATS SECTION -->
