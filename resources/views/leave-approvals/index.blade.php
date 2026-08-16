@@ -143,9 +143,9 @@
                         <option value="Rejected" {{ request('status') == 'Rejected' ? 'selected' : '' }}>Ditolak</option>
                     </select>
 
-                    @if(request()->anyFilled(['search', 'unit_id', 'type', 'status']) || request()->filled('per_page') && request('per_page') != 50)
+                    @if(request()->filled('search') || request()->filled('unit_id') || request()->filled('type') || request()->filled('status') || (request()->filled('per_page') && request('per_page') != 50))
                         <a href="{{ route('leave-approvals.index') }}" data-no-loader="true" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
-                            <i data-lucide="x" class="w-4 h-4"></i>
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                         </a>
                     @endif
                 </div>
