@@ -329,7 +329,10 @@ class EmployeeWorkingShiftController extends Controller
             $this->syncSchedulesToUnit($validated['school_unit_id']);
         }
 
-        return redirect()->route('employee-working-shifts.index', ['tab' => 'batch'])->with('success', 'Batch jadwal shift berhasil diperbarui.');
+        return redirect()->route('employee-working-shifts.index', [
+            'tab' => 'batch',
+            'unit_id' => $validated['school_unit_id']
+        ])->with('success', 'Batch jadwal shift berhasil diperbarui.');
     }
 
     public function destroyBatch(Request $request)
@@ -351,7 +354,10 @@ class EmployeeWorkingShiftController extends Controller
 
         $this->syncSchedulesToUnit($unit_id);
 
-        return redirect()->route('employee-working-shifts.index', ['tab' => 'batch'])->with('success', 'Batch jadwal shift berhasil dihapus.');
+        return redirect()->route('employee-working-shifts.index', [
+            'tab' => 'batch',
+            'unit_id' => $unit_id
+        ])->with('success', 'Batch jadwal shift berhasil dihapus.');
     }
 
     public function destroyRoster(Request $request)
@@ -387,7 +393,10 @@ class EmployeeWorkingShiftController extends Controller
 
         $this->syncSchedulesToUnit($unit_id);
 
-        return redirect()->route('employee-working-shifts.index', ['tab' => 'roster'])->with('success', 'Roster shift bulanan berhasil dihapus.');
+        return redirect()->route('employee-working-shifts.index', [
+            'tab' => 'roster',
+            'unit_id' => $unit_id
+        ])->with('success', 'Roster shift bulanan berhasil dihapus.');
     }
 
     /**
@@ -546,8 +555,10 @@ class EmployeeWorkingShiftController extends Controller
         // Sync to the specific unit ONCE for all updated assignments
         $this->syncSchedulesToUnit($validated['school_unit_id']);
 
-        return redirect()->route('employee-working-shifts.index', ['tab' => 'batch'])
-            ->with('success', 'Jadwal shift pegawai berhasil ditugaskan dan disinkronkan secara massal.');
+        return redirect()->route('employee-working-shifts.index', [
+            'tab' => 'batch',
+            'unit_id' => $validated['school_unit_id']
+        ])->with('success', 'Jadwal shift pegawai berhasil ditugaskan dan disinkronkan secara massal.');
     }
 
     /**
@@ -562,8 +573,10 @@ class EmployeeWorkingShiftController extends Controller
         // Sync to unit
         $this->syncSchedulesToUnit($unitId);
 
-        return redirect()->route('employee-working-shifts.index')
-            ->with('success', 'Jadwal shift pegawai berhasil dihapus.');
+        return redirect()->route('employee-working-shifts.index', [
+            'tab' => request('tab', 'batch'),
+            'unit_id' => $unitId
+        ])->with('success', 'Jadwal shift pegawai berhasil dihapus.');
     }
 
     /**
@@ -1113,7 +1126,10 @@ class EmployeeWorkingShiftController extends Controller
 
         $this->syncSchedulesToUnit($unitId);
 
-        return redirect()->route('employee-working-shifts.index', ['tab' => 'roster'])->with('success', 'Roster Shift Bulanan berhasil disimpan dan disinkronkan.');
+        return redirect()->route('employee-working-shifts.index', [
+            'tab' => 'roster',
+            'unit_id' => $unitId
+        ])->with('success', 'Roster Shift Bulanan berhasil disimpan dan disinkronkan.');
     }
 
     public function exportRoster(Request $request)
