@@ -1120,7 +1120,9 @@ class AttendanceHistoryController extends Controller
         $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
 
         if ($format === 'pdf') {
-            return view('attendance-history.export-pdf', compact('historyList', 'periodeStr', 'startDateReq', 'endDateReq'));
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('attendance-history.export-pdf', compact('historyList', 'periodeStr'))
+                ->setPaper('a4', 'portrait');
+            return $pdf->download("Riwayat_Kehadiran_{$startDateReq}_to_{$endDateReq}.pdf");
         }
 
         // Generate Excel

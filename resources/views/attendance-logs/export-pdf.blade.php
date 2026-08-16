@@ -6,28 +6,22 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 8px; /* Very small to fit all dates */
+            font-size: 7.5px; /* Very small to fit all dates */
             color: #333;
-            margin: 0;
-            padding: 0;
         }
         @page {
-            size: A4 landscape;
-            margin: 1cm;
+            margin: 0.8cm 0.5cm;
         }
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                background: white;
-                color: black;
-            }
-            tr {
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
-        }
+        /* Color-coded Cells for DomPDF (Flat styling without nested divs) */
+        .cell-hadir { background-color: #ecfdf5; color: #047857; font-weight: bold; }
+        .cell-alfa { background-color: #fff1f2; color: #be123c; font-weight: bold; }
+        .cell-cuti { background-color: #eff6ff; color: #1d4ed8; font-weight: bold; }
+        .cell-sakit { background-color: #fffbeb; color: #d97706; font-weight: bold; }
+        .cell-izin { background-color: #fff7ed; color: #c2410c; font-weight: bold; }
+        .cell-dinas { background-color: #e0e7ff; color: #4338ca; font-weight: bold; }
+        .cell-libur { background-color: #fcf8f8; color: #ef4444; }
+        .cell-off { background-color: #f8fafc; color: #64748b; font-size: 5.5px; }
+        .cell-pending { background-color: #fafafa; color: #9ca3af; }
         h2 {
             text-align: center;
             margin-bottom: 5px;
@@ -75,14 +69,6 @@
 </head>
 <body>
 
-    <div class="no-print" style="background: #f1f5f9; padding: 12px 20px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; font-family: sans-serif; margin-bottom: 20px;">
-        <span style="font-size: 13px; font-weight: bold; color: #1e293b;">Pratinjau Cetak Laporan Absensi</span>
-        <div>
-            <button onclick="window.close();" style="padding: 6px 14px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: background 0.15s;">Tutup Halaman</button>
-            <button onclick="window.print();" style="padding: 6px 14px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 6px; transition: background 0.15s;">Cetak / Simpan PDF</button>
-        </div>
-    </div>
-
     <h2>Laporan Data Riwayat Absensi</h2>
     <div class="subtitle">
         Periode: {{ $periodeStr }} <br>
@@ -121,90 +107,64 @@
                         @php
                             $dateStr = $date->format('Y-m-d');
                             $detail = $report['daily_details'][$dateStr] ?? null;
-                        @endphp
-                        <td>
-                            @if($detail)
-                                @if($detail['status'] === 'Hadir')
-                                    <div class="cell-content badge-green">{{ $detail['check_in'] ?? '-' }}</div>
-                                    @if(!empty($detail['pending_leave']))
-                                        @php
-                                            $pCode = $detail['pending_leave']['leave_code'];
-                                            $pdfStyleMap = [
-                                                'S' => 'color: #d97706; opacity: 0.6; border: 0.5px dashed #f59e0b;',
-                                                'I' => 'color: #7c3aed; opacity: 0.6; border: 0.5px dashed #8b5cf6;',
-                                                'C' => 'color: #2563eb; opacity: 0.6; border: 0.5px dashed #3b82f6;',
-                                                'H' => 'color: #059669; opacity: 0.6; border: 0.5px dashed #10b981;',
-                                            ];
-                                            $pStyle = $pdfStyleMap[$pCode] ?? 'color: #94a3b8; border: 0.5px dashed #94a3b8;';
-                                        @endphp
-                                        <div style="font-size: 5.5px; line-height: 1; margin: 1px 0;"><span style="{{ $pStyle }} padding: 0 1px;">{{ $pCode }}</span></div>
-                                    @endif
-                                    <div class="cell-content text-muted">{{ $detail['check_out'] ?? '-' }}</div>
-                                @elseif($detail['status'] === 'Alfa')
-                                    <span class="text-red">A</span>
-                                    @if(!empty($detail['pending_leave']))
-                                        @php
-                                            $pCode = $detail['pending_leave']['leave_code'];
-                                            $pdfStyleMap = [
-                                                'S' => 'color: #d97706; opacity: 0.6; border: 0.5px dashed #f59e0b;',
-                                                'I' => 'color: #7c3aed; opacity: 0.6; border: 0.5px dashed #8b5cf6;',
-                                                'C' => 'color: #2563eb; opacity: 0.6; border: 0.5px dashed #3b82f6;',
-                                                'H' => 'color: #059669; opacity: 0.6; border: 0.5px dashed #10b981;',
-                                            ];
-                                            $pStyle = $pdfStyleMap[$pCode] ?? 'color: #94a3b8; border: 0.5px dashed #94a3b8;';
-                                        @endphp
-                                        <div style="font-size: 5.5px; line-height: 1; margin: 1px 0;"><span style="{{ $pStyle }} padding: 0 1px;">{{ $pCode }}</span></div>
-                                    @endif
-                                @elseif($detail['status'] === 'Cuti/Izin')
-                                    @php
-                                        $leaveCode = $detail['leave_code'] ?? 'I';
-                                        $isPending = !empty($detail['is_pending']);
-                                        $pdfColorMap = [
-                                            'S' => $isPending ? 'color: #d97706; opacity: 0.6; border: 0.5px dashed #f59e0b; padding: 0px 1px;' : 'color: #d97706; font-weight: bold;',
-                                            'I' => $isPending ? 'color: #7c3aed; opacity: 0.6; border: 0.5px dashed #8b5cf6; padding: 0px 1px;' : 'color: #7c3aed; font-weight: bold;',
-                                            'C' => $isPending ? 'color: #2563eb; opacity: 0.6; border: 0.5px dashed #3b82f6; padding: 0px 1px;' : 'color: #2563eb; font-weight: bold;',
-                                            'H' => $isPending ? 'color: #059669; opacity: 0.6; border: 0.5px dashed #10b981; padding: 0px 1px;' : 'color: #059669; font-weight: bold;',
-                                        ];
-                                        $pdfStyle = $pdfColorMap[$leaveCode] ?? 'color: #3b82f6;';
-                                    @endphp
+                            $cellClass = '';
+                            $content = '';
+                            
+                            if ($detail) {
+                                $status = $detail['status'];
+                                if ($status === 'Hadir') {
+                                    $cellClass = 'cell-hadir';
+                                    $checkIn = isset($detail['check_in']) ? date('H:i', strtotime($detail['check_in'])) : '-';
+                                    $checkOut = isset($detail['check_out']) ? date('H:i', strtotime($detail['check_out'])) : '-';
+                                    $content = "{$checkIn}<br>{$checkOut}";
                                     
-                                    @if(!empty($detail['check_in']) || !empty($detail['check_out']))
-                                        <div class="cell-content">
-                                            @if(!empty($detail['check_in']))
-                                                <div class="badge-green" style="font-size: 6.5px;">{{ $detail['check_in'] }}</div>
-                                            @else
-                                                <div class="text-muted">-</div>
-                                            @endif
-                                            
-                                            <span style="{{ $pdfStyle }}; font-size: 6.5px;">{{ $leaveCode }}</span>
-                                            
-                                            @if(!empty($detail['check_out']))
-                                                <div class="text-muted" style="font-size: 6.5px;">{{ $detail['check_out'] }}</div>
-                                            @else
-                                                <div class="text-muted">-</div>
-                                            @endif
-                                        </div>
-                                    @else
-                                        <span style="{{ $pdfStyle }}; font-size: 7.5px;">{{ $leaveCode }}</span>
-                                        @if($isPending)
-                                            <div class="text-muted" style="font-size: 6px; line-height: 0.8;">-</div>
-                                        @endif
-                                    @endif
-                                @elseif($detail['status'] === 'Libur')
-                                    <span class="text-red">-</span>
-                                @elseif($detail['status'] === 'Off')
-                                    <span class="text-muted" style="font-size: 6px;">OFF</span>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            @else
-                                @if($date->isSunday())
-                                    <span class="text-red">-</span>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            @endif
-                        </td>
+                                    if (!empty($detail['pending_leave'])) {
+                                        $cellClass = 'cell-pending';
+                                        $content .= "<br>(" . $detail['pending_leave']['leave_code'] . ")";
+                                    }
+                                } elseif ($status === 'Alfa') {
+                                    $cellClass = 'cell-alfa';
+                                    $content = 'A';
+                                    if (!empty($detail['pending_leave'])) {
+                                        $cellClass = 'cell-pending';
+                                        $content .= "<br>(" . $detail['pending_leave']['leave_code'] . ")";
+                                    }
+                                } elseif ($status === 'Cuti/Izin') {
+                                    $leaveCode = $detail['leave_code'] ?? 'I';
+                                    $isPending = !empty($detail['is_pending']);
+                                    if ($leaveCode === 'S') $cellClass = 'cell-sakit';
+                                    elseif ($leaveCode === 'I') $cellClass = 'cell-izin';
+                                    elseif ($leaveCode === 'C') $cellClass = 'cell-cuti';
+                                    elseif ($leaveCode === 'H') $cellClass = 'cell-dinas';
+                                    else $cellClass = 'cell-cuti';
+                                    
+                                    if ($isPending) $cellClass = 'cell-pending';
+                                    $content = $leaveCode;
+                                    
+                                    if (!empty($detail['check_in']) || !empty($detail['check_out'])) {
+                                        $ci = isset($detail['check_in']) ? date('H:i', strtotime($detail['check_in'])) : '-';
+                                        $co = isset($detail['check_out']) ? date('H:i', strtotime($detail['check_out'])) : '-';
+                                        $content = "{$ci}<br>{$leaveCode}<br>{$co}";
+                                    }
+                                } elseif ($status === 'Libur') {
+                                    $cellClass = 'cell-libur';
+                                    $content = '-';
+                                } elseif ($status === 'Off') {
+                                    $cellClass = 'cell-off';
+                                    $content = 'OFF';
+                                } else {
+                                    $content = '-';
+                                }
+                            } else {
+                                if ($date->isSunday()) {
+                                    $cellClass = 'cell-libur';
+                                    $content = '-';
+                                } else {
+                                    $content = '-';
+                                }
+                            }
+                        @endphp
+                        <td class="{{ $cellClass }}">{!! $content !!}</td>
                     @endforeach
                 </tr>
             @empty
@@ -228,12 +188,5 @@
         </table>
     </div>
 
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                window.print();
-            }, 600);
-        });
-    </script>
 </body>
 </html>
