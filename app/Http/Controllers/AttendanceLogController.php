@@ -455,6 +455,14 @@ class AttendanceLogController extends Controller
 
         $format = $request->query('format', 'excel');
         
+        $totalEmployeesToExport = count($reports);
+        $totalDays = $startDate->diffInDays($endDate) + 1;
+        $totalRows = $totalEmployeesToExport * $totalDays;
+
+        if ($format === 'pdf' && $totalRows > 1500) {
+            return redirect()->back()->with('error', "Jumlah data matriks ekspor terlalu besar ({$totalRows} sel). Untuk menjaga stabilitas server, ekspor PDF dibatasi maksimal 1.500 data. Silakan gunakan format Excel (yang dapat berjalan secara instan) atau perkecil rentang tanggal / pilih Unit Sekolah secara spesifik.");
+        }
+        
         $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
         $unitName = "Semua_Unit";
         if (!empty($unitId)) {
