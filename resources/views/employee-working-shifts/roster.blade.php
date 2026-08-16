@@ -97,6 +97,28 @@
         </button>
     </div>
 
+    <!-- Shift Diaktifkan Roster Info Panel -->
+    <div class="bg-indigo-50/40 dark:bg-indigo-955/15 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-4 text-left flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+        <div class="space-y-1">
+            <span class="text-[11px] font-extrabold text-indigo-850 dark:text-indigo-400 flex items-center gap-1.5 uppercase tracking-wide">
+                <i data-lucide="info" class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0"></i>
+                Shift Kerja yang Digunakan dalam Roster ini:
+            </span>
+            <div class="flex flex-wrap gap-1.5 mt-2.5">
+                <template x-for="sh in getSelectedShiftsList()" :key="sh.id">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-bold border transition-colors shadow-3xs"
+                        :class="sh.colorClass">
+                        <span x-text="sh.code" class="px-1.5 py-0.5 rounded bg-white/40 dark:bg-black/20 font-black"></span>
+                        <span x-text="sh.name"></span>
+                    </span>
+                </template>
+                <template x-if="selectedShiftIds.length === 0">
+                    <span class="text-xs text-slate-500 italic">Belum ada shift kerja yang diaktifkan. Klik tombol Kelola Shift Roster untuk menambahkan.</span>
+                </template>
+            </div>
+        </div>
+    </div>
+
     <!-- Collapsible Instructions & Legend -->
     <div x-cloak x-show="showLegend" x-collapse
         class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-5 grid grid-cols-1 md:grid-cols-2 gap-6 w-full text-left">
@@ -148,12 +170,19 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                     </button>
                 </div>
-                
-                <button type="button" @click="showAddEmployeeModal = true"
-                    class="h-9 px-4 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs cursor-pointer transition-all hover:scale-[1.02] duration-150 gap-1.5 border-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a6 6 0 0 0-3.44-5.32M19 19a1 1 0 0 0 1-1v-.72A6 6 0 0 0 16.56 12m-9 6.72a6 6 0 0 1 3.44-5.32M5 19a1 1 0 0 1-1-1v-.72a6 6 0 0 1 3.44-5.32M15 9.72a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-9 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                    <span>Kelola Pegawai Roster</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="showAddShiftModal = true"
+                        class="h-9 px-4 inline-flex items-center justify-center bg-emerald-650 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-2xs cursor-pointer transition-all hover:scale-[1.02] duration-150 gap-1.5 border-0">
+                        <i data-lucide="settings" class="w-3.5 h-3.5 shrink-0 text-white"></i>
+                        <span>Kelola Shift Roster</span>
+                    </button>
+
+                    <button type="button" @click="showAddEmployeeModal = true"
+                        class="h-9 px-4 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs cursor-pointer transition-all hover:scale-[1.02] duration-150 gap-1.5 border-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a6 6 0 0 0-3.44-5.32M19 19a1 1 0 0 0 1-1v-.72A6 6 0 0 0 16.56 12m-9 6.72a6 6 0 0 1 3.44-5.32M5 19a1 1 0 0 1-1-1v-.72a6 6 0 0 1 3.44-5.32M15 9.72a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-9 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                        <span>Kelola Pegawai Roster</span>
+                    </button>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -225,8 +254,13 @@
                                             :class="getCellColor('{{ $empId }}', {{ $d }}, '{{ $shiftId }}')"
                                             x-on:change="updateCellDisplay('{{ $empId }}', {{ $d }})">
                                             <option value="OFF" {{ !$shiftId || $shiftId == 'OFF' ? 'selected' : '' }}>OFF</option>
-                                            @foreach($shifts as $shift)
-                                                <option value="{{ $shift->id }}" {{ $shiftId == $shift->id ? 'selected' : '' }}>{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</option>
+                                            @foreach($allShifts as $shift)
+                                                <option value="{{ $shift->id }}" 
+                                                    x-show="selectedShiftIds.includes({{ $shift->id }})"
+                                                    :disabled="!selectedShiftIds.includes({{ $shift->id }})"
+                                                    {{ $shiftId == $shift->id ? 'selected' : '' }}>
+                                                    {{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </td>
@@ -308,6 +342,54 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal Kelola Shift Roster -->
+            <div x-show="showAddShiftModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title-shift" role="dialog" aria-modal="true" x-cloak>
+                <div x-show="showAddShiftModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+                <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4 text-center">
+                        <div x-show="showAddShiftModal" @click.away="showAddShiftModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full max-w-md border border-slate-200 dark:border-slate-800 flex flex-col max-h-[80vh]">
+                            
+                            <!-- Modal Header -->
+                            <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="settings" class="w-5 h-5 text-emerald-650 dark:text-emerald-400"></i>
+                                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">Kelola Shift Roster</h3>
+                                </div>
+                                <button type="button" @click="showAddShiftModal = false" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 bg-transparent border-0 cursor-pointer flex items-center justify-center p-1 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- Modal Body -->
+                            <div class="p-4 flex flex-col overflow-hidden min-h-[250px]">
+                                <p class="text-[11px] text-slate-500 mb-3 text-left">Pilih shift mana saja yang ingin diaktifkan dan digunakan dalam pengisian tabel roster ini.</p>
+                                
+                                <!-- Shift List -->
+                                <div class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar text-xs">
+                                    <template x-for="sh in allAvailableShifts" :key="sh.id">
+                                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer">
+                                            <div class="flex items-center gap-2 text-left min-w-0">
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-black shadow-xs" :class="sh.colorClass" x-text="sh.code"></span>
+                                                <span class="font-bold text-slate-850 dark:text-slate-200 truncate" x-text="sh.name"></span>
+                                            </div>
+                                            <input type="checkbox" :value="sh.id" x-model="selectedShiftIds"
+                                                class="rounded border-slate-350 text-indigo-650 w-4 h-4 cursor-pointer focus:ring-indigo-500">
+                                        </label>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Modal Footer -->
+                            <div class="p-4 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800 flex justify-end shrink-0">
+                                <button type="button" @click="showAddShiftModal = false" class="h-9 px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm text-xs cursor-pointer transition-colors font-sans">
+                                    Selesai
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
 </div>
 
@@ -326,10 +408,26 @@
             cellsData: {},
             showLegend: false,
             showAddEmployeeModal: false,
+            showAddShiftModal: false,
             addEmployeeSearchQuery: '',
             activeEmployeeIds: @json(array_values(array_map('strval', !empty($empIdsParam) ? $empIdsParam : ($assignedEmployeeIds ?? [])))),
+            allAvailableShifts: [
+                @foreach($allShifts as $shift)
+                    {
+                        id: {{ $shift->id }},
+                        code: '{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}',
+                        name: '{{ addslashes($shift->name) }}',
+                        colorClass: 'shift-color-{{ $shift->id }}'
+                    },
+                @endforeach
+            ],
+            selectedShiftIds: @json(array_map('intval', $shifts->pluck('id')->toArray())),
 
             init() {},
+
+            getSelectedShiftsList() {
+                return this.allAvailableShifts.filter(sh => this.selectedShiftIds.includes(sh.id));
+            },
 
             getCellRef(empId, day) {
                 return document.getElementById('sel_' + empId + '_' + day);
