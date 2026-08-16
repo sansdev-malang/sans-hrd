@@ -24,6 +24,9 @@
             background-color: #1e293b !important;
             color: #f8fafc !important;
         }
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 
 <div class="p-6 space-y-6 animate-fade-in" x-data="rosterGrid()">
@@ -172,7 +175,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" @click="showAddShiftModal = true"
-                        class="h-9 px-4 inline-flex items-center justify-center bg-emerald-650 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-2xs cursor-pointer transition-all hover:scale-[1.02] duration-150 gap-1.5 border-0">
+                        class="h-9 px-4 inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-2xs cursor-pointer transition-all hover:scale-[1.02] duration-150 gap-1.5 border-0">
                         <i data-lucide="settings" class="w-3.5 h-3.5 shrink-0 text-white"></i>
                         <span>Kelola Shift Roster</span>
                     </button>
@@ -215,7 +218,7 @@
                                 $rowData = $rosterData[$empId] ?? null;
                                 $bonusSchemaId = $rowData['bonus_schema_id'] ?? '';
                             @endphp
-                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group" 
+                             <tr x-cloak class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group" 
                                 x-show="activeEmployeeIds.includes(String('{{ $empId }}')) && '{{ addslashes(strtolower($emp['name'])) }}'.includes(searchQuery.toLowerCase())">
                                 <td class="p-3 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-900 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)]">
                                     <div class="flex items-center justify-between gap-3">
