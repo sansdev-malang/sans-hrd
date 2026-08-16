@@ -216,4 +216,19 @@ class PayslipController extends Controller
             return back()->with('error', 'Gagal menghapus slip gaji: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Trigger manual synchronization of payslips for a given month.
+     */
+    public function triggerSync(Request $request)
+    {
+        $month = $request->query('month', date('Y-m'));
+        $payslips = Payslip::where('period', $month)->get();
+        
+        foreach ($payslips as $payslip) {
+            $this->notifyUnitAboutPayslip($payslip);
+        }
+        
+        return redirect()->back()->with('success', 'Sinkronisasi slip gaji periode ' . $month . ' ke unit sekolah berhasil dipicu.');
+    }
 }

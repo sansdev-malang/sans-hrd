@@ -82,8 +82,15 @@
                         @endif
                     </div>
 
-                    <!-- Right Side: Per Page Options -->
+                    <!-- Right Side: Per Page & Sync -->
                     <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
+                        <form action="{{ route('payslips.sync', ['month' => $month]) }}" method="POST" class="inline" data-no-loader="true">
+                            @csrf
+                            <button type="submit" class="h-10 px-4 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-xl border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer flex items-center gap-1.5 shadow-3xs hover:scale-105 duration-150 border-0" title="Sinkronisasi slip gaji bulan ini ke seluruh unit">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                Sync Gaji ke Unit
+                            </button>
+                        </form>
                         <select name="per_page" onchange="triggerFilterForm(this)"
                             class="h-10 pl-3 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-bold bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>

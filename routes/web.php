@@ -57,6 +57,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('attendance-percentage-reports', [\App\Http\Controllers\AttendancePercentageReportController::class, 'index'])->name('attendance-percentage-reports.index');
 
     // Manajemen Gaji
+    Route::post('payslips/sync', [\App\Http\Controllers\PayslipController::class, 'triggerSync'])->name('payslips.sync');
     Route::get('payslips', [\App\Http\Controllers\PayslipController::class, 'index'])->name('payslips.index');
     Route::post('payslips', [\App\Http\Controllers\PayslipController::class, 'store'])->name('payslips.store');
     Route::delete('payslips/{payslip}', [\App\Http\Controllers\PayslipController::class, 'destroy'])->name('payslips.destroy');
@@ -101,6 +102,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('attendance-history/export', [\App\Http\Controllers\AttendanceHistoryController::class, 'export'])->name('attendance-history.export');
 
     // Announcements CRUD
+    Route::post('announcements/sync', [\App\Http\Controllers\AnnouncementController::class, 'triggerSync'])->name('announcements.sync');
     Route::resource('announcements', \App\Http\Controllers\AnnouncementController::class);
 
     // Synced Performance Reports Web Views

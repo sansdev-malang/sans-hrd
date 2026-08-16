@@ -9,7 +9,14 @@
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Pengumuman Pusat</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Kelola dan sebar luaskan pengumuman ke seluruh atau unit sekolah tertentu (SD, PAUD, SMP) secara instan.</p>
             </div>
-            <div>
+            <div class="flex items-center gap-2">
+                <form action="{{ route('announcements.sync') }}" method="POST" class="inline" data-no-loader="true">
+                    @csrf
+                    <button type="submit" class="h-9 px-4 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2 inline-flex items-center justify-center border-0 shadow-3xs">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        Sync Ulang ke Unit
+                    </button>
+                </form>
                 <a href="{{ route('announcements.create') }}" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     Buat Pengumuman Baru

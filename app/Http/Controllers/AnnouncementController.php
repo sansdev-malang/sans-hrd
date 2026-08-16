@@ -249,4 +249,18 @@ class AnnouncementController extends Controller
             }
         }
     }
+
+    /**
+     * Trigger manual synchronization of all active announcements.
+     */
+    public function triggerSync()
+    {
+        $announcements = Announcement::where('is_active', true)->get();
+        
+        foreach ($announcements as $announcement) {
+            $this->syncAnnouncementToUnits($announcement);
+        }
+        
+        return redirect()->route('announcements.index')->with('success', 'Sinkronisasi pengumuman ke unit sekolah berhasil dipicu.');
+    }
 }
