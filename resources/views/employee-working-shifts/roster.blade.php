@@ -40,7 +40,7 @@
     <!-- Header & Back Button -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
         <div class="flex items-center gap-3 text-left">
-            <a href="{{ route('employee-working-shifts.index') }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-3xs">
+            <a href="{{ route('employee-working-shifts.index', ['tab' => 'roster', 'unit_id' => $selectedUnitId]) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-3xs">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
             </a>
             <div>
@@ -280,7 +280,7 @@
                 </table>
             </div>
             <div class="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex justify-end items-center gap-3">
-                <a href="{{ route('employee-working-shifts.index') }}" class="h-9 px-4 inline-flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 gap-1.5 cursor-pointer">
+                <a href="{{ route('employee-working-shifts.index', ['tab' => 'roster', 'unit_id' => $selectedUnitId]) }}" class="h-9 px-4 inline-flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 gap-1.5 cursor-pointer">
                     Batal
                 </a>
                 <button type="submit" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 dark:focus:ring-offset-slate-900 gap-1.5 cursor-pointer border-0">

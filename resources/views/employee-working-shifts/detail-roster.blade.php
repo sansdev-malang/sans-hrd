@@ -14,8 +14,10 @@
             background-color: {{ $shift->hex_bg }}40;
             color: {{ $shift->hex_text }};
         }
-    @endforeach
-</style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 <div class="p-6 space-y-6 animate-fade-in" x-data="{ 
         openExportModal: false, 
         exportType: 'pdf',
@@ -77,7 +79,7 @@
     <!-- Header & Back Button -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
         <div class="flex items-center gap-3 text-left">
-            <a href="{{ route('employee-working-shifts.index') }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-3xs">
+            <a href="{{ route('employee-working-shifts.index', ['tab' => 'roster', 'unit_id' => $selectedUnitId]) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-3xs">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
             </a>
             <div>
