@@ -1708,6 +1708,10 @@
                 container.style.opacity = '0.5';
                 container.style.pointerEvents = 'none';
             }
+            
+            if (typeof NProgress !== 'undefined') {
+                NProgress.start();
+            }
 
             fetch(url, {
                 headers: {
@@ -1739,6 +1743,11 @@
             .catch(err => {
                 console.error('AJAX loading failed:', err);
                 window.location.href = url;
+            })
+            .finally(() => {
+                if (typeof NProgress !== 'undefined') {
+                    NProgress.done();
+                }
             });
         }
 

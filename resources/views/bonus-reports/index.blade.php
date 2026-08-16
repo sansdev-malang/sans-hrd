@@ -517,6 +517,10 @@
                 container.style.pointerEvents = 'none';
             }
 
+            if (typeof NProgress !== 'undefined') {
+                NProgress.start();
+            }
+
             fetch(url, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -548,6 +552,11 @@
             .catch(err => {
                 console.error('AJAX loading failed:', err);
                 window.location.href = url;
+            })
+            .finally(() => {
+                if (typeof NProgress !== 'undefined') {
+                    NProgress.done();
+                }
             });
         }
 
