@@ -49,24 +49,16 @@
         .text-left { text-align: left; }
         .font-bold { font-weight: bold; }
         
-        .badge {
-            display: inline-block;
-            padding: 1px 4px;
-            font-size: 7.5px;
-            font-weight: bold;
-            border-radius: 3px;
-            text-align: center;
-        }
-        .badge-hadir { color: #047857; background-color: #ecfdf5; border: 0.5px solid #a7f3d0; }
-        .badge-terlambat { color: #b45309; background-color: #fffbeb; border: 0.5px solid #fde68a; }
-        .badge-alfa { color: #be123c; background-color: #fff1f2; border: 0.5px solid #fecdd3; }
-        .badge-sakit { color: #b91c1c; background-color: #fef2f2; border: 0.5px solid #fee2e2; }
-        .badge-izin { color: #c2410c; background-color: #fff7ed; border: 0.5px solid #ffedd5; }
-        .badge-cuti { color: #1d4ed8; background-color: #eff6ff; border: 0.5px solid #dbeafe; }
-        .badge-dinas { color: #4338ca; background-color: #e0e7ff; border: 0.5px solid #c7d2fe; }
-        .badge-off { color: #64748b; background-color: #f8fafc; border: 0.5px solid #e2e8f0; }
-        .badge-libur { color: #4b5563; background-color: #f3f4f6; border: 0.5px solid #e5e7eb; }
-        .badge-pending { color: #9ca3af; background-color: #fafafa; border: 0.5px solid #f3f4f6; }
+        .cell-hadir { color: #047857; background-color: #ecfdf5; font-weight: bold; text-align: center; }
+        .cell-terlambat { color: #b45309; background-color: #fffbeb; font-weight: bold; text-align: center; }
+        .cell-alfa { color: #be123c; background-color: #fff1f2; font-weight: bold; text-align: center; }
+        .cell-sakit { color: #b91c1c; background-color: #fef2f2; font-weight: bold; text-align: center; }
+        .cell-izin { color: #c2410c; background-color: #fff7ed; font-weight: bold; text-align: center; }
+        .cell-cuti { color: #1d4ed8; background-color: #eff6ff; font-weight: bold; text-align: center; }
+        .cell-dinas { color: #4338ca; background-color: #e0e7ff; font-weight: bold; text-align: center; }
+        .cell-off { color: #64748b; background-color: #f8fafc; text-align: center; }
+        .cell-libur { color: #4b5563; background-color: #f3f4f6; text-align: center; }
+        .cell-pending { color: #9ca3af; background-color: #fafafa; text-align: center; }
 
         .text-muted {
             color: #9ca3af;
@@ -122,24 +114,22 @@
                             </td>
                             <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_in'] ?: '-' }}</td>
                             <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_out'] ?: '-' }}</td>
-                            <td class="text-center">
-                                @php
-                                    $badgeClass = match($row['status']) {
-                                        'Hadir' => 'badge-hadir',
-                                        'Terlambat' => 'badge-terlambat',
-                                        'Alfa' => 'badge-alfa',
-                                        'Sakit' => 'badge-sakit',
-                                        'Izin' => 'badge-izin',
-                                        'Cuti' => 'badge-cuti',
-                                        'Dinas' => 'badge-dinas',
-                                        'Off' => 'badge-off',
-                                        'Libur' => 'badge-libur',
-                                        'Pending' => 'badge-pending',
-                                        default => 'badge-off',
-                                    };
-                                @endphp
-                                <span class="badge {{ $badgeClass }}">{{ $row['status'] }}</span>
-                            </td>
+                            @php
+                                $cellClass = match($row['status']) {
+                                    'Hadir' => 'cell-hadir',
+                                    'Terlambat' => 'cell-terlambat',
+                                    'Alfa' => 'cell-alfa',
+                                    'Sakit' => 'cell-sakit',
+                                    'Izin' => 'cell-izin',
+                                    'Cuti' => 'cell-cuti',
+                                    'Dinas' => 'cell-dinas',
+                                    'Off' => 'cell-off',
+                                    'Libur' => 'cell-libur',
+                                    'Pending' => 'cell-pending',
+                                    default => 'cell-off',
+                                };
+                            @endphp
+                            <td class="{{ $cellClass }}">{{ $row['status'] }}</td>
                             <td>
                                 @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
                                     <span style="color: #b45309; font-weight: bold;">Terlambat {{ $row['late_minutes'] }} mnt</span>

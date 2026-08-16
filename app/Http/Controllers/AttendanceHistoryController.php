@@ -1120,6 +1120,9 @@ class AttendanceHistoryController extends Controller
         $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
 
         if ($format === 'pdf') {
+            if (count($historyList) > 2000) {
+                return redirect()->back()->with('error', 'Jumlah data melebihi batas unduhan PDF (maksimal 2.000 baris). Silakan filter Tanggal/Unit terlebih dahulu atau gunakan format Excel.');
+            }
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('attendance-history.export-pdf', compact('historyList', 'periodeStr'))
                 ->setPaper('a4', 'portrait');
             $response = $pdf->download("Riwayat_Kehadiran_{$startDateReq}_to_{$endDateReq}.pdf");
