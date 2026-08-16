@@ -653,7 +653,7 @@
                 // Handle clicking specific interactive links (Reset buttons, sync/pull data operations, and export downloads)
                 document.addEventListener('click', function (e) {
                     const link = e.target.closest('a');
-                    if (!link) return;
+                    if (!link || link.hasAttribute('data-no-loader')) return;
                     
                     const href = link.getAttribute('href');
                     const target = link.getAttribute('target');
