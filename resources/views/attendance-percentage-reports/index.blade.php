@@ -30,6 +30,8 @@
             </div>
         </header>
 
+        <div id="attendance-report-container" class="space-y-6">
+
         <!-- RATA-RATA KEHADIRAN PER UNIT -->
         @if(isset($unitStats) && count($unitStats) > 0)
             <section class="bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-4 w-full text-left flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
@@ -142,7 +144,31 @@
 
         <!-- MODERN FILTERS & SEARCH -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full text-left">
-            <form method="GET" action="{{ route('attendance-percentage-reports.index') }}">
+            <form method="GET" action="{{ route('attendance-percentage-reports.index') }}" id="attendance-filter-form" data-no-loader="true">
+                <input type="hidden" name="unit_id" id="filter-unit-id" value="{{ request('unit_id', $unitId ?? null) }}">
+
+                <!-- Unit Pills Filter -->
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 border-b border-slate-150 dark:border-slate-800/60 w-full mb-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1.5 flex items-center gap-1">
+                        <i data-lucide="school" class="w-3.5 h-3.5"></i>
+                        Unit:
+                    </span>
+                    
+                    <!-- Semua Unit Pill -->
+                    <button type="button" 
+                            onclick="selectUnitFilter('', this)"
+                            class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ empty(request('unit_id', $unitId ?? null)) ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                        Semua Unit
+                    </button>
+                    
+                    @foreach($schoolUnits as $unit)
+                        <button type="button"
+                                onclick="selectUnitFilter('{{ $unit->id }}', this)"
+                                class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ request('unit_id', $unitId ?? null) == $unit->id ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                            {{ $unit->name }}
+                        </button>
+                    @endforeach
+                </div>
                 <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 w-full">
                     <!-- Search Input -->
                     <div class="flex-grow min-w-0">
@@ -172,21 +198,6 @@
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai Tanggal</label>
                         <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
                     </div>
-
-                    <!-- Filter Unit -->
-                    @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                    <div class="w-full lg:w-48 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Unit Sekolah</label>
-                        <select name="unit_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                            <option value="">Semua Unit</option>
-                            @foreach($schoolUnits as $unit)
-                                <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
-                                    {{ $unit->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @endif
 
                     <!-- Filter Jabatan -->
                     @if(isset($positions) && count($positions) > 0)
@@ -394,6 +405,7 @@
                 </table>
             </div>
         </section>
+    </div>
 
         <!-- SLIDE-OVER DRAWER (LACI DETAIL) - FULL VIEWPORT OVERLAY WITH FIXED STACKING -->
         <div x-cloak x-show="isDrawerOpen" class="fixed inset-0 z-[9999] overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
@@ -516,3 +528,100 @@
 
     </div>
 </x-admin-layout>
+
+<!-- AJAX NAVIGATION & FILTER SCRIPT -->
+<script>
+    function triggerFilterForm(el) {
+        const form = document.getElementById('attendance-filter-form');
+        if (form) {
+            form.requestSubmit();
+        }
+    }
+
+    function selectUnitFilter(unitId, btnEl) {
+        const input = document.getElementById('filter-unit-id');
+        if (input) {
+            input.value = unitId;
+            triggerFilterForm(btnEl);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('attendance-report-container');
+
+        function loadTableContent(url) {
+            if (container) {
+                container.style.opacity = '0.5';
+                container.style.pointerEvents = 'none';
+            }
+            
+            if (typeof NProgress !== 'undefined') {
+                NProgress.start();
+            }
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.getElementById('attendance-report-container');
+                
+                if (newContent && container) {
+                    container.innerHTML = newContent.innerHTML;
+                    container.style.opacity = '1';
+                    container.style.pointerEvents = 'auto';
+
+                    // Reinitialize Lucide Icons
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+
+                    // Sync URL in address bar without reload
+                    window.history.pushState({}, '', url);
+                } else {
+                    window.location.href = url;
+                }
+            })
+            .catch(err => {
+                console.error('AJAX loading failed:', err);
+                window.location.href = url;
+            })
+            .finally(() => {
+                if (typeof NProgress !== 'undefined') {
+                    NProgress.done();
+                }
+            });
+        }
+
+        // Delegate submit event
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('#attendance-filter-form');
+            if (!form) return;
+
+            e.preventDefault();
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const action = form.getAttribute('action') || window.location.pathname;
+            const url = new URL(action, window.location.origin);
+            url.search = params.toString();
+
+            loadTableContent(url);
+        });
+
+        // Delegate click on reset/pagination links inside container
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('#attendance-report-container a');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            if (href && (href.startsWith(window.location.origin) || href.startsWith('/'))) {
+                e.preventDefault();
+                loadTableContent(href);
+            }
+        });
+    });
+</script>
