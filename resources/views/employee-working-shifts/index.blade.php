@@ -412,6 +412,31 @@
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('employee-working-shifts.index') }}" id="roster-filter-form" data-no-loader="true">
                 <input type="hidden" name="tab" value="{{ $activeTab }}">
+                <input type="hidden" name="unit_id" id="filter-unit-id" value="{{ $selectedUnitId }}">
+
+                <!-- Unit Pills Filter -->
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 border-b border-slate-150 dark:border-slate-800/60 w-full mb-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1.5 flex items-center gap-1">
+                        <i data-lucide="school" class="w-3.5 h-3.5"></i>
+                        Unit:
+                    </span>
+                    
+                    <!-- Semua Unit Pill -->
+                    <button type="button" 
+                            onclick="selectUnitFilter('', this)"
+                            class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ empty($selectedUnitId) ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                        Semua Unit
+                    </button>
+                    
+                    @foreach($units as $unit)
+                        <button type="button"
+                                onclick="selectUnitFilter('{{ $unit->id }}', this)"
+                                class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ $selectedUnitId == $unit->id ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                            {{ $unit->name }}
+                        </button>
+                    @endforeach
+                </div>
+
                 <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full">
                     <!-- Search Input -->
                     <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full md:w-96 shrink-0 flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
@@ -425,18 +450,6 @@
                         <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.focus();" class="h-10 px-2.5 text-slate-400 hover:text-slate-655 dark:hover:text-slate-255 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
                             <i data-lucide="x" class="w-3.5 h-3.5"></i>
                         </button>
-                    </div>
-
-                    <!-- Filter Unit -->
-                    <div class="w-full md:w-48 shrink-0">
-                        <select name="unit_id" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                            <option value="">Semua Unit Sekolah</option>
-                            @foreach ($units as $unit)
-                                <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>
-                                    {{ $unit->name }}
-                                </option>
-                            @endforeach
-                        </select>
                     </div>
 
                     <!-- Filter Per Page -->
@@ -1697,6 +1710,14 @@
         const form = document.getElementById('roster-filter-form');
         if (form) {
             form.requestSubmit();
+        }
+    }
+
+    function selectUnitFilter(unitId, btnEl) {
+        const input = document.getElementById('filter-unit-id');
+        if (input) {
+            input.value = unitId;
+            triggerFilterForm(btnEl);
         }
     }
 
