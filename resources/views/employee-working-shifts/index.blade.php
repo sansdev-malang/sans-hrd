@@ -358,15 +358,13 @@
 
 
             <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-                @if(!empty($selectedUnitId))
-                    <form action="{{ route('employee-working-shifts.sync-trigger', ['unit_id' => $selectedUnitId]) }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
-                        @csrf
-                        <button type="submit" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2 border-0 shadow-3xs">
-                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                            Sync Jadwal ke Unit
-                        </button>
-                    </form>
-                @endif
+                <form action="{{ route('employee-working-shifts.sync-trigger', ['unit_id' => $selectedUnitId]) }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
+                    @csrf
+                    <button type="submit" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2 border-0 shadow-3xs" title="{{ empty($selectedUnitId) ? 'Sinkronisasi jadwal seluruh unit' : 'Sinkronisasi jadwal unit ini' }}">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        {{ empty($selectedUnitId) ? 'Sync Semua Jadwal' : 'Sync Jadwal ke Unit' }}
+                    </button>
+                </form>
                 <button type="button" @click="showCreateModal = true"
                     class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
                     <i data-lucide="calendar-range" class="w-4.5 h-4.5"></i>

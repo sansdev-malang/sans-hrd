@@ -1474,12 +1474,17 @@ class EmployeeWorkingShiftController extends Controller
     public function triggerSync(Request $request)
     {
         $unitId = $request->input('unit_id');
-        if (!$unitId) {
-            return redirect()->back()->with('error', 'Unit sekolah wajib dipilih untuk sinkronisasi.');
+        if ($unitId) {
+            $this->syncSchedulesToUnit($unitId);
+            $msg = 'Sinkronisasi jadwal roster ke unit sekolah berhasil dipicu.';
+        } else {
+            $units = SchoolUnit::where('is_active', true)->get();
+            foreach ($units as $unit) {
+                $this->syncSchedulesToUnit($unit->id);
+            }
+            $msg = 'Sinkronisasi jadwal roster ke seluruh unit sekolah berhasil dipicu.';
         }
 
-        $this->syncSchedulesToUnit($unitId);
-
-        return redirect()->back()->with('success', 'Sinkronisasi jadwal roster ke unit sekolah berhasil dipicu.');
+        return redirect()->back()->with('success', $msg);
     }
 }
