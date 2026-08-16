@@ -65,7 +65,7 @@ class LeaveApprovalController extends Controller
         $leavesCollection = $query->get();
 
         // 3. Map employee names
-        $employees = (new \App\Services\SchoolUnitService)->getSdEmployees();
+        $employees = (new \App\Services\SchoolUnitService)->getAllEmployees();
         $employeeMap = collect($employees)->keyBy(function ($item) {
             return $item['unit_id'] . '-' . $item['id'];
         })->toArray();
@@ -321,14 +321,26 @@ class LeaveApprovalController extends Controller
     {
         $units = SchoolUnit::where('is_active', true)->get();
 
+        if ($units->isEmpty()) {
+            return;
+        }
+
+        // Fetch leave requests from all units concurrently
+        $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($units) {
+            return $units->map(function ($unit) use ($pool) {
+                return $pool->as($unit->id)
+                    ->withHeaders([
+                        'X-API-TOKEN' => $unit->api_token,
+                        'Accept' => 'application/json',
+                    ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/leave-requests');
+            });
+        });
+
         foreach ($units as $unit) {
             try {
-                $response = Http::withHeaders([
-                    'X-API-TOKEN' => $unit->api_token,
-                    'Accept' => 'application/json',
-                ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/leave-requests');
+                $response = $responses[$unit->id] ?? null;
 
-                if ($response->successful()) {
+                if ($response instanceof \Illuminate\Http\Client\Response && $response->successful()) {
                     $remoteLeaves = $response->json() ?? [];
 
                     foreach ($remoteLeaves as $rL) {
@@ -416,6 +428,9 @@ class LeaveApprovalController extends Controller
                             }
                         }
                     }
+                } else {
+                    $statusCode = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
+                    Log::error("Failed response pulling leave requests from unit {$unit->name}. Status: {$statusCode}");
                 }
             } catch (\Exception $e) {
                 Log::error("Failed pulling leave requests from unit {$unit->name}: " . $e->getMessage());

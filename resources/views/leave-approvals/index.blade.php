@@ -91,7 +91,7 @@
 
         <!-- FILTERS & SEARCH -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form method="GET" action="{{ route('leave-approvals.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+            <form method="GET" action="{{ route('leave-approvals.index') }}" id="leave-filter-form" data-no-loader="true" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
                     <!-- Search Box -->
@@ -114,7 +114,7 @@
 
                     <!-- Unit -->
                     @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                        <select name="unit_id" onchange="this.form.submit()"
+                        <select name="unit_id" onchange="triggerFilterForm(this)"
                             class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="">Semua Unit Sekolah</option>
                             @foreach($schoolUnits as $su)
@@ -125,7 +125,7 @@
 
                     <!-- Jenis Izin -->
                     @if(isset($leaveTypes) && count($leaveTypes) > 0)
-                        <select name="type" onchange="this.form.submit()"
+                        <select name="type" onchange="triggerFilterForm(this)"
                             class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="">Semua Jenis Izin</option>
                             @foreach($leaveTypes as $lt)
@@ -135,7 +135,7 @@
                     @endif
 
                     <!-- Status -->
-                    <select name="status" onchange="this.form.submit()"
+                    <select name="status" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Status</option>
                         <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Menunggu Persetujuan</option>
@@ -144,7 +144,7 @@
                     </select>
 
                     @if(request()->anyFilled(['search', 'unit_id', 'type', 'status']) || request()->filled('per_page') && request('per_page') != 50)
-                        <a href="{{ route('leave-approvals.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
+                        <a href="{{ route('leave-approvals.index') }}" data-no-loader="true" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </a>
                     @endif
@@ -152,7 +152,7 @@
 
                 <!-- Right Side: Per Page Options -->
                 <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
-                    <select name="per_page" onchange="this.form.submit()"
+                    <select name="per_page" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
@@ -166,7 +166,7 @@
         </section>
 
         <!-- TABLE LIST -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left w-full flex flex-col justify-between">
+        <div id="leave-table-container" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left w-full flex flex-col justify-between">
             <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center flex-wrap gap-2 bg-white dark:bg-slate-900">
                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                     Daftar Riwayat Izin
@@ -670,4 +670,87 @@
             }
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.getElementById('leave-table-container');
+
+            window.triggerFilterForm = function(el) {
+                const form = el.form || document.getElementById('leave-filter-form');
+                if (form) {
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    }
+                }
+            };
+
+            function loadTableContent(url) {
+                if (!container) return;
+
+                container.classList.add('opacity-40', 'pointer-events-none');
+                if (window.NProgress) NProgress.start();
+
+                fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.getElementById('leave-table-container');
+                    
+                    if (newContent && container) {
+                        container.innerHTML = newContent.innerHTML;
+                    }
+                    
+                    // Update URL bar without reload
+                    window.history.pushState({}, '', url.toString());
+
+                    // Re-bind Lucide icons
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching filtered data:', err);
+                })
+                .finally(() => {
+                    container.classList.remove('opacity-40', 'pointer-events-none');
+                    if (window.NProgress) NProgress.done();
+                });
+            }
+
+            // Delegate submit event
+            document.addEventListener('submit', function (e) {
+                const form = e.target.closest('#leave-filter-form');
+                if (!form) return;
+
+                e.preventDefault();
+                const formData = new FormData(form);
+                const params = new URLSearchParams(formData);
+                const action = form.getAttribute('action') || window.location.pathname;
+                const url = new URL(action, window.location.origin);
+                url.search = params.toString();
+
+                loadTableContent(url);
+            });
+
+            // Delegate click event for pagination and reset buttons
+            document.addEventListener('click', function (e) {
+                const link = e.target.closest('#leave-table-container a[href], .reset-filter-btn');
+                if (!link) return;
+
+                const hrefAttr = link.getAttribute('href');
+                if (!hrefAttr || hrefAttr.startsWith('#')) return;
+
+                e.preventDefault();
+                const url = new URL(link.href);
+                loadTableContent(url);
+            });
+        });
+    </script>
 </x-admin-layout>
