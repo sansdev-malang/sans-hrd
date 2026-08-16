@@ -38,16 +38,20 @@
                     <!-- Search Input -->
                     <div class="flex-grow min-w-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Cari Pegawai</label>
-                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
-                            <div class="pl-3 text-slate-450 dark:text-slate-500">
-                                <i data-lucide="search" class="w-4 h-4"></i>
-                            </div>
+                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-350 dark:focus-within:border-slate-700">
                             <input type="text" name="search" x-model="searchVal" x-ref="searchInput" placeholder="Cari nama pegawai..."
                                 style="border: none !important; outline: none !important; box-shadow: none !important;"
-                                class="w-full h-10 px-2.5 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0">
+                                class="w-full h-10 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0">
                             
-                            <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.focus();" class="h-10 px-2.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
+                            <!-- Clear Button (x) -->
+                            <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; triggerFilterForm($el);" class="h-10 px-2 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
                                 <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                            
+                            <!-- Cari Button (Welded to the right) -->
+                            <button type="submit" class="h-10 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold border-l border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1 cursor-pointer">
+                                <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                                <span>Cari</span>
                             </button>
                         </div>
                     </div>
@@ -109,19 +113,15 @@
                     </div>
                     @endif
 
-                    <!-- Action buttons -->
-                    <div class="flex items-center gap-2 justify-end w-full lg:w-auto lg:ml-auto pb-0.5">
-                        <button type="submit" class="h-10 px-5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1.5">
-                            <i data-lucide="filter" class="w-4 h-4"></i>
-                            Terapkan
-                        </button>
-                        @if(request()->hasAny(['search', 'start_date', 'end_date', 'status', 'unit_id', 'position']))
-                            <a href="{{ route('attendance-history.index') }}" data-no-loader="true" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5" title="Reset Filter">
-                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                                Reset
-                            </a>
-                        @endif
+                    <!-- Reset Button -->
+                    @if(request()->hasAny(['search', 'start_date', 'end_date', 'status', 'unit_id', 'position']))
+                    <div class="flex items-center pb-0.5 self-end lg:self-auto justify-end">
+                        <a href="{{ route('attendance-history.index') }}" data-no-loader="true" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5" title="Reset Filter">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                            Reset
+                        </a>
                     </div>
+                    @endif
 
                 </div>
             </form>
