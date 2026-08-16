@@ -321,7 +321,8 @@
 
         <!-- DETAIL DRAWER (Alpine.js overlay + slide-out panel) -->
         <div x-show="showDrawer" x-cloak
-            class="fixed inset-0 z-[100] flex justify-end"
+            class="fixed inset-0 flex justify-end"
+            style="margin-top: 0px !important; z-index: 9999;"
             x-transition:enter="transition ease-out duration-300"
             x-transition:leave="transition ease-in duration-200">
             
