@@ -361,13 +361,15 @@
                 @php
                     $selectedUnit = $units->firstWhere('id', $selectedUnitId);
                 @endphp
-                <form action="{{ route('employee-working-shifts.sync-trigger', ['unit_id' => $selectedUnitId]) }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
-                    @csrf
-                    <button type="submit" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2 border-0 shadow-3xs" title="{{ empty($selectedUnitId) ? 'Sinkronisasi jadwal seluruh unit' : 'Sinkronisasi jadwal unit ini' }}">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        {{ empty($selectedUnitId) ? 'Sync Semua Jadwal' : 'Sync Jadwal ' . ($selectedUnit->name ?? '') }}
-                    </button>
-                </form>
+                <div id="roster-sync-btn-container">
+                    <form action="{{ route('employee-working-shifts.sync-trigger', ['unit_id' => $selectedUnitId]) }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
+                        @csrf
+                        <button type="submit" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2 border-0 shadow-3xs" title="{{ empty($selectedUnitId) ? 'Sinkronisasi jadwal seluruh unit' : 'Sinkronisasi jadwal unit ini' }}">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            {{ empty($selectedUnitId) ? 'Sync Semua Jadwal' : 'Sync Jadwal ' . ($selectedUnit->name ?? '') }}
+                        </button>
+                    </form>
+                </div>
                 <button type="button" @click="showCreateModal = true"
                     class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
                     <i data-lucide="calendar-range" class="w-4.5 h-4.5"></i>
@@ -1754,11 +1756,17 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 const newContent = doc.getElementById('roster-table-container');
+                const newSyncBtn = doc.getElementById('roster-sync-btn-container');
+                const currentSyncBtn = document.getElementById('roster-sync-btn-container');
                 
                 if (newContent && container) {
                     container.innerHTML = newContent.innerHTML;
                     container.style.opacity = '1';
                     container.style.pointerEvents = 'auto';
+
+                    if (newSyncBtn && currentSyncBtn) {
+                        currentSyncBtn.innerHTML = newSyncBtn.innerHTML;
+                    }
 
                     // Reinitialize Lucide Icons
                     if (typeof lucide !== 'undefined') {
