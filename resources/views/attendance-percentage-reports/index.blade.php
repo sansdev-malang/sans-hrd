@@ -1,14 +1,6 @@
 <x-admin-layout>
     <style>
         [x-cloak] { display: none !important; }
-        .dark input[type="date"] {
-            color-scheme: dark !important;
-        }
-        .dark input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) !important;
-            opacity: 0.85 !important;
-            cursor: pointer;
-        }
     </style>
     @php
         $countTotal = count($reports);
