@@ -477,7 +477,7 @@ class AttendanceLogController extends Controller
                 ->setPaper('a4', 'landscape');
             $response = $pdf->download($baseFileName . ".pdf");
             if ($request->filled('download_token')) {
-                $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
+                setcookie('download_token', $request->query('download_token'), time() + 60, '/', '', false, false);
             }
             return $response;
         }
@@ -612,7 +612,7 @@ class AttendanceLogController extends Controller
         }, 200, $responseHeaders);
 
         if ($request->filled('download_token')) {
-            $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
+            setcookie('download_token', $request->query('download_token'), time() + 60, '/', '', false, false);
         }
 
         return $response;

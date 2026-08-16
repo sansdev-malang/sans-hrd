@@ -1181,7 +1181,7 @@ class AttendanceHistoryController extends Controller
 
         $response = response()->download($tempFile, "Riwayat_Kehadiran_{$startDateReq}_to_{$endDateReq}.xlsx")->deleteFileAfterSend(true);
         if ($request->filled('download_token')) {
-            $response->headers->setCookie(cookie('download_token', $request->query('download_token'), 1, '/', null, false, false));
+            setcookie('download_token', $request->query('download_token'), time() + 60, '/', '', false, false);
         }
         return $response;
     }
