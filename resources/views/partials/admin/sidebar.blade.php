@@ -99,9 +99,9 @@
             <nav class="space-y-1 mb-4">
                 
                 <!-- Kehadiran Pegawai Dropdown -->
-                <div x-data="{ open: {{ Request::routeIs('attendance-logs.*') ? 'true' : 'false' }} }">
+                <div x-data="{ open: {{ Request::routeIs('attendance-logs.*') || Request::routeIs('attendance-history.*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="menu-item flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors relative group
-                        {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}">
+                        {{ Request::routeIs('attendance-logs.*') || Request::routeIs('attendance-history.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}">
                         <div class="flex items-center gap-3">
                             <i data-lucide="scan-face" class="menu-icon w-4 h-4"></i>
                             <span class="menu-text">Kehadiran Pegawai</span>
@@ -118,12 +118,11 @@
                                 <span>Data Kehadiran</span>
                             </div>
                         </a>
-                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
+                        <a href="{{ route('attendance-history.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('attendance-history.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
                             <div class="flex items-center gap-2.5">
-                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
+                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('attendance-history.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
                                 <span>Riwayat Kehadiran</span>
                             </div>
-                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
                         </a>
                         <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
                             <div class="flex items-center gap-2.5">

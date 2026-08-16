@@ -96,6 +96,10 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('attendance-logs/export', [\App\Http\Controllers\AttendanceLogController::class, 'export'])->name('attendance-logs.export');
     Route::get('attendance-logs', [\App\Http\Controllers\AttendanceLogController::class, 'index'])->name('attendance-logs.index');
 
+    // Attendance History (New page)
+    Route::get('attendance-history', [\App\Http\Controllers\AttendanceHistoryController::class, 'index'])->name('attendance-history.index');
+    Route::get('attendance-history/export', [\App\Http\Controllers\AttendanceHistoryController::class, 'export'])->name('attendance-history.export');
+
     // Announcements CRUD
     Route::resource('announcements', \App\Http\Controllers\AnnouncementController::class);
 
