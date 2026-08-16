@@ -48,29 +48,31 @@
                 
                 <div class="flex flex-wrap items-center gap-3 md:gap-6">
                     @foreach($unitStats as $uId => $stat)
-                        @php
-                            $avg = $stat['average'];
-                            if ($avg >= 95) {
-                                $indicatorColor = 'bg-emerald-500';
-                                $textColor = 'text-emerald-600 dark:text-emerald-450';
-                            } elseif ($avg >= 90) {
-                                $indicatorColor = 'bg-amber-500';
-                                $textColor = 'text-amber-555 dark:text-amber-450';
-                            } else {
-                                $indicatorColor = 'bg-rose-500';
-                                $textColor = 'text-rose-650 dark:text-rose-455';
-                            }
-                        @endphp
-                        <div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-lg shadow-2xs">
-                            <span class="w-2 h-2 rounded-full {{ $indicatorColor }}"></span>
-                            <div class="flex flex-col">
-                                <span class="text-[9.5px] font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wide leading-none mb-0.5">{{ $stat['name'] }}</span>
-                                <div class="flex items-baseline gap-1">
-                                    <span class="text-xs font-black font-mono {{ $textColor }}">{{ $avg }}%</span>
-                                    <span class="text-[9px] text-slate-400 font-medium">({{ $stat['count'] }} orang)</span>
+                        @if($stat['count'] > 0)
+                            @php
+                                $avg = $stat['average'];
+                                if ($avg >= 95) {
+                                    $indicatorColor = 'bg-emerald-500';
+                                    $textColor = 'text-emerald-600 dark:text-emerald-450';
+                                } elseif ($avg >= 90) {
+                                    $indicatorColor = 'bg-amber-500';
+                                    $textColor = 'text-amber-555 dark:text-amber-450';
+                                } else {
+                                    $indicatorColor = 'bg-rose-500';
+                                    $textColor = 'text-rose-650 dark:text-rose-455';
+                                }
+                            @endphp
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-lg shadow-2xs">
+                                <span class="w-2 h-2 rounded-full {{ $indicatorColor }}"></span>
+                                <div class="flex flex-col">
+                                    <span class="text-[9.5px] font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wide leading-none mb-0.5">{{ $stat['name'] }}</span>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-xs font-black font-mono {{ $textColor }}">{{ $avg }}%</span>
+                                        <span class="text-[9px] text-slate-400 font-medium">({{ $stat['count'] }} orang)</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     @endforeach
                 </div>
             </section>
