@@ -209,7 +209,7 @@ class AnnouncementController extends Controller
             // If action is delete, or this unit is not a target anymore, send DELETE
             if ($action === 'delete' || !$isTarget) {
                 try {
-                    Http::withHeaders([
+                    Http::timeout(3)->withHeaders([
                         'X-API-TOKEN' => $unit->api_token,
                         'Accept' => 'application/json',
                     ])->post(rtrim($unit->api_url, '/') . '/sync/announcements', [
@@ -228,7 +228,7 @@ class AnnouncementController extends Controller
                 $attachmentUrl = $announcement->attachment ? asset('storage/' . $announcement->attachment) : null;
 
                 try {
-                    Http::withHeaders([
+                    Http::timeout(3)->withHeaders([
                         'X-API-TOKEN' => $unit->api_token,
                         'Accept' => 'application/json',
                     ])->post(rtrim($unit->api_url, '/') . '/sync/announcements', [

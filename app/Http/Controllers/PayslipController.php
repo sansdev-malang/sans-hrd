@@ -185,7 +185,7 @@ class PayslipController extends Controller
         $attachmentUrl = $payslip->attachment_path ? asset('storage/' . $payslip->attachment_path) : null;
 
         try {
-            Http::withHeaders([
+            Http::timeout(3)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->post(rtrim($unit->api_url, '/') . '/sync/payslips', [
