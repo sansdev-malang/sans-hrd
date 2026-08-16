@@ -96,7 +96,7 @@
 
         <!-- FILTERS & SEARCH -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form id="filter-form" method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+            <form id="filter-form" data-no-loader="true" method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
                     <!-- Search Box Welded with Cari Button (Premium Input Group) -->
@@ -118,7 +118,7 @@
                     </div>
 
                     <!-- Unit -->
-                    <select name="unit" onchange="submitFilterForm(this)"
+                    <select name="unit" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Unit Sekolah</option>
                         @foreach($schoolUnits as $su)
@@ -127,7 +127,7 @@
                     </select>
 
                     <!-- Jabatan -->
-                    <select name="position" onchange="submitFilterForm(this)"
+                    <select name="position" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Jabatan</option>
                         @foreach($positions as $pos)
@@ -144,7 +144,7 @@
 
                 <!-- Right Side: Per Page Options -->
                 <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
-                    <select name="per_page" onchange="submitFilterForm(this)"
+                    <select name="per_page" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
@@ -1554,7 +1554,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!filterForm || !tableContainer) return;
 
     // Helper to submit form via event
-    window.submitFilterForm = function(element) {
+    window.triggerFilterForm = function(element) {
         const form = element.closest('form');
         if (form) {
             form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
