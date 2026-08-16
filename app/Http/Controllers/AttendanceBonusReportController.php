@@ -47,7 +47,7 @@ class AttendanceBonusReportController extends Controller
             ->first();
 
         // 3. Fetch Employees (Filter by unit if needed)
-        $rawEmployees = $this->service->getSdEmployees();
+        $rawEmployees = $this->service->getAllEmployees();
         
         // Extract unique positions (jabatan) from raw employee data
         $positions = collect($rawEmployees)
@@ -344,7 +344,7 @@ class AttendanceBonusReportController extends Controller
             ->where('is_active', true)
             ->first();
 
-        $rawEmployees = $this->service->getSdEmployees();
+        $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees);
 
         if (!empty($unitId)) {

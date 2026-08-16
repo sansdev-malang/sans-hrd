@@ -1,6 +1,7 @@
 <x-admin-layout>
     <div class="p-6 space-y-6" x-data="bonusReports">
-        
+        <!-- BONUS REPORT MAIN CONTAINER -->
+        <div id="bonus-table-container" class="space-y-6">
         <!-- HEADER -->
         <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex flex-col gap-0.5">
@@ -45,15 +46,15 @@
 
         <!-- FILTERS & CONTROLS -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form method="GET" action="{{ route('bonus-reports.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+            <form method="GET" action="{{ route('bonus-reports.index') }}" id="bonus-filter-form" data-no-loader="true" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
                     <!-- Search Box -->
                     <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
                         <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
-                            style="border: none !important; outline: none !important; box-shadow: none !important;"
-                            class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
+                             style="border: none !important; outline: none !important; box-shadow: none !important;"
+                             class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
                         
                         <!-- Clear Button (x) -->
                         <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $el.closest('.search-container').querySelector('input').focus();" class="h-9 px-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center" title="Bersihkan pencarian">
@@ -68,12 +69,12 @@
                     </div>
 
                     <!-- Bulan -->
-                    <input type="month" name="month" value="{{ request('month', $month) }}" onchange="this.form.submit()"
+                    <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
                         class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer shadow-inner">
 
                     <!-- Filter Unit -->
                     @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                        <select name="unit_id" onchange="this.form.submit()"
+                        <select name="unit_id" onchange="triggerFilterForm(this)"
                             class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="">Semua Unit Sekolah</option>
                             @foreach($schoolUnits as $unit)
@@ -85,7 +86,7 @@
                     @endif
 
                     <!-- Jabatan -->
-                    <select name="position" onchange="this.form.submit()"
+                    <select name="position" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Jabatan</option>
                         @foreach($positions as $pos)
@@ -93,16 +94,16 @@
                         @endforeach
                     </select>
 
-                    @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != now()->format('Y-m') || request()->filled('per_page') && request('per_page') != 50)
-                        <a href="{{ route('bonus-reports.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
-                            <i data-lucide="x" class="w-4 h-4"></i>
+                    @if(request()->filled('search') || request()->filled('unit_id') || request()->filled('position') || (request()->filled('month') && request('month') != now()->format('Y-m')) || (request()->filled('per_page') && request('per_page') != 50))
+                        <a href="{{ route('bonus-reports.index') }}" data-no-loader="true" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                         </a>
                     @endif
                 </div>
 
                 <!-- Right Side: Per Page Options -->
                 <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
-                    <select name="per_page" onchange="this.form.submit()"
+                    <select name="per_page" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
@@ -422,6 +423,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 </x-admin-layout>
 
@@ -496,4 +498,98 @@
         }
     }
 </style>
+
+<!-- AJAX NAVIGATION & FILTER SCRIPT -->
+<script>
+    function triggerFilterForm(el) {
+        const form = document.getElementById('bonus-filter-form');
+        if (form) {
+            form.requestSubmit();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('bonus-table-container');
+
+        function loadTableContent(url) {
+            if (container) {
+                container.style.opacity = '0.5';
+                container.style.pointerEvents = 'none';
+            }
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.getElementById('bonus-table-container');
+                
+                if (newContent && container) {
+                    container.innerHTML = newContent.innerHTML;
+                    container.style.opacity = '1';
+                    container.style.pointerEvents = 'auto';
+
+                    // Reinitialize Lucide Icons
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+
+                    // Reinitialize Alpine on the new elements if needed, but since Alpine x-data is on a wrapper above container, it handles live reactivity automatically.
+                    // Sync URL in address bar without reload
+                    window.history.pushState({}, '', url);
+                } else {
+                    window.location.href = url;
+                }
+            })
+            .catch(err => {
+                console.error('AJAX loading failed:', err);
+                window.location.href = url;
+            });
+        }
+
+        // Delegate submit event
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('#bonus-filter-form');
+            if (!form) return;
+
+            e.preventDefault();
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const action = form.getAttribute('action') || window.location.pathname;
+            const url = new URL(action, window.location.origin);
+            url.search = params.toString();
+
+            loadTableContent(url);
+        });
+
+        // Delegate click on pagination links
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('#bonus-table-container a');
+            if (!link) return;
+
+            // Don't intercept download/export buttons or external links
+            if (link.classList.contains('reset-filter-btn') || link.getAttribute('data-no-loader') === 'true') {
+                if (link.getAttribute('href')) {
+                    e.preventDefault();
+                    loadTableContent(link.getAttribute('href'));
+                }
+                return;
+            }
+
+            const href = link.getAttribute('href');
+            if (href && (href.startsWith(window.location.origin) || href.startsWith('/'))) {
+                // If it is an export link, let it download naturally
+                if (href.includes('/export')) {
+                    return;
+                }
+                e.preventDefault();
+                loadTableContent(href);
+            }
+        });
+    });
+</script>
 
