@@ -106,7 +106,7 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Atur template jam kerja masuk dan pulang bagi guru dan karyawan (shift maupun non-shift) secara terpusat.</p>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('working-shifts.sync') }}" class="h-9 px-4 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg shadow-2xs hover:shadow-xs border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-2 cursor-pointer">
+                <a href="{{ route('working-shifts.sync') }}" data-no-loader="true" onclick="this.style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');" class="h-9 px-4 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg shadow-2xs hover:shadow-xs border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-2 cursor-pointer">
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     Sync Ulang ke Unit
                 </a>
