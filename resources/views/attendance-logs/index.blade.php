@@ -755,6 +755,7 @@
         if (!container) return;
 
         function loadTableContent(url) {
+            container.classList.add('opacity-40', 'pointer-events-none');
             if (window.NProgress) NProgress.start();
 
             // Resolve relative path to avoid CORS issues
@@ -788,6 +789,7 @@
                 window.location.href = url.toString();
             })
             .finally(() => {
+                container.classList.remove('opacity-40', 'pointer-events-none');
                 if (window.NProgress) NProgress.done();
             });
         }

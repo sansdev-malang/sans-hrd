@@ -32,8 +32,15 @@ class EmployeeController extends Controller
         $rawEmployees = $this->service->getAllEmployees();
         $unitCounts = collect($rawEmployees)->groupBy('unit_id')->map->count();
         
-        // Extract unique positions (jabatan) from raw employee data
-        $positions = collect($rawEmployees)
+        $unit = $request->query('unit');
+
+        // Extract unique positions (jabatan) from raw employee data, filtered by unit if specified
+        $filteredEmployeesForPos = collect($rawEmployees);
+        if (!empty($unit)) {
+            $filteredEmployeesForPos = $filteredEmployeesForPos->filter(fn($emp) => ($emp['unit_id'] ?? '') == $unit);
+        }
+
+        $positions = $filteredEmployeesForPos
             ->map(function ($emp) {
                 return $emp['position'] ?? $emp['subject_position'] ?? null;
             })

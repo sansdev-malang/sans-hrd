@@ -372,9 +372,14 @@ class AttendanceLogController extends Controller
         $unitId = $request->query('unit_id');
         $position = $request->query('position');
 
-        // Extract unique positions (jabatan) from raw employee data using the renamed service method
+        // Extract unique positions (jabatan) from raw employee data using the renamed service method, filtered by unit if specified
         $rawEmployeesForPos = $this->service->getAllEmployees();
-        $positions = collect($rawEmployeesForPos)
+        $filteredEmployeesForPos = collect($rawEmployeesForPos);
+        if (!empty($unitId)) {
+            $filteredEmployeesForPos = $filteredEmployeesForPos->filter(fn($e) => isset($e['unit_id']) && $e['unit_id'] == $unitId);
+        }
+
+        $positions = $filteredEmployeesForPos
             ->map(function ($emp) {
                 return $emp['position'] ?? $emp['subject_position'] ?? null;
             })
