@@ -629,24 +629,10 @@ class EmployeeController extends Controller
     /**
      * Remove the specified employee from the unit's database.
      */
-    public function destroy($unitId, $id)
+    public function destroy(Request $request, $unitId, $id)
     {
         $unit = SchoolUnit::findOrFail($unitId);
-
-        // Fetch employee data first to get zkteco_uid
-        $response = Http::withHeaders([
-            'X-API-TOKEN' => $unit->api_token,
-            'Accept' => 'application/json',
-        ])->get(rtrim($unit->api_url, '/') . '/employees');
-        
-        $zkteco_uid = null;
-        if ($response->successful()) {
-            $employees = $response->json('data') ?? [];
-            $employee = collect($employees)->firstWhere('id', $id);
-            if ($employee && !empty($employee['zkteco_uid'])) {
-                $zkteco_uid = $employee['zkteco_uid'];
-            }
-        }
+        $zkteco_uid = $request->input('zkteco_uid');
 
         // Call the unit's API to delete the employee
         $deleteResponse = Http::withHeaders([
