@@ -373,6 +373,8 @@
 
 
 
+        <!-- ROSTER TABLE CONTAINER -->
+        <div id="roster-table-container" class="space-y-6">
         <!-- TABS NAVIGATOR (MODERN SEGMENTED CONTROL) -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full text-left mt-2 mb-4">
             <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-inner gap-1 shrink-0">
@@ -408,7 +410,7 @@
 
         <!-- FILTERS & SEARCH (MODERN COMMAND BAR STYLE) -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form method="GET" action="{{ route('employee-working-shifts.index') }}">
+            <form method="GET" action="{{ route('employee-working-shifts.index') }}" id="roster-filter-form" data-no-loader="true">
                 <input type="hidden" name="tab" value="{{ $activeTab }}">
                 <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full">
                     <!-- Search Input -->
@@ -420,14 +422,14 @@
                             style="border: none !important; outline: none !important; box-shadow: none !important;"
                             class="w-full h-10 px-2.5 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0">
                         
-                        <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.focus();" class="h-10 px-2.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
+                        <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.focus();" class="h-10 px-2.5 text-slate-400 hover:text-slate-655 dark:hover:text-slate-255 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
                             <i data-lucide="x" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
 
                     <!-- Filter Unit -->
                     <div class="w-full md:w-48 shrink-0">
-                        <select name="unit_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="unit_id" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                             <option value="">Semua Unit Sekolah</option>
                             @foreach ($units as $unit)
                                 <option value="{{ $unit->id }}" {{ $selectedUnitId == $unit->id ? 'selected' : '' }}>
@@ -439,7 +441,7 @@
 
                     <!-- Filter Per Page -->
                     <div class="w-full md:w-32 shrink-0">
-                        <select name="per_page" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="per_page" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                             <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                             <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
                             <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
@@ -456,8 +458,8 @@
                             Cari
                         </button>
 
-                        @if(request()->hasAny(['unit_id', 'search', 'per_page']) && count(request()->except('page')) > 0)
-                            <a href="{{ route('employee-working-shifts.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5">
+                        @if(request()->filled('search') || request()->filled('unit_id') || (request()->filled('per_page') && request('per_page') != 50))
+                            <a href="{{ route('employee-working-shifts.index') }}" data-no-loader="true" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5 reset-filter-btn">
                                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                                 Reset
                             </a>
@@ -690,6 +692,7 @@
                     </div>
                 </div>
             @endif
+        </div>
         </div>
 
         <!-- MODAL DETAIL PEGAWAI (SLIDE-OVER / CENTERING WITH BLUR AND PROPER BACKDROP) -->
@@ -1687,3 +1690,96 @@
 
     </div>
 </x-admin-layout>
+
+<!-- AJAX NAVIGATION & FILTER SCRIPT -->
+<script>
+    function triggerFilterForm(el) {
+        const form = document.getElementById('roster-filter-form');
+        if (form) {
+            form.requestSubmit();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('roster-table-container');
+
+        function loadTableContent(url) {
+            if (container) {
+                container.style.opacity = '0.5';
+                container.style.pointerEvents = 'none';
+            }
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.getElementById('roster-table-container');
+                
+                if (newContent && container) {
+                    container.innerHTML = newContent.innerHTML;
+                    container.style.opacity = '1';
+                    container.style.pointerEvents = 'auto';
+
+                    // Reinitialize Lucide Icons
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+
+                    // Sync URL in address bar without reload
+                    window.history.pushState({}, '', url);
+                } else {
+                    window.location.href = url;
+                }
+            })
+            .catch(err => {
+                console.error('AJAX loading failed:', err);
+                window.location.href = url;
+            });
+        }
+
+        // Delegate submit event
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('#roster-filter-form');
+            if (!form) return;
+
+            e.preventDefault();
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const action = form.getAttribute('action') || window.location.pathname;
+            const url = new URL(action, window.location.origin);
+            url.search = params.toString();
+
+            loadTableContent(url);
+        });
+
+        // Delegate click on pagination links
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('#roster-table-container a');
+            if (!link) return;
+
+            // Don't intercept download/export buttons or external links
+            if (link.classList.contains('reset-filter-btn') || link.getAttribute('data-no-loader') === 'true') {
+                if (link.getAttribute('href')) {
+                    e.preventDefault();
+                    loadTableContent(link.getAttribute('href'));
+                }
+                return;
+            }
+
+            const href = link.getAttribute('href');
+            if (href && (href.startsWith(window.location.origin) || href.startsWith('/'))) {
+                // Ignore detail links or delete forms
+                if (href.includes('/detail-roster') || href.includes('/roster') || href.includes('/edit')) {
+                    return;
+                }
+                e.preventDefault();
+                loadTableContent(href);
+            }
+        });
+    });
+</script>

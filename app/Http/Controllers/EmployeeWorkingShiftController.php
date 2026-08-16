@@ -39,7 +39,7 @@ class EmployeeWorkingShiftController extends Controller
         $assignments = $query->orderBy('start_date', 'desc')->get();
 
         // Get employees from the service to map names
-        $employees = $this->unitService->getSdEmployees();
+        $employees = $this->unitService->getAllEmployees();
         $employeeMap = collect($employees)->keyBy(function ($item) {
             return $item['unit_id'] . '-' . $item['id'];
         })->toArray();
@@ -646,7 +646,7 @@ class EmployeeWorkingShiftController extends Controller
         $daysInMonth = \Carbon\Carbon::create($year, $month, 1)->daysInMonth;
 
         $unitService = app(\App\Services\SchoolUnitService::class);
-        $allEmployees = $unitService->getSdEmployees();
+        $allEmployees = $unitService->getAllEmployees();
         $rawEmployees = array_filter($allEmployees, function($emp) use ($selectedUnitId) {
             return $emp['unit_id'] == $selectedUnitId;
         });
@@ -1142,7 +1142,7 @@ class EmployeeWorkingShiftController extends Controller
         }
         $daysInMonth = \Carbon\Carbon::create($year, $month)->daysInMonth;
         
-        $allEmployees = $this->unitService->getSdEmployees();
+        $allEmployees = $this->unitService->getAllEmployees();
         $rawEmployees = array_filter($allEmployees, function($emp) use ($unitId) {
             return $emp['unit_id'] == $unitId;
         });
