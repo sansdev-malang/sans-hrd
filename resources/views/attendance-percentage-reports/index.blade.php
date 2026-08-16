@@ -84,7 +84,9 @@
                 class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
                 <div class="space-y-1">
                     <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Pegawai</span>
-                    <h4 class="text-2xl font-black font-mono text-slate-900 dark:text-slate-50 leading-none">{{ $countTotal }}</h4>
+                    <h4 class="text-2xl font-black font-mono text-slate-900 dark:text-slate-50 leading-none">
+                        {{ $countTotal }} <span class="text-xs font-bold text-slate-400 dark:text-slate-500 font-sans tracking-normal lowercase ml-1">pegawai</span>
+                    </h4>
                     <p class="text-[10px] text-slate-400 font-medium">Seluruh unit terfilter</p>
                 </div>
                 <div class="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
@@ -98,7 +100,9 @@
                 class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
                 <div class="space-y-1">
                     <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider block">Zona Aman (>= 95%)</span>
-                    <h4 class="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">{{ $countGreen }}</h4>
+                    <h4 class="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">
+                        {{ $countGreen }} <span class="text-xs font-bold text-emerald-500/80 dark:text-emerald-500 font-sans tracking-normal lowercase ml-1">pegawai</span>
+                    </h4>
                     <p class="text-[10px] text-slate-400 font-medium">Performa sangat baik</p>
                 </div>
                 <div class="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -112,7 +116,9 @@
                 class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
                 <div class="space-y-1">
                     <span class="text-[9px] font-bold text-amber-500 uppercase tracking-wider block">Zona Waspada (90% - 94.9%)</span>
-                    <h4 class="text-2xl font-black font-mono text-amber-500 leading-none">{{ $countYellow }}</h4>
+                    <h4 class="text-2xl font-black font-mono text-amber-500 leading-none">
+                        {{ $countYellow }} <span class="text-xs font-bold text-amber-550/80 dark:text-amber-500 font-sans tracking-normal lowercase ml-1">pegawai</span>
+                    </h4>
                     <p class="text-[10px] text-slate-400 font-medium">Perlu perhatian ringan</p>
                 </div>
                 <div class="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-555">
@@ -126,7 +132,9 @@
                 class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
                 <div class="space-y-1">
                     <span class="text-[9px] font-bold text-rose-600 dark:text-rose-455 uppercase tracking-wider block">Zona Kritis (< 90%)</span>
-                    <h4 class="text-2xl font-black font-mono text-rose-600 dark:text-rose-455 leading-none">{{ $countRed }}</h4>
+                    <h4 class="text-2xl font-black font-mono text-rose-600 dark:text-rose-455 leading-none">
+                        {{ $countRed }} <span class="text-xs font-bold text-rose-500/80 dark:text-rose-500/80 font-sans tracking-normal lowercase ml-1">pegawai</span>
+                    </h4>
                     <p class="text-[10px] text-slate-400 font-medium">Memerlukan evaluasi kehadiran</p>
                 </div>
                 <div class="h-10 w-10 rounded-lg bg-rose-50 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
