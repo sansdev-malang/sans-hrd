@@ -173,6 +173,10 @@
                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                     Daftar Riwayat Izin
                 </h3>
+                <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/40 px-2.5 py-1 rounded-md">
+                    <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-500"></i>
+                    <span>Klik nama pegawai untuk melihat detail izin</span>
+                </div>
             </div>
             <div class="overflow-x-auto overflow-y-auto custom-scrollbar" style="max-height: calc(100vh - 240px);">
                 <table class="w-full text-xs border-collapse">
