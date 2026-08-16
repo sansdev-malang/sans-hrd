@@ -28,12 +28,15 @@
         }
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-spacing: 0;
+            border-top: 0.5px solid #888;
+            border-left: 0.5px solid #888;
             margin-bottom: 20px;
         }
         th, td {
-            border: 0.5px solid #888;
-            padding: 4px 5px;
+            border-right: 0.5px solid #888;
+            border-bottom: 0.5px solid #888;
+            padding: 3px 4px;
             vertical-align: middle;
         }
         th {
@@ -78,76 +81,103 @@
         Dicetak pada: {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('d F Y H:i') }} WIB
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 4%; text-align: center;">No</th>
-                <th style="width: 35%;">Nama Pegawai</th>
-                <th style="width: 18%;">Hari & Tanggal</th>
-                <th style="width: 15%;">Jadwal Shift</th>
-                <th style="width: 8%; text-align: center;">Masuk</th>
-                <th style="width: 8%; text-align: center;">Keluar</th>
-                <th style="width: 8%; text-align: center;">Status</th>
-                <th style="width: 14%;">Keterangan</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($historyList as $index => $row)
+    @if(count($historyList) > 0)
+        @foreach(collect($historyList)->chunk(100) as $chunk)
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 4%; text-align: center;">No</th>
+                        <th style="width: 31%;">Nama Pegawai</th>
+                        <th style="width: 18%;">Hari & Tanggal</th>
+                        <th style="width: 15%;">Jadwal Kerja</th>
+                        <th style="width: 10%; text-align: center;">Waktu Masuk</th>
+                        <th style="width: 10%; text-align: center;">Waktu Pulang</th>
+                        <th style="width: 8%; text-align: center;">Status</th>
+                        <th style="width: 14%;">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($chunk as $index => $row)
+                        <tr>
+                            <td class="text-center">{{ $index + 1 }}</td>
+                            <td>
+                                <strong class="font-bold">{{ $row['employee_name'] }}</strong>
+                                @if($row['employee_nip'])
+                                    <br><span style="font-size: 7px; color: #666; font-family: monospace;">NIP/NUPTK: {{ $row['employee_nip'] }}</span>
+                                @endif
+                                <br><span style="font-size: 7.5px; color: #555;">{{ $row['unit_name'] }} - {{ $row['position'] }}</span>
+                            </td>
+                            <td>{{ $row['date_formatted'] }}</td>
+                            <td>
+                                @if($row['shift_name'] === '-')
+                                    <span>-</span>
+                                @else
+                                    <strong class="font-bold" style="font-size: 8px;">{{ $row['shift_name'] }}</strong>
+                                    @if($row['shift_start'])
+                                        <br><span style="font-size: 7px; color: #666;">{{ $row['shift_start'] }} - {{ $row['shift_end'] }}</span>
+                                    @else
+                                        <br><span style="font-size: 7px; color: #666;">Libur</span>
+                                    @endif
+                                @endif
+                            </td>
+                            <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_in'] ?: '-' }}</td>
+                            <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_out'] ?: '-' }}</td>
+                            <td class="text-center">
+                                @php
+                                    $badgeClass = match($row['status']) {
+                                        'Hadir' => 'badge-hadir',
+                                        'Terlambat' => 'badge-terlambat',
+                                        'Alfa' => 'badge-alfa',
+                                        'Sakit' => 'badge-sakit',
+                                        'Izin' => 'badge-izin',
+                                        'Cuti' => 'badge-cuti',
+                                        'Dinas' => 'badge-dinas',
+                                        'Off' => 'badge-off',
+                                        'Libur' => 'badge-libur',
+                                        'Pending' => 'badge-pending',
+                                        default => 'badge-off',
+                                    };
+                                @endphp
+                                <span class="badge {{ $badgeClass }}">{{ $row['status'] }}</span>
+                            </td>
+                            <td>
+                                @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
+                                    <span style="color: #b45309; font-weight: bold;">Terlambat {{ $row['late_minutes'] }} mnt</span>
+                                @elseif($row['notes'])
+                                    <span>{{ $row['notes'] }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @if(!$loop->last)
+                <div style="page-break-after: always;"></div>
+            @endif
+        @endforeach
+    @else
+        <table>
+            <thead>
                 <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td>
-                        <div class="font-bold">{{ $row['employee_name'] }}</div>
-                        @if($row['employee_nip'])
-                            <div style="font-size: 7px; color: #666; font-family: monospace;">NIP/NUPTK: {{ $row['employee_nip'] }}</div>
-                        @endif
-                        <div style="font-size: 7.5px; color: #555;">{{ $row['unit_name'] }} - {{ $row['position'] }}</div>
-                    </td>
-                    <td>{{ $row['date_formatted'] }}</td>
-                    <td>
-                        <div class="font-bold" style="font-size: 8px;">{{ $row['shift_name'] }}</div>
-                        @if($row['shift_start'])
-                            <div style="font-size: 7px; color: #666;">{{ $row['shift_start'] }} - {{ $row['shift_end'] }}</div>
-                        @else
-                            <div style="font-size: 7px; color: #666;">Libur</div>
-                        @endif
-                    </td>
-                    <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_in'] ?: '-' }}</td>
-                    <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_out'] ?: '-' }}</td>
-                    <td class="text-center">
-                        @php
-                            $badgeClass = match($row['status']) {
-                                'Hadir' => 'badge-hadir',
-                                'Terlambat' => 'badge-terlambat',
-                                'Alfa' => 'badge-alfa',
-                                'Sakit' => 'badge-sakit',
-                                'Izin' => 'badge-izin',
-                                'Cuti' => 'badge-cuti',
-                                'Dinas' => 'badge-dinas',
-                                'Off' => 'badge-off',
-                                'Libur' => 'badge-libur',
-                                'Pending' => 'badge-pending',
-                                default => 'badge-off',
-                            };
-                        @endphp
-                        <span class="badge {{ $badgeClass }}">{{ $row['status'] }}</span>
-                    </td>
-                    <td>
-                        @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
-                            <span style="color: #b45309; font-weight: bold;">Terlambat {{ $row['late_minutes'] }} mnt</span>
-                        @elseif($row['notes'])
-                            <span>{{ $row['notes'] }}</span>
-                        @else
-                            <span class="text-muted">-</span>
-                        @endif
-                    </td>
+                    <th style="width: 4%; text-align: center;">No</th>
+                    <th style="width: 31%;">Nama Pegawai</th>
+                    <th style="width: 18%;">Hari & Tanggal</th>
+                    <th style="width: 15%;">Jadwal Kerja</th>
+                    <th style="width: 10%; text-align: center;">Waktu Masuk</th>
+                    <th style="width: 10%; text-align: center;">Waktu Pulang</th>
+                    <th style="width: 8%; text-align: center;">Status</th>
+                    <th style="width: 14%;">Keterangan</th>
                 </tr>
-            @empty
+            </thead>
+            <tbody>
                 <tr>
                     <td colspan="8" class="text-center" style="padding: 20px;">Tidak ada data riwayat absensi yang ditemukan.</td>
                 </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    @endif
 
     <div style="margin-top: 40px; width: 100%;">
         <table style="border: none; width: 100%;">

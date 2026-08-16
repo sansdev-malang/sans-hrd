@@ -46,13 +46,27 @@ class AttendanceHistoryController extends Controller
 
         // Get unique positions from raw employee data
         $rawEmployees = collect($this->service->getSdEmployees());
-        $positions = $rawEmployees
+        
+        $unitPositions = [];
+        $unitPositions[''] = $rawEmployees
             ->map(fn($emp) => $emp['position'] ?? $emp['subject_position'] ?? 'Staf')
             ->filter()
             ->unique()
             ->sort()
             ->values()
             ->toArray();
+
+        foreach ($rawEmployees->groupBy('unit_id') as $uId => $emps) {
+            $unitPositions[$uId] = $emps
+                ->map(fn($emp) => $emp['position'] ?? $emp['subject_position'] ?? 'Staf')
+                ->filter()
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
+        }
+
+        $positions = !empty($unitId) ? ($unitPositions[$unitId] ?? []) : $unitPositions[''];
 
         // Filter employees
         if (!empty($unitId)) {
@@ -112,14 +126,16 @@ class AttendanceHistoryController extends Controller
                 return $leave->school_unit_id . '_' . $leave->employee_id;
             });
 
-        // 3. Fetch shifts
+        $shiftsMonthStart = $startDate->copy()->startOfMonth()->format('Y-m-d');
+        $shiftsMonthEnd = $endDate->copy()->endOfMonth()->format('Y-m-d');
+
         $shiftsData = EmployeeWorkingShift::with(['workingShift.details'])
             ->whereIn('employee_id', $employeeIds)
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->where('start_date', '<=', $endDate->format('Y-m-d'))
-                      ->where(function($q) use ($startDate) {
+            ->where(function ($query) use ($shiftsMonthStart, $shiftsMonthEnd) {
+                $query->where('start_date', '<=', $shiftsMonthEnd)
+                      ->where(function($q) use ($shiftsMonthStart) {
                           $q->whereNull('end_date')
-                            ->orWhere('end_date', '>=', $startDate->format('Y-m-d'));
+                            ->orWhere('end_date', '>=', $shiftsMonthStart);
                       });
             })
             ->get()
@@ -151,12 +167,6 @@ class AttendanceHistoryController extends Controller
             ->get()
             ->groupBy('uid');
 
-        // Fetch default shift
-        $defaultShift = \App\Models\WorkingShift::with('details')->where('code', 'default')->first();
-        if (!$defaultShift) {
-            $defaultShift = \App\Models\WorkingShift::with('details')->first();
-        }
-
         // Build flat history list
         $historyList = [];
 
@@ -168,13 +178,14 @@ class AttendanceHistoryController extends Controller
             if (!$uid || !$empId) continue;
 
             $userLogs = $logsData->get((string)$uid) ? $logsData->get((string)$uid)->pluck('timestamp')->sort()->values()->toArray() : [];
+            $consumedLogs = [];
 
             $currentDate = $startDate->copy();
             $lastDay = $endDate->greaterThan(Carbon::now()) ? Carbon::now()->endOfDay() : $endDate;
 
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeek;
+                $dayOfWeek = $currentDate->dayOfWeekIso;
 
                 $isHoliday = isset($unitHolidays[$unit][$dateStr]) ?? false;
                 
@@ -207,11 +218,12 @@ class AttendanceHistoryController extends Controller
                 $isOffShift = false;
                 $shiftStartTime = null;
                 $shiftEndTime = null;
-                $shiftName = 'Shift Kerja';
+                $shiftName = '-';
                 $shiftKey = $unit . '_' . $empId;
                 $isShiftWorker = false;
+                $matchedRosterAssignment = null;
 
-                // Resolve Assigned or Default Shift
+                // Resolve Assigned Shift
                 $matchedAssignment = null;
                 if (isset($shiftsData[$shiftKey])) {
                     foreach ($shiftsData[$shiftKey] as $assignment) {
@@ -227,7 +239,7 @@ class AttendanceHistoryController extends Controller
                     }
                 }
 
-                $activeShift = $matchedAssignment ?: $defaultShift;
+                $activeShift = $matchedAssignment;
 
                 if ($activeShift) {
                     $shiftName = $activeShift->name;
@@ -243,13 +255,63 @@ class AttendanceHistoryController extends Controller
                             $shiftEndTime = $detail->end_time;
                         }
                     }
+                } else {
+                    // Check if they are on a roster in this same month
+                    $monthStr = substr($dateStr, 0, 7);
+                    $matchedRosterAssignment = null;
+                    if (isset($shiftsData[$shiftKey])) {
+                        foreach ($shiftsData[$shiftKey] as $assignment) {
+                            $assignStartMonth = substr($assignment->start_date instanceof \Carbon\Carbon ? $assignment->start_date->format('Y-m-d') : $assignment->start_date, 0, 7);
+                            if ($assignment->roster_name && $assignStartMonth === $monthStr) {
+                                $matchedRosterAssignment = $assignment;
+                                break;
+                            }
+                        }
+                    }
+                    if ($matchedRosterAssignment) {
+                        $shiftName = $matchedRosterAssignment->roster_name;
+                        $isOffShift = true;
+                    }
                 }
 
                 if ($isShiftWorker && !$hasShiftToday && !$isOffShift) {
                     $isOffShift = true;
                 }
 
-                // Check-in and Check-out Log retrieval
+                // Check-in and Check-out Log retrieval using unconsumed logs
+                $availableLogs = array_diff($userLogs, $consumedLogs);
+
+                // Consume orphan night shift checkout: if we have an early morning scan on this day (before 10:00),
+                // and there is an unconsumed scan from yesterday evening (after 17:00), consume both of them!
+                $yesterdayDateStr = $currentDate->copy()->subDay()->format('Y-m-d');
+                $yesterdayNightScan = null;
+                $todayMorningScan = null;
+                
+                foreach ($availableLogs as $tsStr) {
+                    if (substr($tsStr, 0, 10) === $yesterdayDateStr) {
+                        $timePart = substr($tsStr, 11, 8);
+                        if ($timePart >= '17:00:00' && $timePart <= '23:59:59') {
+                            if (!$yesterdayNightScan || $tsStr < $yesterdayNightScan) {
+                                $yesterdayNightScan = $tsStr;
+                            }
+                        }
+                    }
+                    if (substr($tsStr, 0, 10) === $dateStr) {
+                        $timePart = substr($tsStr, 11, 8);
+                        if ($timePart >= '04:00:00' && $timePart <= '10:00:00') {
+                            if (!$todayMorningScan || $tsStr < $todayMorningScan) {
+                                $todayMorningScan = $tsStr;
+                            }
+                        }
+                    }
+                }
+                
+                if ($yesterdayNightScan && $todayMorningScan) {
+                    $consumedLogs[] = $yesterdayNightScan;
+                    $consumedLogs[] = $todayMorningScan;
+                    $availableLogs = array_diff($userLogs, $consumedLogs);
+                }
+
                 $checkInLog = null;
                 $checkOutLog = null;
 
@@ -266,7 +328,7 @@ class AttendanceHistoryController extends Controller
                     $outStart = $expectedOut->copy()->subHours(6);
                     $outEnd = $expectedOut->copy()->addHours(6);
 
-                    foreach ($userLogs as $tsStr) {
+                    foreach ($availableLogs as $tsStr) {
                         $ts = Carbon::parse($tsStr);
                         if ($ts->between($inStart, $inEnd)) {
                             if (!$checkInLog || $ts < Carbon::parse($checkInLog)) {
@@ -302,20 +364,63 @@ class AttendanceHistoryController extends Controller
                         }
                     }
                 } else {
-                    // Rest day (Off / Holiday / Sunday) - search all scans on this day
-                    $dayScans = [];
-                    foreach ($userLogs as $tsStr) {
+                    // Rest day (Off / Holiday / Sunday)
+                    
+                    // 1. Try to find a night shift starting on this rest day (check-in after 17:00, check-out next morning before 10:00)
+                    $nightCheckIn = null;
+                    $nightCheckOut = null;
+                    
+                    foreach ($availableLogs as $tsStr) {
                         if (substr($tsStr, 0, 10) === $dateStr) {
-                            $dayScans[] = $tsStr;
+                            $timePart = substr($tsStr, 11, 8);
+                            if ($timePart >= '17:00:00' && $timePart <= '23:59:59') {
+                                if (!$nightCheckIn || $tsStr < $nightCheckIn) {
+                                    $nightCheckIn = $tsStr;
+                                }
+                            }
                         }
                     }
-                    if (count($dayScans) > 0) {
-                        sort($dayScans);
-                        $checkInLog = $dayScans[0];
-                        if (count($dayScans) > 1) {
-                            $checkOutLog = $dayScans[count($dayScans) - 1];
+                    
+                    if ($nightCheckIn) {
+                        $nextDateStr = $currentDate->copy()->addDay()->format('Y-m-d');
+                        foreach ($availableLogs as $tsStr) {
+                            if (substr($tsStr, 0, 10) === $nextDateStr) {
+                                $timePart = substr($tsStr, 11, 8);
+                                if ($timePart >= '04:00:00' && $timePart <= '10:00:00') {
+                                    if (!$nightCheckOut || $tsStr < $nightCheckOut) {
+                                        $nightCheckOut = $tsStr;
+                                    }
+                                }
+                            }
                         }
                     }
+                    
+                    if ($nightCheckIn) {
+                        $checkInLog = $nightCheckIn;
+                        $checkOutLog = $nightCheckOut;
+                    } else {
+                        // 2. Normal day shift on rest day (all scans on this day)
+                        $dayScans = [];
+                        foreach ($availableLogs as $tsStr) {
+                            if (substr($tsStr, 0, 10) === $dateStr) {
+                                $dayScans[] = $tsStr;
+                            }
+                        }
+                        if (count($dayScans) > 0) {
+                            sort($dayScans);
+                            $checkInLog = $dayScans[0];
+                            if (count($dayScans) > 1) {
+                                $checkOutLog = $dayScans[count($dayScans) - 1];
+                            }
+                        }
+                    }
+                }
+
+                if ($checkInLog) {
+                    $consumedLogs[] = $checkInLog;
+                }
+                if ($checkOutLog && $checkOutLog !== $checkInLog) {
+                    $consumedLogs[] = $checkOutLog;
                 }
 
                 $record = [
@@ -330,7 +435,7 @@ class AttendanceHistoryController extends Controller
                     'shift_start' => $shiftStartTime ? substr($shiftStartTime, 0, 5) : null,
                     'shift_end' => $shiftEndTime ? substr($shiftEndTime, 0, 5) : null,
                     'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
-                    'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
+                    'check_out' => $checkOutLog ? (substr($checkOutLog, 11, 5) . (substr($checkOutLog, 0, 10) !== $dateStr ? ' (Besok)' : '')) : null,
                     'status' => 'Off',
                     'late_minutes' => 0,
                     'notes' => '',
@@ -345,59 +450,78 @@ class AttendanceHistoryController extends Controller
                         $record['status'] = 'Libur';
                         $record['notes'] = 'Libur Nasional / Yayasan';
                     }
-                } elseif ($hasShiftToday) {
-                    if ($checkInLog || $checkOutLog) {
-                        $isLate = false;
-                        $lateMinutes = 0;
-                        if ($checkInLog && $shiftStartTime) {
-                            $checkInTime = Carbon::parse($checkInLog)->second(0);
-                            $expectedInTime = Carbon::parse($dateStr . ' ' . $shiftStartTime)->second(0);
-                            if ($checkInTime > $expectedInTime) {
-                                $isLate = true;
-                                $lateMinutes = $checkInTime->diffInMinutes($expectedInTime);
+                } elseif ($activeShift) {
+                    if ($hasShiftToday) {
+                        if ($checkInLog || $checkOutLog) {
+                            $isLate = false;
+                            $lateMinutes = 0;
+                            if ($checkInLog && $shiftStartTime) {
+                                $checkInTime = Carbon::parse($checkInLog)->second(0);
+                                $expectedInTime = Carbon::parse($dateStr . ' ' . $shiftStartTime)->second(0);
+                                if ($checkInTime > $expectedInTime) {
+                                    $isLate = true;
+                                    $lateMinutes = $checkInTime->diffInMinutes($expectedInTime);
+                                }
+                            }
+                            $record['late_minutes'] = $lateMinutes;
+                            $record['status'] = $isLate ? 'Terlambat' : 'Hadir';
+                        } elseif ($isOnLeave) {
+                            if ($statusCode === 'S') {
+                                $record['status'] = 'Sakit';
+                            } elseif ($statusCode === 'C') {
+                                $record['status'] = 'Cuti';
+                            } elseif ($statusCode === 'H' || $getsBonus) {
+                                $record['status'] = 'Dinas';
+                            } else {
+                                $record['status'] = 'Izin';
+                            }
+                            $record['notes'] = $leaveReason;
+                        } else {
+                            $now = Carbon::now('Asia/Jakarta');
+                            $shiftStartDateTime = Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                            if ($now->lessThan($shiftStartDateTime)) {
+                                $record['status'] = 'Pending';
+                            } else {
+                                $record['status'] = 'Alfa';
                             }
                         }
-                        $record['late_minutes'] = $lateMinutes;
-                        $record['status'] = $isLate ? 'Terlambat' : 'Hadir';
-                    } elseif ($isOnLeave) {
-                        if ($statusCode === 'S') {
-                            $record['status'] = 'Sakit';
-                        } elseif ($statusCode === 'C') {
-                            $record['status'] = 'Cuti';
-                        } elseif ($statusCode === 'H' || $getsBonus) {
-                            $record['status'] = 'Dinas';
+                    } elseif ($isOffShift) {
+                        if ($checkInLog) {
+                            $record['status'] = 'Hadir';
+                            $record['notes'] = ($isShiftWorker || $matchedRosterAssignment) ? 'Masuk Kerja' : 'Masuk di Hari Libur Pekan';
                         } else {
-                            $record['status'] = 'Izin';
+                            $record['status'] = 'Off';
+                            $record['notes'] = 'Jadwal Libur';
                         }
-                        $record['notes'] = $leaveReason;
                     } else {
-                        $now = Carbon::now('Asia/Jakarta');
-                        $shiftStartDateTime = Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
-                        if ($now->lessThan($shiftStartDateTime)) {
-                            $record['status'] = 'Pending';
+                        if ($checkInLog) {
+                            $record['status'] = 'Hadir';
+                            $record['notes'] = 'Masuk Kerja';
                         } else {
-                            $record['status'] = 'Alfa';
+                            if ($dayOfWeek == 0) {
+                                $record['status'] = 'Libur';
+                                $record['notes'] = 'Hari Minggu (Non-Shift)';
+                            } else {
+                                $record['status'] = 'Off';
+                            }
                         }
                     }
                 } elseif ($isOffShift) {
                     if ($checkInLog) {
                         $record['status'] = 'Hadir';
-                        $record['notes'] = 'Masuk di Hari Libur Pekan';
+                        $record['notes'] = ($isShiftWorker || $matchedRosterAssignment) ? 'Masuk Kerja' : 'Masuk di Hari Libur Pekan';
                     } else {
                         $record['status'] = 'Off';
-                        $record['notes'] = 'Jadwal Libur Pekan/Shift';
+                        $record['notes'] = 'Jadwal Libur';
                     }
                 } else {
+                    // No shift/schedule assigned at all
                     if ($checkInLog) {
                         $record['status'] = 'Hadir';
-                        $record['notes'] = 'Masuk Kerja';
+                        $record['notes'] = 'Masuk Kerja (Tanpa Jadwal)';
                     } else {
-                        if ($dayOfWeek == 0) {
-                            $record['status'] = 'Libur';
-                            $record['notes'] = 'Hari Minggu (Non-Shift)';
-                        } else {
-                            $record['status'] = 'Off';
-                        }
+                        $record['status'] = '-';
+                        $record['notes'] = '-';
                     }
                 }
 
@@ -420,12 +544,16 @@ class AttendanceHistoryController extends Controller
             }
         }
 
-        // Sort descending date, then ascending name
+        // Sort descending date, then ascending unit name, then ascending name
         usort($historyList, function($a, $b) {
             $dateA = $a['date']->format('Y-m-d');
             $dateB = $b['date']->format('Y-m-d');
             if ($dateA !== $dateB) {
                 return strcmp($dateB, $dateA);
+            }
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
             }
             return strcmp($a['employee_name'], $b['employee_name']);
         });
@@ -439,10 +567,20 @@ class AttendanceHistoryController extends Controller
 
         // Paginator
         $total = count($historyList);
-        $perPage = (int) $request->query('per_page', 50);
+        $perPageInput = $request->query('per_page', 50);
         $page = (int) $request->query('page', 1);
 
-        $paginatedItems = array_slice($historyList, ($page - 1) * $perPage, $perPage);
+        if ($perPageInput === 'all') {
+            $perPage = $total > 0 ? $total : 50;
+            $paginatedItems = $historyList;
+        } else {
+            $perPage = (int) $perPageInput;
+            if ($perPage <= 0) {
+                $perPage = 50;
+            }
+            $paginatedItems = array_slice($historyList, ($page - 1) * $perPage, $perPage);
+        }
+
         $paginatedHistory = new LengthAwarePaginator(
             $paginatedItems,
             $total,
@@ -459,13 +597,14 @@ class AttendanceHistoryController extends Controller
             'startDateReq',
             'endDateReq',
             'positions',
-            'selectedStatus'
+            'selectedStatus',
+            'unitPositions'
         ));
     }
 
     public function export(Request $request)
     {
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
         ini_set('max_execution_time', 300);
 
         $startDateReq = $request->query('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
@@ -537,14 +676,16 @@ class AttendanceHistoryController extends Controller
                 return $leave->school_unit_id . '_' . $leave->employee_id;
             });
 
-        // 3. Fetch shifts
+        $shiftsMonthStart = $startDate->copy()->startOfMonth()->format('Y-m-d');
+        $shiftsMonthEnd = $endDate->copy()->endOfMonth()->format('Y-m-d');
+
         $shiftsData = EmployeeWorkingShift::with(['workingShift.details'])
             ->whereIn('employee_id', $employeeIds)
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->where('start_date', '<=', $endDate->format('Y-m-d'))
-                      ->where(function($q) use ($startDate) {
+            ->where(function ($query) use ($shiftsMonthStart, $shiftsMonthEnd) {
+                $query->where('start_date', '<=', $shiftsMonthEnd)
+                      ->where(function($q) use ($shiftsMonthStart) {
                           $q->whereNull('end_date')
-                            ->orWhere('end_date', '>=', $startDate->format('Y-m-d'));
+                            ->orWhere('end_date', '>=', $shiftsMonthStart);
                       });
             })
             ->get()
@@ -576,12 +717,6 @@ class AttendanceHistoryController extends Controller
             ->get()
             ->groupBy('uid');
 
-        // Fetch default shift
-        $defaultShift = \App\Models\WorkingShift::with('details')->where('code', 'default')->first();
-        if (!$defaultShift) {
-            $defaultShift = \App\Models\WorkingShift::with('details')->first();
-        }
-
         // Build list
         $historyList = [];
 
@@ -593,11 +728,12 @@ class AttendanceHistoryController extends Controller
             if (!$uid || !$empId) continue;
 
             $userLogs = $logsData->get((string)$uid) ? $logsData->get((string)$uid)->pluck('timestamp')->sort()->values()->toArray() : [];
+            $consumedLogs = [];
 
             $currentDate = $startDate->copy();
             while ($currentDate <= $endDate) {
                 $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeek;
+                $dayOfWeek = $currentDate->dayOfWeekIso;
 
                 $isHoliday = isset($unitHolidays[$unit][$dateStr]) ?? false;
                 
@@ -630,11 +766,12 @@ class AttendanceHistoryController extends Controller
                 $isOffShift = false;
                 $shiftStartTime = null;
                 $shiftEndTime = null;
-                $shiftName = 'Shift Kerja';
+                $shiftName = '-';
                 $shiftKey = $unit . '_' . $empId;
                 $isShiftWorker = false;
+                $matchedRosterAssignment = null;
 
-                // Resolve Assigned or Default Shift
+                // Resolve Assigned Shift
                 $matchedAssignment = null;
                 if (isset($shiftsData[$shiftKey])) {
                     foreach ($shiftsData[$shiftKey] as $assignment) {
@@ -650,7 +787,7 @@ class AttendanceHistoryController extends Controller
                     }
                 }
 
-                $activeShift = $matchedAssignment ?: $defaultShift;
+                $activeShift = $matchedAssignment;
 
                 if ($activeShift) {
                     $shiftName = $activeShift->name;
@@ -666,13 +803,63 @@ class AttendanceHistoryController extends Controller
                             $shiftEndTime = $detail->end_time;
                         }
                     }
+                } else {
+                    // Check if they are on a roster in this same month
+                    $monthStr = substr($dateStr, 0, 7);
+                    $matchedRosterAssignment = null;
+                    if (isset($shiftsData[$shiftKey])) {
+                        foreach ($shiftsData[$shiftKey] as $assignment) {
+                            $assignStartMonth = substr($assignment->start_date instanceof \Carbon\Carbon ? $assignment->start_date->format('Y-m-d') : $assignment->start_date, 0, 7);
+                            if ($assignment->roster_name && $assignStartMonth === $monthStr) {
+                                $matchedRosterAssignment = $assignment;
+                                break;
+                            }
+                        }
+                    }
+                    if ($matchedRosterAssignment) {
+                        $shiftName = $matchedRosterAssignment->roster_name;
+                        $isOffShift = true;
+                    }
                 }
 
                 if ($isShiftWorker && !$hasShiftToday && !$isOffShift) {
                     $isOffShift = true;
                 }
 
-                // Check-in and Check-out Log retrieval
+                // Check-in and Check-out Log retrieval using unconsumed logs
+                $availableLogs = array_diff($userLogs, $consumedLogs);
+
+                // Consume orphan night shift checkout: if we have an early morning scan on this day (before 10:00),
+                // and there is an unconsumed scan from yesterday evening (after 17:00), consume both of them!
+                $yesterdayDateStr = $currentDate->copy()->subDay()->format('Y-m-d');
+                $yesterdayNightScan = null;
+                $todayMorningScan = null;
+                
+                foreach ($availableLogs as $tsStr) {
+                    if (substr($tsStr, 0, 10) === $yesterdayDateStr) {
+                        $timePart = substr($tsStr, 11, 8);
+                        if ($timePart >= '17:00:00' && $timePart <= '23:59:59') {
+                            if (!$yesterdayNightScan || $tsStr < $yesterdayNightScan) {
+                                $yesterdayNightScan = $tsStr;
+                            }
+                        }
+                    }
+                    if (substr($tsStr, 0, 10) === $dateStr) {
+                        $timePart = substr($tsStr, 11, 8);
+                        if ($timePart >= '04:00:00' && $timePart <= '10:00:00') {
+                            if (!$todayMorningScan || $tsStr < $todayMorningScan) {
+                                $todayMorningScan = $tsStr;
+                            }
+                        }
+                    }
+                }
+                
+                if ($yesterdayNightScan && $todayMorningScan) {
+                    $consumedLogs[] = $yesterdayNightScan;
+                    $consumedLogs[] = $todayMorningScan;
+                    $availableLogs = array_diff($userLogs, $consumedLogs);
+                }
+
                 $checkInLog = null;
                 $checkOutLog = null;
 
@@ -689,7 +876,7 @@ class AttendanceHistoryController extends Controller
                     $outStart = $expectedOut->copy()->subHours(6);
                     $outEnd = $expectedOut->copy()->addHours(6);
 
-                    foreach ($userLogs as $tsStr) {
+                    foreach ($availableLogs as $tsStr) {
                         $ts = Carbon::parse($tsStr);
                         if ($ts->between($inStart, $inEnd)) {
                             if (!$checkInLog || $ts < Carbon::parse($checkInLog)) {
@@ -725,20 +912,63 @@ class AttendanceHistoryController extends Controller
                         }
                     }
                 } else {
-                    // Rest day (Off / Holiday / Sunday) - search all scans on this day
-                    $dayScans = [];
-                    foreach ($userLogs as $tsStr) {
+                    // Rest day (Off / Holiday / Sunday)
+                    
+                    // 1. Try to find a night shift starting on this rest day (check-in after 17:00, check-out next morning before 10:00)
+                    $nightCheckIn = null;
+                    $nightCheckOut = null;
+                    
+                    foreach ($availableLogs as $tsStr) {
                         if (substr($tsStr, 0, 10) === $dateStr) {
-                            $dayScans[] = $tsStr;
+                            $timePart = substr($tsStr, 11, 8);
+                            if ($timePart >= '17:00:00' && $timePart <= '23:59:59') {
+                                if (!$nightCheckIn || $tsStr < $nightCheckIn) {
+                                    $nightCheckIn = $tsStr;
+                                }
+                            }
                         }
                     }
-                    if (count($dayScans) > 0) {
-                        sort($dayScans);
-                        $checkInLog = $dayScans[0];
-                        if (count($dayScans) > 1) {
-                            $checkOutLog = $dayScans[count($dayScans) - 1];
+                    
+                    if ($nightCheckIn) {
+                        $nextDateStr = $currentDate->copy()->addDay()->format('Y-m-d');
+                        foreach ($availableLogs as $tsStr) {
+                            if (substr($tsStr, 0, 10) === $nextDateStr) {
+                                $timePart = substr($tsStr, 11, 8);
+                                if ($timePart >= '04:00:00' && $timePart <= '10:00:00') {
+                                    if (!$nightCheckOut || $tsStr < $nightCheckOut) {
+                                        $nightCheckOut = $tsStr;
+                                    }
+                                }
+                            }
                         }
                     }
+                    
+                    if ($nightCheckIn) {
+                        $checkInLog = $nightCheckIn;
+                        $checkOutLog = $nightCheckOut;
+                    } else {
+                        // 2. Normal day shift on rest day (all scans on this day)
+                        $dayScans = [];
+                        foreach ($availableLogs as $tsStr) {
+                            if (substr($tsStr, 0, 10) === $dateStr) {
+                                $dayScans[] = $tsStr;
+                            }
+                        }
+                        if (count($dayScans) > 0) {
+                            sort($dayScans);
+                            $checkInLog = $dayScans[0];
+                            if (count($dayScans) > 1) {
+                                $checkOutLog = $dayScans[count($dayScans) - 1];
+                            }
+                        }
+                    }
+                }
+
+                if ($checkInLog) {
+                    $consumedLogs[] = $checkInLog;
+                }
+                if ($checkOutLog && $checkOutLog !== $checkInLog) {
+                    $consumedLogs[] = $checkOutLog;
                 }
 
                 $record = [
@@ -753,7 +983,7 @@ class AttendanceHistoryController extends Controller
                     'shift_start' => $shiftStartTime ? substr($shiftStartTime, 0, 5) : null,
                     'shift_end' => $shiftEndTime ? substr($shiftEndTime, 0, 5) : null,
                     'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
-                    'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
+                    'check_out' => $checkOutLog ? (substr($checkOutLog, 11, 5) . (substr($checkOutLog, 0, 10) !== $dateStr ? ' (Besok)' : '')) : null,
                     'status' => 'Off',
                     'late_minutes' => 0,
                     'notes' => '',
@@ -768,59 +998,78 @@ class AttendanceHistoryController extends Controller
                         $record['status'] = 'Libur';
                         $record['notes'] = 'Libur Nasional / Yayasan';
                     }
-                } elseif ($hasShiftToday) {
-                    if ($checkInLog || $checkOutLog) {
-                        $isLate = false;
-                        $lateMinutes = 0;
-                        if ($checkInLog && $shiftStartTime) {
-                            $checkInTime = Carbon::parse($checkInLog)->second(0);
-                            $expectedInTime = Carbon::parse($dateStr . ' ' . $shiftStartTime)->second(0);
-                            if ($checkInTime > $expectedInTime) {
-                                $isLate = true;
-                                $lateMinutes = $checkInTime->diffInMinutes($expectedInTime);
+                } elseif ($activeShift) {
+                    if ($hasShiftToday) {
+                        if ($checkInLog || $checkOutLog) {
+                            $isLate = false;
+                            $lateMinutes = 0;
+                            if ($checkInLog && $shiftStartTime) {
+                                $checkInTime = Carbon::parse($checkInLog)->second(0);
+                                $expectedInTime = Carbon::parse($dateStr . ' ' . $shiftStartTime)->second(0);
+                                if ($checkInTime > $expectedInTime) {
+                                    $isLate = true;
+                                    $lateMinutes = $checkInTime->diffInMinutes($expectedInTime);
+                                }
+                            }
+                            $record['late_minutes'] = $lateMinutes;
+                            $record['status'] = $isLate ? 'Terlambat' : 'Hadir';
+                        } elseif ($isOnLeave) {
+                            if ($statusCode === 'S') {
+                                $record['status'] = 'Sakit';
+                            } elseif ($statusCode === 'C') {
+                                $record['status'] = 'Cuti';
+                            } elseif ($statusCode === 'H' || $getsBonus) {
+                                $record['status'] = 'Dinas';
+                            } else {
+                                $record['status'] = 'Izin';
+                            }
+                            $record['notes'] = $leaveReason;
+                        } else {
+                            $now = Carbon::now('Asia/Jakarta');
+                            $shiftStartDateTime = Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                            if ($now->lessThan($shiftStartDateTime)) {
+                                $record['status'] = 'Pending';
+                            } else {
+                                $record['status'] = 'Alfa';
                             }
                         }
-                        $record['late_minutes'] = $lateMinutes;
-                        $record['status'] = $isLate ? 'Terlambat' : 'Hadir';
-                    } elseif ($isOnLeave) {
-                        if ($statusCode === 'S') {
-                            $record['status'] = 'Sakit';
-                        } elseif ($statusCode === 'C') {
-                            $record['status'] = 'Cuti';
-                        } elseif ($statusCode === 'H' || $getsBonus) {
-                            $record['status'] = 'Dinas';
+                    } elseif ($isOffShift) {
+                        if ($checkInLog) {
+                            $record['status'] = 'Hadir';
+                            $record['notes'] = ($isShiftWorker || $matchedRosterAssignment) ? 'Masuk Kerja' : 'Masuk di Hari Libur Pekan';
                         } else {
-                            $record['status'] = 'Izin';
+                            $record['status'] = 'Off';
+                            $record['notes'] = 'Jadwal Libur';
                         }
-                        $record['notes'] = $leaveReason;
                     } else {
-                        $now = Carbon::now('Asia/Jakarta');
-                        $shiftStartDateTime = Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
-                        if ($now->lessThan($shiftStartDateTime)) {
-                            $record['status'] = 'Pending';
+                        if ($checkInLog) {
+                            $record['status'] = 'Hadir';
+                            $record['notes'] = 'Masuk Kerja';
                         } else {
-                            $record['status'] = 'Alfa';
+                            if ($dayOfWeek == 0) {
+                                $record['status'] = 'Libur';
+                                $record['notes'] = 'Hari Minggu (Non-Shift)';
+                            } else {
+                                $record['status'] = 'Off';
+                            }
                         }
                     }
                 } elseif ($isOffShift) {
                     if ($checkInLog) {
                         $record['status'] = 'Hadir';
-                        $record['notes'] = 'Masuk di Hari Libur Pekan';
+                        $record['notes'] = ($isShiftWorker || $matchedRosterAssignment) ? 'Masuk Kerja' : 'Masuk di Hari Libur Pekan';
                     } else {
                         $record['status'] = 'Off';
-                        $record['notes'] = 'Jadwal Libur Pekan/Shift';
+                        $record['notes'] = 'Jadwal Libur';
                     }
                 } else {
+                    // No shift/schedule assigned at all
                     if ($checkInLog) {
                         $record['status'] = 'Hadir';
-                        $record['notes'] = 'Masuk Kerja';
+                        $record['notes'] = 'Masuk Kerja (Tanpa Jadwal)';
                     } else {
-                        if ($dayOfWeek == 0) {
-                            $record['status'] = 'Libur';
-                            $record['notes'] = 'Hari Minggu (Non-Shift)';
-                        } else {
-                            $record['status'] = 'Off';
-                        }
+                        $record['status'] = '-';
+                        $record['notes'] = '-';
                     }
                 }
 
@@ -843,12 +1092,16 @@ class AttendanceHistoryController extends Controller
             }
         }
 
-        // Sort descending date, then ascending name
+        // Sort descending date, then ascending unit name, then ascending name
         usort($historyList, function($a, $b) {
             $dateA = $a['date']->format('Y-m-d');
             $dateB = $b['date']->format('Y-m-d');
             if ($dateA !== $dateB) {
                 return strcmp($dateB, $dateA);
+            }
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
             }
             return strcmp($a['employee_name'], $b['employee_name']);
         });
@@ -860,6 +1113,7 @@ class AttendanceHistoryController extends Controller
             });
         }
 
+        \Illuminate\Support\Facades\Log::info("HISTORY LIST COUNT FOR EXPORT: " . count($historyList));
         $format = $request->query('format', 'excel');
         $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
 

@@ -8,7 +8,7 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Melihat, memantau, dan menyaring riwayat log absensi harian pegawai secara terperinci.</p>
             </div>
             
-            <!-- EXPORT DROPDOWN -->
+            <!-- EXPORT DROPDOWN (Temporarily Disabled due to 504 Gateway Timeout)
             <div x-data="{ open: false }" class="relative inline-block text-left w-full md:w-auto">
                 <button type="button" @click="open = !open" @click.outside="open = false" class="w-full md:w-auto justify-center h-9 px-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
                     <i data-lucide="download" class="w-4 h-4"></i>
@@ -22,69 +22,69 @@
                         Excel (.xlsx)
                     </a>
                     <a href="{{ route('attendance-history.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 transition-colors">
-                        <i data-lucide="file-text" class="w-4 h-4 text-rose-600 dark:text-rose-500"></i>
+                        <i data-lucide="file-text" class="w-4 h-4 text-rose-650 dark:text-rose-500"></i>
                         PDF (.pdf)
                     </a>
                 </div>
             </div>
+            -->
         </section>
 
         <!-- FILTERS & SEARCH -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form method="GET" action="{{ route('attendance-history.index') }}" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full text-left">
+            <form method="GET" action="{{ route('attendance-history.index') }}" id="filter_form">
+                <input type="hidden" name="per_page" id="filter_per_page" value="{{ request('per_page', 50) }}">
+                <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 w-full">
                     
-                    <!-- Search Pegawai -->
-                    <div class="col-span-1 md:col-span-2">
+                    <!-- Search Input -->
+                    <div class="flex-grow min-w-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Cari Pegawai</label>
-                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
-                            <div class="pl-3 text-slate-400 dark:text-slate-500">
+                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
+                            <div class="pl-3 text-slate-450 dark:text-slate-500">
                                 <i data-lucide="search" class="w-4 h-4"></i>
                             </div>
-                            <input type="text" name="search" x-model="searchVal" placeholder="Nama atau NIP..."
+                            <input type="text" name="search" x-model="searchVal" x-ref="searchInput" placeholder="Cari nama pegawai..."
                                 style="border: none !important; outline: none !important; box-shadow: none !important;"
-                                class="w-full h-9 px-2 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
-                            <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $el.closest('form').submit();" class="h-9 px-2.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
+                                class="w-full h-10 px-2.5 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0">
+                            
+                            <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.focus();" class="h-10 px-2.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
                                 <i data-lucide="x" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- Mulai Tanggal -->
-                    <div>
+                    <div class="w-full lg:w-36 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai Tanggal</label>
-                        <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
+                        <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
                     </div>
 
                     <!-- Selesai Tanggal -->
-                    <div>
+                    <div class="w-full lg:w-36 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
+                        <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
                     </div>
 
                     <!-- Status Kehadiran -->
-                    <div>
+                    <div class="w-full lg:w-40 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Status Kehadiran</label>
-                        <select name="status" class="w-full text-xs h-9 px-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="status" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                             <option value="">Semua Status</option>
-                            <option value="Hadir" {{ request('status') === 'Hadir' ? 'selected' : '' }}>Hadir (Tepat Waktu)</option>
+                            <option value="Hadir" {{ request('status') === 'Hadir' ? 'selected' : '' }}>Hadir</option>
                             <option value="Terlambat" {{ request('status') === 'Terlambat' ? 'selected' : '' }}>Terlambat</option>
                             <option value="Alfa" {{ request('status') === 'Alfa' ? 'selected' : '' }}>Alfa</option>
                             <option value="Sakit" {{ request('status') === 'Sakit' ? 'selected' : '' }}>Sakit</option>
                             <option value="Izin" {{ request('status') === 'Izin' ? 'selected' : '' }}>Izin</option>
                             <option value="Cuti" {{ request('status') === 'Cuti' ? 'selected' : '' }}>Cuti</option>
-                            <option value="Dinas" {{ request('status') === 'Dinas' ? 'selected' : '' }}>Dinas / Tugas</option>
-                            <option value="Off" {{ request('status') === 'Off' ? 'selected' : '' }}>Libur Pekan (Off)</option>
-                            <option value="Libur" {{ request('status') === 'Libur' ? 'selected' : '' }}>Libur Resmi</option>
-                            <option value="Pending" {{ request('status') === 'Pending' ? 'selected' : '' }}>Pending (Belum Shift)</option>
+                            <option value="Dinas" {{ request('status') === 'Dinas' ? 'selected' : '' }}>Dinas</option>
                         </select>
                     </div>
 
                     <!-- Unit Sekolah -->
                     @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                    <div>
+                    <div class="w-full lg:w-44 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Unit Sekolah</label>
-                        <select name="unit_id" class="w-full text-xs h-9 px-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="unit_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                             <option value="">Semua Unit</option>
                             @foreach($schoolUnits as $unit)
                                 <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
@@ -95,52 +95,68 @@
                     </div>
                     @endif
 
-                </div>
-
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                    
-                    <!-- Per Page & Info -->
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-500">Tampilkan</span>
-                        <select name="per_page" onchange="this.form.submit()" class="text-xs h-8 px-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md text-slate-900 dark:text-slate-100 focus:outline-none cursor-pointer">
-                            <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
-                            <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
-                            <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
-                            <option value="200" {{ request('per_page') == '200' ? 'selected' : '' }}>200 baris</option>
+                    <!-- Jabatan / Posisi -->
+                    @if(isset($positions) && count($positions) > 0)
+                    <div class="w-full lg:w-44 shrink-0">
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Jabatan / Posisi</label>
+                        <select name="position" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                            <option value="">Semua Jabatan</option>
+                            @foreach($positions as $pos)
+                                <option value="{{ $pos }}" {{ request('position') === $pos ? 'selected' : '' }}>
+                                    {{ $pos }}
+                                </option>
+                            @endforeach
                         </select>
-                        <span class="text-xs text-slate-500">dari total {{ $paginatedHistory->total() }} entri</span>
                     </div>
+                    @endif
 
                     <!-- Action buttons -->
-                    <div class="flex items-center gap-2 justify-end">
-                        <button type="submit" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-250 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1.5">
-                            <i data-lucide="filter" class="w-3.5 h-3.5"></i>
-                            Terapkan Filter
+                    <div class="flex items-center gap-2 justify-end w-full lg:w-auto lg:ml-auto pb-0.5">
+                        <button type="submit" class="h-10 px-5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1.5">
+                            <i data-lucide="filter" class="w-4 h-4"></i>
+                            Terapkan
                         </button>
-                        
-                        @if(request()->hasAny(['search', 'start_date', 'end_date', 'status', 'unit_id', 'position', 'per_page']))
-                            <a href="{{ route('attendance-history.index') }}" class="inline-flex items-center justify-center h-9 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5">
-                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        @if(request()->hasAny(['search', 'start_date', 'end_date', 'status', 'unit_id', 'position']))
+                            <a href="{{ route('attendance-history.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5" title="Reset Filter">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                                 Reset
                             </a>
                         @endif
                     </div>
+
                 </div>
             </form>
         </section>
 
         <!-- TABLE SECTION -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
-            <div class="overflow-x-auto w-full">
+            <!-- Header Table Card -->
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Riwayat Kehadiran Pegawai</h3>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="text-slate-500">Tampilkan</span>
+                    <select onchange="document.getElementById('filter_per_page').value = this.value; document.getElementById('filter_form').submit();" class="text-xs h-8 px-2 bg-white dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-md text-slate-900 dark:text-slate-100 focus:outline-none cursor-pointer">
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                        <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                        <option value="200" {{ request('per_page') == '200' ? 'selected' : '' }}>200 baris</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                    </select>
+                    <span class="text-slate-500">dari total {{ $paginatedHistory->total() }} entri</span>
+                </div>
+            </div>
+            <div class="overflow-auto max-h-[600px] w-full relative">
                 <table class="w-full text-xs border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 text-slate-500 dark:text-slate-400 font-semibold">
+                        <tr class="sticky top-0 z-10 border-b border-slate-200 dark:border-slate-850 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-semibold shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
                             <th class="px-4 py-3 text-center w-12">No</th>
                             <th class="px-4 py-3 text-left">Pegawai</th>
                             <th class="px-4 py-3 text-left">Hari & Tanggal</th>
-                            <th class="px-4 py-3 text-left">Jadwal Shift</th>
-                            <th class="px-4 py-3 text-center">Scan Masuk</th>
-                            <th class="px-4 py-3 text-center">Scan Keluar</th>
+                            <th class="px-4 py-3 text-left">Jadwal Kerja</th>
+                            <th class="px-4 py-3 text-center">Waktu Masuk</th>
+                            <th class="px-4 py-3 text-center">Waktu Pulang</th>
                             <th class="px-4 py-3 text-center">Status</th>
                             <th class="px-4 py-3 text-left max-w-xs">Keterangan</th>
                         </tr>
@@ -161,28 +177,32 @@
                                 <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">
                                     {{ $row['date_formatted'] }}
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="font-medium text-slate-700 dark:text-slate-300">{{ $row['shift_name'] }}</div>
-                                    @if($row['shift_start'])
-                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-                                            {{ $row['shift_start'] }} - {{ $row['shift_end'] }}
-                                        </div>
+                                <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">
+                                    @if($row['shift_name'] === '-')
+                                        <span>-</span>
                                     @else
-                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">Libur</div>
+                                        <div class="text-slate-800 dark:text-slate-200 font-semibold">{{ $row['shift_name'] }}</div>
+                                        @if($row['shift_start'])
+                                            <div class="text-[10px] text-slate-400 dark:text-slate-400 font-mono">
+                                                {{ $row['shift_start'] }} - {{ $row['shift_end'] }}
+                                            </div>
+                                        @else
+                                            <div class="text-[10px] text-slate-400 dark:text-slate-400 font-mono">Libur</div>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-center font-mono font-medium">
                                     @if($row['check_in'])
-                                        <span class="text-slate-800 dark:text-slate-105">{{ $row['check_in'] }}</span>
+                                        <span class="text-slate-800 dark:text-slate-200">{{ $row['check_in'] }}</span>
                                     @else
-                                        <span class="text-slate-300 dark:text-slate-700">-</span>
+                                        <span class="text-slate-300 dark:text-slate-650">-</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-center font-mono font-medium">
                                     @if($row['check_out'])
-                                        <span class="text-slate-800 dark:text-slate-105">{{ $row['check_out'] }}</span>
+                                        <span class="text-slate-800 dark:text-slate-200">{{ $row['check_out'] }}</span>
                                     @else
-                                        <span class="text-slate-300 dark:text-slate-700">-</span>
+                                        <span class="text-slate-300 dark:text-slate-650">-</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-center">
@@ -205,7 +225,7 @@
                                         {{ $row['status'] }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400 max-w-xs truncate" title="{{ $row['notes'] }}">
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400 max-w-xs truncate">
                                     @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
                                         <span class="text-amber-600 dark:text-amber-500 font-semibold">Terlambat {{ $row['late_minutes'] }} menit</span>
                                     @elseif($row['notes'])
@@ -231,30 +251,51 @@
             </div>
 
             <!-- PAGINATION FOOTER -->
+            <!-- PAGINATION FOOTER -->
             @if($paginatedHistory->hasPages())
                 <div class="px-4 py-3 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between">
                     <div class="flex-1 flex justify-between sm:hidden">
                         {{ $paginatedHistory->links('pagination::simple-tailwind') }}
                     </div>
-                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-xs text-slate-500">
-                                Menampilkan
-                                <span class="font-medium text-slate-700 dark:text-slate-350">{{ $paginatedHistory->firstItem() ?? 0 }}</span>
-                                sampai
-                                <span class="font-medium text-slate-700 dark:text-slate-350">{{ $paginatedHistory->lastItem() ?? 0 }}</span>
-                                dari
-                                <span class="font-medium text-slate-700 dark:text-slate-350">{{ $paginatedHistory->total() }}</span>
-                                hasil
-                            </p>
-                        </div>
-                        <div>
-                            {{ $paginatedHistory->links('pagination::tailwind') }}
-                        </div>
+                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-end">
+                        {{ $paginatedHistory->links('pagination::tailwind') }}
                     </div>
                 </div>
             @endif
         </section>
 
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const unitPositions = @json($unitPositions ?? []);
+            const unitSelect = document.querySelector('select[name="unit_id"]');
+            const positionSelect = document.querySelector('select[name="position"]');
+            
+            if (unitSelect && positionSelect) {
+                const initialSelectedPosition = "{{ request('position') }}";
+                
+                function updatePositions() {
+                    const selectedUnit = unitSelect.value;
+                    const positions = unitPositions[selectedUnit] || unitPositions[''] || [];
+                    
+                    const currentValue = positionSelect.value || initialSelectedPosition;
+                    
+                    positionSelect.innerHTML = '<option value="">Semua Jabatan</option>';
+                    
+                    positions.forEach(pos => {
+                        const opt = document.createElement('option');
+                        opt.value = pos;
+                        opt.textContent = pos;
+                        if (pos === currentValue) {
+                            opt.selected = true;
+                        }
+                        positionSelect.appendChild(opt);
+                    });
+                }
+                
+                unitSelect.addEventListener('change', updatePositions);
+            }
+        });
+    </script>
 </x-admin-layout>
