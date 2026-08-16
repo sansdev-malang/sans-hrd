@@ -172,7 +172,7 @@
                                      <div class="flex gap-2 justify-end">
                                          @if($emp['payslip'])
                                              <a href="{{ Storage::url($emp['payslip']->file_path) }}" target="_blank"
-                                                class="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-855 dark:hover:bg-slate-800 text-slate-750 dark:text-slate-350 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1" title="Lihat Slip">
+                                                class="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1" title="Lihat Slip">
                                                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                                  Lihat
                                              </a>
