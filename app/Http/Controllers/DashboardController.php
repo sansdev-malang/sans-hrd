@@ -204,7 +204,7 @@ class DashboardController extends Controller
             ->get();
 
         try {
-            $employees = $this->schoolService->getSdEmployees();
+            $employees = $sdEmployees;
             $employeeMap = collect($employees)->keyBy(function ($item) {
                 return $item['unit_id'] . '-' . $item['id'];
             })->toArray();

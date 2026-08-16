@@ -64,41 +64,47 @@ class SchoolUnitService
      */
     public function getSdAttendances(string $date): array
     {
-        $activeUnits = SchoolUnit::where('is_active', true)->get();
-        $allAttendances = [];
+        $cacheKey = 'sd_attendances_' . $date;
+        $isToday = ($date === date('Y-m-d'));
+        $cacheTime = $isToday ? 60 : 86400; // 1 minute for today, 24 hours for past dates
 
-        if ($activeUnits->isEmpty()) {
-            return [];
-        }
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, $cacheTime, function() use ($date) {
+            $activeUnits = SchoolUnit::where('is_active', true)->get();
+            $allAttendances = [];
 
-        $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($activeUnits, $date) {
-            return $activeUnits->map(function ($unit) use ($pool, $date) {
-                return $pool->as($unit->id)
-                    ->withHeaders([
-                        'X-API-TOKEN' => $unit->api_token,
-                        'Accept' => 'application/json',
-                    ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/attendances', [
-                        'date' => $date
-                    ]);
-            });
-        });
-
-        foreach ($activeUnits as $unit) {
-            $response = $responses[$unit->id] ?? null;
-
-            if ($response instanceof \Illuminate\Http\Client\Response && $response->successful()) {
-                $attendances = $response->json('data') ?? [];
-                foreach ($attendances as &$att) {
-                    $att['unit_name'] = $unit->name;
-                    $att['unit_id'] = $unit->id;
-                }
-                $allAttendances = array_merge($allAttendances, $attendances);
-            } else {
-                $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
-                Log::error("Failed to fetch attendances from unit {$unit->name}. Status: {$status}");
+            if ($activeUnits->isEmpty()) {
+                return [];
             }
-        }
 
-        return $allAttendances;
+            $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($activeUnits, $date) {
+                return $activeUnits->map(function ($unit) use ($pool, $date) {
+                    return $pool->as($unit->id)
+                        ->withHeaders([
+                            'X-API-TOKEN' => $unit->api_token,
+                            'Accept' => 'application/json',
+                        ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/attendances', [
+                            'date' => $date
+                        ]);
+                });
+            });
+
+            foreach ($activeUnits as $unit) {
+                $response = $responses[$unit->id] ?? null;
+
+                if ($response instanceof \Illuminate\Http\Client\Response && $response->successful()) {
+                    $attendances = $response->json('data') ?? [];
+                    foreach ($attendances as &$att) {
+                        $att['unit_name'] = $unit->name;
+                        $att['unit_id'] = $unit->id;
+                    }
+                    $allAttendances = array_merge($allAttendances, $attendances);
+                } else {
+                    $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
+                    Log::error("Failed to fetch attendances from unit {$unit->name}. Status: {$status}");
+                }
+            }
+
+            return $allAttendances;
+        });
     }
 }
