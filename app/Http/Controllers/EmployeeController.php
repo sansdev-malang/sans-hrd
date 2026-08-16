@@ -415,6 +415,7 @@ class EmployeeController extends Controller
         $response = $req->post(rtrim($unit->api_url, '/') . '/employees', $apiData);
 
         if ($response->successful()) {
+            \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
             // If zkteco_uid is provided, queue ADMS commands for selected devices
             $zkteco_uid = $request->input('zkteco_uid');
             $device_ids = $request->input('zkteco_device_ids', []);
@@ -584,6 +585,7 @@ class EmployeeController extends Controller
         }
 
         if ($response->successful()) {
+            \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
             // If zkteco_uid is provided, queue ADMS commands for selected devices
             $zkteco_uid = $request->input('zkteco_uid');
             $device_ids = $request->input('zkteco_device_ids', []);
@@ -653,6 +655,7 @@ class EmployeeController extends Controller
         ])->delete(rtrim($unit->api_url, '/') . '/employees/' . $id);
 
         if ($deleteResponse->successful()) {
+            \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
             // Jika berhasil dihapus di aplikasi, antrekan perintah hapus ke mesin
             if ($zkteco_uid) {
                 $mappings = EmployeeDeviceMapping::where('zkteco_uid', $zkteco_uid)->get();
@@ -857,6 +860,7 @@ class EmployeeController extends Controller
         }
 
         if ($importedCount > 0) {
+            \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
             $msg = "$importedCount pegawai berhasil diimpor.";
             if (count($errors) > 0) {
                 return redirect()->route('employees.index')->with('success', $msg)->with('import_errors', $errors);

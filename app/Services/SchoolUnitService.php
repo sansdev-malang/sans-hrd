@@ -13,7 +13,7 @@ class SchoolUnitService
      */
     public function getSdEmployees(): array
     {
-        return \Illuminate\Support\Facades\Cache::remember('sd_employees_all', 300, function() {
+        return \Illuminate\Support\Facades\Cache::remember('sd_employees_all', 86400, function() {
             $activeUnits = SchoolUnit::where('is_active', true)->get();
             $allEmployees = [];
 

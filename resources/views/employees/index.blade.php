@@ -94,9 +94,11 @@
             @endforeach
         </section>
 
-        <!-- FILTERS & SEARCH -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form id="filter-form" data-no-loader="true" method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+        <!-- FILTERS & SEARCH & DATA TABLE WRAPPER -->
+        <div id="employee-table-container" class="w-full space-y-6">
+            <!-- FILTERS & SEARCH -->
+            <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
+                <form id="filter-form" data-no-loader="true" method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
                     <!-- Search Box Welded with Cari Button (Premium Input Group) -->
@@ -158,8 +160,7 @@
         </section>
 
         <!-- DATA TABLE -->
-        <div id="employee-table-container" class="w-full">
-            <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
             <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center flex-wrap gap-2 bg-white dark:bg-slate-900">
                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                     @if(request('unit') && $schoolUnits->firstWhere('id', request('unit')))
@@ -1595,14 +1596,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Intercept form submit
-    filterForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(filterForm);
-        const queryParams = new URLSearchParams(formData).toString();
-        // Use relative URL to prevent CORS/domain mismatch blocks
-        const url = `${window.location.pathname}?${queryParams}`;
-        loadTableContent(url);
+    // Intercept form submit globally (delegated) since form is replaced by AJAX
+    document.addEventListener('submit', (e) => {
+        const form = e.target.closest('#filter-form');
+        if (form) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const queryParams = new URLSearchParams(formData).toString();
+            // Use relative URL to prevent CORS/domain mismatch blocks
+            const url = `${window.location.pathname}?${queryParams}`;
+            loadTableContent(url);
+        }
     });
 
     // Intercept pagination link clicks and reset filter button clicks
