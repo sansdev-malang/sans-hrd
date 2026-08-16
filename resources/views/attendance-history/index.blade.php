@@ -30,64 +30,55 @@
         </section>
 
         <!-- FILTERS & SEARCH -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full text-left">
-            <form method="GET" action="{{ route('attendance-history.index') }}" id="history-filter-form" data-no-loader="true">
-                <input type="hidden" name="per_page" id="filter_per_page" value="{{ request('per_page', 50) }}">
-                <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 w-full">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
+            <form method="GET" action="{{ route('attendance-history.index') }}" id="history-filter-form" data-no-loader="true" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                
+                <!-- Left Side: Search & Filters -->
+                <div class="flex flex-wrap items-center gap-2 flex-1">
                     
-                    <!-- Search Input -->
-                    <div class="flex-grow min-w-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Cari Pegawai</label>
-                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-350 dark:focus-within:border-slate-700">
-                            <input type="text" name="search" x-model="searchVal" x-ref="searchInput" placeholder="Cari nama pegawai..."
-                                style="border: none !important; outline: none !important; box-shadow: none !important;"
-                                class="w-full h-10 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0">
-                            
-                            <!-- Clear Button (x) -->
-                            <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; triggerFilterForm($el);" class="h-10 px-2 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
-                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                            </button>
-                            
-                            <!-- Cari Button (Welded to the right) -->
-                            <button type="submit" class="h-10 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold border-l border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1 cursor-pointer">
-                                <i data-lucide="search" class="w-3.5 h-3.5"></i>
-                                <span>Cari</span>
-                            </button>
-                        </div>
+                    <!-- Search Box Welded with Cari Button (Premium Input Group) -->
+                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
+                        <input type="text" name="search" x-model="searchVal" x-ref="searchInput" placeholder="Cari nama pegawai..."
+                            style="border: none !important; outline: none !important; box-shadow: none !important;"
+                            class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
+                        
+                        <!-- Clear Button (x) -->
+                        <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.value = ''; triggerFilterForm($el);" class="h-9 px-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center" title="Bersihkan pencarian">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+
+                        <button type="submit" 
+                            :class="searchVal.trim() !== '' ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300'"
+                            class="h-9 px-4 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-l border-slate-200 dark:border-slate-800">
+                            Cari
+                        </button>
                     </div>
 
                     <!-- Mulai Tanggal -->
-                    <div class="w-full lg:w-36 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai Tanggal</label>
-                        <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
-                    </div>
+                    <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" onchange="triggerFilterForm(this)" 
+                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer font-mono dark:[color-scheme:dark]" title="Mulai Tanggal">
 
                     <!-- Selesai Tanggal -->
-                    <div class="w-full lg:w-36 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
-                    </div>
+                    <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" onchange="triggerFilterForm(this)" 
+                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer font-mono dark:[color-scheme:dark]" title="Selesai Tanggal">
 
                     <!-- Status Kehadiran -->
-                    <div class="w-full lg:w-40 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Status Kehadiran</label>
-                        <select name="status" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                            <option value="">Semua Status</option>
-                            <option value="Hadir" {{ request('status') === 'Hadir' ? 'selected' : '' }}>Hadir</option>
-                            <option value="Terlambat" {{ request('status') === 'Terlambat' ? 'selected' : '' }}>Terlambat</option>
-                            <option value="Alfa" {{ request('status') === 'Alfa' ? 'selected' : '' }}>Alfa</option>
-                            <option value="Sakit" {{ request('status') === 'Sakit' ? 'selected' : '' }}>Sakit</option>
-                            <option value="Izin" {{ request('status') === 'Izin' ? 'selected' : '' }}>Izin</option>
-                            <option value="Cuti" {{ request('status') === 'Cuti' ? 'selected' : '' }}>Cuti</option>
-                            <option value="Dinas" {{ request('status') === 'Dinas' ? 'selected' : '' }}>Dinas</option>
-                        </select>
-                    </div>
+                    <select name="status" onchange="triggerFilterForm(this)" 
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        <option value="">Semua Status</option>
+                        <option value="Hadir" {{ request('status') === 'Hadir' ? 'selected' : '' }}>Hadir</option>
+                        <option value="Terlambat" {{ request('status') === 'Terlambat' ? 'selected' : '' }}>Terlambat</option>
+                        <option value="Alfa" {{ request('status') === 'Alfa' ? 'selected' : '' }}>Alfa</option>
+                        <option value="Sakit" {{ request('status') === 'Sakit' ? 'selected' : '' }}>Sakit</option>
+                        <option value="Izin" {{ request('status') === 'Izin' ? 'selected' : '' }}>Izin</option>
+                        <option value="Cuti" {{ request('status') === 'Cuti' ? 'selected' : '' }}>Cuti</option>
+                        <option value="Dinas" {{ request('status') === 'Dinas' ? 'selected' : '' }}>Dinas</option>
+                    </select>
 
                     <!-- Unit Sekolah -->
                     @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                    <div class="w-full lg:w-44 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Unit Sekolah</label>
-                        <select name="unit_id" onchange="if(typeof updatePositions === 'function') updatePositions(); triggerFilterForm(this);" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="unit_id" onchange="if(typeof updatePositions === 'function') updatePositions(); triggerFilterForm(this);" 
+                            class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="">Semua Unit</option>
                             @foreach($schoolUnits as $unit)
                                 <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
@@ -95,14 +86,12 @@
                                 </option>
                             @endforeach
                         </select>
-                    </div>
                     @endif
 
                     <!-- Jabatan / Posisi -->
                     @if(isset($positions) && count($positions) > 0)
-                    <div class="w-full lg:w-44 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Jabatan / Posisi</label>
-                        <select name="position" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="position" onchange="triggerFilterForm(this)" 
+                            class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="">Semua Jabatan</option>
                             @foreach($positions as $pos)
                                 <option value="{{ $pos }}" {{ request('position') === $pos ? 'selected' : '' }}>
@@ -110,19 +99,14 @@
                                 </option>
                             @endforeach
                         </select>
-                    </div>
                     @endif
 
                     <!-- Reset Button -->
                     @if(request()->hasAny(['search', 'start_date', 'end_date', 'status', 'unit_id', 'position']))
-                    <div class="flex items-center pb-0.5 self-end lg:self-auto justify-end">
-                        <a href="{{ route('attendance-history.index') }}" data-no-loader="true" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5" title="Reset Filter">
+                        <a href="{{ route('attendance-history.index') }}" data-no-loader="true" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
                             <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                            Reset
                         </a>
-                    </div>
                     @endif
-
                 </div>
             </form>
         </section>
@@ -388,4 +372,20 @@
             }
         });
     </script>
+
+    <style>
+        @media (min-width: 640px) {
+            .search-container {
+                max-width: 280px !important;
+            }
+        }
+        .search-container button[type="submit"]:hover {
+            background-color: #0f172a !important; /* bg-slate-900 */
+            color: #ffffff !important; /* text-white */
+        }
+        .dark .search-container button[type="submit"]:hover {
+            background-color: #f8fafc !important; /* bg-slate-100 */
+            color: #0f172a !important; /* text-slate-900 */
+        }
+    </style>
 </x-admin-layout>
