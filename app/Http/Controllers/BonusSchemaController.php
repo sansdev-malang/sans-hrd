@@ -51,7 +51,12 @@ class BonusSchemaController extends Controller
         }
 
         // Auto sync to units
-        $this->syncBonusSchemasToUnits();
+        $failed = $this->syncBonusSchemasToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->route('bonus-schemas.index')
+                ->with('error', 'Skema bonus berhasil dibuat lokal, namun gagal disinkronkan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
+        }
 
         return redirect()->route('bonus-schemas.index')
             ->with('success', 'Skema bonus berhasil dibuat dan disinkronkan ke semua unit.');
@@ -91,7 +96,12 @@ class BonusSchemaController extends Controller
         }
 
         // Auto sync to units
-        $this->syncBonusSchemasToUnits();
+        $failed = $this->syncBonusSchemasToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->route('bonus-schemas.index')
+                ->with('error', 'Skema bonus berhasil diperbarui lokal, namun gagal disinkronkan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
+        }
 
         return redirect()->route('bonus-schemas.index')
             ->with('success', 'Skema bonus berhasil diperbarui dan disinkronkan ke semua unit.');
@@ -105,7 +115,12 @@ class BonusSchemaController extends Controller
         $bonusSchema->delete();
 
         // Auto sync to units
-        $this->syncBonusSchemasToUnits();
+        $failed = $this->syncBonusSchemasToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->route('bonus-schemas.index')
+                ->with('error', 'Skema bonus berhasil dihapus lokal, namun gagal menyinkronkan penghapusan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
+        }
 
         return redirect()->route('bonus-schemas.index')
             ->with('success', 'Skema bonus berhasil dihapus.');
@@ -116,15 +131,22 @@ class BonusSchemaController extends Controller
      */
     public function triggerSync()
     {
-        $this->syncBonusSchemasToUnits();
+        $failed = $this->syncBonusSchemasToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->route('bonus-schemas.index')
+                ->with('error', 'Gagal menyinkronkan skema bonus ke unit: ' . implode(', ', $failed) . '. Silakan coba beberapa saat lagi.');
+        }
+
         return redirect()->route('bonus-schemas.index')
-            ->with('success', 'Sinkronisasi data skema bonus selesai.');
+            ->with('success', 'Sinkronisasi data skema bonus selesai dan berhasil terkirim ke semua unit.');
     }
 
     /**
      * Helper to sync schemas to active units.
+     * Returns an array of failed unit names.
      */
-    private function syncBonusSchemasToUnits()
+    private function syncBonusSchemasToUnits(): array
     {
         $units = SchoolUnit::where('is_active', true)->get();
         $schemas = BonusSchema::with('tiers')->get()->map(function ($schema) {
@@ -143,7 +165,7 @@ class BonusSchemaController extends Controller
         })->toArray();
 
         if ($units->isEmpty()) {
-            return;
+            return [];
         }
 
         $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($units, $schemas) {
@@ -158,12 +180,16 @@ class BonusSchemaController extends Controller
             });
         });
 
+        $failedUnits = [];
         foreach ($units as $unit) {
             $response = $responses[$unit->id] ?? null;
             if (!$response || !$response->successful()) {
                 $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
                 Log::error("Failed to sync bonus schemas to unit {$unit->name}. Status: {$status}");
+                $failedUnits[] = $unit->name;
             }
         }
+
+        return $failedUnits;
     }
 }
