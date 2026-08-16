@@ -1,58 +1,110 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SANS HRD (Pusat) - Human Resource Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+SANS HRD Pusat adalah sistem manajemen sumber daya manusia terpusat yang dirancang khusus untuk mengelola kepegawaian, kehadiran, jadwal shift (roster), persetujuan cuti/izin, serta penggajian di berbagai unit sekolah (seperti SD, SMP, dan PAUD) di bawah satu naungan yayasan.
 
-## About Laravel
+Sistem ini bertindak sebagai **Hub Pusat (Central Hub)** yang berkomunikasi secara aktif dengan database lokal masing-masing unit sekolah melalui API terintegrasi secara aman.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Fitur Utama
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Manajemen Pegawai & UID Mesin
+* Menghimpun data pegawai secara dinamis dari API unit sekolah aktif dengan sistem caching performa tinggi (24 jam).
+* Sinkronisasi data pegawai instan (pembersihan cache pusat).
+* Integrasi pembuatan ID Mesin Absensi (UID) yang diselaraskan dengan unit sekolah.
 
-## Learning Laravel
+### 2. Manajemen Jadwal Shift & Roster Kerja
+* Pembuatan skema jam kerja fleksibel (Shift, Non-Shift, Libur).
+* Penugasan jadwal tetap maupun bergilir (Roster bulanan) secara kolektif per unit sekolah.
+* Push otomatis data roster ke database unit sekolah target.
+* Tombol sinkronisasi manual dinamis berdasarkan filter aktif (**"Sync Semua Jadwal"** / **"Sync Jadwal [Nama Unit]"**).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 3. Penarikan Data Kehadiran (ZKTeco ADMS)
+* Sinkronisasi otomatis log absensi mentah dari mesin ZKTeco pusat melalui protokol ADMS.
+* Tombol **"Tarik Absensi Mesin"** untuk penarikan data mentah secara real-time.
+* Kalkulasi otomatis status kehadiran harian (Hadir, Terlambat, Alfa, Sakit, Izin, Cuti, Dinas, Off, Libur, Pending) beserta durasi keterlambatan presisi dalam satuan menit.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 4. Skema & Riwayat Laporan Bonus Kehadiran
+* Pengaturan skema bonus keterlambatan masuk kerja berjenjang (multi-tier).
+* Rekapitulasi laporan bonus bulanan pegawai berdasarkan data kehadiran riil dan cutoff payroll yang dikonfigurasi.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### 5. Pengumuman Pusat & Slip Gaji
+* Membuat pengumuman massal di pusat dan menyebarkannya secara instan ke portal unit sekolah terpilih.
+* Integrasi Slip Gaji bulanan dan pemicu pemberitahuan ke aplikasi unit sekolah.
 
-## Agentic Development
+### 6. Persetujuan Cuti & Izin Kehadiran
+* Penarikan otomatis permohonan izin/cuti yang diajukan dari unit sekolah.
+* Proses persetujuan (*Approve/Reject*) di pusat yang langsung memengaruhi status di unit dengan proteksi kegagalan koneksi (*rollback* jika unit offline).
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
+## 🛠️ Arsitektur & Teknologi
+
+* **Framework**: Laravel 11.x (PHP 8.2+)
+* **Database**: MySQL / MariaDB
+* **Styling**: Tailwind CSS & Vanilla CSS (Dark Mode Support)
+* **Interaktivitas**: Alpine.js & Vanilla JS
+* **Integrasi**: HTTP Client (Guzzle) dengan proteksi timeout (3-5 detik) untuk mencegah server hang saat unit sekolah offline.
+* **Keamanan**: Token-based API Authentication per unit sekolah.
+
+---
+
+## ⚙️ Cara Instalasi & Menjalankan Proyek
+
+### 1. Kloning Repositori
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/sansdev-malang/sans-hrd.git
+cd sans-hrd
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Instalasi Dependensi
+```bash
+# Dependensi PHP
+composer install
 
-## Contributing
+# Dependensi Frontend
+npm install
+npm run build
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Konfigurasi Lingkungan (`.env`)
+Salin file `.env.example` ke `.env` dan sesuaikan konfigurasi database Anda:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Code of Conduct
+### 4. Migrasi & Seed Database
+```bash
+php artisan migrate --seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🖥️ Panduan Deployment di VPS
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Setiap kali melakukan pembaruan kode dari repositori GitHub ke server VPS, jalankan perintah berikut secara berurutan:
 
-## License
+```bash
+# 1. Tarik kode terbaru dari GitHub
+git pull origin main
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 2. Bersihkan & bangun ulang seluruh cache Laravel secara instan
+php artisan optimize:clear
+```
+
+---
+
+## 📡 Perintah Artisan Khusus
+
+Sistem ini memiliki perintah latar belakang (*background job*) untuk menarik log mesin absensi secara otomatis:
+```bash
+# Menarik data absensi mentah dari mesin ZKTeco
+php artisan zkteco:pull
+```
+*Disarankan untuk menjadwalkan perintah di atas di dalam task scheduler (Cron Job) setiap 5 atau 10 menit.*
+
+---
+
+## 📄 Lisensi
+Sistem Manajemen SANS HRD ini dikembangkan secara privat untuk kebutuhan internal sekolah. Seluruh hak cipta dilindungi undang-undang.
