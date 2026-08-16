@@ -256,8 +256,8 @@
                                             <option value="OFF" {{ !$shiftId || $shiftId == 'OFF' ? 'selected' : '' }}>OFF</option>
                                             @foreach($allShifts as $shift)
                                                 <option value="{{ $shift->id }}" 
-                                                    x-show="selectedShiftIds.includes({{ $shift->id }})"
-                                                    :disabled="!selectedShiftIds.includes({{ $shift->id }})"
+                                                    x-show="selectedShiftIds.map(Number).includes({{ $shift->id }})"
+                                                    :disabled="!selectedShiftIds.map(Number).includes({{ $shift->id }})"
                                                     {{ $shiftId == $shift->id ? 'selected' : '' }}>
                                                     {{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}
                                                 </option>
@@ -426,7 +426,7 @@
             init() {},
 
             getSelectedShiftsList() {
-                return this.allAvailableShifts.filter(sh => this.selectedShiftIds.includes(sh.id));
+                return this.allAvailableShifts.filter(sh => this.selectedShiftIds.map(Number).includes(sh.id));
             },
 
             getCellRef(empId, day) {
