@@ -222,7 +222,7 @@
                         </button>
 
                         @if(request()->hasAny(['unit_id', 'search', 'start_date', 'end_date', 'position']) && count(request()->except('page')) > 0)
-                            <a href="{{ route('attendance-percentage-reports.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5">
+                            <a href="{{ route('attendance-percentage-reports.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5 reset-filter-btn" data-no-loader="true">
                                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                                 Reset
                             </a>
