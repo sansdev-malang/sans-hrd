@@ -84,7 +84,7 @@
 
                     <!-- Right Side: Per Page & Sync -->
                     <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
-                        <form action="{{ route('payslips.sync', ['month' => $month]) }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').disabled = true; this.querySelector('i').classList.add('animate-spin');">
+                        <form action="{{ route('payslips.sync', ['month' => $month]) }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
                             @csrf
                             <button type="submit" class="h-10 px-4 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-xl border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer flex items-center gap-1.5 shadow-3xs hover:scale-105 duration-150 border-0" title="Sinkronisasi slip gaji bulan ini ke seluruh unit">
                                 <i data-lucide="refresh-cw" class="w-4 h-4"></i>
