@@ -1,6 +1,9 @@
 <x-admin-layout>
     <style>
         [x-cloak] { display: none !important; }
+        .dark input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
     </style>
     @php
         $countTotal = count($reports);
@@ -29,6 +32,49 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Analisis kehadiran pegawai dan pantau perbaikan performa kedisiplinan kerja secara komprehensif.</p>
             </div>
         </header>
+
+        <!-- RATA-RATA KEHADIRAN PER UNIT -->
+        @if(isset($unitStats) && count($unitStats) > 0)
+            <section class="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-4 w-full text-left flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <div class="p-1.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-650 dark:text-indigo-400 rounded-lg">
+                        <i data-lucide="building-2" class="w-4.5 h-4.5"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-800 dark:text-slate-250 leading-tight">Rata-rata Kehadiran per Unit</h4>
+                        <p class="text-[10px] text-slate-400">Persentase rata-rata seluruh pegawai terdaftar per unit sekolah</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3 md:gap-6">
+                    @foreach($unitStats as $uId => $stat)
+                        @php
+                            $avg = $stat['average'];
+                            if ($avg >= 95) {
+                                $indicatorColor = 'bg-emerald-500';
+                                $textColor = 'text-emerald-600 dark:text-emerald-450';
+                            } elseif ($avg >= 90) {
+                                $indicatorColor = 'bg-amber-500';
+                                $textColor = 'text-amber-555 dark:text-amber-450';
+                            } else {
+                                $indicatorColor = 'bg-rose-500';
+                                $textColor = 'text-rose-650 dark:text-rose-455';
+                            }
+                        @endphp
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-lg shadow-2xs">
+                            <span class="w-2 h-2 rounded-full {{ $indicatorColor }}"></span>
+                            <div class="flex flex-col">
+                                <span class="text-[9.5px] font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wide leading-none mb-0.5">{{ $stat['name'] }}</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-xs font-black font-mono {{ $textColor }}">{{ $avg }}%</span>
+                                    <span class="text-[9px] text-slate-400 font-medium">({{ $stat['count'] }} orang)</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
 
         <!-- ZONA KATEGORI FILTER CARDS -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full text-left">
