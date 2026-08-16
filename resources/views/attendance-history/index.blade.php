@@ -1,6 +1,6 @@
 <x-admin-layout>
     <div class="p-6 space-y-6">
-        
+        <div id="history-table-container" class="space-y-6">
         <!-- HEADER -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div class="flex flex-col gap-0.5">
@@ -31,7 +31,7 @@
 
         <!-- FILTERS & SEARCH -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full text-left">
-            <form method="GET" action="{{ route('attendance-history.index') }}" id="filter_form">
+            <form method="GET" action="{{ route('attendance-history.index') }}" id="history-filter-form" data-no-loader="true">
                 <input type="hidden" name="per_page" id="filter_per_page" value="{{ request('per_page', 50) }}">
                 <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 w-full">
                     
@@ -55,19 +55,19 @@
                     <!-- Mulai Tanggal -->
                     <div class="w-full lg:w-36 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai Tanggal</label>
-                        <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
+                        <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
                     </div>
 
                     <!-- Selesai Tanggal -->
                     <div class="w-full lg:w-36 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
+                        <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
                     </div>
 
                     <!-- Status Kehadiran -->
                     <div class="w-full lg:w-40 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Status Kehadiran</label>
-                        <select name="status" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="status" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                             <option value="">Semua Status</option>
                             <option value="Hadir" {{ request('status') === 'Hadir' ? 'selected' : '' }}>Hadir</option>
                             <option value="Terlambat" {{ request('status') === 'Terlambat' ? 'selected' : '' }}>Terlambat</option>
@@ -83,7 +83,7 @@
                     @if(isset($schoolUnits) && count($schoolUnits) > 0)
                     <div class="w-full lg:w-44 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Unit Sekolah</label>
-                        <select name="unit_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="unit_id" onchange="if(typeof updatePositions === 'function') updatePositions(); triggerFilterForm(this);" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                             <option value="">Semua Unit</option>
                             @foreach($schoolUnits as $unit)
                                 <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
@@ -98,7 +98,7 @@
                     @if(isset($positions) && count($positions) > 0)
                     <div class="w-full lg:w-44 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Jabatan / Posisi</label>
-                        <select name="position" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="position" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                             <option value="">Semua Jabatan</option>
                             @foreach($positions as $pos)
                                 <option value="{{ $pos }}" {{ request('position') === $pos ? 'selected' : '' }}>
@@ -116,7 +116,7 @@
                             Terapkan
                         </button>
                         @if(request()->hasAny(['search', 'start_date', 'end_date', 'status', 'unit_id', 'position']))
-                            <a href="{{ route('attendance-history.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5" title="Reset Filter">
+                            <a href="{{ route('attendance-history.index') }}" data-no-loader="true" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5" title="Reset Filter">
                                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                                 Reset
                             </a>
@@ -262,38 +262,129 @@
                 </div>
             @endif
         </section>
+        </div>
 
     </div>
 
     <script>
+        window.triggerFilterForm = function(el) {
+            const form = el.form || document.getElementById('history-filter-form');
+            if (form) {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             const unitPositions = @json($unitPositions ?? []);
             const unitSelect = document.querySelector('select[name="unit_id"]');
             const positionSelect = document.querySelector('select[name="position"]');
             
-            if (unitSelect && positionSelect) {
-                const initialSelectedPosition = "{{ request('position') }}";
+            function updatePositions() {
+                if (!unitSelect || !positionSelect) return;
+                const selectedUnit = unitSelect.value;
+                const positions = unitPositions[selectedUnit] || unitPositions[''] || [];
                 
-                function updatePositions() {
-                    const selectedUnit = unitSelect.value;
-                    const positions = unitPositions[selectedUnit] || unitPositions[''] || [];
-                    
-                    const currentValue = positionSelect.value || initialSelectedPosition;
-                    
-                    positionSelect.innerHTML = '<option value="">Semua Jabatan</option>';
-                    
-                    positions.forEach(pos => {
-                        const opt = document.createElement('option');
-                        opt.value = pos;
-                        opt.textContent = pos;
-                        if (pos === currentValue) {
-                            opt.selected = true;
+                const currentValue = positionSelect.value;
+                
+                positionSelect.innerHTML = '<option value="">Semua Jabatan</option>';
+                
+                positions.forEach(pos => {
+                    const opt = document.createElement('option');
+                    opt.value = pos;
+                    opt.textContent = pos;
+                    if (pos === currentValue) {
+                        opt.selected = true;
+                    }
+                    positionSelect.appendChild(opt);
+                });
+            }
+
+            window.updatePositions = updatePositions;
+            
+            if (unitSelect && positionSelect) {
+                unitSelect.addEventListener('change', updatePositions);
+                // Run initially to sync position list if a unit was selected
+                if (unitSelect.value !== '') {
+                    updatePositions();
+                }
+            }
+
+            // AJAX Filtering and Pagination
+            const container = document.getElementById('history-table-container');
+            if (container) {
+                function loadTableContent(url) {
+                    container.classList.add('opacity-40', 'pointer-events-none');
+                    if (window.NProgress) NProgress.start();
+
+                    const relativeUrl = url.pathname + url.search;
+
+                    fetch(relativeUrl, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
                         }
-                        positionSelect.appendChild(opt);
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.text();
+                    })
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newContent = doc.getElementById('history-table-container');
+                        if (newContent && container) {
+                            container.innerHTML = newContent.innerHTML;
+                            
+                            if (window.lucide) {
+                                window.lucide.createIcons();
+                            }
+                            
+                            // Re-bind unitSelect listener on newly loaded DOM
+                            const newUnitSelect = document.querySelector('select[name="unit_id"]');
+                            const newPositionSelect = document.querySelector('select[name="position"]');
+                            if (newUnitSelect && newPositionSelect) {
+                                newUnitSelect.addEventListener('change', window.updatePositions);
+                            }
+                            
+                            window.history.pushState({}, '', url.toString());
+                        }
+                    })
+                    .catch(error => {
+                        console.error('AJAX Load Error:', error);
+                        window.location.href = url.toString();
+                    })
+                    .finally(() => {
+                        container.classList.remove('opacity-40', 'pointer-events-none');
+                        if (window.NProgress) NProgress.done();
                     });
                 }
-                
-                unitSelect.addEventListener('change', updatePositions);
+
+                // Delegate submit event
+                document.addEventListener('submit', function (e) {
+                    const form = e.target.closest('#history-filter-form');
+                    if (!form) return;
+
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    const params = new URLSearchParams(formData);
+                    const action = form.getAttribute('action') || window.location.pathname;
+                    const url = new URL(action, window.location.origin);
+                    url.search = params.toString();
+
+                    loadTableContent(url);
+                });
+
+                // Delegate click event for pagination
+                document.addEventListener('click', function (e) {
+                    const link = e.target.closest('#history-table-container a[href]');
+                    if (!link) return;
+
+                    const hrefAttr = link.getAttribute('href');
+                    if (!hrefAttr || hrefAttr.startsWith('#') || hrefAttr.includes('export')) return;
+
+                    e.preventDefault();
+                    const url = new URL(link.href);
+                    loadTableContent(url);
+                });
             }
         });
     </script>
