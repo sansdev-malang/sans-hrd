@@ -32,6 +32,13 @@
             border-top: 0.5px solid #888;
             border-left: 0.5px solid #888;
             margin-bottom: 20px;
+            table-layout: fixed; /* Speeds up column layout calculation */
+        }
+        thead {
+            display: table-header-group; /* Repeat headers natively on each page */
+        }
+        tr {
+            page-break-inside: avoid; /* Prevent row splitting across pages */
         }
         th, td {
             border-right: 0.5px solid #888;
@@ -74,79 +81,74 @@
     </div>
 
     @if(count($historyList) > 0)
-        @foreach(collect($historyList)->chunk(100) as $chunk)
-            <table>
-                <thead>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 4%; text-align: center;">No</th>
+                    <th style="width: 31%;">Nama Pegawai</th>
+                    <th style="width: 18%;">Hari & Tanggal</th>
+                    <th style="width: 15%;">Jadwal Kerja</th>
+                    <th style="width: 10%; text-align: center;">Waktu Masuk</th>
+                    <th style="width: 10%; text-align: center;">Waktu Pulang</th>
+                    <th style="width: 8%; text-align: center;">Status</th>
+                    <th style="width: 14%;">Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($historyList as $index => $row)
                     <tr>
-                        <th style="width: 4%; text-align: center;">No</th>
-                        <th style="width: 31%;">Nama Pegawai</th>
-                        <th style="width: 18%;">Hari & Tanggal</th>
-                        <th style="width: 15%;">Jadwal Kerja</th>
-                        <th style="width: 10%; text-align: center;">Waktu Masuk</th>
-                        <th style="width: 10%; text-align: center;">Waktu Pulang</th>
-                        <th style="width: 8%; text-align: center;">Status</th>
-                        <th style="width: 14%;">Keterangan</th>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td>
+                            <strong class="font-bold">{{ $row['employee_name'] }}</strong>
+                            @if($row['employee_nip'])
+                                <br><span style="font-size: 7px; color: #666; font-family: monospace;">NIP/NUPTK: {{ $row['employee_nip'] }}</span>
+                            @endif
+                            <br><span style="font-size: 7.5px; color: #555;">{{ $row['unit_name'] }} - {{ $row['position'] }}</span>
+                        </td>
+                        <td>{{ $row['date_formatted'] }}</td>
+                        <td>
+                            @if($row['shift_name'] === '-')
+                                <span>-</span>
+                            @else
+                                <strong class="font-bold" style="font-size: 8px;">{{ $row['shift_name'] }}</strong>
+                                @if($row['shift_start'])
+                                    <br><span style="font-size: 7px; color: #666;">{{ $row['shift_start'] }} - {{ $row['shift_end'] }}</span>
+                                @else
+                                    <br><span style="font-size: 7px; color: #666;">Libur</span>
+                                @endif
+                            @endif
+                        </td>
+                        <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_in'] ?: '-' }}</td>
+                        <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_out'] ?: '-' }}</td>
+                        @php
+                            $cellClass = match($row['status']) {
+                                'Hadir' => 'cell-hadir',
+                                'Terlambat' => 'cell-terlambat',
+                                'Alfa' => 'cell-alfa',
+                                'Sakit' => 'cell-sakit',
+                                'Izin' => 'cell-izin',
+                                'Cuti' => 'cell-cuti',
+                                'Dinas' => 'cell-dinas',
+                                'Off' => 'cell-off',
+                                'Libur' => 'cell-libur',
+                                'Pending' => 'cell-pending',
+                                default => 'cell-off',
+                            };
+                        @endphp
+                        <td class="{{ $cellClass }}">{{ $row['status'] }}</td>
+                        <td>
+                            @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
+                                <span style="color: #b45309; font-weight: bold;">Terlambat {{ $row['late_minutes'] }} mnt</span>
+                            @elseif($row['notes'])
+                                <span>{{ $row['notes'] }}</span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($chunk as $index => $row)
-                        <tr>
-                            <td class="text-center">{{ $index + 1 }}</td>
-                            <td>
-                                <strong class="font-bold">{{ $row['employee_name'] }}</strong>
-                                @if($row['employee_nip'])
-                                    <br><span style="font-size: 7px; color: #666; font-family: monospace;">NIP/NUPTK: {{ $row['employee_nip'] }}</span>
-                                @endif
-                                <br><span style="font-size: 7.5px; color: #555;">{{ $row['unit_name'] }} - {{ $row['position'] }}</span>
-                            </td>
-                            <td>{{ $row['date_formatted'] }}</td>
-                            <td>
-                                @if($row['shift_name'] === '-')
-                                    <span>-</span>
-                                @else
-                                    <strong class="font-bold" style="font-size: 8px;">{{ $row['shift_name'] }}</strong>
-                                    @if($row['shift_start'])
-                                        <br><span style="font-size: 7px; color: #666;">{{ $row['shift_start'] }} - {{ $row['shift_end'] }}</span>
-                                    @else
-                                        <br><span style="font-size: 7px; color: #666;">Libur</span>
-                                    @endif
-                                @endif
-                            </td>
-                            <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_in'] ?: '-' }}</td>
-                            <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_out'] ?: '-' }}</td>
-                            @php
-                                $cellClass = match($row['status']) {
-                                    'Hadir' => 'cell-hadir',
-                                    'Terlambat' => 'cell-terlambat',
-                                    'Alfa' => 'cell-alfa',
-                                    'Sakit' => 'cell-sakit',
-                                    'Izin' => 'cell-izin',
-                                    'Cuti' => 'cell-cuti',
-                                    'Dinas' => 'cell-dinas',
-                                    'Off' => 'cell-off',
-                                    'Libur' => 'cell-libur',
-                                    'Pending' => 'cell-pending',
-                                    default => 'cell-off',
-                                };
-                            @endphp
-                            <td class="{{ $cellClass }}">{{ $row['status'] }}</td>
-                            <td>
-                                @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
-                                    <span style="color: #b45309; font-weight: bold;">Terlambat {{ $row['late_minutes'] }} mnt</span>
-                                @elseif($row['notes'])
-                                    <span>{{ $row['notes'] }}</span>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            @if(!$loop->last)
-                <div style="page-break-after: always;"></div>
-            @endif
-        @endforeach
+                @endforeach
+            </tbody>
+        </table>
     @else
         <table>
             <thead>
