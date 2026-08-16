@@ -45,36 +45,37 @@
         </section>
 
         <!-- FILTERS & CONTROLS -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-                
-                <!-- Left Side: Search & Filters -->
-                <div class="flex flex-wrap items-center gap-2 flex-1">
-                    <!-- Search Box Welded with Cari Button (Premium Input Group) -->
-                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
-                        <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
-                            style="border: none !important; outline: none !important; box-shadow: none !important;"
-                            class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
-                        
-                        <!-- Clear Button (x) -->
-                        <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $el.closest('.search-container').querySelector('input').focus();" class="h-9 px-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center" title="Bersihkan pencarian">
-                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                        </button>
+        <div id="attendance-table-container" class="space-y-6">
+            <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
+                <form id="attendance-filter-form" data-no-loader="true" method="GET" action="{{ route('attendance-logs.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                    
+                    <!-- Left Side: Search & Filters -->
+                    <div class="flex flex-wrap items-center gap-2 flex-1">
+                        <!-- Search Box Welded with Cari Button (Premium Input Group) -->
+                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
+                            <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
+                                style="border: none !important; outline: none !important; box-shadow: none !important;"
+                                class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
+                            
+                            <!-- Clear Button (x) -->
+                            <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $el.closest('.search-container').querySelector('input').focus();" class="h-9 px-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center" title="Bersihkan pencarian">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
 
-                        <button type="submit" 
-                            :class="searchVal.trim() !== '' ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300'"
-                            class="h-9 px-4 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-l border-slate-200 dark:border-slate-800">
-                            Cari
-                        </button>
-                    </div>
+                            <button type="submit" 
+                                :class="searchVal.trim() !== '' ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300'"
+                                class="h-9 px-4 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-l border-slate-200 dark:border-slate-800">
+                                Cari
+                            </button>
+                        </div>
 
-                    <!-- Bulan -->
-                    <input type="month" name="month" value="{{ request('month', $month) }}" onchange="this.form.submit()"
-                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700">
+                        <!-- Bulan -->
+                        <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
+                            class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700">
 
-                    <!-- Filter Unit -->
-                    @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                        <select name="unit_id" onchange="this.form.submit()"
+                        <!-- Filter Unit -->
+                        @if(isset($schoolUnits) && count($schoolUnits) > 0)
+                            <select name="unit_id" onchange="triggerFilterForm(this)"
                             class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="">Semua Unit Sekolah</option>
                             @foreach($schoolUnits as $unit)
@@ -86,7 +87,7 @@
                     @endif
 
                     <!-- Jabatan -->
-                    <select name="position" onchange="this.form.submit()"
+                    <select name="position" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Jabatan</option>
                         @foreach($positions as $pos)
@@ -95,7 +96,7 @@
                     </select>
 
                     @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != now()->format('Y-m') || request()->filled('per_page') && request('per_page') != 50)
-                        <a href="{{ route('attendance-logs.index') }}" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
+                        <a href="{{ route('attendance-logs.index') }}" data-no-loader="true" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </a>
                     @endif
@@ -103,7 +104,7 @@
 
                 <!-- Right Side: Per Page Options -->
                 <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
-                    <select name="per_page" onchange="this.form.submit()"
+                    <select name="per_page" onchange="triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
@@ -384,11 +385,11 @@
                         <span class="font-bold text-slate-700 dark:text-slate-300">{{ $paginatedReports->total() }}</span>
                         pegawai
                     </div>
-                    <div class="flex items-center gap-1.5 font-semibold">
+                     <div class="flex items-center gap-1.5 font-semibold">
                         @if ($paginatedReports->onFirstPage())
                             <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Sebelumnya</span>
                         @else
-                            <a href="{{ $paginatedReports->appends(request()->query())->previousPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Sebelumnya</a>
+                            <a href="{{ $paginatedReports->appends(request()->query())->previousPageUrl() }}" data-no-loader="true" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Sebelumnya</a>
                         @endif
 
                         <span class="px-3 py-1 font-medium text-slate-700 dark:text-slate-300">
@@ -396,7 +397,7 @@
                         </span>
 
                         @if ($paginatedReports->hasMorePages())
-                            <a href="{{ $paginatedReports->appends(request()->query())->nextPageUrl() }}" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Berikutnya</a>
+                            <a href="{{ $paginatedReports->appends(request()->query())->nextPageUrl() }}" data-no-loader="true" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all bg-white dark:bg-slate-900">Berikutnya</a>
                         @else
                             <span class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 flex items-center justify-center cursor-not-allowed select-none bg-slate-50 dark:bg-slate-900/20">Berikutnya</span>
                         @endif
@@ -404,6 +405,7 @@
                 </div>
             @endif
         </section>
+        </div>
 
         <!-- LEGEND / STATUS EXPLANATION -->
         <div class="flex flex-wrap gap-4 items-center justify-center text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-4 px-2">
@@ -735,8 +737,88 @@
                     return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
                 }
                 return name.substring(0, 2).toUpperCase();
-            }
         }));
+    });
+</script>
+
+<script>
+    function triggerFilterForm(el) {
+        const form = el.form;
+        if (form) {
+            const event = new Event('submit', { cancelable: true, bubbles: true });
+            form.dispatchEvent(event);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('attendance-table-container');
+        if (!container) return;
+
+        function loadTableContent(url) {
+            if (window.NProgress) NProgress.start();
+
+            // Resolve relative path to avoid CORS issues
+            const relativeUrl = url.pathname + url.search;
+
+            fetch(relativeUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.getElementById('attendance-table-container');
+                if (newContent && container) {
+                    container.innerHTML = newContent.innerHTML;
+                    
+                    if (window.lucide) {
+                        window.lucide.createIcons();
+                    }
+                    
+                    window.history.pushState({}, '', url.toString());
+                }
+            })
+            .catch(error => {
+                console.error('AJAX Load Error:', error);
+                window.location.href = url.toString();
+            })
+            .finally(() => {
+                if (window.NProgress) NProgress.done();
+            });
+        }
+
+        // Delegate submit event
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('#attendance-filter-form');
+            if (!form) return;
+
+            e.preventDefault();
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const action = form.getAttribute('action') || window.location.pathname;
+            const url = new URL(action, window.location.origin);
+            url.search = params.toString();
+
+            loadTableContent(url);
+        });
+
+        // Delegate click event for pagination and reset buttons
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('#attendance-table-container a[href], a.reset-filter-btn');
+            if (!link) return;
+
+            const hrefAttr = link.getAttribute('href');
+            if (!hrefAttr || hrefAttr.startsWith('#') || hrefAttr.includes('export')) return;
+
+            e.preventDefault();
+            const url = new URL(link.href);
+            loadTableContent(url);
+        });
     });
 </script>
 <style>

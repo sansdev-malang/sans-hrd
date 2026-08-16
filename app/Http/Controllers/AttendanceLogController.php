@@ -34,7 +34,7 @@ class AttendanceLogController extends Controller
 
     private function generateReportsData($startDate, $endDate, $search = null, $unitId = null, $position = null)
     {
-        $rawEmployees = collect($this->service->getSdEmployees());
+        $rawEmployees = collect($this->service->getAllEmployees());
 
         if (!empty($unitId)) {
             $rawEmployees = $rawEmployees->filter(fn($e) => isset($e['unit_id']) && $e['unit_id'] == $unitId);
@@ -54,6 +54,14 @@ class AttendanceLogController extends Controller
         }
         $employeesCollection = $rawEmployees->values();
 
+        return $this->generateReportsDataForCollection($startDate, $endDate, $employeesCollection);
+    }
+
+    private function generateReportsDataForCollection($startDate, $endDate, $employeesCollection)
+    {
+        $uids = $employeesCollection->pluck('zkteco_uid')->filter()->toArray();
+        $employeeIds = $employeesCollection->pluck('id')->filter()->toArray();
+
         $holidays = \App\Models\Holiday::with('adjustments')
             ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -63,10 +71,11 @@ class AttendanceLogController extends Controller
             })->get();
         $holidayDates = $holidays->pluck('original_date')->toArray();
 
-        $leavesData = \App\Models\LeaveRequest::where(function($q) use ($startDate, $endDate) {
-            $q->whereBetween('start_date', [$startDate, $endDate])
-              ->orWhereBetween('end_date', [$startDate, $endDate]);
-        })->get();
+        $leavesData = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('start_date', [$startDate, $endDate])
+                  ->orWhereBetween('end_date', [$startDate, $endDate]);
+            })->get();
 
         $leaves = [];
         foreach ($leavesData as $l) {
@@ -84,6 +93,7 @@ class AttendanceLogController extends Controller
         }
 
         $shiftsData = \App\Models\EmployeeWorkingShift::with('workingShift.details')
+            ->whereIn('employee_id', $employeeIds)
             ->where(function($q) use ($startDate, $endDate) {
                 $q->where('start_date', '<=', $endDate->format('Y-m-d'))
                   ->where(function($sq) use ($startDate) {
@@ -117,10 +127,11 @@ class AttendanceLogController extends Controller
         }
 
         // Fetch logs up to next day noon to catch night shift clock outs
-        $logsData = \App\Models\AttendanceLog::whereBetween('timestamp', [
-            $startDate->format('Y-m-d 00:00:00'),
-            $endDate->copy()->addDay()->format('Y-m-d 12:00:00')
-        ])->get();
+        $logsData = \App\Models\AttendanceLog::whereIn('uid', $uids)
+            ->whereBetween('timestamp', [
+                $startDate->format('Y-m-d 00:00:00'),
+                $endDate->copy()->addDay()->format('Y-m-d 12:00:00')
+            ])->get();
 
         $attendanceLogs = [];
         foreach ($logsData as $log) {
@@ -361,8 +372,8 @@ class AttendanceLogController extends Controller
         $unitId = $request->query('unit_id');
         $position = $request->query('position');
 
-        // Extract unique positions (jabatan) from raw employee data
-        $rawEmployeesForPos = $this->service->getSdEmployees();
+        // Extract unique positions (jabatan) from raw employee data using the renamed service method
+        $rawEmployeesForPos = $this->service->getAllEmployees();
         $positions = collect($rawEmployeesForPos)
             ->map(function ($emp) {
                 return $emp['position'] ?? $emp['subject_position'] ?? null;
@@ -372,15 +383,40 @@ class AttendanceLogController extends Controller
             ->sort()
             ->values();
 
-        $reports = $this->generateReportsData($startDate, $endDate, $search, $unitId, $position);
+        // 1. Filter the entire employee list first
+        $rawEmployees = collect($rawEmployeesForPos);
 
-        $total = count($reports);
+        if (!empty($unitId)) {
+            $rawEmployees = $rawEmployees->filter(fn($e) => isset($e['unit_id']) && $e['unit_id'] == $unitId);
+        }
+        if (!empty($search)) {
+            $rawEmployees = $rawEmployees->filter(function($e) use ($search) {
+                return stripos($e['name'], $search) !== false 
+                    || (isset($e['zkteco_uid']) && stripos((string)$e['zkteco_uid'], $search) !== false) 
+                    || (isset($e['nuptk']) && stripos($e['nuptk'], $search) !== false);
+            });
+        }
+        if (!empty($position)) {
+            $rawEmployees = $rawEmployees->filter(function($e) use ($position) {
+                $empPos = $e['position'] ?? $e['subject_position'] ?? '';
+                return $empPos == $position;
+            });
+        }
+        $employeesCollection = $rawEmployees->values();
+        $total = $employeesCollection->count();
+
+        // 2. Paginate employees list first
         $perPageReq = $request->query('per_page', 50);
         $perPage = $perPageReq === 'all' ? ($total > 0 ? $total : 1) : (int) $perPageReq;
-        $page = $request->query('page', 1);
+        $page = (int) $request->query('page', 1);
         
+        $paginatedEmployees = $employeesCollection->slice(($page - 1) * $perPage, $perPage)->values();
+
+        // 3. ONLY run attendance matrix reports for the paginated subset of employees!
+        $reports = $this->generateReportsDataForCollection($startDate, $endDate, $paginatedEmployees);
+
         $paginatedReports = new \Illuminate\Pagination\LengthAwarePaginator(
-            array_slice($reports, ($page - 1) * $perPage, $perPage),
+            $reports,
             $total,
             $perPage,
             $page,
