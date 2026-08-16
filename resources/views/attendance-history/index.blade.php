@@ -120,7 +120,7 @@
                 </div>
                 <div class="flex items-center gap-2 text-xs">
                     <span class="text-slate-500">Tampilkan</span>
-                    <select onchange="document.getElementById('filter_per_page').value = this.value; document.getElementById('filter_form').submit();" class="text-xs h-8 px-2 bg-white dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-md text-slate-900 dark:text-slate-100 focus:outline-none cursor-pointer">
+                    <select onchange="document.getElementById('filter_per_page').value = this.value; triggerFilterForm(this);" class="text-xs h-8 pl-2 pr-8 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md text-slate-900 dark:text-slate-100 focus:outline-none cursor-pointer min-w-[105px] text-ellipsis overflow-hidden whitespace-nowrap shadow-sm">
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
                         <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
                         <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
