@@ -594,6 +594,10 @@
                 if (typeof NProgress !== 'undefined') {
                     NProgress.done();
                 }
+                const globalLoader = document.getElementById('global-loading-overlay');
+                if (globalLoader) {
+                    globalLoader.classList.add('hidden');
+                }
             });
         }
 

@@ -48,20 +48,20 @@ class AttendancePercentageReportController extends Controller
         $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees);
 
-        // Extract unique positions for filter
-        $positions = collect($rawEmployees)
+        if (!empty($unitId)) {
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
+                return ($emp['unit_id'] ?? '') == $unitId;
+            });
+        }
+
+        // Extract unique positions for filter (adapts to selected unit)
+        $positions = $employeesCollection
             ->map(fn($emp) => $emp['position'] ?? $emp['subject_position'] ?? 'Staf')
             ->filter()
             ->unique()
             ->sort()
             ->values()
             ->toArray();
-
-        if (!empty($unitId)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
-                return ($emp['unit_id'] ?? '') == $unitId;
-            });
-        }
 
         // Apply position filter
         $selectedPosition = $request->query('position');
