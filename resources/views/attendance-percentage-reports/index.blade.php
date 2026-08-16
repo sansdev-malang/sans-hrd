@@ -31,87 +31,6 @@
             </div>
         </header>
 
-        <!-- MODERN FILTERS & SEARCH -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full text-left">
-            <form method="GET" action="{{ route('attendance-percentage-reports.index') }}">
-                <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 w-full">
-                    <!-- Search Input -->
-                    <div class="flex-grow min-w-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Cari Pegawai</label>
-                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
-                            <div class="pl-3 text-slate-450 dark:text-slate-500">
-                                <i data-lucide="search" class="w-4 h-4"></i>
-                            </div>
-                            <input type="text" name="search" x-model="searchVal" x-ref="searchInput" placeholder="Cari nama pegawai..."
-                                style="border: none !important; outline: none !important; box-shadow: none !important;"
-                                class="w-full h-10 px-2.5 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0">
-                            
-                            <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.focus();" class="h-10 px-2.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
-                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Mulai Tanggal -->
-                    <div class="w-full lg:w-40 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai Tanggal</label>
-                        <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
-                    </div>
-
-                    <!-- Selesai Tanggal -->
-                    <div class="w-full lg:w-40 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
-                    </div>
-
-                    <!-- Filter Unit -->
-                    @if(isset($schoolUnits) && count($schoolUnits) > 0)
-                    <div class="w-full lg:w-48 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Unit Sekolah</label>
-                        <select name="unit_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                            <option value="">Semua Unit</option>
-                            @foreach($schoolUnits as $unit)
-                                <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
-                                    {{ $unit->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @endif
-
-                    <!-- Filter Jabatan -->
-                    @if(isset($positions) && count($positions) > 0)
-                    <div class="w-full lg:w-48 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Jabatan / Posisi</label>
-                        <select name="position" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                            <option value="">Semua Jabatan</option>
-                            @foreach($positions as $pos)
-                                <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>
-                                    {{ $pos }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @endif
-
-                    <!-- Action Buttons -->
-                    <div class="flex items-center gap-2 justify-end w-full lg:w-auto lg:ml-auto pb-0.5">
-                        <button type="submit" class="h-10 px-5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1.5">
-                            <i data-lucide="filter" class="w-4 h-4"></i>
-                            Terapkan
-                        </button>
-
-                        @if(request()->hasAny(['unit_id', 'search', 'start_date', 'end_date', 'position']) && count(request()->except('page')) > 0)
-                            <a href="{{ route('attendance-percentage-reports.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5">
-                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                                Reset
-                            </a>
-                        @endif
-                    </div>
-                </div>
-            </form>
-        </section>
-
         <!-- ZONA KATEGORI FILTER CARDS -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full text-left">
             <!-- Card 1: Semua Pegawai -->
@@ -162,13 +81,94 @@
                 class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
                 <div class="space-y-1">
                     <span class="text-[9px] font-bold text-rose-600 dark:text-rose-455 uppercase tracking-wider block">Zona Kritis (< 90%)</span>
-                    <h4 class="text-2xl font-black font-mono text-rose-600 dark:text-rose-450 leading-none">{{ $countRed }}</h4>
+                    <h4 class="text-2xl font-black font-mono text-rose-600 dark:text-rose-455 leading-none">{{ $countRed }}</h4>
                     <p class="text-[10px] text-slate-400 font-medium">Memerlukan evaluasi kehadiran</p>
                 </div>
                 <div class="h-10 w-10 rounded-lg bg-rose-50 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
                     <i data-lucide="alert-triangle" class="w-5 h-5"></i>
                 </div>
             </button>
+        </section>
+
+        <!-- MODERN FILTERS & SEARCH -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 w-full text-left">
+            <form method="GET" action="{{ route('attendance-percentage-reports.index') }}">
+                <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 w-full">
+                    <!-- Search Input -->
+                    <div class="flex-grow min-w-0">
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Cari Pegawai</label>
+                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="w-full flex items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
+                            <div class="pl-3 text-slate-450 dark:text-slate-500">
+                                <i data-lucide="search" class="w-4 h-4"></i>
+                            </div>
+                            <input type="text" name="search" x-model="searchVal" x-ref="searchInput" placeholder="Cari nama pegawai..."
+                                style="border: none !important; outline: none !important; box-shadow: none !important;"
+                                class="w-full h-10 px-2.5 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0">
+                            
+                            <button type="button" x-show="searchVal.trim() !== ''" @click="searchVal = ''; $refs.searchInput.focus();" class="h-10 px-2.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition-colors cursor-pointer bg-transparent border-0 flex items-center justify-center">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mulai Tanggal -->
+                    <div class="w-full lg:w-40 shrink-0">
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai Tanggal</label>
+                        <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
+                    </div>
+
+                    <!-- Selesai Tanggal -->
+                    <div class="w-full lg:w-40 shrink-0">
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai Tanggal</label>
+                        <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
+                    </div>
+
+                    <!-- Filter Unit -->
+                    @if(isset($schoolUnits) && count($schoolUnits) > 0)
+                    <div class="w-full lg:w-48 shrink-0">
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Unit Sekolah</label>
+                        <select name="unit_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                            <option value="">Semua Unit</option>
+                            @foreach($schoolUnits as $unit)
+                                <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
+                                    {{ $unit->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
+                    <!-- Filter Jabatan -->
+                    @if(isset($positions) && count($positions) > 0)
+                    <div class="w-full lg:w-48 shrink-0">
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Jabatan / Posisi</label>
+                        <select name="position" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                            <option value="">Semua Jabatan</option>
+                            @foreach($positions as $pos)
+                                <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>
+                                    {{ $pos }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2 justify-end w-full lg:w-auto lg:ml-auto pb-0.5">
+                        <button type="submit" class="h-10 px-5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1.5">
+                            <i data-lucide="filter" class="w-4 h-4"></i>
+                            Terapkan
+                        </button>
+
+                        @if(request()->hasAny(['unit_id', 'search', 'start_date', 'end_date', 'position']) && count(request()->except('page')) > 0)
+                            <a href="{{ route('attendance-percentage-reports.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                Reset
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </form>
         </section>
 
         <!-- FORMULA INFO ALERT -->
@@ -190,7 +190,7 @@
         <!-- TABLE SECTION -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
             <!-- Table Header Legend -->
-            <div class="px-6 py-3.5 border-b border-slate-150 dark:border-slate-800/80 bg-slate-550/5 dark:bg-slate-955/50 flex flex-wrap items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">
+            <div class="px-6 py-3.5 border-b border-slate-150 dark:border-slate-800/80 bg-slate-500/5 dark:bg-slate-900/50 flex flex-wrap items-center justify-between gap-3 text-[11px] font-semibold text-slate-500">
                 <span class="font-bold text-slate-900 dark:text-slate-150 flex items-center gap-2">
                     <i data-lucide="table-properties" class="w-4 h-4 text-slate-500"></i>
                     Tabel Evaluasi Kehadiran Pegawai
@@ -203,7 +203,7 @@
             </div>
 
             <!-- SCROLLABLE TABLE CONTAINER (RESTRICTED HEIGHT FOR INDEPENDENT SCROLLING) -->
-            <div class="overflow-x-auto max-h-[440px] overflow-y-auto block relative rounded-b-xl border-t border-slate-100 dark:border-slate-800/60 no-scrollbar">
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto block relative rounded-b-xl border-t border-slate-100 dark:border-slate-800/60 no-scrollbar">
                 <table class="w-full text-xs">
                     <thead class="sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 shadow-xs">
                         <tr class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
