@@ -153,7 +153,7 @@ class HolidayController extends Controller
 
         foreach ($units as $unit) {
             try {
-                Http::withHeaders([
+                Http::timeout(3)->withHeaders([
                     'X-API-TOKEN' => $unit->api_token,
                     'Accept' => 'application/json',
                 ])->post(rtrim($unit->api_url, '/') . '/sync/holidays', [

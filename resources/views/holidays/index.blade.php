@@ -1,4 +1,10 @@
 <x-admin-layout>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+
     <div class="p-6 space-y-6" x-data="{ 
         showAddModal: false, 
         showAdjModal: false,
