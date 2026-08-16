@@ -111,6 +111,9 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     // Synced Performance Reports Web Views
     Route::get('performance-reports', [\App\Http\Controllers\PerformanceReportController::class, 'index'])->name('performance-reports.index');
     Route::get('performance-reports/{id}', [\App\Http\Controllers\PerformanceReportController::class, 'show'])->name('performance-reports.show');
+
+    // Layanan SDM (Mockup / Tahap Pengembangan)
+    Route::get('layanan-sdm', [\App\Http\Controllers\LayananSdmController::class, 'index'])->name('layanan-sdm.index');
 });
 
 // Unit API access - PROTECTED with School Unit Token
