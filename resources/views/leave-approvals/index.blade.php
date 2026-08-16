@@ -89,8 +89,10 @@
             </div>
         </section>
 
-        <!-- FILTERS & SEARCH -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
+        <!-- LEAVE MAIN CONTAINER -->
+        <div id="leave-table-container" class="space-y-6">
+            <!-- FILTERS & SEARCH -->
+            <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('leave-approvals.index') }}" id="leave-filter-form" data-no-loader="true" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
@@ -166,7 +168,7 @@
         </section>
 
         <!-- TABLE LIST -->
-        <div id="leave-table-container" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left w-full flex flex-col justify-between">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left w-full flex flex-col justify-between">
             <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center flex-wrap gap-2 bg-white dark:bg-slate-900">
                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                     Daftar Riwayat Izin
@@ -414,6 +416,7 @@
                     </div>
                 </div>
             @endif
+        </div>
         </div>
 
         <!-- MODAL DETAIL PEGAWAI -->
