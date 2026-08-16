@@ -67,7 +67,12 @@ class WorkingShiftController extends Controller
         }
 
         // Auto sync to units
-        $this->syncShiftsToUnits();
+        $failed = $this->syncShiftsToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->route('working-shifts.index')
+                ->with('error', 'Shift kerja berhasil ditambahkan secara lokal, namun gagal disinkronkan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
+        }
 
         return redirect()->route('working-shifts.index')
             ->with('success', 'Shift kerja berhasil ditambahkan dan disinkronkan ke semua unit.');
@@ -111,7 +116,12 @@ class WorkingShiftController extends Controller
         }
 
         // Auto sync to units
-        $this->syncShiftsToUnits();
+        $failed = $this->syncShiftsToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->route('working-shifts.index')
+                ->with('error', 'Shift kerja berhasil diperbarui secara lokal, namun gagal disinkronkan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
+        }
 
         return redirect()->route('working-shifts.index')
             ->with('success', 'Shift kerja berhasil diperbarui dan disinkronkan ke semua unit.');
@@ -125,7 +135,12 @@ class WorkingShiftController extends Controller
         $workingShift->delete();
 
         // Auto sync to units
-        $this->syncShiftsToUnits();
+        $failed = $this->syncShiftsToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->route('working-shifts.index')
+                ->with('error', 'Shift kerja berhasil dihapus secara lokal, namun gagal menyinkronkan penghapusan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
+        }
 
         return redirect()->route('working-shifts.index')
             ->with('success', 'Shift kerja berhasil dihapus.');
@@ -136,15 +151,22 @@ class WorkingShiftController extends Controller
      */
     public function triggerSync()
     {
-        $this->syncShiftsToUnits();
+        $failed = $this->syncShiftsToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->route('working-shifts.index')
+                ->with('error', 'Gagal menyinkronkan data shift ke unit sekolah: ' . implode(', ', $failed) . '. Silakan coba beberapa saat lagi.');
+        }
+
         return redirect()->route('working-shifts.index')
-            ->with('success', 'Sinkronisasi data shift ke unit sekolah selesai.');
+            ->with('success', 'Sinkronisasi data shift ke semua unit sekolah selesai dan berhasil.');
     }
 
     /**
      * Helper to sync shifts to all active units.
+     * Returns an array of failed unit names.
      */
-    private function syncShiftsToUnits()
+    private function syncShiftsToUnits(): array
     {
         $units = SchoolUnit::where('is_active', true)->get();
         $shifts = WorkingShift::with('details')->get()->map(function ($shift) {
@@ -166,7 +188,7 @@ class WorkingShiftController extends Controller
         })->toArray();
 
         if ($units->isEmpty()) {
-            return;
+            return [];
         }
 
         $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($units, $shifts) {
@@ -181,12 +203,16 @@ class WorkingShiftController extends Controller
             });
         });
 
+        $failedUnits = [];
         foreach ($units as $unit) {
             $response = $responses[$unit->id] ?? null;
             if (!$response || !$response->successful()) {
                 $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
                 Log::error("Failed to sync shifts to unit {$unit->name}. Status: {$status}");
+                $failedUnits[] = $unit->name;
             }
         }
+
+        return $failedUnits;
     }
 }
