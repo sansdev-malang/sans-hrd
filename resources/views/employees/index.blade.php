@@ -96,7 +96,7 @@
 
         <!-- FILTERS & SEARCH -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
-            <form method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+            <form id="filter-form" method="GET" action="{{ route('employees.index') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
                     <!-- Search Box Welded with Cari Button (Premium Input Group) -->
@@ -118,7 +118,7 @@
                     </div>
 
                     <!-- Unit -->
-                    <select name="unit" onchange="this.form.submit()"
+                    <select name="unit" onchange="submitFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Unit Sekolah</option>
                         @foreach($schoolUnits as $su)
@@ -127,7 +127,7 @@
                     </select>
 
                     <!-- Jabatan -->
-                    <select name="position" onchange="this.form.submit()"
+                    <select name="position" onchange="submitFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Jabatan</option>
                         @foreach($positions as $pos)
@@ -144,7 +144,7 @@
 
                 <!-- Right Side: Per Page Options -->
                 <div class="flex items-center gap-2 w-full md:w-auto shrink-0 self-end md:self-auto justify-end">
-                    <select name="per_page" onchange="this.form.submit()"
+                    <select name="per_page" onchange="submitFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
@@ -158,7 +158,8 @@
         </section>
 
         <!-- DATA TABLE -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
+        <div id="employee-table-container" class="w-full">
+            <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
             <div class="p-5 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center flex-wrap gap-2 bg-white dark:bg-slate-900">
                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                     @if(request('unit') && $schoolUnits->firstWhere('id', request('unit')))
@@ -318,6 +319,8 @@
                     </div>
                 </div>
             @endif
+            </section>
+        </div>
         <!-- IMPORT MODAL -->
         <div x-show="showImportModal" 
              style="display: none;"
@@ -1542,6 +1545,90 @@
         color: #0f172a !important; /* text-slate-900 */
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const filterForm = document.getElementById('filter-form');
+    const tableContainer = document.getElementById('employee-table-container');
+
+    if (!filterForm || !tableContainer) return;
+
+    // Helper to submit form via event
+    window.submitFilterForm = function(element) {
+        const form = element.closest('form');
+        if (form) {
+            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+    };
+
+    // Helper to fetch and replace table container content
+    async function loadTableContent(url) {
+        // Show loading state
+        tableContainer.classList.add('opacity-40', 'pointer-events-none');
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const htmlText = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, 'text/html');
+            
+            const newTable = doc.getElementById('employee-table-container');
+            if (newTable) {
+                tableContainer.innerHTML = newTable.innerHTML;
+                
+                // Update URL in browser address bar without reload
+                window.history.pushState({}, '', url);
+                
+                // Re-initialize Lucide icons for new rows
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }
+        } catch (error) {
+            console.error('Error filtering table:', error);
+            // Fallback: full reload using relative path
+            window.location.href = url;
+        } finally {
+            tableContainer.classList.remove('opacity-40', 'pointer-events-none');
+        }
+    }
+
+    // Intercept form submit
+    filterForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(filterForm);
+        const queryParams = new URLSearchParams(formData).toString();
+        // Use relative URL to prevent CORS/domain mismatch blocks
+        const url = `${window.location.pathname}?${queryParams}`;
+        loadTableContent(url);
+    });
+
+    // Intercept pagination link clicks and reset filter button clicks
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && link.href) {
+            // Check if link is inside the table container (e.g. pagination) or is the reset button
+            if (link.closest('#employee-table-container') || link.classList.contains('reset-filter-btn')) {
+                // Ensure it is not a delete/edit action or modal trigger link
+                if (!link.classList.contains('no-ajax') && !link.hasAttribute('@click') && !link.hasAttribute('x-on:click')) {
+                    e.preventDefault();
+                    
+                    // Convert absolute URL to relative path to bypass CORS blocks
+                    try {
+                        const targetUrl = new URL(link.href);
+                        const relativeUrl = targetUrl.pathname + targetUrl.search;
+                        loadTableContent(relativeUrl);
+                    } catch (err) {
+                        loadTableContent(link.href);
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
 </x-admin-layout>
 
 
