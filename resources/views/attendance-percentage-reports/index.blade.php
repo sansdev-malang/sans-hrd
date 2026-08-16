@@ -13,7 +13,6 @@
         activeCategoryFilter: 'all',
         selectedReport: null,
         isDrawerOpen: false,
-        showFormulaInfo: localStorage.getItem('hide_attendance_formula_info') !== 'true',
         openDrawer(report) {
             this.selectedReport = report;
             this.isDrawerOpen = true;
@@ -171,21 +170,7 @@
             </form>
         </section>
 
-        <!-- FORMULA INFO ALERT -->
-        <div x-show="showFormulaInfo" x-transition class="flex items-start justify-between gap-3 p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/30 rounded-xl text-left">
-            <div class="flex items-start gap-3">
-                <i data-lucide="info" class="w-4.5 h-4.5 text-indigo-650 dark:text-indigo-400 shrink-0 mt-0.5"></i>
-                <div class="space-y-1">
-                    <span class="text-xs font-bold text-indigo-950 dark:text-indigo-300 block">Metodologi Kehadiran Aktif</span>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                        Rumus: <strong class="font-bold text-indigo-900 dark:text-indigo-300">Hadir / (Hadir + Alpa) &times; 100%</strong>. Hari <strong class="font-bold text-slate-800 dark:text-slate-200">Sakit, Izin, dan Cuti</strong> yang disetujui resmi otomatis dikecualikan dari pembagi sehingga tidak memotong nilai persentase.
-                    </p>
-                </div>
-            </div>
-            <button type="button" @click="localStorage.setItem('hide_attendance_formula_info', 'true'); showFormulaInfo = false;" class="text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 p-1 rounded-lg hover:bg-indigo-100/50 dark:hover:bg-slate-800 transition-all cursor-pointer">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-        </div>
+
 
         <!-- TABLE SECTION -->
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full text-left">
