@@ -172,10 +172,10 @@ class AttendanceLogController extends Controller
             sort($ulogs);
         }
 
-        return $this->processAttendanceReport($startDate, $endDate, $employeesCollection, $holidayDates, $leaves, $assignedShifts, $attendanceLogs);
+        return $this->processAttendanceReport($startDate, $endDate, $employeesCollection, $unitHolidays, $leaves, $assignedShifts, $attendanceLogs);
     }
 
-    private function processAttendanceReport($startDate, $endDate, $employeesCollection, $holidayDates, $leaves, $assignedShifts, $attendanceLogs)
+    private function processAttendanceReport($startDate, $endDate, $employeesCollection, $unitHolidays, $leaves, $assignedShifts, $attendanceLogs)
     {
         $reports = [];
         $lastDay = clone $endDate;
