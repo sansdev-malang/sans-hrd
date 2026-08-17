@@ -985,7 +985,7 @@
                                         <select x-model="workingShiftId" name="working_shift_id" required
                                             class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
                                             <option value="">Pilih Shift...</option>
-                                            @foreach ($shifts as $shift)
+                                            @foreach ($shifts->where('is_shift', false) as $shift)
                                                 <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
                                             @endforeach
                                         </select>
@@ -1199,7 +1199,7 @@
                                             <select name="working_shift_id" required x-model="editWorkingShiftId"
                                                 class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
                                                 <option value="">Pilih Template Shift</option>
-                                                @foreach ($shifts as $shift)
+                                                @foreach ($shifts->where('is_shift', false) as $shift)
                                                     <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
                                                 @endforeach
                                             </select>
