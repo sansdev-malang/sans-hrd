@@ -127,10 +127,45 @@ class AttendanceBonusReportController extends Controller
             });
 
         // Pre-fetch Holidays
-        $holidays = \App\Models\Holiday::with('adjustments')
-            ->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->get();
-        $holidayDates = $holidays->pluck('original_date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d'))->toArray();
+        $holidays = \App\Models\Holiday::all();
+        $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+        $schoolUnitsList = \App\Models\SchoolUnit::all();
+        $unitHolidays = [];
+        $unitHolidays[''] = [];
+        foreach ($holidays as $h) {
+            if ($h->is_global) {
+                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
+            }
+        }
+        foreach ($holidayAdjustments as $adj) {
+            if (is_null($adj->school_unit_id)) {
+                $origStr = $adj->original_date->format('Y-m-d');
+                $adjStr = $adj->adjusted_date->format('Y-m-d');
+                if (isset($unitHolidays[''][$origStr])) {
+                    unset($unitHolidays[''][$origStr]);
+                }
+                $unitHolidays[''][$adjStr] = true;
+            }
+        }
+        foreach ($schoolUnitsList as $unitModel) {
+            $uId = $unitModel->id;
+            $unitHolidays[$uId] = [];
+            foreach ($holidays as $h) {
+                if ($h->is_global) {
+                    $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
+                }
+            }
+            foreach ($holidayAdjustments as $adj) {
+                if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
+                    $origStr = $adj->original_date->format('Y-m-d');
+                    $adjStr = $adj->adjusted_date->format('Y-m-d');
+                    if (isset($unitHolidays[$uId][$origStr])) {
+                        unset($unitHolidays[$uId][$origStr]);
+                    }
+                    $unitHolidays[$uId][$adjStr] = true;
+                }
+            }
+        }
 
         // Pre-fetch Leave Requests (Approved)
         $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
@@ -167,7 +202,9 @@ class AttendanceBonusReportController extends Controller
                 $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
                 // Skip Holidays only for non-shift workers
-                if (in_array($dateStr, $holidayDates)) {
+                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
+                $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false);
+                if ($isHoliday) {
                     $isShiftOnDate = false;
                     $shiftKey = $unit . '_' . $empId;
                     if (isset($assignedShifts[$shiftKey])) {
@@ -431,10 +468,45 @@ class AttendanceBonusReportController extends Controller
                 });
             });
 
-        $holidays = \App\Models\Holiday::with('adjustments')
-            ->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->get();
-        $holidayDates = $holidays->pluck('original_date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d'))->toArray();
+        $holidays = \App\Models\Holiday::all();
+        $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+        $schoolUnitsList = \App\Models\SchoolUnit::all();
+        $unitHolidays = [];
+        $unitHolidays[''] = [];
+        foreach ($holidays as $h) {
+            if ($h->is_global) {
+                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
+            }
+        }
+        foreach ($holidayAdjustments as $adj) {
+            if (is_null($adj->school_unit_id)) {
+                $origStr = $adj->original_date->format('Y-m-d');
+                $adjStr = $adj->adjusted_date->format('Y-m-d');
+                if (isset($unitHolidays[''][$origStr])) {
+                    unset($unitHolidays[''][$origStr]);
+                }
+                $unitHolidays[''][$adjStr] = true;
+            }
+        }
+        foreach ($schoolUnitsList as $unitModel) {
+            $uId = $unitModel->id;
+            $unitHolidays[$uId] = [];
+            foreach ($holidays as $h) {
+                if ($h->is_global) {
+                    $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
+                }
+            }
+            foreach ($holidayAdjustments as $adj) {
+                if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
+                    $origStr = $adj->original_date->format('Y-m-d');
+                    $adjStr = $adj->adjusted_date->format('Y-m-d');
+                    if (isset($unitHolidays[$uId][$origStr])) {
+                        unset($unitHolidays[$uId][$origStr]);
+                    }
+                    $unitHolidays[$uId][$adjStr] = true;
+                }
+            }
+        }
 
         $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
             ->where('status', 'Approved')
@@ -470,7 +542,9 @@ class AttendanceBonusReportController extends Controller
                 $dayOfWeek = $currentDate->dayOfWeek;
 
                 // Skip Holidays only for non-shift workers
-                if (in_array($dateStr, $holidayDates)) {
+                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
+                $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false);
+                if ($isHoliday) {
                     $isShiftOnDate = false;
                     $shiftKey = $unit . '_' . $empId;
                     if (isset($assignedShifts[$shiftKey])) {
