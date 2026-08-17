@@ -92,8 +92,25 @@ class AttendanceHistoryController extends Controller
         // 1. Fetch holidays
         $holidays = Holiday::all();
         $holidayAdjustments = HolidayAdjustment::all();
-        $schoolUnitsList = SchoolUnit::where('is_active', true)->get();
+        $schoolUnitsList = SchoolUnit::all();
         $unitHolidays = [];
+        $unitHolidays[''] = [];
+        foreach ($holidays as $h) {
+            if ($h->is_global) {
+                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
+            }
+        }
+        foreach ($holidayAdjustments as $adj) {
+            if (is_null($adj->school_unit_id)) {
+                $origStr = $adj->original_date->format('Y-m-d');
+                $adjStr = $adj->adjusted_date->format('Y-m-d');
+                if (isset($unitHolidays[''][$origStr])) {
+                    unset($unitHolidays[''][$origStr]);
+                }
+                $unitHolidays[''][$adjStr] = true;
+            }
+        }
+
         foreach ($schoolUnitsList as $unitModel) {
             $uId = $unitModel->id;
             $unitHolidays[$uId] = [];
@@ -187,7 +204,8 @@ class AttendanceHistoryController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeekIso;
 
-                $isHoliday = isset($unitHolidays[$unit][$dateStr]) ?? false;
+                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
+                $isHoliday = $unitHolidays[$empUnitKey][$dateStr] ?? false;
                 
                 $isOnLeave = false;
                 $getsBonus = false;
@@ -442,7 +460,7 @@ class AttendanceHistoryController extends Controller
                 ];
 
                 // Status determination
-                if ($isHoliday) {
+                if ($isHoliday && !$isShiftWorker) {
                     if ($checkInLog) {
                         $record['status'] = 'Hadir';
                         $record['notes'] = 'Masuk di Hari Libur';

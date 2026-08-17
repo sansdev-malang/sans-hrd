@@ -53,14 +53,45 @@ class AttendanceApiController extends Controller
         }
         $employeesCollection = $rawEmployees->values();
 
-        $holidays = \App\Models\Holiday::with('adjustments')
-            ->where(function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-                  ->orWhereHas('adjustments', function ($q2) use ($startDate, $endDate) {
-                      $q2->whereBetween('adjusted_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
-                  });
-            })->get();
-        $holidayDates = $holidays->pluck('original_date')->toArray();
+        $holidays = \App\Models\Holiday::all();
+        $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+        $schoolUnitsList = SchoolUnit::all();
+        $unitHolidays = [];
+        $unitHolidays[''] = [];
+        foreach ($holidays as $h) {
+            if ($h->is_global) {
+                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
+            }
+        }
+        foreach ($holidayAdjustments as $adj) {
+            if (is_null($adj->school_unit_id)) {
+                $origStr = $adj->original_date->format('Y-m-d');
+                $adjStr = $adj->adjusted_date->format('Y-m-d');
+                if (isset($unitHolidays[''][$origStr])) {
+                    unset($unitHolidays[''][$origStr]);
+                }
+                $unitHolidays[''][$adjStr] = true;
+            }
+        }
+        foreach ($schoolUnitsList as $unitModel) {
+            $uId = $unitModel->id;
+            $unitHolidays[$uId] = [];
+            foreach ($holidays as $h) {
+                if ($h->is_global) {
+                    $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
+                }
+            }
+            foreach ($holidayAdjustments as $adj) {
+                if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
+                    $origStr = $adj->original_date->format('Y-m-d');
+                    $adjStr = $adj->adjusted_date->format('Y-m-d');
+                    if (isset($unitHolidays[$uId][$origStr])) {
+                        unset($unitHolidays[$uId][$origStr]);
+                    }
+                    $unitHolidays[$uId][$adjStr] = true;
+                }
+            }
+        }
 
         $leavesData = \App\Models\LeaveRequest::where(function($q) use ($startDate, $endDate) {
             $q->whereBetween('start_date', [$startDate, $endDate])
@@ -141,6 +172,17 @@ class AttendanceApiController extends Controller
             $unit = $emp['unit_id'] ?? null;
 
             if (!$uid || !$empId) continue;
+
+            $isShiftWorker = false;
+            $shiftKey = $unit . '_' . $empId;
+            if (isset($assignedShifts[$shiftKey])) {
+                foreach ($assignedShifts[$shiftKey] as $assignment) {
+                    if ($assignment->workingShift->is_shift) {
+                        $isShiftWorker = true;
+                        break;
+                    }
+                }
+            }
             $userLogs = $attendanceLogs[(string)$uid] ?? [];
 
             $dailyDetails = [];
@@ -150,7 +192,9 @@ class AttendanceApiController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) to 6 (Sat)
 
-                if (in_array($dateStr, $holidayDates)) {
+                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
+                $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false) && !$isShiftWorker;
+                if ($isHoliday) {
                     $dailyDetails[$dateStr] = ['status' => 'Libur'];
                     $currentDate->addDay();
                     continue;
@@ -422,10 +466,45 @@ class AttendanceApiController extends Controller
             });
 
         // Pre-fetch Holidays
-        $holidays = \App\Models\Holiday::with('adjustments')
-            ->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->get();
-        $holidayDates = $holidays->pluck('original_date')->toArray();
+        $holidays = \App\Models\Holiday::all();
+        $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+        $schoolUnitsList = SchoolUnit::all();
+        $unitHolidays = [];
+        $unitHolidays[''] = [];
+        foreach ($holidays as $h) {
+            if ($h->is_global) {
+                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
+            }
+        }
+        foreach ($holidayAdjustments as $adj) {
+            if (is_null($adj->school_unit_id)) {
+                $origStr = $adj->original_date->format('Y-m-d');
+                $adjStr = $adj->adjusted_date->format('Y-m-d');
+                if (isset($unitHolidays[''][$origStr])) {
+                    unset($unitHolidays[''][$origStr]);
+                }
+                $unitHolidays[''][$adjStr] = true;
+            }
+        }
+        foreach ($schoolUnitsList as $unitModel) {
+            $uId = $unitModel->id;
+            $unitHolidays[$uId] = [];
+            foreach ($holidays as $h) {
+                if ($h->is_global) {
+                    $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
+                }
+            }
+            foreach ($holidayAdjustments as $adj) {
+                if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
+                    $origStr = $adj->original_date->format('Y-m-d');
+                    $adjStr = $adj->adjusted_date->format('Y-m-d');
+                    if (isset($unitHolidays[$uId][$origStr])) {
+                        unset($unitHolidays[$uId][$origStr]);
+                    }
+                    $unitHolidays[$uId][$adjStr] = true;
+                }
+            }
+        }
 
         // Pre-fetch Leave Requests (Approved)
         $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
@@ -449,6 +528,17 @@ class AttendanceApiController extends Controller
 
             if (!$uid || !$empId) continue;
 
+            $isShiftWorker = false;
+            $shiftKey = $unit . '_' . $empId;
+            if (isset($assignedShifts[$shiftKey])) {
+                foreach ($assignedShifts[$shiftKey] as $assignment) {
+                    if ($assignment->workingShift->is_shift) {
+                        $isShiftWorker = true;
+                        break;
+                    }
+                }
+            }
+
             $totalPresent = 0;
             $totalLateMinutes = 0;
             $totalAbsent = 0;
@@ -465,8 +555,9 @@ class AttendanceApiController extends Controller
                 $shiftEndTime = null;
                 $shiftName = null;
 
-                // Skip Holidays
-                if (in_array($dateStr, $holidayDates)) {
+                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
+                $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false) && !$isShiftWorker;
+                if ($isHoliday) {
                     $currentDate->addDay();
                     continue;
                 }
@@ -733,7 +824,7 @@ class AttendanceApiController extends Controller
             }
 
             // Calculate Status & Bonus using centralized HRD logic
-            $calc = $this->calculateAttendanceLogic($emp['id'], $date, $clockIn, $clockOut);
+            $calc = $this->calculateAttendanceLogic($emp['id'], $emp['unit_id'] ?? null, $date, $clockIn, $clockOut);
 
             $results[] = [
                 'employee' => $emp,
@@ -760,23 +851,32 @@ class AttendanceApiController extends Controller
         ]);
     }
 
-    private function calculateAttendanceLogic($employeeId, $date, $clockIn, $clockOut)
+    private function calculateAttendanceLogic($employeeId, $unitId, $date, $clockIn, $clockOut)
     {
         $carbonDate = Carbon::parse($date);
         $dayOfWeek = $carbonDate->dayOfWeek; // 0=Sunday, 1=Monday, ..., 6=Saturday
 
         // 1. Check Holiday Adjustment or global holiday
         $isHoliday = false;
-        $adjustment = HolidayAdjustment::where('adjusted_date', $date)->first();
+        $adjustment = HolidayAdjustment::where('adjusted_date', $date)
+            ->where(function($q) use ($unitId) {
+                $q->whereNull('school_unit_id')
+                  ->orWhere('school_unit_id', $unitId);
+            })->first();
 
         if ($adjustment) {
             $isHoliday = true;
         } else {
-            $holiday = Holiday::where('original_date', $date)->first();
+            $holiday = Holiday::where('original_date', $date)
+                ->where('is_global', true)
+                ->first();
             if ($holiday) {
                 $wasRescheduled = HolidayAdjustment::where('holiday_id', $holiday->id)
                     ->where('original_date', $date)
-                    ->exists();
+                    ->where(function($q) use ($unitId) {
+                        $q->whereNull('school_unit_id')
+                          ->orWhere('school_unit_id', $unitId);
+                    })->exists();
                 if (!$wasRescheduled) {
                     $isHoliday = true;
                 }
@@ -815,7 +915,8 @@ class AttendanceApiController extends Controller
                 ->first();
         }
 
-        $isOffDay = ($shiftDetail && $shiftDetail->is_off) || $isHoliday;
+        $isShiftWorker = $shift && $shift->is_shift;
+        $isOffDay = ($shiftDetail && $shiftDetail->is_off) || ($isHoliday && !$isShiftWorker);
 
         // 3. Check Approved Leave Requests
         $leave = LeaveRequest::where('employee_id', $employeeId)

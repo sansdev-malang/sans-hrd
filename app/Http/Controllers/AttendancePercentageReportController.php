@@ -131,33 +131,40 @@ class AttendancePercentageReportController extends Controller
         $holidays = \App\Models\Holiday::all();
         $holidayAdjustments = \App\Models\HolidayAdjustment::all();
 
-        // Build active holiday dates per unit
-        $schoolUnitsList = SchoolUnit::where('is_active', true)->get();
+        $schoolUnitsList = SchoolUnit::all();
         $unitHolidays = [];
+        $unitHolidays[''] = [];
+        foreach ($holidays as $h) {
+            if ($h->is_global) {
+                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
+            }
+        }
+        foreach ($holidayAdjustments as $adj) {
+            if (is_null($adj->school_unit_id)) {
+                $origStr = $adj->original_date->format('Y-m-d');
+                $adjStr = $adj->adjusted_date->format('Y-m-d');
+                if (isset($unitHolidays[''][$origStr])) {
+                    unset($unitHolidays[''][$origStr]);
+                }
+                $unitHolidays[''][$adjStr] = true;
+            }
+        }
 
         foreach ($schoolUnitsList as $unitModel) {
             $uId = $unitModel->id;
             $unitHolidays[$uId] = [];
-
-            // Add global/national holidays first
             foreach ($holidays as $h) {
                 if ($h->is_global) {
                     $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
                 }
             }
-
-            // Apply adjustments/reschedules for this unit (or global adjustments)
             foreach ($holidayAdjustments as $adj) {
                 if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
                     $origStr = $adj->original_date->format('Y-m-d');
                     $adjStr = $adj->adjusted_date->format('Y-m-d');
-
-                    // Original date is no longer a holiday
                     if (isset($unitHolidays[$uId][$origStr])) {
                         unset($unitHolidays[$uId][$origStr]);
                     }
-
-                    // Adjusted date becomes the new holiday
                     $unitHolidays[$uId][$adjStr] = true;
                 }
             }
@@ -197,6 +204,17 @@ class AttendancePercentageReportController extends Controller
 
             if (!$uid || !$empId) continue;
 
+            $isShiftWorker = false;
+            $shiftKey = $unit . '_' . $empId;
+            if (isset($assignedShifts[$shiftKey])) {
+                foreach ($assignedShifts[$shiftKey] as $assignment) {
+                    if ($assignment->workingShift->is_shift) {
+                        $isShiftWorker = true;
+                        break;
+                    }
+                }
+            }
+
             $totalWorkDays = 0;
             $totalPresent = 0; // Physical scan OR gets_presence_bonus leaves
             $actualScanCount = 0; // Physical scan tap
@@ -223,7 +241,8 @@ class AttendancePercentageReportController extends Controller
                 $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
                 // Skip Holidays based on employee's unit
-                $isHoliday = isset($unitHolidays[$unit][$dateStr]) ?? false;
+                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
+                $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false) && !$isShiftWorker;
                 if ($isHoliday) {
                     $dayDetails[] = [
                         'date' => $formattedDate,
