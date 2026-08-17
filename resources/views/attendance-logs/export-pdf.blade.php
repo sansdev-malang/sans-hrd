@@ -148,7 +148,7 @@
                                     }
                                 } elseif ($status === 'Libur') {
                                     $cellClass = 'cell-libur';
-                                    $content = '-';
+                                    $content = 'OFF';
                                 } elseif ($status === 'Off') {
                                     $cellClass = 'cell-off';
                                     $content = 'OFF';

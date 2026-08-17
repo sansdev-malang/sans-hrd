@@ -135,7 +135,7 @@
                                 default => 'cell-off',
                             };
                         @endphp
-                        <td class="{{ $cellClass }}">{{ $row['status'] }}</td>
+                        <td class="{{ $cellClass }}">{{ $row['status'] === 'Libur' ? 'OFF' : $row['status'] }}</td>
                         <td>
                             @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
                                 <span style="color: #b45309; font-weight: bold;">Terlambat {{ $row['late_minutes'] }} mnt</span>

@@ -69,7 +69,7 @@ class AttendanceLogController extends Controller
                       $q2->whereBetween('adjusted_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
                   });
             })->get();
-        $holidayDates = $holidays->pluck('original_date')->toArray();
+        $holidayDates = $holidays->pluck('original_date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d'))->toArray();
 
         $leavesData = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
             ->where(function($q) use ($startDate, $endDate) {
@@ -167,7 +167,23 @@ class AttendanceLogController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) to 6 (Sat)
 
-                if (in_array($dateStr, $holidayDates)) {
+                // Resolve if they are a shift worker on this date
+                $isShiftWorkerOnDate = false;
+                $shiftKey = $unit . '_' . $empId;
+                if (isset($assignedShifts[$shiftKey])) {
+                    foreach ($assignedShifts[$shiftKey] as $assignment) {
+                        $assignStartDate = substr($assignment->start_date, 0, 10);
+                        $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                        if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                            if ($assignment->workingShift->is_shift) {
+                                $isShiftWorkerOnDate = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (in_array($dateStr, $holidayDates) && !$isShiftWorkerOnDate) {
                     $dailyDetails[$dateStr] = ['status' => 'Libur'];
                     $currentDate->addDay();
                     continue;

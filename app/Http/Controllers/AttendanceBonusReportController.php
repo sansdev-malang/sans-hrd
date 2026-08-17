@@ -130,7 +130,7 @@ class AttendanceBonusReportController extends Controller
         $holidays = \App\Models\Holiday::with('adjustments')
             ->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->get();
-        $holidayDates = $holidays->pluck('original_date')->toArray();
+        $holidayDates = $holidays->pluck('original_date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d'))->toArray();
 
         // Pre-fetch Leave Requests (Approved)
         $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
@@ -166,10 +166,27 @@ class AttendanceBonusReportController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
-                // Skip Holidays
+                // Skip Holidays only for non-shift workers
                 if (in_array($dateStr, $holidayDates)) {
-                    $currentDate->addDay();
-                    continue;
+                    $isShiftOnDate = false;
+                    $shiftKey = $unit . '_' . $empId;
+                    if (isset($assignedShifts[$shiftKey])) {
+                        foreach ($assignedShifts[$shiftKey] as $assignment) {
+                            $assignStartDate = substr($assignment->start_date, 0, 10);
+                            $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                            if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                                if ($assignment->workingShift->is_shift) {
+                                    $isShiftOnDate = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!$isShiftOnDate) {
+                        $currentDate->addDay();
+                        continue;
+                    }
                 }
 
                 // Skip Leaves (except Dinas, those getting presence bonus, or those requiring attendance)
@@ -417,7 +434,7 @@ class AttendanceBonusReportController extends Controller
         $holidays = \App\Models\Holiday::with('adjustments')
             ->whereBetween('original_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->get();
-        $holidayDates = $holidays->pluck('original_date')->toArray();
+        $holidayDates = $holidays->pluck('original_date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d'))->toArray();
 
         $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
             ->where('status', 'Approved')
@@ -452,9 +469,27 @@ class AttendanceBonusReportController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek;
 
+                // Skip Holidays only for non-shift workers
                 if (in_array($dateStr, $holidayDates)) {
-                    $currentDate->addDay();
-                    continue;
+                    $isShiftOnDate = false;
+                    $shiftKey = $unit . '_' . $empId;
+                    if (isset($assignedShifts[$shiftKey])) {
+                        foreach ($assignedShifts[$shiftKey] as $assignment) {
+                            $assignStartDate = substr($assignment->start_date, 0, 10);
+                            $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                            if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                                if ($assignment->workingShift->is_shift) {
+                                    $isShiftOnDate = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!$isShiftOnDate) {
+                        $currentDate->addDay();
+                        continue;
+                    }
                 }
 
                 // Skip Leaves (except Dinas, those getting presence bonus, or those requiring attendance)

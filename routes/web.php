@@ -127,6 +127,9 @@ Route::middleware(['throttle:60,1', 'verify_school_unit_token'])->prefix('api')-
     // Leave Request Sync Endpoints (from units)
     Route::post('sync/leave-request', [\App\Http\Controllers\Api\LeaveSyncApiController::class, 'storeOrUpdate']);
     Route::post('sync/leave-request/delete', [\App\Http\Controllers\Api\LeaveSyncApiController::class, 'destroy']);
+
+    // Employee Sync Endpoints (from units)
+    Route::post('sync/clear-employee-cache', [\App\Http\Controllers\Api\EmployeeSyncApiController::class, 'clearCache']);
 });
 
 // PKG Integration API - PROTECTED with PKG Token

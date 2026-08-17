@@ -1181,7 +1181,7 @@ class AttendanceHistoryController extends Controller
             $sheet->setCellValue('I' . $rowIdx, $item['shift_end'] ?? '-');
             $sheet->setCellValue('J' . $rowIdx, $item['check_in'] ?? '-');
             $sheet->setCellValue('K' . $rowIdx, $item['check_out'] ?? '-');
-            $sheet->setCellValue('L' . $rowIdx, $item['status']);
+            $sheet->setCellValue('L' . $rowIdx, $item['status'] === 'Libur' ? 'OFF' : $item['status']);
             $sheet->setCellValue('M' . $rowIdx, $item['late_minutes'] > 0 ? $item['late_minutes'] : 0);
             $sheet->setCellValue('N' . $rowIdx, $item['notes'] ?? '');
             

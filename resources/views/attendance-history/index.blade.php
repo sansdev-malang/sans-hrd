@@ -191,7 +191,7 @@
                                         };
                                     @endphp
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
-                                        {{ $row['status'] }}
+                                        {{ $row['status'] === 'Libur' ? 'OFF' : $row['status'] }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-slate-600 dark:text-slate-400 max-w-xs truncate">
