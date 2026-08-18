@@ -89,6 +89,8 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::resource('zkteco-devices', \App\Http\Controllers\ZktecoDeviceController::class);
 
     // Raw Attendance Logs
+    Route::get('raw-attendance-logs/template', [\App\Http\Controllers\RawAttendanceLogController::class, 'downloadTemplate'])->name('raw-attendance-logs.template');
+    Route::post('raw-attendance-logs/import', [\App\Http\Controllers\RawAttendanceLogController::class, 'importExcel'])->name('raw-attendance-logs.import');
     Route::get('raw-attendance-logs', [\App\Http\Controllers\RawAttendanceLogController::class, 'index'])->name('raw-attendance-logs.index');
     Route::post('raw-attendance-logs', [\App\Http\Controllers\RawAttendanceLogController::class, 'store'])->name('raw-attendance-logs.store');
     Route::put('raw-attendance-logs/{id}', [\App\Http\Controllers\RawAttendanceLogController::class, 'update'])->name('raw-attendance-logs.update');

@@ -69,10 +69,16 @@
                     </div>
                 </form>
 
-                <button @click="openCreateModal" class="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer self-start md:self-auto shrink-0">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Tambah Log Manual
-                </button>
+                <div class="flex items-center gap-2 mt-4 md:mt-0">
+                    <button @click="showImportModal = true" class="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
+                        <i data-lucide="file-up" class="w-4 h-4"></i>
+                        Import Excel
+                    </button>
+                    <button @click="openCreateModal" class="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Tambah Log Manual
+                    </button>
+                </div>
             </div>
 
             <!-- TABLE DESKTOP (FREEZE HEADER / SCROLLABLE ROWS) -->
@@ -447,6 +453,40 @@
             </div>
         </div>
 
+        <!-- MODAL IMPORT EXCEL -->
+        <div x-show="showImportModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity" style="margin-top: 0px !important;">
+            <div @click.away="showImportModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 duration-200 text-left">
+                <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Import Log dari Excel</h3>
+                    <button type="button" @click="showImportModal = false" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                
+                <form action="{{ route('raw-attendance-logs.import') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5 text-xs">
+                    @csrf
+                    
+                    <div class="space-y-3">
+                        <p class="text-slate-600 dark:text-slate-400">Pastikan Anda menggunakan format Excel yang benar. Klik tombol di bawah untuk mengunduh template terbaru beserta daftar referensi UID/ID yang dibutuhkan.</p>
+                        <a href="{{ route('raw-attendance-logs.template') }}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            Download Template & Referensi
+                        </a>
+                    </div>
+
+                    <div class="space-y-1.5 border-t border-slate-100 dark:border-slate-800 pt-4">
+                        <label class="block font-bold text-slate-700 dark:text-slate-300">File Excel (.xlsx, .xls) <span class="text-rose-500">*</span></label>
+                        <input type="file" name="file" accept=".xlsx, .xls" required class="w-full h-10 px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500/50 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900/30 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 cursor-pointer">
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2.5 bg-slate-50/50 dark:bg-slate-950 -mx-6 -mb-6 px-6 py-4 mt-6 rounded-b-xl">
+                        <button type="button" @click="showImportModal = false" class="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-transparent text-xs font-bold rounded-lg cursor-pointer">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg cursor-pointer">Import Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 </x-admin-layout>
 
@@ -455,6 +495,7 @@
         Alpine.data('rawLogsData', () => ({
             showCreateModal: false,
             showEditModal: false,
+            showImportModal: false,
             selectedLog: null,
             employees: @json($employees),
             
