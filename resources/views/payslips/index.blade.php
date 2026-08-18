@@ -45,7 +45,7 @@
                     <!-- Left Side: Search & Filters -->
                     <div class="flex flex-wrap items-center gap-2 flex-1">
                         <!-- Search Box -->
-                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
+                        <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center flex-1 min-w-[200px] search-container bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
                             <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
                                 style="border: none !important; outline: none !important; box-shadow: none !important;"
                                 class="w-full h-10 px-3.5 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-550 focus:ring-0 focus:outline-none">

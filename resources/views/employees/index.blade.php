@@ -109,7 +109,7 @@
                 <!-- Left Side: Search & Filters -->
                 <div class="flex flex-wrap items-center gap-2 flex-1">
                     <!-- Search Box Welded with Cari Button (Premium Input Group) -->
-                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center w-full search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
+                    <div x-data="{ searchVal: '{{ request('search') }}' }" class="flex items-center flex-1 min-w-[200px] search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
                         <input type="text" name="search" x-model="searchVal" placeholder="Cari pegawai..."
                             style="border: none !important; outline: none !important; box-shadow: none !important;"
                             class="w-full h-9 px-3 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0">
