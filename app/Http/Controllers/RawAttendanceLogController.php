@@ -25,6 +25,8 @@ class RawAttendanceLogController extends Controller
         $search = $request->query('search');
         $unitId = $request->query('unit_id');
         $position = $request->query('position');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
 
         // Fetch employee mapping
         $employees = $this->service->getSdEmployees();
@@ -59,6 +61,13 @@ class RawAttendanceLogController extends Controller
         }
 
         $query = AttendanceLog::with('device');
+
+        if (!empty($startDate)) {
+            $query->whereDate('timestamp', '>=', $startDate);
+        }
+        if (!empty($endDate)) {
+            $query->whereDate('timestamp', '<=', $endDate);
+        }
 
         // If any filters are applied, constrain query to matching employee uids
         if (!empty($unitId) || !empty($position) || !empty($search)) {
@@ -114,7 +123,8 @@ class RawAttendanceLogController extends Controller
 
         return view('raw-attendance-logs.index', compact(
             'logs', 'search', 'unitId', 'position', 'employeeMap', 
-            'devices', 'employees', 'schoolUnits', 'positions', 'unitPositions'
+            'devices', 'employees', 'schoolUnits', 'positions', 'unitPositions',
+            'startDate', 'endDate'
         ));
     }
 
@@ -350,6 +360,217 @@ class RawAttendanceLogController extends Controller
             DB::rollBack();
             return redirect()->route('raw-attendance-logs.index')->withErrors(['file' => 'Gagal mengimpor file: ' . $e->getMessage()]);
         }
+    }
+
+    public function export(Request $request)
+    {
+        $search = $request->query('search');
+        $unitId = $request->query('unit_id');
+        $position = $request->query('position');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        // Fetch employee mapping
+        $employees = $this->service->getSdEmployees();
+
+        // Build filtered employee list
+        $filteredEmployees = collect($employees);
+        if (!empty($unitId)) {
+            $filteredEmployees = $filteredEmployees->filter(function($emp) use ($unitId) {
+                return (string)($emp['unit_id'] ?? '') === (string)$unitId;
+            });
+        }
+        if (!empty($position)) {
+            $filteredEmployees = $filteredEmployees->filter(function($emp) use ($position) {
+                $pos = $emp['position'] ?? $emp['subject_position'] ?? '';
+                return $pos === $position;
+            });
+        }
+        if (!empty($search)) {
+            $filteredEmployees = $filteredEmployees->filter(function($emp) use ($search) {
+                $nameMatch = stripos($emp['name'] ?? '', $search) !== false;
+                $uidMatch = stripos((string)($emp['zkteco_uid'] ?? ''), $search) !== false;
+                return $nameMatch || $uidMatch;
+            });
+        }
+
+        // Map employees for name retrieval & sorting
+        $employeeMap = [];
+        $employeeUnitMap = [];
+        $employeeUnitNameMap = [];
+        $employeeNameMap = [];
+        foreach ($employees as $emp) {
+            if (!empty($emp['zkteco_uid'])) {
+                $uidStr = (string)$emp['zkteco_uid'];
+                $empName = $emp['name'] ?? 'Tidak Dikenal';
+                $employeeMap[$uidStr] = $empName;
+                $employeeNameMap[$uidStr] = $empName;
+                
+                $unitName = '-';
+                if (!empty($emp['unit_id'])) {
+                    $schoolUnits = \App\Models\SchoolUnit::all();
+                    $unit = $schoolUnits->firstWhere('id', $emp['unit_id']);
+                    if ($unit) $unitName = $unit->name;
+                }
+                $employeeUnitNameMap[$uidStr] = $unitName;
+                
+                $pos = $emp['position'] ?? $emp['subject_position'] ?? '-';
+                $employeeUnitMap[$uidStr] = $unitName . ' - ' . $pos;
+            }
+        }
+
+        $query = AttendanceLog::with('device');
+
+        // Apply date filters
+        if (!empty($startDate)) {
+            $query->whereDate('timestamp', '>=', $startDate);
+        }
+        if (!empty($endDate)) {
+            $query->whereDate('timestamp', '<=', $endDate);
+        }
+
+        // If any filters are applied, constrain query to matching employee uids
+        if (!empty($unitId) || !empty($position) || !empty($search)) {
+            $uids = $filteredEmployees->pluck('zkteco_uid')->filter()->map(function($uid) {
+                return (string)$uid;
+            })->unique()->toArray();
+
+            $query->where(function($q) use ($uids, $search) {
+                if (!empty($uids)) {
+                    $q->whereIn('uid', $uids);
+                } else {
+                    $q->where('uid', 'INVALID_UID');
+                }
+
+                if (!empty($search)) {
+                    $q->orWhere('local_name', 'like', "%{$search}%")
+                      ->orWhereHas('device', function($qd) use ($search) {
+                          $qd->where('name', 'like', "%{$search}%");
+                      });
+                }
+            });
+        }
+
+        // Limit the export range to prevent crash if no dates are set and DB is large
+        if (empty($startDate) && empty($endDate)) {
+            // Default to last 30 days
+            $query->where('timestamp', '>=', now()->subDays(30));
+        }
+
+        // Fetch logs
+        $logs = $query->orderBy('timestamp', 'desc')->get();
+
+        // Sort by unit A-Z, then employee name A-Z, then timestamp DESC
+        $logs = $logs->sort(function ($a, $b) use ($employeeUnitNameMap, $employeeNameMap) {
+            $unitA = $employeeUnitNameMap[(string)$a->uid] ?? 'ZZZZ';
+            $unitB = $employeeUnitNameMap[(string)$b->uid] ?? 'ZZZZ';
+            
+            $cmpUnit = strcasecmp($unitA, $unitB);
+            if ($cmpUnit !== 0) {
+                return $cmpUnit;
+            }
+            
+            $nameA = $employeeNameMap[(string)$a->uid] ?? 'ZZZZ';
+            $nameB = $employeeNameMap[(string)$b->uid] ?? 'ZZZZ';
+            
+            $cmpName = strcasecmp($nameA, $nameB);
+            if ($cmpName !== 0) {
+                return $cmpName;
+            }
+            
+            return strcmp($b->timestamp, $a->timestamp); // timestamp desc
+        });
+
+        // Generate Excel
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Log Absensi');
+
+        // Headers
+        $headers = [
+            'ID Log',
+            'UID Pegawai',
+            'Nama Pegawai',
+            'Unit & Jabatan',
+            'Waktu Absen (Timestamp)',
+            'State (Status)',
+            'Tipe Sensor',
+            'Mesin Sumber',
+            'SN Mesin'
+        ];
+
+        foreach ($headers as $colIndex => $headerText) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+            $sheet->setCellValue($colLetter . '1', $headerText);
+        }
+
+        // Bold Headers
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+
+        // Fill Data
+        $rowNum = 2;
+        foreach ($logs as $log) {
+            $stateLabel = match((int)$log->state) {
+                0 => 'Check-In',
+                1 => 'Check-Out',
+                2 => 'Break-Out',
+                3 => 'Break-In',
+                4 => 'Overtime-In',
+                5 => 'Overtime-Out',
+                15 => 'Otomatis',
+                255 => 'Otomatis',
+                default => 'Auto ('.$log->state.')'
+            };
+
+            $typeLabel = match((int)$log->type) {
+                0 => 'Password',
+                1 => 'Wajah',
+                4 => 'Kartu RFID',
+                15 => 'Wajah',
+                255 => 'Wajah (via API)',
+                default => 'Sensor Lain ('.$log->type.')'
+            };
+
+            $empName = $employeeMap[(string)$log->uid] ?? 'Tidak Dikenal';
+            $empUnit = $employeeUnitMap[(string)$log->uid] ?? '-';
+            $deviceName = $log->device ? $log->device->name : '-';
+            $deviceSn = $log->device ? $log->device->sn : '-';
+
+            $sheet->setCellValue('A' . $rowNum, $log->id);
+            $sheet->setCellValue('B' . $rowNum, $log->uid);
+            $sheet->setCellValue('C' . $rowNum, $empName);
+            $sheet->setCellValue('D' . $rowNum, $empUnit);
+            $sheet->setCellValue('E' . $rowNum, $log->timestamp);
+            $sheet->setCellValue('F' . $rowNum, $stateLabel);
+            $sheet->setCellValue('G' . $rowNum, $typeLabel);
+            $sheet->setCellValue('H' . $rowNum, $deviceName);
+            $sheet->setCellValue('I' . $rowNum, $deviceSn);
+
+            // Format timestamp column as text/string to prevent formatting mess
+            $sheet->getStyle('E' . $rowNum)->getNumberFormat()->setFormatCode('@');
+
+            $rowNum++;
+        }
+
+        // Auto-size columns
+        foreach (range(1, 9) as $colIdx) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
+            $sheet->getColumnDimension($colLetter)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'Export_Log_Absensi_Murni.xlsx';
+
+        if (!empty($startDate) && !empty($endDate)) {
+            $filename = 'Export_Log_Absensi_Murni_' . $startDate . '_to_' . $endDate . '.xlsx';
+        }
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        
+        $writer->save('php://output');
+        exit;
     }
 
     private function parseTimestamp($value)

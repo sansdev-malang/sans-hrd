@@ -56,12 +56,19 @@
                         </template>
                     </select>
 
+                    <!-- DATE RANGE FILTER -->
+                    <div class="flex items-center gap-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 shadow-inner focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-colors">
+                        <input type="date" name="start_date" value="{{ $startDate }}" placeholder="Mulai" class="h-9 px-1 text-xs bg-transparent border-0 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-0 cursor-pointer">
+                        <span class="text-slate-400 text-xs">s/d</span>
+                        <input type="date" name="end_date" value="{{ $endDate }}" placeholder="Selesai" class="h-9 px-1 text-xs bg-transparent border-0 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-0 cursor-pointer">
+                    </div>
+
                     <!-- BUTTONS -->
                     <div class="flex items-center gap-2">
                         <button type="submit" class="h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold text-xs rounded-lg transition-colors flex items-center justify-center min-w-[90px] cursor-pointer">
                             Filter
                         </button>
-                        @if($search || $unitId || $position)
+                        @if($search || $unitId || $position || $startDate || $endDate)
                         <a href="{{ route('raw-attendance-logs.index') }}" class="h-9 px-4 bg-slate-100 hover:bg-slate-200 text-slate-650 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg transition-colors flex items-center justify-center">
                             Reset
                         </a>
@@ -70,6 +77,10 @@
                 </form>
 
                 <div class="flex items-center gap-2 mt-4 md:mt-0">
+                    <a href="{{ route('raw-attendance-logs.export', request()->query()) }}" data-no-loader class="h-9 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
+                        <i data-lucide="file-down" class="w-4 h-4"></i>
+                        Ekspor Excel
+                    </a>
                     <button @click="showImportModal = true" class="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
                         <i data-lucide="file-up" class="w-4 h-4"></i>
                         Import Excel
