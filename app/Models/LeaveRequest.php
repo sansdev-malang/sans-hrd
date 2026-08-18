@@ -82,6 +82,38 @@ class LeaveRequest extends Model
     public function getAttachmentAttribute()
     {
         $remote = $this->getRemoteData();
-        return $remote['attachment'] ?? null;
+        if ($remote && isset($remote['attachment']) && !empty($remote['attachment'])) {
+            $attachment = $remote['attachment'];
+            
+            // Extract relative path if it contains '/storage/'
+            $storagePos = strpos($attachment, '/storage/');
+            if ($storagePos !== false) {
+                $attachment = substr($attachment, $storagePos + strlen('/storage/'));
+            } else {
+                $parsed = parse_url($attachment);
+                if (isset($parsed['scheme']) && isset($parsed['host'])) {
+                    $path = $parsed['path'] ?? '';
+                    if (str_starts_with($path, '/storage/')) {
+                        $attachment = substr($path, strlen('/storage/'));
+                    } else {
+                        return $remote['attachment'];
+                    }
+                }
+            }
+            
+            // Build absolute URL using the SchoolUnit's api_url from Central HRD database
+            $unit = $this->schoolUnit ?? SchoolUnit::find($this->school_unit_id);
+            if ($unit && $unit->api_url) {
+                $baseUrl = rtrim($unit->api_url, '/');
+                $apiPos = strpos($baseUrl, '/api/');
+                if ($apiPos !== false) {
+                    $baseUrl = substr($baseUrl, 0, $apiPos);
+                }
+                return $baseUrl . '/storage/' . $attachment;
+            }
+            
+            return $remote['attachment'];
+        }
+        return null;
     }
 }
