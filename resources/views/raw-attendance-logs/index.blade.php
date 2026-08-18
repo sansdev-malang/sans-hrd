@@ -1,9 +1,25 @@
 <x-admin-layout>
     <div class="p-6" x-data="rawLogsData">
         <!-- HEADER SECTION -->
-        <section class="mb-8">
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Log Absensi</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Data absensi murni yang ditarik/dipush dari mesin ZKTeco.</p>
+        <section class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Log Absensi</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Data absensi murni yang ditarik/dipush dari mesin ZKTeco.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('raw-attendance-logs.export', request()->query()) }}" data-no-loader class="h-9 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
+                    <i data-lucide="file-down" class="w-4 h-4"></i>
+                    Ekspor Excel
+                </a>
+                <button @click="showImportModal = true" class="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
+                    <i data-lucide="file-up" class="w-4 h-4"></i>
+                    Import Excel
+                </button>
+                <button @click="openCreateModal" class="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Tambah Log Manual
+                </button>
+            </div>
         </section>
 
         <!-- ALERTS -->
@@ -21,7 +37,7 @@
         <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
             
             <!-- FILTER & SEARCH BAR -->
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                 <form action="{{ route('raw-attendance-logs.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
                     <div x-data="{ searchVal: '{{ $search }}' }" class="flex items-center flex-1 min-w-[200px] search-container bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-0 focus-within:border-slate-300 dark:focus-within:border-slate-700">
                         <input type="text" name="search" x-model="searchVal" placeholder="Cari nama atau UID..."
@@ -75,21 +91,6 @@
                         @endif
                     </div>
                 </form>
-
-                <div class="flex items-center gap-2 mt-4 md:mt-0">
-                    <a href="{{ route('raw-attendance-logs.export', request()->query()) }}" data-no-loader class="h-9 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
-                        <i data-lucide="file-down" class="w-4 h-4"></i>
-                        Ekspor Excel
-                    </a>
-                    <button @click="showImportModal = true" class="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
-                        <i data-lucide="file-up" class="w-4 h-4"></i>
-                        Import Excel
-                    </button>
-                    <button @click="openCreateModal" class="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        Tambah Log Manual
-                    </button>
-                </div>
             </div>
 
             <!-- TABLE DESKTOP (FREEZE HEADER / SCROLLABLE ROWS) -->
