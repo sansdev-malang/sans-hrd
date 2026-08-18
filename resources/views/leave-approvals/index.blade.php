@@ -763,6 +763,12 @@
                 const hrefAttr = link.getAttribute('href');
                 if (!hrefAttr || hrefAttr.startsWith('#')) return;
 
+                // Don't intercept target="_blank" links (like attachments)
+                if (link.getAttribute('target') === '_blank') return;
+
+                // Don't intercept links to other domains/origins
+                if (link.origin !== window.location.origin) return;
+
                 e.preventDefault();
                 const url = new URL(link.href);
                 loadTableContent(url);
