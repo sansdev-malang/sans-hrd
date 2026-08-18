@@ -28,6 +28,7 @@
                     'zkteco-devices.index' => 'Mesin ZKTeco',
                     'attendance-matrix.index' => 'Matriks Absensi',
                     'zkteco-logs.index' => 'Log Penarikan Mesin',
+                    'raw-attendance-logs.index' => 'Log Absensi',
                 ];
                 $title = $routeTitles[$routeName] ?? 'Pusat Aggregator';
             }

@@ -82,6 +82,7 @@ class RawAttendanceLogController extends Controller
 
         $devices = ZktecoDevice::all();
         $schoolUnits = \App\Models\SchoolUnit::where('is_active', true)->get();
+        
         $positions = collect($employees)
             ->map(function ($emp) {
                 return $emp['position'] ?? $emp['subject_position'] ?? null;
@@ -91,9 +92,25 @@ class RawAttendanceLogController extends Controller
             ->sort()
             ->values();
 
+        $unitPositions = [];
+        foreach ($schoolUnits as $unit) {
+            $unitPositions[$unit->id] = collect($employees)
+                ->filter(function($emp) use ($unit) {
+                    return (string)($emp['unit_id'] ?? '') === (string)$unit->id;
+                })
+                ->map(function ($emp) {
+                    return $emp['position'] ?? $emp['subject_position'] ?? null;
+                })
+                ->filter()
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
+        }
+
         return view('raw-attendance-logs.index', compact(
             'logs', 'search', 'unitId', 'position', 'employeeMap', 
-            'devices', 'employees', 'schoolUnits', 'positions'
+            'devices', 'employees', 'schoolUnits', 'positions', 'unitPositions'
         ));
     }
 

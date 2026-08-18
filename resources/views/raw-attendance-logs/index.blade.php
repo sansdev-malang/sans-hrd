@@ -2,7 +2,7 @@
     <div class="p-6" x-data="rawLogsData">
         <!-- HEADER SECTION -->
         <section class="mb-8">
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Log Mentah Mesin</h1>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Log Absensi</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Data absensi murni yang ditarik/dipush dari mesin ZKTeco.</p>
         </section>
 
@@ -41,19 +41,19 @@
                     </div>
 
                     <!-- UNIT FILTER -->
-                    <select name="unit_id" class="h-9 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors text-slate-900 dark:text-slate-100 cursor-pointer">
+                    <select name="unit_id" x-model="filterUnitId" class="h-9 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors text-slate-900 dark:text-slate-100 cursor-pointer">
                         <option value="">Semua Unit</option>
                         @foreach($schoolUnits as $unit)
-                            <option value="{{ $unit->id }}" {{ $unitId == $unit->id ? 'selected' : '' }}>{{ $unit->name }}</option>
+                            <option value="{{ $unit->id }}">{{ $unit->name }}</option>
                         @endforeach
                     </select>
 
                     <!-- JABATAN FILTER -->
-                    <select name="position" class="h-9 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors text-slate-900 dark:text-slate-100 cursor-pointer">
+                    <select name="position" x-model="filterPosition" class="h-9 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors text-slate-900 dark:text-slate-100 cursor-pointer">
                         <option value="">Semua Jabatan</option>
-                        @foreach($positions as $pos)
-                            <option value="{{ $pos }}" {{ $position == $pos ? 'selected' : '' }}>{{ $pos }}</option>
-                        @endforeach
+                        <template x-for="pos in filteredPositions" :key="pos">
+                            <option :value="pos" x-text="pos"></option>
+                        </template>
                     </select>
 
                     <!-- BUTTONS -->
@@ -191,7 +191,7 @@
                     @csrf
                     
                     <!-- Cari & Filter Pegawai -->
-                    <div class="bg-slate-50 dark:bg-slate-955 p-3 rounded-lg border border-slate-200 dark:border-slate-800/80 space-y-2">
+                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800/80 space-y-2">
                         <span class="block font-bold text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">Filter Pegawai</span>
                         <div class="grid grid-cols-2 gap-3">
                             <!-- Unit -->
@@ -209,9 +209,9 @@
                                 <label class="block text-[9px] font-semibold text-slate-400 dark:text-slate-400 uppercase mb-1">Jabatan</label>
                                 <select x-model="createPosition" class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer text-slate-900 dark:text-slate-100">
                                     <option value="">Semua Jabatan</option>
-                                    @foreach($positions as $pos)
-                                        <option value="{{ $pos }}">{{ $pos }}</option>
-                                    @endforeach
+                                    <template x-for="pos in createFilteredPositions" :key="pos">
+                                        <option :value="pos" x-text="pos"></option>
+                                    </template>
                                 </select>
                             </div>
                         </div>
@@ -256,8 +256,8 @@
                     <!-- Mesin Sumber -->
                     <div class="space-y-1.5">
                         <label class="block font-bold text-slate-700 dark:text-slate-300">Mesin Sumber <span class="text-rose-500">*</span></label>
-                        <select name="zkteco_device_id" required class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer">
-                            <option value="" class="bg-white dark:bg-slate-950 text-slate-905">-- Pilih Mesin --</option>
+                        <select name="zkteco_device_id" required class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer">
+                            <option value="" class="bg-white dark:bg-slate-950 text-slate-400">-- Pilih Mesin --</option>
                             @foreach($devices as $dev)
                                 <option value="{{ $dev->id }}" class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">{{ $dev->name }} (SN: {{ $dev->sn }})</option>
                             @endforeach
@@ -267,7 +267,7 @@
                     <!-- Waktu Absen -->
                     <div class="space-y-1.5">
                         <label class="block font-bold text-slate-700 dark:text-slate-300">Waktu Absen (Timestamp) <span class="text-rose-500">*</span></label>
-                        <input type="datetime-local" name="timestamp" required value="{{ date('Y-m-d\TH:i') }}" class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50">
+                        <input type="datetime-local" name="timestamp" required value="{{ date('Y-m-d\TH:i') }}" class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-950 dark:[color-scheme:dark] border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -331,7 +331,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <!-- Unit -->
                             <div>
-                                <label class="block text-[9px] font-semibold text-slate-450 dark:text-slate-400 uppercase mb-1">Unit Sekolah</label>
+                                <label class="block text-[9px] font-semibold text-slate-400 dark:text-slate-400 uppercase mb-1">Unit Sekolah</label>
                                 <select x-model="editUnit" class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer text-slate-900 dark:text-slate-100">
                                     <option value="">Semua Unit</option>
                                     @foreach($schoolUnits as $unit)
@@ -344,9 +344,9 @@
                                 <label class="block text-[9px] font-semibold text-slate-400 dark:text-slate-400 uppercase mb-1">Jabatan</label>
                                 <select x-model="editPosition" class="w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer text-slate-900 dark:text-slate-100">
                                     <option value="">Semua Jabatan</option>
-                                    @foreach($positions as $pos)
-                                        <option value="{{ $pos }}">{{ $pos }}</option>
-                                    @endforeach
+                                    <template x-for="pos in editFilteredPositions" :key="pos">
+                                        <option :value="pos" x-text="pos"></option>
+                                    </template>
                                 </select>
                             </div>
                         </div>
@@ -368,7 +368,7 @@
                             <div x-show="open" style="display: none;" class="absolute z-50 w-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl max-h-48 overflow-y-auto">
                                 <!-- Search input inside dropdown -->
                                 <div class="p-2 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900">
-                                    <input type="text" x-model="editSearch" placeholder="Ketik nama atau UID..." class="w-full h-8 px-2 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900 dark:text-slate-100">
+                                    <input type="text" x-model="editSearch" placeholder="Ketik nama atau UID..." class="w-full h-8 px-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900 dark:text-slate-100">
                                 </div>
                                 
                                 <!-- Options List -->
@@ -402,7 +402,7 @@
                     <!-- Waktu Absen -->
                     <div class="space-y-1.5">
                         <label class="block font-bold text-slate-700 dark:text-slate-300">Waktu Absen (Timestamp) <span class="text-rose-500">*</span></label>
-                        <input type="datetime-local" name="timestamp" required :value="selectedLog ? selectedLog.timestamp.replace(' ', 'T').substring(0, 16) : ''" class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50">
+                        <input type="datetime-local" name="timestamp" required :value="selectedLog ? selectedLog.timestamp.replace(' ', 'T').substring(0, 16) : ''" class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-950 dark:[color-scheme:dark] border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -440,7 +440,7 @@
                     </div>
 
                     <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2.5 bg-slate-50/50 dark:bg-slate-950 -mx-6 -mb-6 px-6 py-4 mt-6 rounded-b-xl">
-                        <button type="button" @click="showEditModal = false" class="px-4 py-2 border border-slate-200 dark:border-slate-855 text-slate-700 dark:text-slate-300 bg-transparent text-xs font-bold rounded-lg cursor-pointer">Batal</button>
+                        <button type="button" @click="showEditModal = false" class="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-transparent text-xs font-bold rounded-lg cursor-pointer">Batal</button>
                         <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg cursor-pointer">Simpan Perubahan</button>
                     </div>
                 </form>
@@ -458,6 +458,19 @@
             selectedLog: null,
             employees: @json($employees),
             
+            // Filters
+            filterUnitId: '{{ $unitId }}',
+            filterPosition: '{{ $position }}',
+            unitPositions: @json($unitPositions),
+            allPositions: @json($positions),
+
+            get filteredPositions() {
+                if (this.filterUnitId && this.unitPositions[this.filterUnitId]) {
+                    return this.unitPositions[this.filterUnitId];
+                }
+                return this.allPositions;
+            },
+
             // Create fields
             createSearch: '',
             createUnit: '',
@@ -465,12 +478,26 @@
             createUid: '',
             createLabel: '-- Pilih Pegawai --',
 
+            get createFilteredPositions() {
+                if (this.createUnit && this.unitPositions[this.createUnit]) {
+                    return this.unitPositions[this.createUnit];
+                }
+                return this.allPositions;
+            },
+
             // Edit fields
             editSearch: '',
             editUnit: '',
             editPosition: '',
             editUid: '',
             editLabel: '-- Pilih Pegawai --',
+
+            get editFilteredPositions() {
+                if (this.editUnit && this.unitPositions[this.editUnit]) {
+                    return this.unitPositions[this.editUnit];
+                }
+                return this.allPositions;
+            },
 
             init() {
                 // Reset create fields on modal open
