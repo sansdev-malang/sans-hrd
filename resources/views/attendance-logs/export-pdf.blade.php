@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Data Riwayat Absensi</title>
+    <title>Data Kehadiran</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -69,7 +69,7 @@
 </head>
 <body>
 
-    <h2>Laporan Data Riwayat Absensi</h2>
+    <h2>Laporan Data Kehadiran</h2>
     <div class="subtitle">
         Periode: {{ $periodeStr }} <br>
         Unit: {{ $unitId ? \App\Models\SchoolUnit::find($unitId)->name ?? 'Semua Unit' : 'Semua Unit' }}

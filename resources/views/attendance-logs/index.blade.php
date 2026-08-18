@@ -20,19 +20,12 @@
             <!-- HEADER -->
             <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div class="flex flex-col gap-0.5">
-                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Riwayat Absensi</h2>
+                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Kehadiran</h2>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Memantau waktu kedatangan dan kepulangan pegawai secara komprehensif.</p>
                 </div>
                 
                 <div class="flex items-center gap-2 w-full md:w-auto">
-                    <!-- TARIK ABSENSI BUTTON -->
-                    <form action="{{ route('attendance-logs.sync') }}" method="POST" class="inline w-full md:w-auto" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
-                        @csrf
-                        <button type="submit" class="w-full md:w-auto justify-center h-9 px-4 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 border-0 shadow-3xs">
-                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                            Tarik Absensi Mesin
-                        </button>
-                    </form>
+
 
                     <!-- EXPORT DROPDOWN -->
                     <div x-data="{ open: false }" class="relative inline-block text-left w-full md:w-auto">

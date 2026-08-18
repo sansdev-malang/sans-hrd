@@ -5,7 +5,7 @@
         <!-- HEADER -->
         <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Rekap Bonus Kehadiran</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Bonus Kehadiran</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Evaluasi kehadiran pegawai berdasarkan skema bonus aktif.</p>
             </div>
             

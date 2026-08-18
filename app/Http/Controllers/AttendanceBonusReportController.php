@@ -59,7 +59,13 @@ class AttendanceBonusReportController extends Controller
             ->sort()
             ->values();
 
-        $employeesCollection = collect($rawEmployees);
+        $employeesCollection = collect($rawEmployees)->sort(function ($a, $b) {
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
+            return strcmp($a['name'] ?? '', $b['name'] ?? '');
+        })->values();
 
         if (!empty($unitId)) {
             $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
@@ -399,7 +405,13 @@ class AttendanceBonusReportController extends Controller
             ->first();
 
         $rawEmployees = $this->service->getAllEmployees();
-        $employeesCollection = collect($rawEmployees);
+        $employeesCollection = collect($rawEmployees)->sort(function ($a, $b) {
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
+            return strcmp($a['name'] ?? '', $b['name'] ?? '');
+        })->values();
 
         if (!empty($unitId)) {
             $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {

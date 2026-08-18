@@ -52,7 +52,13 @@ class AttendanceLogController extends Controller
                 return $empPos == $position;
             });
         }
-        $employeesCollection = $rawEmployees->values();
+        $employeesCollection = $rawEmployees->sort(function ($a, $b) {
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
+            return strcmp($a['name'] ?? '', $b['name'] ?? '');
+        })->values();
 
         return $this->generateReportsDataForCollection($startDate, $endDate, $employeesCollection);
     }
@@ -456,7 +462,13 @@ class AttendanceLogController extends Controller
                 return $empPos == $position;
             });
         }
-        $employeesCollection = $rawEmployees->values();
+        $employeesCollection = $rawEmployees->sort(function ($a, $b) {
+            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+            if ($unitCompare !== 0) {
+                return $unitCompare;
+            }
+            return strcmp($a['name'] ?? '', $b['name'] ?? '');
+        })->values();
         $total = $employeesCollection->count();
 
         // 2. Paginate employees list first

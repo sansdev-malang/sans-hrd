@@ -10,11 +10,11 @@
                 $routeName = request()->route() ? request()->route()->getName() : '';
                 $routeTitles = [
                     'dashboard' => 'Dashboard',
-                    'bonus-reports.index' => 'Rekap Bonus Kehadiran',
+                    'bonus-reports.index' => 'Data Bonus Kehadiran',
                     'attendance-percentage-reports.index' => 'Laporan Persentase Kehadiran',
                     'performance-reports.index' => 'Rapor Kinerja Pegawai',
                     'performance-reports.show' => 'Detail Rapor Kinerja',
-                    'attendance-logs.index' => 'Log Absensi',
+                    'attendance-logs.index' => 'Data Kehadiran',
                     'leaves.index' => 'Pengajuan Izin & Cuti',
                     'settings' => 'Pengaturan Aplikasi',
                     'users.index' => 'Manajemen Pengguna',
