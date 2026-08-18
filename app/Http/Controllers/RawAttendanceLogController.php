@@ -168,13 +168,22 @@ class RawAttendanceLogController extends Controller
         $sheet1->setTitle('Data Entry');
         $sheet1->setCellValue('A1', 'UID Pegawai');
         $sheet1->setCellValue('B1', 'ID Mesin');
-        $sheet1->setCellValue('C1', 'Waktu Absen (YYYY-MM-DD HH:MM:SS)');
+        $sheet1->setCellValue('C1', 'Waktu Absen (Format: YYYY-MM-DD HH:MM:SS, Contoh: 2026-08-18 07:15:30)');
         $sheet1->setCellValue('D1', 'Status (Lihat Referensi)');
         $sheet1->setCellValue('E1', 'Tipe (Lihat Referensi)');
-        $sheet1->setCellValue('F1', 'Nama Lokal (Opsional)');
+
+        // Add 1 row of example data (will be skipped during import)
+        $sheet1->setCellValue('A2', 'CONTOH_123');
+        $sheet1->setCellValue('B2', '1');
+        $sheet1->setCellValue('C2', '2026-08-18 07:15:30');
+        $sheet1->setCellValue('D2', '0');
+        $sheet1->setCellValue('E2', '15');
 
         // Make headers bold
-        $sheet1->getStyle('A1:F1')->getFont()->setBold(true);
+        $sheet1->getStyle('A1:E1')->getFont()->setBold(true);
+
+        // Format Column C (Waktu Absen) as Text
+        $sheet1->getStyle('C')->getNumberFormat()->setFormatCode('@');
 
         // Sheet 2: Referensi
         $sheet2 = $spreadsheet->createSheet();
@@ -239,7 +248,7 @@ class RawAttendanceLogController extends Controller
         }
 
         // Auto-size columns for better readability
-        foreach (range('A', 'F') as $col) {
+        foreach (range('A', 'E') as $col) {
             $sheet1->getColumnDimension($col)->setAutoSize(true);
         }
         foreach (['A', 'C', 'E', 'F', 'H', 'I', 'J'] as $col) {
@@ -295,14 +304,20 @@ class RawAttendanceLogController extends Controller
                 }
 
                 $uid = $row[0];
+                
+                // Skip example row if user uploads without deleting it
+                if (str_contains(strtolower((string)$uid), 'contoh')) {
+                    continue;
+                }
+
                 $deviceId = $row[1];
-                $timestamp = $row[2]; // assuming format YYYY-MM-DD HH:MM:SS
+                $timestamp = $this->parseTimestamp($row[2]);
                 $state = $row[3];
                 $type = $row[4];
                 $localName = $row[5] ?? null;
 
                 // Basic validation for dates
-                if (!strtotime($timestamp)) {
+                if (!$timestamp) {
                     continue; // Skip invalid date formats
                 }
 
@@ -335,5 +350,56 @@ class RawAttendanceLogController extends Controller
             DB::rollBack();
             return redirect()->route('raw-attendance-logs.index')->withErrors(['file' => 'Gagal mengimpor file: ' . $e->getMessage()]);
         }
+    }
+
+    private function parseTimestamp($value)
+    {
+        if (empty($value)) return null;
+
+        // If it's a numeric Excel serial number (realistic range for dates between ~2009 and ~2064)
+        if (is_numeric($value) && $value > 40000 && $value < 60000) {
+            try {
+                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                // fallback
+            }
+        }
+
+        $strValue = trim((string)$value);
+
+        // List of common formats to try parsing strictly
+        $formats = [
+            'Y-m-d H:i:s',
+            'd/m/Y H:i:s',
+            'd-m-Y H:i:s',
+            'Y/m/d H:i:s',
+            'Y-m-d H:i',
+            'd/m/Y H:i',
+            'd-m-Y H:i',
+            'Y/m/d H:i',
+            'Y-m-d',
+            'd/m/Y',
+            'd-m-Y',
+            'Y/m/d',
+        ];
+
+        foreach ($formats as $format) {
+            try {
+                $d = \Carbon\Carbon::createFromFormat($format, $strValue);
+                if ($d) {
+                    return $d->format('Y-m-d H:i:s');
+                }
+            } catch (\Exception $e) {
+                // try next format
+            }
+        }
+
+        // Fallback: replace / with - to force PHP to parse it as DD-MM-YYYY (European) instead of MM/DD/YYYY (US)
+        $time = strtotime(str_replace('/', '-', $strValue));
+        if ($time) {
+            return date('Y-m-d H:i:s', $time);
+        }
+
+        return null;
     }
 }

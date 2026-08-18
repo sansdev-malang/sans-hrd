@@ -115,7 +115,7 @@
                     if (!href || href.startsWith("#") || href.startsWith("javascript:") || target === "_blank") return;
                     
                     // Ignore export/download links
-                    const isDownload = href.includes("export") || href.includes("download") || link.hasAttribute("download");
+                    const isDownload = href.includes("export") || href.includes("download") || href.includes("template") || link.hasAttribute("download");
                     if (isDownload) return;
 
                     if (typeof NProgress !== "undefined") {
