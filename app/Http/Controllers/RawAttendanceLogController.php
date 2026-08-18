@@ -474,34 +474,54 @@ class RawAttendanceLogController extends Controller
             if (!isset($groupedLogs[$uid][$date])) {
                 $groupedLogs[$uid][$date] = [];
             }
-            $groupedLogs[$uid][$date][] = $log->timestamp;
+            $groupedLogs[$uid][$date][] = [
+                'timestamp' => $log->timestamp,
+                'device_name' => $log->device ? $log->device->name : '-',
+                'device_sn' => $log->device ? $log->device->sn : '-'
+            ];
         }
 
         // Process data entry
         $exportData = [];
         foreach ($groupedLogs as $uid => $dates) {
             foreach ($dates as $date => $timestamps) {
-                sort($timestamps);
+                // Sort timestamps ascending
+                usort($timestamps, function ($a, $b) {
+                    return strcmp($a['timestamp'], $b['timestamp']);
+                });
                 
                 $earliest = $timestamps[0];
                 $latest = (count($timestamps) > 1) ? end($timestamps) : null;
                 
-                $jamMasuk = date('H:i:s', strtotime($earliest));
-                $jamPulang = $latest ? date('H:i:s', strtotime($latest)) : '';
+                $jamMasuk = date('H:i:s', strtotime($earliest['timestamp']));
+                $jamPulang = $latest ? date('H:i:s', strtotime($latest['timestamp'])) : '';
                 
                 $formattedDate = date('d-m-Y', strtotime($date));
                 
-                $empNip = $employeeNipMap[$uid] ?? '-';
                 $empName = $employeeNameMap[$uid] ?? 'Tidak Dikenal';
                 $unitName = $employeeUnitNameMap[$uid] ?? '-';
                 
+                // Determine device info
+                $deviceName = $earliest['device_name'];
+                $deviceSn = $earliest['device_sn'];
+                
+                if ($latest && $latest['device_name'] !== $earliest['device_name']) {
+                    $deviceName .= ' / ' . $latest['device_name'];
+                }
+                if ($latest && $latest['device_sn'] !== $earliest['device_sn']) {
+                    $deviceSn .= ' / ' . $latest['device_sn'];
+                }
+                
                 $exportData[] = [
-                    'nip' => $empNip,
+                    'uid' => $uid,
                     'name' => $empName,
                     'date' => $formattedDate,
                     'jam_masuk' => $jamMasuk,
                     'jam_pulang' => $jamPulang,
                     'unit' => $unitName,
+                    'device_name' => $deviceName,
+                    'device_sn' => $deviceSn,
+                    
                     'raw_unit' => $unitName,
                     'raw_name' => $empName,
                     'raw_date' => $date
@@ -536,7 +556,9 @@ class RawAttendanceLogController extends Controller
             'Tanggal',
             'Jam Masuk',
             'Jam Pulang',
-            'Unit'
+            'Unit',
+            'Nama Mesin',
+            'Serial Number Mesin'
         ];
 
         foreach ($headers as $colIndex => $headerText) {
@@ -545,12 +567,15 @@ class RawAttendanceLogController extends Controller
         }
 
         // Bold Headers
-        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
 
         // Fill Data
         $rowNum = 2;
         foreach ($exportData as $data) {
-            $sheet->setCellValue('A' . $rowNum, $data['nip']);
+            // Format Employee ID (UID) as text to keep correct leading zeros or custom formatting
+            $sheet->setCellValue('A' . $rowNum, $data['uid']);
+            $sheet->getStyle('A' . $rowNum)->getNumberFormat()->setFormatCode('@');
+            
             $sheet->setCellValue('B' . $rowNum, $data['name']);
             
             // Format Tanggal as text
@@ -565,12 +590,18 @@ class RawAttendanceLogController extends Controller
             $sheet->getStyle('E' . $rowNum)->getNumberFormat()->setFormatCode('@');
             
             $sheet->setCellValue('F' . $rowNum, $data['unit']);
+            
+            $sheet->setCellValue('G' . $rowNum, $data['device_name']);
+            
+            // Format Serial Number as text
+            $sheet->setCellValue('H' . $rowNum, $data['device_sn']);
+            $sheet->getStyle('H' . $rowNum)->getNumberFormat()->setFormatCode('@');
 
             $rowNum++;
         }
 
         // Auto-size columns
-        foreach (range(1, 6) as $colIdx) {
+        foreach (range(1, 8) as $colIdx) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
