@@ -109,7 +109,32 @@ class LeaveRequest extends Model
                 if ($apiPos !== false) {
                     $baseUrl = substr($baseUrl, 0, $apiPos);
                 }
-                return $baseUrl . '/storage/' . $attachment;
+                
+                $localUrl = $baseUrl . '/storage/' . $attachment;
+                
+                // If the URL is a local domain (.test)
+                if (str_contains($localUrl, '.test')) {
+                    // Try to check if the file actually exists on local using a fast cURL HEAD request
+                    $ch = curl_init($localUrl);
+                    curl_setopt($ch, CURLOPT_NOBODY, true);
+                    curl_setopt($ch, CURLOPT_TIMEOUT_MS, 400); // 400ms timeout
+                    curl_exec($ch);
+                    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+                    
+                    if ($statusCode === 200) {
+                        return $localUrl;
+                    }
+                    
+                    // Fallback to production domains if local file is missing
+                    return str_replace(
+                        ['http://sans-sd.test', 'https://sans-sd.test', 'http://sans-smp.test', 'https://sans-smp.test', 'http://sans-paud.test', 'https://sans-paud.test'],
+                        ['https://sd.sans.sch.id', 'https://sd.sans.sch.id', 'https://smp.sans.sch.id', 'https://smp.sans.sch.id', 'https://paud.sans.sch.id', 'https://paud.sans.sch.id'],
+                        $localUrl
+                    );
+                }
+                
+                return $localUrl;
             }
             
             return $remote['attachment'];
