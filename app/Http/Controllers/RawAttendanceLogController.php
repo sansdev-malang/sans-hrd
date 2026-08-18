@@ -399,12 +399,14 @@ class RawAttendanceLogController extends Controller
         $employeeUnitMap = [];
         $employeeUnitNameMap = [];
         $employeeNameMap = [];
+        $employeeNipMap = [];
         foreach ($employees as $emp) {
             if (!empty($emp['zkteco_uid'])) {
                 $uidStr = (string)$emp['zkteco_uid'];
                 $empName = $emp['name'] ?? 'Tidak Dikenal';
                 $employeeMap[$uidStr] = $empName;
                 $employeeNameMap[$uidStr] = $empName;
+                $employeeNipMap[$uidStr] = $emp['nuptk_nip_nik'] ?? '-';
                 
                 $unitName = '-';
                 if (!empty($emp['unit_id'])) {
@@ -460,25 +462,66 @@ class RawAttendanceLogController extends Controller
         // Fetch logs
         $logs = $query->orderBy('timestamp', 'desc')->get();
 
-        // Sort by unit A-Z, then employee name A-Z, then timestamp DESC
-        $logs = $logs->sort(function ($a, $b) use ($employeeUnitNameMap, $employeeNameMap) {
-            $unitA = $employeeUnitNameMap[(string)$a->uid] ?? 'ZZZZ';
-            $unitB = $employeeUnitNameMap[(string)$b->uid] ?? 'ZZZZ';
+        // Group logs by uid and date
+        $groupedLogs = [];
+        foreach ($logs as $log) {
+            $uid = (string)$log->uid;
+            $date = date('Y-m-d', strtotime($log->timestamp));
             
-            $cmpUnit = strcasecmp($unitA, $unitB);
+            if (!isset($groupedLogs[$uid])) {
+                $groupedLogs[$uid] = [];
+            }
+            if (!isset($groupedLogs[$uid][$date])) {
+                $groupedLogs[$uid][$date] = [];
+            }
+            $groupedLogs[$uid][$date][] = $log->timestamp;
+        }
+
+        // Process data entry
+        $exportData = [];
+        foreach ($groupedLogs as $uid => $dates) {
+            foreach ($dates as $date => $timestamps) {
+                sort($timestamps);
+                
+                $earliest = $timestamps[0];
+                $latest = (count($timestamps) > 1) ? end($timestamps) : null;
+                
+                $jamMasuk = date('H:i:s', strtotime($earliest));
+                $jamPulang = $latest ? date('H:i:s', strtotime($latest)) : '';
+                
+                $formattedDate = date('d-m-Y', strtotime($date));
+                
+                $empNip = $employeeNipMap[$uid] ?? '-';
+                $empName = $employeeNameMap[$uid] ?? 'Tidak Dikenal';
+                $unitName = $employeeUnitNameMap[$uid] ?? '-';
+                
+                $exportData[] = [
+                    'nip' => $empNip,
+                    'name' => $empName,
+                    'date' => $formattedDate,
+                    'jam_masuk' => $jamMasuk,
+                    'jam_pulang' => $jamPulang,
+                    'unit' => $unitName,
+                    'raw_unit' => $unitName,
+                    'raw_name' => $empName,
+                    'raw_date' => $date
+                ];
+            }
+        }
+
+        // Sort by unit A-Z, then employee name A-Z, then date ascending
+        usort($exportData, function ($a, $b) {
+            $cmpUnit = strcasecmp($a['raw_unit'], $b['raw_unit']);
             if ($cmpUnit !== 0) {
                 return $cmpUnit;
             }
             
-            $nameA = $employeeNameMap[(string)$a->uid] ?? 'ZZZZ';
-            $nameB = $employeeNameMap[(string)$b->uid] ?? 'ZZZZ';
-            
-            $cmpName = strcasecmp($nameA, $nameB);
+            $cmpName = strcasecmp($a['raw_name'], $b['raw_name']);
             if ($cmpName !== 0) {
                 return $cmpName;
             }
             
-            return strcmp($b->timestamp, $a->timestamp); // timestamp desc
+            return strcmp($a['raw_date'], $b['raw_date']);
         });
 
         // Generate Excel
@@ -488,15 +531,12 @@ class RawAttendanceLogController extends Controller
 
         // Headers
         $headers = [
-            'ID Log',
-            'UID Pegawai',
-            'Nama Pegawai',
-            'Unit & Jabatan',
-            'Waktu Absen (Timestamp)',
-            'State (Status)',
-            'Tipe Sensor',
-            'Mesin Sumber',
-            'SN Mesin'
+            'Employee ID',
+            'Nama',
+            'Tanggal',
+            'Jam Masuk',
+            'Jam Pulang',
+            'Unit'
         ];
 
         foreach ($headers as $colIndex => $headerText) {
@@ -505,55 +545,32 @@ class RawAttendanceLogController extends Controller
         }
 
         // Bold Headers
-        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
 
         // Fill Data
         $rowNum = 2;
-        foreach ($logs as $log) {
-            $stateLabel = match((int)$log->state) {
-                0 => 'Check-In',
-                1 => 'Check-Out',
-                2 => 'Break-Out',
-                3 => 'Break-In',
-                4 => 'Overtime-In',
-                5 => 'Overtime-Out',
-                15 => 'Otomatis',
-                255 => 'Otomatis',
-                default => 'Auto ('.$log->state.')'
-            };
-
-            $typeLabel = match((int)$log->type) {
-                0 => 'Password',
-                1 => 'Wajah',
-                4 => 'Kartu RFID',
-                15 => 'Wajah',
-                255 => 'Wajah (via API)',
-                default => 'Sensor Lain ('.$log->type.')'
-            };
-
-            $empName = $employeeMap[(string)$log->uid] ?? 'Tidak Dikenal';
-            $empUnit = $employeeUnitMap[(string)$log->uid] ?? '-';
-            $deviceName = $log->device ? $log->device->name : '-';
-            $deviceSn = $log->device ? $log->device->sn : '-';
-
-            $sheet->setCellValue('A' . $rowNum, $log->id);
-            $sheet->setCellValue('B' . $rowNum, $log->uid);
-            $sheet->setCellValue('C' . $rowNum, $empName);
-            $sheet->setCellValue('D' . $rowNum, $empUnit);
-            $sheet->setCellValue('E' . $rowNum, $log->timestamp);
-            $sheet->setCellValue('F' . $rowNum, $stateLabel);
-            $sheet->setCellValue('G' . $rowNum, $typeLabel);
-            $sheet->setCellValue('H' . $rowNum, $deviceName);
-            $sheet->setCellValue('I' . $rowNum, $deviceSn);
-
-            // Format timestamp column as text/string to prevent formatting mess
+        foreach ($exportData as $data) {
+            $sheet->setCellValue('A' . $rowNum, $data['nip']);
+            $sheet->setCellValue('B' . $rowNum, $data['name']);
+            
+            // Format Tanggal as text
+            $sheet->setCellValue('C' . $rowNum, $data['date']);
+            $sheet->getStyle('C' . $rowNum)->getNumberFormat()->setFormatCode('@');
+            
+            // Format time columns as text
+            $sheet->setCellValue('D' . $rowNum, $data['jam_masuk']);
+            $sheet->getStyle('D' . $rowNum)->getNumberFormat()->setFormatCode('@');
+            
+            $sheet->setCellValue('E' . $rowNum, $data['jam_pulang']);
             $sheet->getStyle('E' . $rowNum)->getNumberFormat()->setFormatCode('@');
+            
+            $sheet->setCellValue('F' . $rowNum, $data['unit']);
 
             $rowNum++;
         }
 
         // Auto-size columns
-        foreach (range(1, 9) as $colIdx) {
+        foreach (range(1, 6) as $colIdx) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
