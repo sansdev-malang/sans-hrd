@@ -57,6 +57,7 @@ class EmployeeWorkingShiftController extends Controller
                         'type' => 'permanent',
                         'school_unit_id' => $assignment->school_unit_id,
                         'working_shift_id' => $assignment->working_shift_id,
+                        'bonus_schema_id' => $assignment->bonus_schema_id,
                         'start_date' => $assignment->start_date,
                         'end_date' => $assignment->end_date,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',

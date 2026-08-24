@@ -302,6 +302,7 @@
             this.$watch('showAssignmentModal', value => {
                 if (!value) {
                     this.assignShowError = false;
+                    this.$dispatch('close-assignment');
                 }
             });
             this.$watch('showEditModal', value => {
@@ -849,6 +850,19 @@
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10"
+                     @close-assignment.window="
+                         selectedUnit = ''; 
+                         workingShiftId = ''; 
+                         bonusSchemaId = ''; 
+                         startDate = ''; 
+                         endDate = ''; 
+                         employees = []; 
+                         searchQuery = ''; 
+                         selectedPosition = ''; 
+                         selectedEmps = []; 
+                         selectAll = false; 
+                         assignShowError = false;
+                     "
                      x-data="{ 
                          selectedUnit: '', 
                          workingShiftId: '',
@@ -902,21 +916,6 @@
                          }
                      }"
                       x-init="
-                            $watch('showAssignmentModal', value => {
-                                if (!value) {
-                                    $data.selectedUnit = '';
-                                    $data.workingShiftId = '';
-                                    $data.bonusSchemaId = '';
-                                    $data.startDate = '';
-                                    $data.endDate = '';
-                                    $data.employees = [];
-                                    $data.searchQuery = '';
-                                    $data.selectedPosition = '';
-                                    $data.selectedEmps = [];
-                                    $data.selectAll = false;
-                                    $data.assignShowError = false;
-                                }
-                            });
                             $watch('selectedEmps', () => {
                                 if ($data.filteredEmployees.length === 0) {
                                     $data.selectAll = false;
