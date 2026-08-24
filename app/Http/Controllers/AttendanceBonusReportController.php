@@ -46,6 +46,8 @@ class AttendanceBonusReportController extends Controller
             ->where('is_active', true)
             ->first();
 
+        $allBonusSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
+
         // 3. Fetch Employees (Filter by unit if needed)
         $rawEmployees = $this->service->getAllEmployees();
         
@@ -262,6 +264,7 @@ class AttendanceBonusReportController extends Controller
                 $hasShiftToday = false;
                 $shiftStartTime = null;
                 $shiftKey = $unit . '_' . $empId;
+                $activeAssignmentOnDate = null;
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
@@ -273,6 +276,7 @@ class AttendanceBonusReportController extends Controller
                             if ($detail && !$detail->is_off) {
                                 $hasShiftToday = true;
                                 $shiftStartTime = $detail->start_time;
+                                $activeAssignmentOnDate = $assignment;
                             }
                             break;
                         }
@@ -318,8 +322,16 @@ class AttendanceBonusReportController extends Controller
                         }
 
                         // Calculate Daily Bonus
-                        if ($activeSchema && $activeSchema->tiers->count() > 0) {
-                            $qualifyingTiers = $activeSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
+                        $currentSchema = null;
+                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
+                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
+                        }
+                        if (!$currentSchema) {
+                            $currentSchema = $activeSchema;
+                        }
+
+                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
+                            $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
                                 return $dailyLateMinutes <= $tier->max_late_minutes;
                             })->sortByDesc('nominal');
 
@@ -403,6 +415,8 @@ class AttendanceBonusReportController extends Controller
         $activeSchema = BonusSchema::with('tiers')
             ->where('is_active', true)
             ->first();
+
+        $allBonusSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
 
         $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees)->sort(function ($a, $b) {
@@ -607,6 +621,7 @@ class AttendanceBonusReportController extends Controller
                 $hasShiftToday = false;
                 $shiftStartTime = null;
                 $shiftKey = $unit . '_' . $empId;
+                $activeAssignmentOnDate = null;
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
@@ -617,6 +632,7 @@ class AttendanceBonusReportController extends Controller
                             if ($detail && !$detail->is_off) {
                                 $hasShiftToday = true;
                                 $shiftStartTime = $detail->start_time;
+                                $activeAssignmentOnDate = $assignment;
                             }
                             break;
                         }
@@ -657,8 +673,16 @@ class AttendanceBonusReportController extends Controller
                             $dailyCheckIn = 'DINAS';
                         }
 
-                        if ($activeSchema && $activeSchema->tiers->count() > 0) {
-                            $qualifyingTiers = $activeSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
+                        $currentSchema = null;
+                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
+                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
+                        }
+                        if (!$currentSchema) {
+                            $currentSchema = $activeSchema;
+                        }
+
+                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
+                            $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
                                 return $dailyLateMinutes <= $tier->max_late_minutes;
                             })->sortByDesc('nominal');
 
