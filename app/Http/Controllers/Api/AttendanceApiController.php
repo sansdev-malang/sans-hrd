@@ -989,9 +989,12 @@ class AttendanceApiController extends Controller
                     }
                 }
 
-                $activeSchema = BonusSchema::where('is_active', true)->first();
-                if ($activeSchema) {
-                    $matchingTier = BonusTier::where('bonus_schema_id', $activeSchema->id)
+                $activeSchemaId = ($activeShiftAssigned && $activeShiftAssigned->bonus_schema_id)
+                                    ? $activeShiftAssigned->bonus_schema_id
+                                    : (BonusSchema::where('is_active', true)->first()->id ?? null);
+                
+                if ($activeSchemaId) {
+                    $matchingTier = BonusTier::where('bonus_schema_id', $activeSchemaId)
                         ->where('max_late_minutes', '>=', $lateMinutes)
                         ->orderBy('nominal', 'desc')
                         ->first();
