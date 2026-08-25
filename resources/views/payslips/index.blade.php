@@ -190,7 +190,15 @@
                                                      Lampiran
                                                  </a>
                                              @endif
-                                             <button type="button" onclick="openUploadModal('{{ $emp['id'] }}', '{{ $emp['unit_id'] }}', '{{ addslashes($emp['name']) }}')"
+                                             <button type="button" onclick="openUploadModal(this)"
+                                                     data-employee-id="{{ $emp['id'] }}"
+                                                     data-unit-id="{{ $emp['unit_id'] }}"
+                                                     data-employee-name="{{ $emp['name'] }}"
+                                                     data-has-payslip="true"
+                                                     data-payslip-url="{{ Storage::url($emp['payslip']->file_path) }}"
+                                                     data-payslip-name="{{ basename($emp['payslip']->file_path) }}"
+                                                     data-attachment-url="{{ $emp['payslip']->attachment_path ? Storage::url($emp['payslip']->attachment_path) : '' }}"
+                                                     data-attachment-name="{{ $emp['payslip']->attachment_path ? basename($emp['payslip']->attachment_path) : '' }}"
                                                      class="h-8 px-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-955/20 dark:hover:bg-amber-955/40 text-amber-600 dark:text-amber-400 text-xs font-bold rounded-lg border border-amber-100/30 dark:border-amber-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Edit Slip Gaji">
                                                  <i data-lucide="edit" class="w-3.5 h-3.5"></i>
                                                  Edit
@@ -205,7 +213,11 @@
                                                  </button>
                                              </form>
                                          @else
-                                             <button onclick="openUploadModal('{{ $emp['id'] }}', '{{ $emp['unit_id'] }}', '{{ addslashes($emp['name']) }}')"
+                                             <button type="button" onclick="openUploadModal(this)"
+                                                     data-employee-id="{{ $emp['id'] }}"
+                                                     data-unit-id="{{ $emp['unit_id'] }}"
+                                                     data-employee-name="{{ $emp['name'] }}"
+                                                     data-has-payslip="false"
                                                      class="h-8 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:hover:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 text-xs font-bold rounded-lg border border-indigo-100/30 dark:border-indigo-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0">
                                                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
                                                  Upload
@@ -387,8 +399,17 @@
             return (months[monthIndex] || '') + ' ' + year;
         }
 
-        function openUploadModal(empId, unitId, empName) {
+        function openUploadModal(btn) {
             const selectedMonth = document.querySelector('input[name="month"]').value;
+
+            const empId = btn.getAttribute('data-employee-id');
+            const unitId = btn.getAttribute('data-unit-id');
+            const empName = btn.getAttribute('data-employee-name');
+            const hasPayslip = btn.getAttribute('data-has-payslip') === 'true';
+            const payslipUrl = btn.getAttribute('data-payslip-url') || '';
+            const attachmentUrl = btn.getAttribute('data-attachment-url') || '';
+            const payslipName = btn.getAttribute('data-payslip-name') || '';
+            const attachmentName = btn.getAttribute('data-attachment-name') || '';
 
             document.getElementById('modal_employee_id').value = empId;
             document.getElementById('modal_unit_id').value = unitId;
@@ -397,6 +418,72 @@
             // Dynamically update form period input & title text to match selected filter month
             document.getElementById('uploadForm').querySelector('input[name="period"]').value = selectedMonth;
             document.getElementById('modal_period_title').innerText = formatIndonesianMonth(selectedMonth);
+
+            const fileInput = document.getElementById('payslip_file_input');
+            const dropzone = document.getElementById('payslip_dropzone');
+            const infoBox = document.getElementById('payslip_info_box');
+            const progressBar = document.getElementById('payslip_progress_bar');
+            const statusText = document.getElementById('payslip_status_text');
+            
+            const attachInput = document.getElementById('attachment_file_input');
+            const attachDropzone = document.getElementById('attachment_dropzone');
+            const attachInfoBox = document.getElementById('attachment_info_box');
+            const attachProgressBar = document.getElementById('attachment_progress_bar');
+            const attachStatusText = document.getElementById('attachment_status_text');
+
+            if (hasPayslip) {
+                // Edit mode: make main payslip file input optional
+                fileInput.removeAttribute('required');
+                
+                // Show existing payslip file info
+                dropzone.classList.add('hidden');
+                infoBox.classList.remove('hidden');
+                infoBox.classList.add('flex');
+                document.getElementById('payslip_file_name').outerHTML = `<a href="${payslipUrl}" target="_blank" id="payslip_file_name" class="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 truncate pr-2">${payslipName}</a>`;
+                document.getElementById('payslip_file_size').innerText = 'Sudah Diunggah';
+                progressBar.style.width = '100%';
+                statusText.innerText = 'File Eksis (Akan Dipertahankan)';
+                statusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
+
+                // Show existing attachment if exists
+                if (attachmentUrl && attachmentName) {
+                    attachDropzone.classList.add('hidden');
+                    attachInfoBox.classList.remove('hidden');
+                    attachInfoBox.classList.add('flex');
+                    document.getElementById('attachment_file_name').outerHTML = `<a href="${attachmentUrl}" target="_blank" id="attachment_file_name" class="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 truncate pr-2">${attachmentName}</a>`;
+                    document.getElementById('attachment_file_size').innerText = 'Sudah Diunggah';
+                    attachProgressBar.style.width = '100%';
+                    attachStatusText.innerText = 'File Eksis (Akan Dipertahankan)';
+                    attachStatusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
+                } else {
+                    // Reset attachment fields
+                    attachInput.value = '';
+                    attachDropzone.classList.remove('hidden');
+                    attachInfoBox.classList.add('hidden');
+                    attachInfoBox.classList.remove('flex');
+                    document.getElementById('attachment_file_name').outerHTML = `<span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>`;
+                    document.getElementById('attachment_file_size').innerText = '0 KB';
+                }
+            } else {
+                // Create mode: make main payslip file input required
+                fileInput.setAttribute('required', 'required');
+                
+                // Reset payslip fields
+                fileInput.value = '';
+                dropzone.classList.remove('hidden');
+                infoBox.classList.add('hidden');
+                infoBox.classList.remove('flex');
+                document.getElementById('payslip_file_name').outerHTML = `<span id="payslip_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.pdf</span>`;
+                document.getElementById('payslip_file_size').innerText = '0 KB';
+
+                // Reset attachment fields
+                attachInput.value = '';
+                attachDropzone.classList.remove('hidden');
+                attachInfoBox.classList.add('hidden');
+                attachInfoBox.classList.remove('flex');
+                document.getElementById('attachment_file_name').outerHTML = `<span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>`;
+                document.getElementById('attachment_file_size').innerText = '0 KB';
+            }
 
             const modal = document.getElementById('uploadModal');
             const content = document.getElementById('uploadModalContent');
