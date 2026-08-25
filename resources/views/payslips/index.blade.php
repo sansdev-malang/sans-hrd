@@ -261,7 +261,7 @@
     <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/50 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200 dark:border-slate-800 transform scale-95 opacity-0 transition-all duration-300" id="uploadModalContent">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3.5 mb-5">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 uppercase tracking-wider">Upload Slip Gaji</h3>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 uppercase tracking-wider">Upload Slip Gaji - <span class="text-indigo-650 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</span></h3>
                 <button onclick="closeUploadModal()" class="text-slate-450 hover:text-slate-655 transition-colors border-0 bg-transparent cursor-pointer">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
