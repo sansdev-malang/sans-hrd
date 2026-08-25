@@ -96,23 +96,21 @@ class PayslipController extends Controller
 
     public function store(Request $request)
     {
+        $exists = Payslip::where([
+            'employee_id' => $request->employee_id,
+            'school_unit_id' => $request->school_unit_id,
+            'period' => $request->period
+        ])->exists();
+
         $request->validate([
             'employee_id' => 'required|integer',
             'school_unit_id' => 'required|integer',
             'period' => 'required|string|size:7', // YYYY-MM
-            'payslip_file' => 'required|mimes:pdf|max:512', // 512 KB max
+            'payslip_file' => ($exists ? 'nullable' : 'required') . '|mimes:pdf|max:512', // 512 KB max
             'attachment_file' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:2048', // 2MB max
         ]);
 
         try {
-            $file = $request->file('payslip_file');
-            
-            // Generate a safe filename
-            $filename = 'payslip_' . $request->school_unit_id . '_' . $request->employee_id . '_' . $request->period . '_' . time() . '.pdf';
-            
-            // Store in storage/app/public/payslips
-            $path = $file->storeAs('payslips/' . $request->period, $filename, 'public');
-
             // Find existing payslip to replace or create new
             $payslip = Payslip::firstOrNew([
                 'employee_id' => $request->employee_id,
@@ -120,12 +118,22 @@ class PayslipController extends Controller
                 'period' => $request->period
             ]);
 
-            // Delete old file if exists
-            if ($payslip->exists && $payslip->file_path && Storage::disk('public')->exists($payslip->file_path)) {
-                Storage::disk('public')->delete($payslip->file_path);
-            }
+            if ($request->hasFile('payslip_file')) {
+                $file = $request->file('payslip_file');
+                
+                // Generate a safe filename
+                $filename = 'payslip_' . $request->school_unit_id . '_' . $request->employee_id . '_' . $request->period . '_' . time() . '.pdf';
+                
+                // Store in storage/app/public/payslips
+                $path = $file->storeAs('payslips/' . $request->period, $filename, 'public');
 
-            $payslip->file_path = $path;
+                // Delete old file if exists
+                if ($payslip->exists && $payslip->file_path && Storage::disk('public')->exists($payslip->file_path)) {
+                    Storage::disk('public')->delete($payslip->file_path);
+                }
+
+                $payslip->file_path = $path;
+            }
 
             // Handle optional attachment file
             if ($request->hasFile('attachment_file')) {
