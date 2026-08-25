@@ -85,6 +85,11 @@
                     $statusText = 'Aktif';
                     if (($emp['status'] ?? '') == 'Leave') $statusText = 'Cuti';
                     if (($emp['status'] ?? '') == 'Inactive') $statusText = 'Nonaktif';
+
+                    // Safe date parsing to prevent Carbon 500 errors on empty/null/invalid dates
+                    $birthDate = !empty($emp['birth_date']) && $emp['birth_date'] !== '0000-00-00' && strtotime($emp['birth_date']) ? date('d/m/Y', strtotime($emp['birth_date'])) : '-';
+                    $taskStartDate = !empty($emp['task_start_date']) && $emp['task_start_date'] !== '0000-00-00' && strtotime($emp['task_start_date']) ? date('d/m/Y', strtotime($emp['task_start_date'])) : '-';
+                    $lastSkDate = !empty($emp['last_sk_date']) && $emp['last_sk_date'] !== '0000-00-00' && strtotime($emp['last_sk_date']) ? date('d/m/Y', strtotime($emp['last_sk_date'])) : '-';
                 @endphp
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
@@ -105,7 +110,7 @@
                         </div>
                         <div class="data-item">
                             <span class="label">Lahir:</span>
-                            <span class="val">{{ $emp['birth_place'] ?? '-' }}, {{ $emp['birth_date'] ? \Carbon\Carbon::parse($emp['birth_date'])->format('d/m/Y') : '-' }}</span>
+                            <span class="val">{{ $emp['birth_place'] ?? '-' }}, {{ $birthDate }}</span>
                         </div>
                     </td>
                     
@@ -163,7 +168,7 @@
                     <td>
                         <div class="data-item">
                             <span class="label">TMT:</span>
-                            <span class="val">{{ $emp['task_start_date'] ? \Carbon\Carbon::parse($emp['task_start_date'])->format('d/m/Y') : '-' }}</span>
+                            <span class="val">{{ $taskStartDate }}</span>
                         </div>
                         <div class="data-item">
                             <span class="label">Status:</span>
@@ -179,7 +184,7 @@
                         </div>
                         <div class="data-item">
                             <span class="label">SK Terakhir:</span>
-                            <span class="val" style="font-size: 7.5pt;">{{ $emp['last_sk_number'] ?? '-' }} ({{ $emp['last_sk_date'] ? \Carbon\Carbon::parse($emp['last_sk_date'])->format('d/m/Y') : '-' }})</span>
+                            <span class="val" style="font-size: 7.5pt;">{{ $emp['last_sk_number'] ?? '-' }} ({{ $lastSkDate }})</span>
                         </div>
                     </td>
                     
