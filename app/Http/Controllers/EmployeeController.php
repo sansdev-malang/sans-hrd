@@ -170,36 +170,69 @@ class EmployeeController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         
-        $sheet->setCellValue('A1', 'No');
-        $sheet->setCellValue('B1', 'Unit');
-        $sheet->setCellValue('C1', 'Nama Lengkap');
-        $sheet->setCellValue('D1', 'Email');
-        $sheet->setCellValue('E1', 'Tipe Pegawai');
-        $sheet->setCellValue('F1', 'Jabatan');
-        $sheet->setCellValue('G1', 'No. HP');
-        $sheet->setCellValue('H1', 'Status');
+        $headers = [
+            'No', 'Unit Sekolah', 'Gelar Depan', 'Nama Lengkap (Tanpa Gelar)', 'Gelar Belakang',
+            'Email', 'Tipe Pegawai', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir',
+            'NIK', 'NIY', 'NUPTK', 'No UKG', 'NRG', 'Pangkat/Golongan',
+            'Pendidikan Terakhir', 'Jurusan', 'Jabatan Utama', 'Jabatan Tambahan',
+            'Tanggal Mulai Tugas', 'Status Kepegawaian', 'Tanggal Diangkat',
+            'Tanggal SK Terakhir', 'Nomor SK Terakhir', 'Masa Kerja Golongan',
+            'Alamat', 'No. HP/WA', 'Catatan Tambahan', 'ID ZKTeco (PIN)', 'Status Keaktifan'
+        ];
+
+        foreach ($headers as $colIndex => $header) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+            $sheet->setCellValue($colLetter . '1', $header);
+        }
 
         $row = 2;
         $no = 1;
         foreach ($employeesCollection as $emp) {
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $emp['unit_name'] ?? '');
-            $sheet->setCellValue('C' . $row, $emp['name'] ?? '');
-            $sheet->setCellValue('D' . $row, $emp['email'] ?? '');
-            $sheet->setCellValue('E' . $row, $emp['employee_type']['name'] ?? '');
-            $sheet->setCellValue('F' . $row, $emp['position'] ?? '');
-            $sheet->setCellValue('G' . $row, $emp['phone'] ?? '-');
+            $rawName = $emp['name'] ?? '';
+            $nameWithoutTitles = $emp['raw_name'] ?? $rawName;
+            $genderText = ($emp['gender'] ?? '') === 'Female' ? 'Perempuan' : 'Laki-laki';
             
             $statusText = 'Aktif';
             if (($emp['status'] ?? '') == 'Leave') $statusText = 'Cuti';
             if (($emp['status'] ?? '') == 'Inactive') $statusText = 'Nonaktif';
-            
-            $sheet->setCellValue('H' . $row, $statusText);
+
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $emp['unit_name'] ?? '');
+            $sheet->setCellValue('C' . $row, $emp['front_title'] ?? '');
+            $sheet->setCellValue('D' . $row, $nameWithoutTitles);
+            $sheet->setCellValue('E' . $row, $emp['back_title'] ?? '');
+            $sheet->setCellValue('F' . $row, $emp['email'] ?? '');
+            $sheet->setCellValue('G' . $row, $emp['employee_type']['name'] ?? '');
+            $sheet->setCellValue('H' . $row, $genderText);
+            $sheet->setCellValue('I' . $row, $emp['birth_place'] ?? '');
+            $sheet->setCellValue('J' . $row, $emp['birth_date'] ?? '');
+            $sheet->setCellValue('K' . $row, $emp['nik'] ?? '');
+            $sheet->setCellValue('L' . $row, $emp['niy'] ?? '');
+            $sheet->setCellValue('M' . $row, $emp['nuptk'] ?? '');
+            $sheet->setCellValue('N' . $row, $emp['no_ukg'] ?? '');
+            $sheet->setCellValue('O' . $row, $emp['nrg'] ?? '');
+            $sheet->setCellValue('P' . $row, $emp['pangkat_golongan'] ?? '');
+            $sheet->setCellValue('Q' . $row, $emp['last_education'] ?? '');
+            $sheet->setCellValue('R' . $row, $emp['major'] ?? '');
+            $sheet->setCellValue('S' . $row, $emp['position'] ?? '');
+            $sheet->setCellValue('T' . $row, $emp['additional_position'] ?? '');
+            $sheet->setCellValue('U' . $row, $emp['task_start_date'] ?? '');
+            $sheet->setCellValue('V' . $row, $emp['employment_status'] ?? '');
+            $sheet->setCellValue('W' . $row, $emp['appointment_date'] ?? '');
+            $sheet->setCellValue('X' . $row, $emp['last_sk_date'] ?? '');
+            $sheet->setCellValue('Y' . $row, $emp['last_sk_number'] ?? '');
+            $sheet->setCellValue('Z' . $row, $emp['work_period'] ?? '');
+            $sheet->setCellValue('AA' . $row, $emp['address'] ?? '');
+            $sheet->setCellValue('AB' . $row, $emp['phone'] ?? '');
+            $sheet->setCellValue('AC' . $row, $emp['notes'] ?? '');
+            $sheet->setCellValue('AD' . $row, $emp['zkteco_uid'] ?? '');
+            $sheet->setCellValue('AE' . $row, $statusText);
             $row++;
         }
 
-        foreach(range('A','H') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        foreach (range(1, count($headers)) as $colIndex) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+            $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
         $fileName = 'Data Pegawai - ' . $unitName . '.xlsx';
