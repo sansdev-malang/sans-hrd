@@ -253,6 +253,7 @@ class EmployeeController extends Controller
 
     public function exportPdf(Request $request)
     {
+        ini_set('memory_limit', '512M');
         $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees);
 

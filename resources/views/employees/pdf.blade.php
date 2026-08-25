@@ -46,15 +46,12 @@
         .text-center {
             text-align: center;
         }
-        .data-item {
-            margin-bottom: 2.5px;
-        }
         .label {
             color: #64748b;
-            font-weight: 500;
+            font-weight: normal;
         }
         .val {
-            font-weight: 600;
+            font-weight: bold;
             color: #0f172a;
         }
     </style>
@@ -96,120 +93,48 @@
                     
                     <!-- Pegawai & Unit -->
                     <td>
-                        <div class="data-item">
-                            <span class="label">Nama:</span>
-                            <span class="val">{{ $emp['name'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Unit:</span>
-                            <span class="val">{{ $emp['unit_name'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Gender:</span>
-                            <span class="val">{{ $genderText }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Lahir:</span>
-                            <span class="val">{{ $emp['birth_place'] ?? '-' }}, {{ $birthDate }}</span>
-                        </div>
+                        <span class="label">Nama:</span> <span class="val">{{ $emp['name'] ?? '-' }}</span><br>
+                        <span class="label">Unit:</span> <span class="val">{{ $emp['unit_name'] ?? '-' }}</span><br>
+                        <span class="label">Gender:</span> <span class="val">{{ $genderText }}</span><br>
+                        <span class="label">Lahir:</span> <span class="val">{{ $emp['birth_place'] ?? '-' }}, {{ $birthDate }}</span>
                     </td>
                     
                     <!-- Dokumen Identitas -->
                     <td>
-                        <div class="data-item">
-                            <span class="label">NIK:</span>
-                            <span class="val">{{ $emp['nik'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">NIY:</span>
-                            <span class="val">{{ $emp['niy'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">NUPTK:</span>
-                            <span class="val">{{ $emp['nuptk'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">No UKG:</span>
-                            <span class="val">{{ $emp['no_ukg'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">NRG:</span>
-                            <span class="val">{{ $emp['nrg'] ?? '-' }}</span>
-                        </div>
+                        <span class="label">NIK:</span> <span class="val">{{ $emp['nik'] ?? '-' }}</span><br>
+                        <span class="label">NIY:</span> <span class="val">{{ $emp['niy'] ?? '-' }}</span><br>
+                        <span class="label">NUPTK:</span> <span class="val">{{ $emp['nuptk'] ?? '-' }}</span><br>
+                        <span class="label">No UKG:</span> <span class="val">{{ $emp['no_ukg'] ?? '-' }}</span><br>
+                        <span class="label">NRG:</span> <span class="val">{{ $emp['nrg'] ?? '-' }}</span>
                     </td>
                     
                     <!-- Pendidikan & Jabatan -->
                     <td>
-                        <div class="data-item">
-                            <span class="label">Tipe:</span>
-                            <span class="val">{{ $emp['employee_type']['name'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Jabatan:</span>
-                            <span class="val">{{ $emp['position'] ?? '-' }}</span>
-                        </div>
+                        <span class="label">Tipe:</span> <span class="val">{{ $emp['employee_type']['name'] ?? '-' }}</span><br>
+                        <span class="label">Jabatan:</span> <span class="val">{{ $emp['position'] ?? '-' }}</span><br>
                         @if(!empty($emp['additional_position']))
-                        <div class="data-item">
-                            <span class="label">Tambahan:</span>
-                            <span class="val">{{ $emp['additional_position'] }}</span>
-                        </div>
+                            <span class="label">Tambahan:</span> <span class="val">{{ $emp['additional_position'] }}</span><br>
                         @endif
-                        <div class="data-item">
-                            <span class="label">Pendidikan:</span>
-                            <span class="val">{{ $emp['last_education'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Jurusan:</span>
-                            <span class="val">{{ $emp['major'] ?? '-' }}</span>
-                        </div>
+                        <span class="label">Pendidikan:</span> <span class="val">{{ $emp['last_education'] ?? '-' }}</span><br>
+                        <span class="label">Jurusan:</span> <span class="val">{{ $emp['major'] ?? '-' }}</span>
                     </td>
                     
                     <!-- Administrasi Kerja -->
                     <td>
-                        <div class="data-item">
-                            <span class="label">TMT:</span>
-                            <span class="val">{{ $taskStartDate }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Status:</span>
-                            <span class="val">{{ $emp['employment_status'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Golongan:</span>
-                            <span class="val">{{ $emp['pangkat_golongan'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Masa Kerja:</span>
-                            <span class="val">{{ $emp['work_period'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">SK Terakhir:</span>
-                            <span class="val" style="font-size: 7.5pt;">{{ $emp['last_sk_number'] ?? '-' }} ({{ $lastSkDate }})</span>
-                        </div>
+                        <span class="label">TMT:</span> <span class="val">{{ $taskStartDate }}</span><br>
+                        <span class="label">Status:</span> <span class="val">{{ $emp['employment_status'] ?? '-' }}</span><br>
+                        <span class="label">Golongan:</span> <span class="val">{{ $emp['pangkat_golongan'] ?? '-' }}</span><br>
+                        <span class="label">Masa Kerja:</span> <span class="val">{{ $emp['work_period'] ?? '-' }}</span><br>
+                        <span class="label">SK Terakhir:</span> <span class="val" style="font-size: 7.5pt;">{{ $emp['last_sk_number'] ?? '-' }} ({{ $lastSkDate }})</span>
                     </td>
                     
                     <!-- Kontak & Alamat -->
                     <td>
-                        <div class="data-item">
-                            <span class="label">HP/WA:</span>
-                            <span class="val">{{ $emp['phone'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Email:</span>
-                            <span class="val" style="font-size: 7.5pt;">{{ $emp['email'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">PIN Finger:</span>
-                            <span class="val">{{ $emp['zkteco_uid'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Alamat:</span>
-                            <span class="val" style="font-size: 7pt; font-weight: normal; color: #334155;">{{ $emp['address'] ?? '-' }}</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="label">Keaktifan:</span>
-                            <span class="val" style="font-size: 7.5pt; color: {{ ($emp['status'] ?? '') == 'Active' ? 'green' : (($emp['status'] ?? '') == 'Leave' ? 'orange' : 'red') }};">{{ $statusText }}</span>
-                        </div>
+                        <span class="label">HP/WA:</span> <span class="val">{{ $emp['phone'] ?? '-' }}</span><br>
+                        <span class="label">Email:</span> <span class="val" style="font-size: 7.5pt;">{{ $emp['email'] ?? '-' }}</span><br>
+                        <span class="label">PIN Finger:</span> <span class="val">{{ $emp['zkteco_uid'] ?? '-' }}</span><br>
+                        <span class="label">Alamat:</span> <span class="val" style="font-size: 7pt; font-weight: normal; color: #334155;">{{ $emp['address'] ?? '-' }}</span><br>
+                        <span class="label">Keaktifan:</span> <span class="val" style="font-size: 7.5pt; color: {{ ($emp['status'] ?? '') == 'Active' ? 'green' : (($emp['status'] ?? '') == 'Leave' ? 'orange' : 'red') }};">{{ $statusText }}</span>
                     </td>
                 </tr>
             @empty
