@@ -190,6 +190,11 @@
                                                      Lampiran
                                                  </a>
                                              @endif
+                                             <button type="button" onclick="openUploadModal('{{ $emp['id'] }}', '{{ $emp['unit_id'] }}', '{{ addslashes($emp['name']) }}')"
+                                                     class="h-8 px-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-955/20 dark:hover:bg-amber-955/40 text-amber-600 dark:text-amber-400 text-xs font-bold rounded-lg border border-amber-100/30 dark:border-amber-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Edit Slip Gaji">
+                                                 <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                                                 Edit
+                                             </button>
                                              <form method="POST" action="{{ route('payslips.destroy', $emp['payslip']->id) }}" onsubmit="return confirm('Hapus slip gaji ini?');" class="inline">
                                                  @csrf
                                                  @method('DELETE')
