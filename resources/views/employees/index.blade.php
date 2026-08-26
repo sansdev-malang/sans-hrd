@@ -68,7 +68,7 @@
                             'bg' => 'bg-amber-50 dark:bg-amber-950/20',
                             'border' => 'border-amber-100 dark:border-amber-900/30',
                             'text' => 'text-amber-600 dark:text-amber-400',
-                            'icon' => 'baby'
+                            'icon' => 'user'
                         ],
                         'sd' => [
                             'bg' => 'bg-emerald-50 dark:bg-emerald-950/20',
