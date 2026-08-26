@@ -803,9 +803,14 @@ class AttendanceBonusReportController extends Controller
                 $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
                 
                 if ($detail) {
-                    $sheet->setCellValue($colLetter . $row, $detail['bonus_nominal'] > 0 ? $detail['bonus_nominal'] : '-');
+                    if ($detail['bonus_nominal'] > 0) {
+                        $sheet->setCellValue($colLetter . $row, $detail['bonus_nominal']);
+                    } else {
+                        $sheet->setCellValue($colLetter . $row, '0K');
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
+                    }
                 } else {
-                    $sheet->setCellValue($colLetter . $row, '-');
+                    $sheet->setCellValue($colLetter . $row, 'OFF');
                 }
                 
                 // Align center

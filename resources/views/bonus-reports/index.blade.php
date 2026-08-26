@@ -238,13 +238,15 @@
                                             @php
                                                 $titleText = (isset($detail['status']) && $detail['status'] === 'Dinas') ? 'Dinas (Tidak ada bonus)' : 'Tidak ada bonus';
                                             @endphp
-                                            <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-600 font-bold text-xs" title="{{ $titleText }}">-</div>
+                                            <div class="mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border border-red-200 dark:border-red-800/50" title="{{ $titleText }}">
+                                                0K
+                                            </div>
                                         @endif
                                     @else
                                         @if($date->isSunday())
-                                            <div class="mx-auto flex items-center justify-center text-red-200 dark:text-red-900/30 font-bold text-xs" title="Akhir Pekan">-</div>
+                                            <div class="mx-auto flex items-center justify-center text-red-400/80 dark:text-red-900/50 font-bold text-[9px]" title="Akhir Pekan (OFF)">OFF</div>
                                         @else
-                                            <div class="mx-auto flex items-center justify-center text-slate-100 dark:text-slate-800/50 font-bold text-[10px]">-</div>
+                                            <div class="mx-auto flex items-center justify-center text-slate-400 dark:text-slate-500 font-bold text-[9px]" title="Jadwal Off/Libur">OFF</div>
                                         @endif
                                     @endif
                                 </td>
@@ -398,9 +400,12 @@
                                                              x-text="(selectedReport.daily_details[day.dateStr].bonus_nominal >= 1000) ? (selectedReport.daily_details[day.dateStr].bonus_nominal / 1000) + 'k' : selectedReport.daily_details[day.dateStr].bonus_nominal"></div>
                                                     </template>
                                                     <template x-if="!selectedReport.daily_details[day.dateStr].bonus_nominal || selectedReport.daily_details[day.dateStr].bonus_nominal <= 0">
-                                                        <div class="text-center text-slate-300 dark:text-slate-600 text-[8px] font-bold">-</div>
+                                                        <div class="w-full py-0.5 text-center bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded text-[7px] font-bold">0K</div>
                                                     </template>
                                                 </div>
+                                            </template>
+                                            <template x-if="day.isCurrentMonth && (!selectedReport || !selectedReport.daily_details[day.dateStr])">
+                                                <div class="text-center text-slate-400 dark:text-slate-500 text-[7px] font-bold">OFF</div>
                                             </template>
                                         </div>
                                     </div>
