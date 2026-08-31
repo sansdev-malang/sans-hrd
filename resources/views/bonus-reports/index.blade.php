@@ -244,12 +244,16 @@
                                                 {{ $shortNominal }}
                                             </div>
                                         @else
-                                            @php
-                                                $titleText = (isset($detail['status']) && $detail['status'] === 'Dinas') ? 'Dinas (Tidak ada bonus)' : 'Tidak ada bonus';
-                                            @endphp
-                                            <div class="mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border border-red-200 dark:border-red-800/50" title="{{ $titleText }}">
-                                                0K
-                                            </div>
+                                            @if($dateStr > date('Y-m-d'))
+                                                <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px]">-</div>
+                                            @else
+                                                @php
+                                                    $titleText = (isset($detail['status']) && $detail['status'] === 'Dinas') ? 'Dinas (Tidak ada bonus)' : 'Tidak ada bonus';
+                                                @endphp
+                                                <div class="mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border border-red-200 dark:border-red-800/50" title="{{ $titleText }}">
+                                                    0K
+                                                </div>
+                                            @endif
                                         @endif
                                     @else
                                         @if($date->isSunday())
@@ -409,7 +413,14 @@
                                                              x-text="(selectedReport.daily_details[day.dateStr].bonus_nominal >= 1000) ? (selectedReport.daily_details[day.dateStr].bonus_nominal / 1000) + 'k' : selectedReport.daily_details[day.dateStr].bonus_nominal"></div>
                                                     </template>
                                                     <template x-if="!selectedReport.daily_details[day.dateStr].bonus_nominal || selectedReport.daily_details[day.dateStr].bonus_nominal <= 0">
-                                                        <div class="w-full py-0.5 text-center bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded text-[7px] font-bold">0K</div>
+                                                        <div class="w-full py-0.5">
+                                                            <template x-if="day.dateStr > new Date().toLocaleDateString('en-CA')">
+                                                                <div class="text-center text-slate-300 dark:text-slate-700 rounded text-[7px] font-medium">-</div>
+                                                            </template>
+                                                            <template x-if="day.dateStr <= new Date().toLocaleDateString('en-CA')">
+                                                                <div class="w-full py-0.5 text-center bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded text-[7px] font-bold">0K</div>
+                                                            </template>
+                                                        </div>
                                                     </template>
                                                 </div>
                                             </template>
