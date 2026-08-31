@@ -391,6 +391,7 @@ class AttendanceApiController extends Controller
         return response()->json([
             'success' => true,
             'month' => $month,
+            'cutoff_date' => $cutoffDate,
             'start_date' => $startDate->format('Y-m-d'),
             'end_date' => $endDate->format('Y-m-d'),
             'data' => $reports
