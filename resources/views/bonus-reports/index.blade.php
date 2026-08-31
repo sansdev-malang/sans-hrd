@@ -4,8 +4,14 @@
         <div id="bonus-table-container" class="space-y-6">
         <!-- HEADER -->
         <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Bonus Kehadiran</h2>
+            <div class="flex flex-col gap-1">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Bonus Kehadiran</h2>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-150/30 dark:border-indigo-900/30">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                        <span>Siklus: {{ \Carbon\Carbon::parse($startDateReq)->translatedFormat('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->translatedFormat('d M Y') }}</span>
+                    </span>
+                </div>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Evaluasi kehadiran pegawai berdasarkan skema bonus aktif.</p>
             </div>
             
@@ -69,8 +75,11 @@
                     </div>
 
                     <!-- Bulan -->
-                    <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
-                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer shadow-inner">
+                    <div class="flex items-center gap-1.5 flex-1 sm:flex-initial">
+                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Siklus Gaji:</span>
+                        <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
+                            class="h-9 px-2.5 w-full sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer shadow-inner">
+                    </div>
 
                     <!-- Filter Unit -->
                     @if(isset($schoolUnits) && count($schoolUnits) > 0)

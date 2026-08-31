@@ -28,7 +28,12 @@ class AttendanceApiController extends Controller
 
         public function matrixReport(Request $request)
     {
-        $month = $request->query('month', date('Y-m'));
+        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+        $month = $request->query('month');
+        if (empty($month)) {
+            $today = now();
+            $month = $today->day > $cutoffDate ? $today->copy()->startOfMonth()->addMonth()->format('Y-m') : $today->format('Y-m');
+        }
         $unitId = $request->query('unit_id');
 
         $startDateParam = $request->query('start_date');
@@ -38,8 +43,7 @@ class AttendanceApiController extends Controller
             $startDate = Carbon::parse($startDateParam)->startOfDay();
             $endDate = Carbon::parse($endDateParam)->endOfDay();
         } else {
-            $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
-            $monthCarbon = Carbon::createFromFormat('Y-m', $month);
+            $monthCarbon = Carbon::parse($month . '-01');
             
             $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
             $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
@@ -395,13 +399,15 @@ class AttendanceApiController extends Controller
 
     public function bonusReport(Request $request)
     {
-        $month = $request->query('month', date('Y-m'));
-        $unitId = $request->query('unit_id') ?? $request->query('school_unit_id'); // Optional unit filter
-
-        // Fetch cutoff date from settings, default to 26
         $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+        $month = $request->query('month');
+        if (empty($month)) {
+            $today = now();
+            $month = $today->day > $cutoffDate ? $today->copy()->startOfMonth()->addMonth()->format('Y-m') : $today->format('Y-m');
+        }
+        $unitId = $request->query('unit_id') ?? $request->query('school_unit_id'); // Optional unit filter
         
-        $monthCarbon = Carbon::createFromFormat('Y-m', $month);
+        $monthCarbon = Carbon::parse($month . '-01');
         
         $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
         $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();

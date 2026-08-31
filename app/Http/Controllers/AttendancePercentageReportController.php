@@ -34,9 +34,10 @@ class AttendancePercentageReportController extends Controller
             $endDate = Carbon::parse($endDateReq)->endOfDay();
         } else {
             if (empty($month)) {
-                $month = date('Y-m');
+                $today = now();
+                $month = $today->day > $cutoffDate ? $today->copy()->startOfMonth()->addMonth()->format('Y-m') : $today->format('Y-m');
             }
-            $monthCarbon = Carbon::createFromFormat('Y-m', $month);
+            $monthCarbon = Carbon::parse($month . '-01');
             $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
             $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
 

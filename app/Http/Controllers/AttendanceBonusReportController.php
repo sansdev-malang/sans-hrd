@@ -22,18 +22,14 @@ class AttendanceBonusReportController extends Controller
 
     public function index(Request $request)
     {
-        $month = $request->query('month', date('Y-m'));
-        $unitId = $request->query('unit_id');
-
-        // Fetch cutoff date from settings, default to 26
         $cutoffDate = (int) Setting::get('payroll_cutoff_date', 26);
-
-        // Determine Start and End dates based on the selected month and cutoff date
-        // E.g. month = '2026-07', cutoff = 26
-        // endDate = 2026-07-26
-        // startDate = 2026-06-27
-        
-        $monthCarbon = Carbon::createFromFormat('Y-m', $month);
+        $month = $request->query('month');
+        if (empty($month)) {
+            $today = now();
+            $month = $today->day > $cutoffDate ? $today->copy()->startOfMonth()->addMonth()->format('Y-m') : $today->format('Y-m');
+        }
+        $unitId = $request->query('unit_id');
+        $monthCarbon = Carbon::parse($month . '-01');
         
         $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
         $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
@@ -402,12 +398,15 @@ class AttendanceBonusReportController extends Controller
 
         public function export(Request $request)
     {
-        $month = $request->query('month', now()->format('Y-m'));
+        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 26);
+        $month = $request->query('month');
+        if (empty($month)) {
+            $today = now();
+            $month = $today->day > $cutoffDate ? $today->copy()->startOfMonth()->addMonth()->format('Y-m') : $today->format('Y-m');
+        }
         $unitId = $request->query('unit_id');
         $format = $request->query('format', 'excel'); // 'excel' or 'pdf'
-
-        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 26);
-        $monthCarbon = Carbon::createFromFormat('Y-m', $month);
+        $monthCarbon = Carbon::parse($month . '-01');
         
         $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
         $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();

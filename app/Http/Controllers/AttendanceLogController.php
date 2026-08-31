@@ -416,9 +416,13 @@ class AttendanceLogController extends Controller
 
     public function index(Request $request)
     {
-        $month = $request->query('month', now()->format('Y-m'));
         $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
-        $monthCarbon = \Carbon\Carbon::createFromFormat('Y-m', $month);
+        $month = $request->query('month');
+        if (empty($month)) {
+            $today = now();
+            $month = $today->day > $cutoffDate ? $today->copy()->startOfMonth()->addMonth()->format('Y-m') : $today->format('Y-m');
+        }
+        $monthCarbon = \Carbon\Carbon::parse($month . '-01');
         
         $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
         $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
@@ -501,9 +505,13 @@ class AttendanceLogController extends Controller
         ini_set('memory_limit', '512M');
         ini_set('max_execution_time', 300);
         
-        $month = $request->query('month', now()->format('Y-m'));
         $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
-        $monthCarbon = \Carbon\Carbon::createFromFormat('Y-m', $month);
+        $month = $request->query('month');
+        if (empty($month)) {
+            $today = now();
+            $month = $today->day > $cutoffDate ? $today->copy()->startOfMonth()->addMonth()->format('Y-m') : $today->format('Y-m');
+        }
+        $monthCarbon = \Carbon\Carbon::parse($month . '-01');
         
         $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
         $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
