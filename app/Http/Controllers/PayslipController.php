@@ -176,6 +176,10 @@ class PayslipController extends Controller
             // Notify the unit application about the new payslip
             $this->notifyUnitAboutPayslip($payslip);
 
+            if ($request->filled('redirect_url')) {
+                return redirect($request->input('redirect_url'))->with('success', 'Slip gaji berhasil diunggah.');
+            }
+
             return back()->with('success', 'Slip gaji berhasil diunggah.');
         } catch (\Exception $e) {
             Log::error('Upload Payslip Error: ' . $e->getMessage());
@@ -220,6 +224,10 @@ class PayslipController extends Controller
             }
             $payslip->delete();
             
+            if (request()->filled('redirect_url')) {
+                return redirect(request()->input('redirect_url'))->with('success', 'Slip gaji berhasil dihapus.');
+            }
+
             return back()->with('success', 'Slip gaji berhasil dihapus.');
         } catch (\Exception $e) {
             Log::error('Delete Payslip Error: ' . $e->getMessage());

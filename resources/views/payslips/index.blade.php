@@ -243,6 +243,7 @@
                                              <form method="POST" action="{{ route('payslips.destroy', $emp['payslip']->id) }}" onsubmit="return confirm('Hapus slip gaji ini?');" class="inline">
                                                  @csrf
                                                  @method('DELETE')
+                                                 <input type="hidden" name="redirect_url" value="{{ request()->fullUrl() }}">
                                                  <button type="submit"
                                                          class="h-8 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/30 dark:hover:bg-rose-955/50 text-rose-650 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Hapus">
                                                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -317,7 +318,7 @@
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3.5 mb-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 uppercase tracking-wider">Upload Slip Gaji</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Periode: <strong class="text-indigo-600 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong></p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Periode: <strong id="modal_period_title" class="text-indigo-600 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong></p>
                 </div>
                 <button onclick="closeUploadModal()" class="text-slate-450 hover:text-slate-655 transition-colors border-0 bg-transparent cursor-pointer">
                     <i data-lucide="x" class="w-4 h-4"></i>
@@ -328,14 +329,14 @@
             <div class="p-3 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-900/60 rounded-xl flex items-center justify-between gap-3 text-xs mb-3 shadow-3xs">
                 <div class="flex items-center gap-2.5">
                     <div class="p-1.5 bg-indigo-600 text-white rounded-lg shrink-0">
-                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
                     </div>
                     <div>
                         <div class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Target Periode Gaji</div>
-                        <strong class="text-indigo-700 dark:text-indigo-300 font-bold text-xs">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong>
+                        <strong id="modal_period_badge" class="text-indigo-700 dark:text-indigo-300 font-bold text-xs">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong>
                     </div>
                 </div>
-                <span class="text-[10px] bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-indigo-200/60 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold font-mono">{{ $month }}</span>
+                <span id="modal_period_code" class="text-[10px] bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-indigo-200/60 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold font-mono">{{ $month }}</span>
             </div>
 
             <form id="uploadForm" method="POST" action="{{ route('payslips.store') }}" enctype="multipart/form-data" class="space-y-4">
@@ -343,6 +344,7 @@
                 <input type="hidden" name="employee_id" id="modal_employee_id">
                 <input type="hidden" name="school_unit_id" id="modal_unit_id">
                 <input type="hidden" name="period" value="{{ $month }}">
+                <input type="hidden" name="redirect_url" id="modal_redirect_url" value="{{ request()->fullUrl() }}">
 
                 <div class="text-left">
                     <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Nama Pegawai</label>
@@ -454,24 +456,43 @@
         }
 
         function openUploadModal(btn) {
-            const selectedMonth = document.querySelector('input[name="month"]').value;
+            const monthInput = document.querySelector('input[name="month"]');
+            const selectedMonth = (monthInput && monthInput.value) ? monthInput.value : '{{ $month }}';
 
-            const empId = btn.getAttribute('data-employee-id');
-            const unitId = btn.getAttribute('data-unit-id');
-            const empName = btn.getAttribute('data-employee-name');
+            const empId = btn.getAttribute('data-employee-id') || '';
+            const unitId = btn.getAttribute('data-unit-id') || '';
+            const empName = btn.getAttribute('data-employee-name') || '';
             const hasPayslip = btn.getAttribute('data-has-payslip') === 'true';
             const payslipUrl = btn.getAttribute('data-payslip-url') || '';
             const attachmentUrl = btn.getAttribute('data-attachment-url') || '';
             const payslipName = btn.getAttribute('data-payslip-name') || '';
             const attachmentName = btn.getAttribute('data-attachment-name') || '';
 
-            document.getElementById('modal_employee_id').value = empId;
-            document.getElementById('modal_unit_id').value = unitId;
-            document.getElementById('modal_employee_name').innerText = empName;
+            const empIdEl = document.getElementById('modal_employee_id');
+            const unitIdEl = document.getElementById('modal_unit_id');
+            const empNameEl = document.getElementById('modal_employee_name');
+            const redirectUrlEl = document.getElementById('modal_redirect_url');
+
+            if (empIdEl) empIdEl.value = empId;
+            if (unitIdEl) unitIdEl.value = unitId;
+            if (empNameEl) empNameEl.innerText = empName;
+            if (redirectUrlEl) redirectUrlEl.value = window.location.href;
 
             // Dynamically update form period input & title text to match selected filter month
-            document.getElementById('uploadForm').querySelector('input[name="period"]').value = selectedMonth;
-            document.getElementById('modal_period_title').innerText = formatIndonesianMonth(selectedMonth);
+            const uploadForm = document.getElementById('uploadForm');
+            if (uploadForm) {
+                const periodInput = uploadForm.querySelector('input[name="period"]');
+                if (periodInput) periodInput.value = selectedMonth;
+            }
+
+            const formattedMonth = formatIndonesianMonth(selectedMonth);
+            const titleEl = document.getElementById('modal_period_title');
+            const badgeEl = document.getElementById('modal_period_badge');
+            const codeEl = document.getElementById('modal_period_code');
+
+            if (titleEl) titleEl.innerText = formattedMonth;
+            if (badgeEl) badgeEl.innerText = formattedMonth;
+            if (codeEl) codeEl.innerText = selectedMonth;
 
             const fileInput = document.getElementById('payslip_file_input');
             const dropzone = document.getElementById('payslip_dropzone');
@@ -487,65 +508,103 @@
 
             if (hasPayslip) {
                 // Edit mode: make main payslip file input optional
-                fileInput.removeAttribute('required');
+                if (fileInput) fileInput.removeAttribute('required');
                 
                 // Show existing payslip file info
-                dropzone.classList.add('hidden');
-                infoBox.classList.remove('hidden');
-                infoBox.classList.add('flex');
-                document.getElementById('payslip_file_name').outerHTML = `<a href="${payslipUrl}" target="_blank" id="payslip_file_name" class="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 truncate pr-2">${payslipName}</a>`;
-                document.getElementById('payslip_file_size').innerText = 'Sudah Diunggah';
-                progressBar.style.width = '100%';
-                statusText.innerText = 'File Eksis (Akan Dipertahankan)';
-                statusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
+                if (dropzone) dropzone.classList.add('hidden');
+                if (infoBox) {
+                    infoBox.classList.remove('hidden');
+                    infoBox.classList.add('flex');
+                }
+                const fileNameEl = document.getElementById('payslip_file_name');
+                if (fileNameEl) {
+                    fileNameEl.outerHTML = `<a href="${payslipUrl}" target="_blank" id="payslip_file_name" class="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 truncate pr-2">${payslipName}</a>`;
+                }
+                const fileSizeEl = document.getElementById('payslip_file_size');
+                if (fileSizeEl) fileSizeEl.innerText = 'Sudah Diunggah';
+                if (progressBar) progressBar.style.width = '100%';
+                if (statusText) {
+                    statusText.innerText = 'File Eksis (Akan Dipertahankan)';
+                    statusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
+                }
 
                 // Show existing attachment if exists
                 if (attachmentUrl && attachmentName) {
-                    attachDropzone.classList.add('hidden');
-                    attachInfoBox.classList.remove('hidden');
-                    attachInfoBox.classList.add('flex');
-                    document.getElementById('attachment_file_name').outerHTML = `<a href="${attachmentUrl}" target="_blank" id="attachment_file_name" class="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 truncate pr-2">${attachmentName}</a>`;
-                    document.getElementById('attachment_file_size').innerText = 'Sudah Diunggah';
-                    attachProgressBar.style.width = '100%';
-                    attachStatusText.innerText = 'File Eksis (Akan Dipertahankan)';
-                    attachStatusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
+                    if (attachDropzone) attachDropzone.classList.add('hidden');
+                    if (attachInfoBox) {
+                        attachInfoBox.classList.remove('hidden');
+                        attachInfoBox.classList.add('flex');
+                    }
+                    const attachNameEl = document.getElementById('attachment_file_name');
+                    if (attachNameEl) {
+                        attachNameEl.outerHTML = `<a href="${attachmentUrl}" target="_blank" id="attachment_file_name" class="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 truncate pr-2">${attachmentName}</a>`;
+                    }
+                    const attachSizeEl = document.getElementById('attachment_file_size');
+                    if (attachSizeEl) attachSizeEl.innerText = 'Sudah Diunggah';
+                    if (attachProgressBar) attachProgressBar.style.width = '100%';
+                    if (attachStatusText) {
+                        attachStatusText.innerText = 'File Eksis (Akan Dipertahankan)';
+                        attachStatusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
+                    }
                 } else {
                     // Reset attachment fields
-                    attachInput.value = '';
-                    attachDropzone.classList.remove('hidden');
-                    attachInfoBox.classList.add('hidden');
-                    attachInfoBox.classList.remove('flex');
-                    document.getElementById('attachment_file_name').outerHTML = `<span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>`;
-                    document.getElementById('attachment_file_size').innerText = '0 KB';
+                    if (attachInput) attachInput.value = '';
+                    if (attachDropzone) attachDropzone.classList.remove('hidden');
+                    if (attachInfoBox) {
+                        attachInfoBox.classList.add('hidden');
+                        attachInfoBox.classList.remove('flex');
+                    }
+                    const attachNameEl = document.getElementById('attachment_file_name');
+                    if (attachNameEl) {
+                        attachNameEl.outerHTML = `<span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>`;
+                    }
+                    const attachSizeEl = document.getElementById('attachment_file_size');
+                    if (attachSizeEl) attachSizeEl.innerText = '0 KB';
                 }
             } else {
                 // Create mode: make main payslip file input required
-                fileInput.setAttribute('required', 'required');
+                if (fileInput) {
+                    fileInput.setAttribute('required', 'required');
+                    fileInput.value = '';
+                }
                 
                 // Reset payslip fields
-                fileInput.value = '';
-                dropzone.classList.remove('hidden');
-                infoBox.classList.add('hidden');
-                infoBox.classList.remove('flex');
-                document.getElementById('payslip_file_name').outerHTML = `<span id="payslip_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.pdf</span>`;
-                document.getElementById('payslip_file_size').innerText = '0 KB';
+                if (dropzone) dropzone.classList.remove('hidden');
+                if (infoBox) {
+                    infoBox.classList.add('hidden');
+                    infoBox.classList.remove('flex');
+                }
+                const fileNameEl = document.getElementById('payslip_file_name');
+                if (fileNameEl) {
+                    fileNameEl.outerHTML = `<span id="payslip_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.pdf</span>`;
+                }
+                const fileSizeEl = document.getElementById('payslip_file_size');
+                if (fileSizeEl) fileSizeEl.innerText = '0 KB';
 
                 // Reset attachment fields
-                attachInput.value = '';
-                attachDropzone.classList.remove('hidden');
-                attachInfoBox.classList.add('hidden');
-                attachInfoBox.classList.remove('flex');
-                document.getElementById('attachment_file_name').outerHTML = `<span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>`;
-                document.getElementById('attachment_file_size').innerText = '0 KB';
+                if (attachInput) attachInput.value = '';
+                if (attachDropzone) attachDropzone.classList.remove('hidden');
+                if (attachInfoBox) {
+                    attachInfoBox.classList.add('hidden');
+                    attachInfoBox.classList.remove('flex');
+                }
+                const attachNameEl = document.getElementById('attachment_file_name');
+                if (attachNameEl) {
+                    attachNameEl.outerHTML = `<span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>`;
+                }
+                const attachSizeEl = document.getElementById('attachment_file_size');
+                if (attachSizeEl) attachSizeEl.innerText = '0 KB';
             }
 
             const modal = document.getElementById('uploadModal');
             const content = document.getElementById('uploadModalContent');
 
-            modal.classList.remove('hidden');
-            void modal.offsetWidth;
-            content.classList.remove('scale-95', 'opacity-0');
-            content.classList.add('scale-100', 'opacity-100');
+            if (modal && content) {
+                modal.classList.remove('hidden');
+                void modal.offsetWidth;
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }
         }
 
         function closeUploadModal() {
