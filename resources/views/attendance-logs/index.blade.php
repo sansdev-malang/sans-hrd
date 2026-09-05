@@ -32,6 +32,48 @@
                 
                 <div class="flex items-center gap-2 w-full md:w-auto">
 
+                    <!-- INFO PEMBARUAN STATUS POPOVER -->
+                    <div x-data="{ infoOpen: false }" class="relative inline-block text-left w-full md:w-auto">
+                        <button type="button" @click="infoOpen = !infoOpen; $nextTick(() => { if (window.lucide) lucide.createIcons(); })" @click.outside="infoOpen = false" 
+                            class="w-full md:w-auto justify-center h-9 px-3.5 bg-blue-50/70 hover:bg-blue-100/70 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-semibold text-xs rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2">
+                            <i data-lucide="info" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                            <span>Info Update</span>
+                        </button>
+                        
+                        <div x-show="infoOpen" x-transition.opacity.duration.200ms style="display: none;" 
+                            class="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-4 space-y-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/60 flex items-center justify-center shrink-0">
+                                        <i data-lucide="info" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-slate-900 dark:text-slate-100">Pembaruan Status Kehadiran</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Ketentuan tanggal terlewat</p>
+                                    </div>
+                                </div>
+                                <button type="button" @click="infoOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition-colors">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            
+                            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                                Pembaruan status kehadiran untuk tanggal yang telah terlewat (misal: penyesuaian karena dinas luar atau tugas khusus) dilakukan melalui mekanisme pengajuan izin oleh <strong>Admin Unit</strong> masing-masing.
+                            </p>
+                            
+                            <div class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 leading-normal flex items-start gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                                <span>Data kehadiran akan otomatis diperbarui dan tersinkronisasi setelah pengajuan izin disetujui.</span>
+                            </div>
+
+                            <div class="pt-1">
+                                <a href="{{ route('leave-approvals.index') }}" data-no-ajax="true" class="w-full h-8 px-3 bg-slate-900 hover:bg-slate-800 text-white dark:bg-indigo-600 dark:hover:bg-indigo-500 dark:text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm">
+                                    <span>Buka Izin Kehadiran</span>
+                                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- EXPORT DROPDOWN -->
                     <div x-data="{ open: false }" class="relative inline-block text-left w-full md:w-auto">
@@ -843,10 +885,12 @@
             if (!link) return;
 
             const hrefAttr = link.getAttribute('href');
-            if (!hrefAttr || hrefAttr.startsWith('#') || hrefAttr.includes('export')) return;
+            if (!hrefAttr || hrefAttr.startsWith('#') || hrefAttr.includes('export') || link.hasAttribute('data-no-ajax') || link.getAttribute('data-no-loader') === 'true') return;
+
+            const url = new URL(link.href, window.location.origin);
+            if (url.pathname !== window.location.pathname) return;
 
             e.preventDefault();
-            const url = new URL(link.href);
             loadTableContent(url);
         });
     });
