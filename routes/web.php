@@ -83,6 +83,11 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::put('leave-approvals/{id}', [\App\Http\Controllers\LeaveApprovalController::class, 'update'])->name('leave-approvals.update');
     Route::delete('leave-approvals/{id}', [\App\Http\Controllers\LeaveApprovalController::class, 'destroy'])->name('leave-approvals.destroy');
 
+    // Master Leave Types CRUD & Sync
+    Route::post('leave-types/pull', [\App\Http\Controllers\LeaveTypeController::class, 'pullFromUnits'])->name('leave-types.pull');
+    Route::post('leave-types/push-all', [\App\Http\Controllers\LeaveTypeController::class, 'pushAllToUnits'])->name('leave-types.push-all');
+    Route::resource('leave-types', \App\Http\Controllers\LeaveTypeController::class);
+
     // ZKTeco Device Management
     Route::post('zkteco-devices/{zktecoDevice}/pull', [\App\Http\Controllers\ZktecoDeviceController::class, 'pullLogs'])->name('zkteco-devices.pull');
     Route::post('zkteco-devices/{zktecoDevice}/force-adms', [\App\Http\Controllers\ZktecoDeviceController::class, 'forceAdms'])->name('zkteco-devices.force-adms');

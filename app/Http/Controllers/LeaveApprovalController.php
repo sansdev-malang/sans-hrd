@@ -281,7 +281,7 @@ class LeaveApprovalController extends Controller
     }
 
     /**
-     * Delete a leave request (Soft Delete and Reject on Remote Unit).
+     * Delete a leave request (Permanently Delete from Remote Unit and Central HRD).
      */
     public function destroy($id)
     {
@@ -289,18 +289,20 @@ class LeaveApprovalController extends Controller
         $unit = SchoolUnit::findOrFail($leave->school_unit_id);
 
         try {
-            // Reject on remote unit
+            // Delete on remote unit
             $response = Http::timeout(3)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
                 'Accept' => 'application/json',
             ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
                 'leave_id' => $leave->remote_leave_id ?? $leave->employee_id,
+                'action' => 'delete',
                 'status' => 'Rejected',
                 'notes' => 'Dihapus oleh HRD Pusat.',
+                'processed_by' => auth()->user()->name . ' (HRD Pusat)',
             ]);
 
             if ($response->successful()) {
-                // Soft delete locally
+                // Delete locally
                 $leave->delete();
 
                 return redirect()->route('leave-approvals.index')
@@ -342,22 +344,22 @@ class LeaveApprovalController extends Controller
 
                 if ($response instanceof \Illuminate\Http\Client\Response && $response->successful()) {
                     $remoteLeaves = $response->json() ?? [];
+                    $activeRemoteIds = [];
 
                     foreach ($remoteLeaves as $rL) {
+                        $activeRemoteIds[] = $rL['id'];
                         $statusCode = $rL['status_code'] ?? null;
-                        $status = $rL['status'];
+                        $remoteStatus = $rL['status'] ?? 'Pending';
+                        $status = $remoteStatus;
                         
                         $isNewOrPendingH = false;
                         if ($statusCode === 'H') {
-                            // Check if it already exists and is approved in our local DB
-                            $exists = LeaveRequest::where('school_unit_id', $unit->id)
-                                ->where('remote_leave_id', $rL['id'])
-                                ->first();
-                            
-                            if (!$exists || $exists->status !== 'Approved') {
+                            if ($remoteStatus === 'Pending') {
+                                $status = 'Approved';
                                 $isNewOrPendingH = true;
+                            } elseif ($remoteStatus === 'Rejected') {
+                                $status = 'Rejected';
                             }
-                            $status = 'Approved';
                         }
 
                         $notes = $rL['notes'] ?? ($statusCode === 'H' ? 'Disetujui otomatis oleh HRD Pusat (Dinas).' : null);
@@ -397,12 +399,19 @@ class LeaveApprovalController extends Controller
                             'start_date' => $rL['start_date'],
                             'end_date' => $rL['end_date'],
                             'status_code' => $statusCode,
+                            'type' => $rL['type'] ?? null,
+                            'reason' => $rL['reason'] ?? null,
+                            'attachment' => $rL['attachment'] ?? null,
                             'gets_presence_bonus' => $rL['gets_presence_bonus'] ?? false,
                             'requires_attendance' => $rL['requires_attendance'] ?? true,
                             'requires_approval' => $rL['requires_approval'] ?? true,
                             'status' => $status,
                             'notes' => $notes,
                         ];
+
+                        if (!empty($rL['created_at'])) {
+                            $updateData['created_at'] = $rL['created_at'];
+                        }
 
                         // We check by school_unit_id and remote_leave_id
                         LeaveRequest::updateOrCreate(
@@ -428,6 +437,11 @@ class LeaveApprovalController extends Controller
                             }
                         }
                     }
+
+                    // Delete records in Central HRD that no longer exist on the remote unit
+                    LeaveRequest::where('school_unit_id', $unit->id)
+                        ->whereNotIn('remote_leave_id', $activeRemoteIds)
+                        ->delete();
                 } else {
                     $statusCode = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
                     Log::error("Failed response pulling leave requests from unit {$unit->name}. Status: {$statusCode}");
