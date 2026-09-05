@@ -32,50 +32,106 @@
 
         <div id="attendance-report-container" class="space-y-6">
 
-        <!-- RATA-RATA KEHADIRAN PER UNIT -->
-        @if(isset($unitStats) && count($unitStats) > 0)
-            <section class="bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-4 w-full text-left flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-                <div class="flex items-center gap-2.5 shrink-0">
-                    <div class="p-1.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-650 dark:text-indigo-400 rounded-lg">
-                        <i data-lucide="building-2" class="w-4.5 h-4.5"></i>
+        <!-- DUAL SUMMARY BANNERS: KEHADIRAN & KETERLAMBATAN PER UNIT (SEJAJAR KIRI-KANAN) -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full text-left">
+            <!-- BANNER 1: RATA-RATA KEHADIRAN PER UNIT -->
+            @if(isset($unitStats) && count($unitStats) > 0)
+                <section class="bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-4 w-full flex flex-col justify-between gap-3 shadow-sm">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-1.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-650 dark:text-indigo-400 rounded-lg shrink-0">
+                            <i data-lucide="building-2" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">Rata-rata Kehadiran per Unit</h4>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500">Persentase rata-rata kehadiran pegawai terdaftar per unit</p>
+                        </div>
                     </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">Rata-rata Kehadiran per Unit</h4>
-                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Persentase rata-rata seluruh pegawai terdaftar per unit sekolah</p>
-                    </div>
-                </div>
-                
-                <div class="flex flex-wrap items-center gap-3 md:gap-6">
-                    @foreach($unitStats as $uId => $stat)
-                        @if($stat['count'] > 0)
-                            @php
-                                $avg = $stat['average'];
-                                if ($avg >= 95) {
-                                    $indicatorColor = 'bg-emerald-500';
-                                    $textColor = 'text-emerald-600 dark:text-emerald-450';
-                                } elseif ($avg >= 90) {
-                                    $indicatorColor = 'bg-amber-500';
-                                    $textColor = 'text-amber-555 dark:text-amber-450';
-                                } else {
-                                    $indicatorColor = 'bg-rose-500';
-                                    $textColor = 'text-rose-650 dark:text-rose-455';
-                                }
-                            @endphp
-                            <div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800/50 rounded-lg shadow-2xs">
-                                <span class="w-2 h-2 rounded-full {{ $indicatorColor }}"></span>
-                                <div class="flex flex-col">
-                                    <span class="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-none mb-0.5">{{ $stat['name'] }}</span>
-                                    <div class="flex items-baseline gap-1">
-                                        <span class="text-xs font-black font-mono {{ $textColor }}">{{ $avg }}%</span>
-                                        <span class="text-[9px] text-slate-400 dark:text-slate-500 font-medium">({{ $stat['count'] }} orang)</span>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 w-full pt-1">
+                        @foreach($unitStats as $uId => $stat)
+                            @if($stat['count'] > 0)
+                                @php
+                                    $avg = $stat['average'];
+                                    if ($avg >= 95) {
+                                        $indicatorColor = 'bg-emerald-500';
+                                        $textColor = 'text-emerald-600 dark:text-emerald-450';
+                                    } elseif ($avg >= 90) {
+                                        $indicatorColor = 'bg-amber-500';
+                                        $textColor = 'text-amber-555 dark:text-amber-450';
+                                    } else {
+                                        $indicatorColor = 'bg-rose-500';
+                                        $textColor = 'text-rose-650 dark:text-rose-455';
+                                    }
+                                @endphp
+                                <div class="flex flex-col justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60 rounded-xl shadow-2xs">
+                                    <div class="flex items-center justify-between gap-1 pb-1.5 border-b border-slate-100 dark:border-slate-800/60 mb-1.5">
+                                        <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide truncate" title="{{ $stat['name'] }}">{{ $stat['name'] }}</span>
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $indicatorColor }} shrink-0"></span>
+                                    </div>
+                                    <div class="flex flex-col gap-0.5 mt-auto">
+                                        <div class="text-sm font-black font-mono {{ $textColor }} leading-none">{{ $avg }}%</div>
+                                        <div class="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{{ $stat['count'] }} pegawai</div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-            </section>
-        @endif
+                            @endif
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            <!-- BANNER 2: PEMETAAN KETERLAMBATAN PER UNIT -->
+            @if(isset($unitLateStats) && count($unitLateStats) > 0)
+                <section class="bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-4 w-full flex flex-col justify-between gap-3 shadow-sm">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-1.5 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 rounded-lg shrink-0">
+                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">Pemetaan Keterlambatan per Unit</h4>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500">Rincian pegawai zona waspada (kuning) &amp; zona kritis (merah)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 w-full pt-1">
+                        @foreach($unitLateStats as $uId => $stat)
+                            @if($stat['count'] > 0)
+                                @php
+                                    $unitStatusDot = $stat['kritis_staff_count'] > 0 ? 'bg-rose-500' : ($stat['waspada_staff_count'] > 0 ? 'bg-amber-500' : 'bg-emerald-500');
+                                @endphp
+                                <div class="flex flex-col justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60 rounded-xl shadow-2xs">
+                                    <!-- Header: Unit Name & Status Dot -->
+                                    <div class="flex items-center justify-between gap-1 pb-1.5 border-b border-slate-100 dark:border-slate-800/60 mb-1.5">
+                                        <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide truncate" title="{{ $stat['name'] }}">{{ $stat['name'] }}</span>
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $unitStatusDot }} shrink-0" title="{{ $stat['kritis_staff_count'] > 0 ? 'Terdapat pegawai kritis' : ($stat['waspada_staff_count'] > 0 ? 'Terdapat pegawai terlambat' : 'Semua tepat waktu') }}"></span>
+                                    </div>
+
+                                    <!-- 2 Zona: Waspada (Kuning) & Kritis (Merah) -->
+                                    <div class="space-y-1 text-[10px] mt-auto">
+                                        <!-- Zona Waspada (Kuning) -->
+                                        <div class="flex items-center justify-between text-amber-600 dark:text-amber-450" title="Zona Waspada: {{ $stat['waspada_staff_count'] }} pegawai pernah terlambat <= 07:25 / ada izin disetujui">
+                                            <span class="flex items-center gap-1.5">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                                <span class="text-[9px] font-bold">Terlambat</span>
+                                            </span>
+                                            <span class="font-mono font-black text-[10.5px]">{{ $stat['waspada_staff_count'] }} <span class="text-[8px] font-normal text-slate-400">org</span></span>
+                                        </div>
+
+                                        <!-- Zona Kritis (Merah) -->
+                                        <div class="flex items-center justify-between text-rose-600 dark:text-rose-450" title="Zona Kritis: {{ $stat['kritis_staff_count'] }} pegawai pernah terlambat > 07:25 tanpa izin disetujui">
+                                            <span class="flex items-center gap-1.5">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
+                                                <span class="text-[9px] font-bold">Kritis</span>
+                                            </span>
+                                            <span class="font-mono font-black text-[10.5px]">{{ $stat['kritis_staff_count'] }} <span class="text-[8px] font-normal text-slate-400">org</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+        </div>
 
         <!-- ZONA KATEGORI FILTER CARDS -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full text-left">
@@ -389,9 +445,14 @@
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                                 🟢 Hadir Penuh ({{ $rep['total_present'] }} Hari)
                                             </span>
-                                            @if(($rep['total_late_minutes'] ?? 0) > 0)
+                                            @if(($rep['waspada_late_count'] ?? 0) > 0)
                                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30">
-                                                    Terlambat: {{ $rep['total_late_minutes'] }} mnt ({{ $rep['late_count'] }}x)
+                                                    Terlambat: {{ $rep['waspada_late_count'] }}x
+                                                </span>
+                                            @endif
+                                            @if(($rep['kritis_late_count'] ?? 0) > 0)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-450 border border-rose-200/30 dark:border-rose-900/30">
+                                                    Mengkhawatirkan: {{ $rep['kritis_late_count'] }}x
                                                 </span>
                                             @endif
                                         @else
@@ -400,9 +461,14 @@
                                                     Hadir: {{ $rep['total_present'] }}
                                                 </span>
                                             @endif
-                                            @if(($rep['total_late_minutes'] ?? 0) > 0)
+                                            @if(($rep['waspada_late_count'] ?? 0) > 0)
                                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30">
-                                                    Terlambat: {{ $rep['total_late_minutes'] }} mnt ({{ $rep['late_count'] }}x)
+                                                    Terlambat: {{ $rep['waspada_late_count'] }}x
+                                                </span>
+                                            @endif
+                                            @if(($rep['kritis_late_count'] ?? 0) > 0)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-450 border border-rose-200/30 dark:border-rose-900/30">
+                                                    Mengkhawatirkan: {{ $rep['kritis_late_count'] }}x
                                                 </span>
                                             @endif
                                             @if($rep['total_sakit'] > 0)

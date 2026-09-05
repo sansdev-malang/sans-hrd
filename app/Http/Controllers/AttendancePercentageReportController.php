@@ -206,6 +206,8 @@ class AttendancePercentageReportController extends Controller
             $totalAbsent = 0;
             $totalLateMinutes = 0;
             $lateCount = 0;
+            $waspadaLateCount = 0;
+            $kritisLateCount = 0;
 
             $sakitDates = [];
             $izinDates = [];
@@ -214,6 +216,8 @@ class AttendancePercentageReportController extends Controller
             $scanDates = [];
             $dinasDates = [];
             $lateDates = [];
+            $waspadaDates = [];
+            $kritisDates = [];
             $dayDetails = [];
 
             // Loop through each day of the month
@@ -318,6 +322,7 @@ class AttendancePercentageReportController extends Controller
 
                         // Calculate late minutes if shift start time is set
                         $dailyLateMinutes = 0;
+                        $dailyLateCategory = null;
                         if ($shiftStartTime) {
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
                             if ($firstLogCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
@@ -325,6 +330,32 @@ class AttendancePercentageReportController extends Controller
                                 $totalLateMinutes += $dailyLateMinutes;
                                 $lateCount++;
                                 $lateDates[] = $currentDate->translatedFormat('d M');
+
+                                $empPosition = strtolower($emp['position'] ?? $emp['subject_position'] ?? '');
+                                $isShiftExempt = $isShiftWorker 
+                                    || str_contains($empPosition, 'keamanan') 
+                                    || str_contains($empPosition, 'satpam') 
+                                    || str_contains($empPosition, 'security') 
+                                    || str_contains($empPosition, 'mart') 
+                                    || str_contains($empPosition, 'toko') 
+                                    || str_contains($empPosition, 'salehmart');
+
+                                $isRedLate = false;
+                                if (!$isShiftExempt && $firstLogCarbon > Carbon::parse($dateStr . ' 07:25:00')->second(0)) {
+                                    if (!($activeLeave && $activeLeave->status === 'Approved')) {
+                                        $isRedLate = true;
+                                    }
+                                }
+
+                                if ($isRedLate) {
+                                    $dailyLateCategory = 'kritis';
+                                    $kritisLateCount++;
+                                    $kritisDates[] = $currentDate->translatedFormat('d M');
+                                } else {
+                                    $dailyLateCategory = 'waspada';
+                                    $waspadaLateCount++;
+                                    $waspadaDates[] = $currentDate->translatedFormat('d M');
+                                }
                             }
                         }
 
@@ -347,21 +378,23 @@ class AttendancePercentageReportController extends Controller
                         }
 
                         if ($dailyLateMinutes > 0) {
-                            $scanDetail .= " • Terlambat: {$dailyLateMinutes} mnt";
+                            $lateLabel = $dailyLateCategory === 'kritis' ? 'Mengkhawatirkan' : 'Terlambat';
+                            $scanDetail .= " • {$lateLabel}: {$dailyLateMinutes} mnt";
                         }
 
                         $dayDetails[] = [
                             'date' => $formattedDate,
                             'status' => 'Hadir',
-                            'label' => 'Hadir',
+                            'label' => $dailyLateCategory === 'kritis' ? 'Mengkhawatirkan' : ($dailyLateCategory === 'waspada' ? 'Terlambat' : 'Hadir'),
                             'detail' => $scanDetail,
                             'shift_name' => $shiftName,
                             'shift_schedule' => $shiftScheduleText,
                             'in_time' => $inTime,
                             'out_time' => $outTime,
                             'late_minutes' => $dailyLateMinutes,
+                            'late_category' => $dailyLateCategory,
                             'notes' => null,
-                            'color' => 'emerald'
+                            'color' => $dailyLateCategory === 'kritis' ? 'rose' : ($dailyLateCategory === 'waspada' ? 'amber' : 'emerald')
                         ];
                     } elseif ($activeLeave) {
                         $statusCode = $activeLeave->status_code;
@@ -500,6 +533,10 @@ class AttendancePercentageReportController extends Controller
                 'total_late_minutes' => $totalLateMinutes,
                 'late_count' => $lateCount,
                 'late_dates' => $lateDates,
+                'waspada_late_count' => $waspadaLateCount,
+                'waspada_dates' => $waspadaDates,
+                'kritis_late_count' => $kritisLateCount,
+                'kritis_dates' => $kritisDates,
                 'percentage' => $percentage,
                 'day_details' => $dayDetails,
             ];
@@ -546,6 +583,60 @@ class AttendancePercentageReportController extends Controller
             ],
         ];
 
+        // 1b. Calculate unit late statistics (Zona Waspada & Zona Kritis)
+        $unitLateStats = [
+            'paud' => [
+                'name' => 'PAUD',
+                'count' => 0,
+                'waspada_staff_count' => 0,
+                'kritis_staff_count' => 0,
+                'waspada_events' => 0,
+                'kritis_events' => 0,
+                'total_late_minutes' => 0,
+                'avg_late_minutes' => 0
+            ],
+            'sd' => [
+                'name' => 'SD (Reguler)',
+                'count' => 0,
+                'waspada_staff_count' => 0,
+                'kritis_staff_count' => 0,
+                'waspada_events' => 0,
+                'kritis_events' => 0,
+                'total_late_minutes' => 0,
+                'avg_late_minutes' => 0
+            ],
+            'smp' => [
+                'name' => 'SMP (Reguler)',
+                'count' => 0,
+                'waspada_staff_count' => 0,
+                'kritis_staff_count' => 0,
+                'waspada_events' => 0,
+                'kritis_events' => 0,
+                'total_late_minutes' => 0,
+                'avg_late_minutes' => 0
+            ],
+            'gpk' => [
+                'name' => 'GPK (SD-SMP)',
+                'count' => 0,
+                'waspada_staff_count' => 0,
+                'kritis_staff_count' => 0,
+                'waspada_events' => 0,
+                'kritis_events' => 0,
+                'total_late_minutes' => 0,
+                'avg_late_minutes' => 0
+            ],
+            'gpq' => [
+                'name' => 'GPQ (SD-SMP)',
+                'count' => 0,
+                'waspada_staff_count' => 0,
+                'kritis_staff_count' => 0,
+                'waspada_events' => 0,
+                'kritis_events' => 0,
+                'total_late_minutes' => 0,
+                'avg_late_minutes' => 0
+            ],
+        ];
+
         foreach ($allReports as $rep) {
             $pos = strtoupper(trim($rep['employee']['position'] ?? $rep['employee']['subject_position'] ?? ''));
             $uName = strtolower(trim($rep['employee']['unit_name'] ?? ''));
@@ -567,11 +658,30 @@ class AttendancePercentageReportController extends Controller
                 $unitStats[$category]['total_present'] += $rep['total_present'];
                 $unitStats[$category]['total_absent'] += $rep['total_absent'];
             }
+
+            if (isset($unitLateStats[$category])) {
+                $unitLateStats[$category]['count']++;
+                $unitLateStats[$category]['waspada_events'] += $rep['waspada_late_count'];
+                $unitLateStats[$category]['kritis_events'] += $rep['kritis_late_count'];
+                $unitLateStats[$category]['total_late_minutes'] += $rep['total_late_minutes'];
+                if ($rep['waspada_late_count'] > 0) {
+                    $unitLateStats[$category]['waspada_staff_count']++;
+                }
+                if ($rep['kritis_late_count'] > 0) {
+                    $unitLateStats[$category]['kritis_staff_count']++;
+                }
+            }
         }
 
         foreach ($unitStats as $k => &$v) {
             $totalActive = $v['total_present'] + $v['total_absent'];
             $v['average'] = $totalActive > 0 ? round(($v['total_present'] / $totalActive) * 100, 1) : 0;
+        }
+        unset($v);
+
+        foreach ($unitLateStats as $k => &$v) {
+            $totalLateEvents = $v['waspada_events'] + $v['kritis_events'];
+            $v['avg_late_minutes'] = $totalLateEvents > 0 ? round($v['total_late_minutes'] / $totalLateEvents, 1) : 0;
         }
         unset($v);
 
@@ -642,6 +752,7 @@ class AttendancePercentageReportController extends Controller
             'startDateReq',
             'endDateReq',
             'unitStats',
+            'unitLateStats',
             'positions',
             'selectedPositions'
         ));
