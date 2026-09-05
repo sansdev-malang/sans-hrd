@@ -52,8 +52,9 @@
                     <select name="status" onchange="triggerFilterForm(this)" 
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Status</option>
-                        <option value="Hadir" {{ request('status') === 'Hadir' ? 'selected' : '' }}>Hadir</option>
+                        <option value="Tepat waktu" {{ in_array(request('status'), ['Tepat waktu', 'Hadir']) ? 'selected' : '' }}>Tepat waktu</option>
                         <option value="Terlambat" {{ request('status') === 'Terlambat' ? 'selected' : '' }}>Terlambat</option>
+                        <option value="Mengkhawatirkan" {{ request('status') === 'Mengkhawatirkan' ? 'selected' : '' }}>Mengkhawatirkan</option>
                         <option value="Alfa" {{ request('status') === 'Alfa' ? 'selected' : '' }}>Alfa</option>
                         <option value="Sakit" {{ request('status') === 'Sakit' ? 'selected' : '' }}>Sakit</option>
                         <option value="Izin" {{ request('status') === 'Izin' ? 'selected' : '' }}>Izin</option>
@@ -162,7 +163,16 @@
                                 </td>
                                 <td class="px-4 py-3 text-center font-mono font-medium">
                                     @if($row['check_in'])
-                                        <span class="text-slate-800 dark:text-slate-200">{{ $row['check_in'] }}</span>
+                                        @php
+                                            $isApprovedLate = ($row['status'] === 'Terlambat' && !empty($row['leave_status']) && $row['leave_status'] === 'Approved');
+                                            $checkInColor = match($row['status']) {
+                                                'Tepat waktu', 'Hadir' => 'text-emerald-600 dark:text-emerald-400 font-bold',
+                                                'Terlambat' => $isApprovedLate ? 'text-sky-600 dark:text-sky-400 font-bold' : 'text-amber-600 dark:text-amber-500 font-bold',
+                                                'Mengkhawatirkan' => 'text-rose-600 dark:text-rose-400 font-bold',
+                                                default => 'text-slate-800 dark:text-slate-200 font-medium',
+                                            };
+                                        @endphp
+                                        <span class="{{ $checkInColor }}">{{ $row['check_in'] }}</span>
                                     @else
                                         <span class="text-slate-300 dark:text-slate-650">-</span>
                                     @endif
@@ -176,9 +186,13 @@
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     @php
+                                        $isApprovedLate = ($row['status'] === 'Terlambat' && !empty($row['leave_status']) && $row['leave_status'] === 'Approved');
                                         $statusClass = match($row['status']) {
-                                            'Hadir' => 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-450 border-emerald-250 dark:border-emerald-800/40',
-                                            'Terlambat' => 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-500 border-amber-200 dark:border-amber-900/30',
+                                            'Tepat waktu', 'Hadir' => 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-450 border-emerald-250 dark:border-emerald-800/40',
+                                            'Terlambat' => $isApprovedLate 
+                                                ? 'bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-800/40' 
+                                                : 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-500 border-amber-200 dark:border-amber-900/30',
+                                            'Mengkhawatirkan' => 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-450 border-rose-250 dark:border-rose-900/40',
                                             'Alfa' => 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-450 border-rose-250 dark:border-rose-900/40',
                                             'Sakit' => 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-450 border-red-200 dark:border-red-900/40',
                                             'Izin' => 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-450 border-orange-200 dark:border-orange-900/30',
@@ -190,15 +204,38 @@
                                             default => 'bg-slate-50 text-slate-500 border-slate-200',
                                         };
                                     @endphp
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
-                                        {{ $row['status'] === 'Libur' ? 'OFF' : $row['status'] }}
-                                    </span>
+                                    <div class="inline-flex flex-col items-center justify-center gap-0.5">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
+                                            {{ $row['status'] === 'Libur' ? 'OFF' : $row['status'] }}
+                                        </span>
+                                        @if(($row['status'] === 'Terlambat' || $row['status'] === 'Mengkhawatirkan') && $row['late_minutes'] > 0)
+                                            @php
+                                                $lateTextColor = match($row['status']) {
+                                                    'Mengkhawatirkan' => 'text-rose-600 dark:text-rose-400 font-bold',
+                                                    'Terlambat' => $isApprovedLate ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-amber-600 dark:text-amber-500 font-semibold',
+                                                    default => 'text-slate-600 dark:text-slate-400',
+                                                };
+                                            @endphp
+                                            <span class="text-[10px] tracking-tight {{ $lateTextColor }}">
+                                                +{{ $row['late_minutes'] }} mnt
+                                            </span>
+                                        @endif
+                                        @if(!empty($row['leave_status']) && in_array($row['status'], ['Izin', 'Sakit', 'Cuti', 'Dinas', 'Terlambat', 'Mengkhawatirkan', 'Tepat waktu']))
+                                            @if($row['leave_status'] === 'Approved')
+                                                <span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                                    <i data-lucide="check" class="w-2.5 h-2.5"></i>Disetujui
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-amber-600 dark:text-amber-500">
+                                                    <i data-lucide="clock" class="w-2.5 h-2.5"></i>Pending
+                                                </span>
+                                            @endif
+                                        @endif
+                                    </div>
                                 </td>
-                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400 max-w-xs truncate">
-                                    @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
-                                        <span class="text-amber-600 dark:text-amber-500 font-semibold">Terlambat {{ $row['late_minutes'] }} menit</span>
-                                    @elseif($row['notes'])
-                                        <span class="font-medium">{{ $row['notes'] }}</span>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400 max-w-xs">
+                                    @if(!empty($row['notes']) && $row['notes'] !== '-')
+                                        <span class="font-medium text-slate-700 dark:text-slate-300 break-words line-clamp-2" title="{{ $row['notes'] }}">{{ $row['notes'] }}</span>
                                     @else
                                         <span class="text-slate-300 dark:text-slate-700 font-mono">-</span>
                                     @endif
@@ -220,17 +257,16 @@
             </div>
 
             <!-- PAGINATION FOOTER -->
-            <!-- PAGINATION FOOTER -->
-            @if($paginatedHistory->hasPages())
-                <div class="px-4 py-3 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between">
-                    <div class="flex-1 flex justify-between sm:hidden">
-                        {{ $paginatedHistory->links('pagination::simple-tailwind') }}
+            <div class="px-4 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
+                @if($paginatedHistory->hasPages())
+                    {{ $paginatedHistory->links('pagination::tailwind') }}
+                @else
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+                        <span>Menampilkan <strong>{{ $paginatedHistory->total() > 0 ? 1 : 0 }}</strong> sampai <strong>{{ $paginatedHistory->total() }}</strong> dari <strong>{{ $paginatedHistory->total() }}</strong> hasil</span>
+                        <span class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">(Halaman 1 dari 1)</span>
                     </div>
-                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-end">
-                        {{ $paginatedHistory->links('pagination::tailwind') }}
-                    </div>
-                </div>
-            @endif
+                @endif
+            </div>
         </section>
         </div>
 

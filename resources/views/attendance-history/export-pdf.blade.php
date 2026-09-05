@@ -58,6 +58,8 @@
         
         .cell-hadir { color: #047857; background-color: #ecfdf5; font-weight: bold; text-align: center; }
         .cell-terlambat { color: #b45309; background-color: #fffbeb; font-weight: bold; text-align: center; }
+        .cell-terlambat-izin { color: #0284c7; background-color: #f0f9ff; font-weight: bold; text-align: center; }
+        .cell-mengkhawatirkan { color: #be123c; background-color: #fff1f2; font-weight: bold; text-align: center; }
         .cell-alfa { color: #be123c; background-color: #fff1f2; font-weight: bold; text-align: center; }
         .cell-sakit { color: #b91c1c; background-color: #fef2f2; font-weight: bold; text-align: center; }
         .cell-izin { color: #c2410c; background-color: #fff7ed; font-weight: bold; text-align: center; }
@@ -73,9 +75,8 @@
     </style>
 </head>
 <body>
-
-    <h2>Laporan Riwayat Kehadiran Pegawai</h2>
-    <div class="subtitle">
+    <div class="header">
+        <h2>REKAPITULASI RIWAYAT KEHADIRAN PEGAWAI</h2>
         Periode Laporan: {{ $periodeStr }} <br>
         Dicetak pada: {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('d F Y H:i') }} WIB
     </div>
@@ -118,12 +119,22 @@
                                 @endif
                             @endif
                         </td>
-                        <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_in'] ?: '-' }}</td>
+                        @php
+                            $isApprovedLate = ($row['status'] === 'Terlambat' && !empty($row['leave_status']) && $row['leave_status'] === 'Approved');
+                            $checkInColor = match($row['status']) {
+                                'Tepat waktu', 'Hadir' => 'color: #059669;',
+                                'Terlambat' => $isApprovedLate ? 'color: #0284c7;' : 'color: #d97706;',
+                                'Mengkhawatirkan' => 'color: #e11d48;',
+                                default => 'color: #1e293b;',
+                            };
+                        @endphp
+                        <td class="text-center font-bold" style="font-family: monospace; {{ $row['check_in'] ? $checkInColor : '' }}">{{ $row['check_in'] ?: '-' }}</td>
                         <td class="text-center font-bold" style="font-family: monospace;">{{ $row['check_out'] ?: '-' }}</td>
                         @php
                             $cellClass = match($row['status']) {
-                                'Hadir' => 'cell-hadir',
-                                'Terlambat' => 'cell-terlambat',
+                                'Tepat waktu', 'Hadir' => 'cell-hadir',
+                                'Terlambat' => $isApprovedLate ? 'cell-terlambat-izin' : 'cell-terlambat',
+                                'Mengkhawatirkan' => 'cell-mengkhawatirkan',
                                 'Alfa' => 'cell-alfa',
                                 'Sakit' => 'cell-sakit',
                                 'Izin' => 'cell-izin',
@@ -135,11 +146,17 @@
                                 default => 'cell-off',
                             };
                         @endphp
-                        <td class="{{ $cellClass }}">{{ $row['status'] === 'Libur' ? 'OFF' : $row['status'] }}</td>
+                        <td class="{{ $cellClass }}">
+                            {{ $row['status'] === 'Libur' ? 'OFF' : $row['status'] }}
+                            @if(($row['status'] === 'Terlambat' || $row['status'] === 'Mengkhawatirkan') && $row['late_minutes'] > 0)
+                                <br><span style="font-size: 7px; font-weight: bold;">+{{ $row['late_minutes'] }} mnt</span>
+                            @endif
+                            @if(!empty($row['leave_status']) && in_array($row['status'], ['Izin', 'Sakit', 'Cuti', 'Dinas', 'Terlambat', 'Mengkhawatirkan', 'Tepat waktu']))
+                                <br><span style="font-size: 7px; font-weight: bold; color: {{ $row['leave_status'] === 'Approved' ? '#059669' : '#d97706' }};">({{ $row['leave_status'] === 'Approved' ? 'Disetujui' : 'Pending' }})</span>
+                            @endif
+                        </td>
                         <td>
-                            @if($row['status'] === 'Terlambat' && $row['late_minutes'] > 0)
-                                <span style="color: #b45309; font-weight: bold;">Terlambat {{ $row['late_minutes'] }} mnt</span>
-                            @elseif($row['notes'])
+                            @if(!empty($row['notes']) && $row['notes'] !== '-')
                                 <span>{{ $row['notes'] }}</span>
                             @else
                                 <span class="text-muted">-</span>

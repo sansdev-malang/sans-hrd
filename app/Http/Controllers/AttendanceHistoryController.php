@@ -131,16 +131,27 @@ class AttendanceHistoryController extends Controller
             }
         }
 
-        // 2. Fetch approved leaves
+        // 2. Fetch approved and pending leaves
         $leavesData = LeaveRequest::whereIn('employee_id', $employeeIds)
-            ->where('status', 'Approved')
+            ->whereIn('status', ['Approved', 'Pending'])
             ->where(function($q) use ($startDate, $endDate) {
                 $q->where('start_date', '<=', $endDate->format('Y-m-d'))
                   ->where('end_date', '>=', $startDate->format('Y-m-d'));
             })
             ->get()
             ->groupBy(function($leave) {
-                return $leave->school_unit_id . '_' . $leave->employee_id;
+                return ($leave->school_unit_id ?: '') . '_' . $leave->employee_id;
+            })
+            ->map(function($group) {
+                return $group->sort(function($a, $b) {
+                    $statusOrder = ['Approved' => 1, 'Pending' => 2, 'Rejected' => 3];
+                    $orderA = $statusOrder[$a->status] ?? 4;
+                    $orderB = $statusOrder[$b->status] ?? 4;
+                    if ($orderA !== $orderB) {
+                        return $orderA <=> $orderB;
+                    }
+                    return $b->id <=> $a->id;
+                });
             });
 
         $shiftsMonthStart = $startDate->copy()->startOfMonth()->format('Y-m-d');
@@ -211,24 +222,30 @@ class AttendanceHistoryController extends Controller
                 $getsBonus = false;
                 $statusCode = null;
                 $leaveReason = '';
+                $leaveApprovalStatus = null;
                 $leaveKey = $unit . '_' . $empId;
-                if (isset($leavesData[$leaveKey])) {
-                    foreach ($leavesData[$leaveKey] as $leave) {
-                        $leaveStart = substr($leave->start_date, 0, 10);
-                        $leaveEnd = substr($leave->end_date, 0, 10);
-                        if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
-                            $isOnLeave = true;
-                            $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
-                            $statusCode = $leave->status_code;
-                            $leaveReason = $leave->notes ?? $leave->reason ?? 'Izin disetujui';
-                            if (!$statusCode) {
-                                if ($leave->type_name === 'Sakit') $statusCode = 'S';
-                                elseif ($leave->type_name === 'Cuti') $statusCode = 'C';
-                                elseif ($leave->type_name === 'Dinas') $statusCode = 'H';
-                                else $statusCode = 'I';
-                            }
-                            break;
+                $fallbackLeaveKey = '_' . $empId;
+                $empLeaves = $leavesData->get($leaveKey) ?? $leavesData->get($fallbackLeaveKey) ?? [];
+                foreach ($empLeaves as $leave) {
+                    $leaveStart = $leave->start_date instanceof \Carbon\Carbon ? $leave->start_date->format('Y-m-d') : substr((string)$leave->start_date, 0, 10);
+                    $leaveEnd = $leave->end_date instanceof \Carbon\Carbon ? $leave->end_date->format('Y-m-d') : substr((string)$leave->end_date, 0, 10);
+                    if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
+                        $isOnLeave = true;
+                        $leaveApprovalStatus = $leave->status;
+                        $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
+                        $statusCode = $leave->status_code;
+                        $leaveReason = !empty($leave->reason) && $leave->reason !== '-' 
+                            ? $leave->reason 
+                            : (!empty($leave->notes) && $leave->notes !== '-' 
+                                ? $leave->notes 
+                                : (!empty($leave->type) ? $leave->type : ($leave->type_name ?? 'Izin')));
+                        if (!$statusCode) {
+                            if ($leave->type_name === 'Sakit' || str_contains(strtolower($leave->type ?? ''), 'sakit')) $statusCode = 'S';
+                            elseif ($leave->type_name === 'Cuti' || str_contains(strtolower($leave->type ?? ''), 'cuti')) $statusCode = 'C';
+                            elseif ($leave->type_name === 'Dinas' || str_contains(strtolower($leave->type ?? ''), 'dinas') || str_contains(strtolower($leave->type ?? ''), 'kedinasan')) $statusCode = 'H';
+                            else $statusCode = 'I';
                         }
+                        break;
                     }
                 }
 
@@ -457,12 +474,13 @@ class AttendanceHistoryController extends Controller
                     'status' => 'Off',
                     'late_minutes' => 0,
                     'notes' => '',
+                    'leave_status' => $isOnLeave ? $leaveApprovalStatus : null,
                 ];
 
                 // Status determination
                 if ($isHoliday && !$isShiftWorker) {
                     if ($checkInLog) {
-                        $record['status'] = 'Hadir';
+                        $record['status'] = 'Tepat waktu';
                         $record['notes'] = 'Masuk di Hari Libur';
                     } else {
                         $record['status'] = 'Libur';
@@ -472,17 +490,43 @@ class AttendanceHistoryController extends Controller
                     if ($hasShiftToday) {
                         if ($checkInLog || $checkOutLog) {
                             $isLate = false;
+                            $isRedLate = false;
                             $lateMinutes = 0;
                             if ($checkInLog && $shiftStartTime) {
                                 $checkInTime = Carbon::parse($checkInLog)->second(0);
                                 $expectedInTime = Carbon::parse($dateStr . ' ' . $shiftStartTime)->second(0);
                                 if ($checkInTime > $expectedInTime) {
                                     $isLate = true;
-                                    $lateMinutes = $checkInTime->diffInMinutes($expectedInTime);
+                                    $lateMinutes = (int) abs($checkInTime->diffInMinutes($expectedInTime));
+                                }
+
+                                $empPosition = strtolower($emp['position'] ?? $emp['subject_position'] ?? '');
+                                $isShiftExempt = $isShiftWorker 
+                                    || $matchedRosterAssignment
+                                    || str_contains($empPosition, 'keamanan') 
+                                    || str_contains($empPosition, 'satpam') 
+                                    || str_contains($empPosition, 'security') 
+                                    || str_contains($empPosition, 'mart') 
+                                    || str_contains($empPosition, 'toko') 
+                                    || str_contains($empPosition, 'salehmart');
+
+                                if (!$isShiftExempt && $checkInTime > Carbon::parse($dateStr . ' 07:25:00')->second(0)) {
+                                    if (!($isOnLeave && $leaveApprovalStatus === 'Approved')) {
+                                        $isRedLate = true;
+                                    }
                                 }
                             }
                             $record['late_minutes'] = $lateMinutes;
-                            $record['status'] = $isLate ? 'Terlambat' : 'Hadir';
+                            if ($isRedLate) {
+                                $record['status'] = 'Mengkhawatirkan';
+                            } elseif ($isLate) {
+                                $record['status'] = 'Terlambat';
+                            } else {
+                                $record['status'] = 'Tepat waktu';
+                            }
+                            if ($isOnLeave) {
+                                $record['notes'] = $leaveReason;
+                            }
                         } elseif ($isOnLeave) {
                             if ($statusCode === 'S') {
                                 $record['status'] = 'Sakit';
@@ -505,18 +549,42 @@ class AttendanceHistoryController extends Controller
                         }
                     } elseif ($isOffShift) {
                         if ($checkInLog) {
-                            $record['status'] = 'Hadir';
+                            $record['status'] = 'Tepat waktu';
                             $record['notes'] = ($isShiftWorker || $matchedRosterAssignment) ? 'Masuk Kerja' : 'Masuk di Hari Libur Pekan';
                         } else {
-                            $record['status'] = 'Off';
-                            $record['notes'] = 'Jadwal Libur';
+                            if ($isOnLeave) {
+                                if ($statusCode === 'S') {
+                                    $record['status'] = 'Sakit';
+                                } elseif ($statusCode === 'C') {
+                                    $record['status'] = 'Cuti';
+                                } elseif ($statusCode === 'H' || $getsBonus) {
+                                    $record['status'] = 'Dinas';
+                                } else {
+                                    $record['status'] = 'Izin';
+                                }
+                                $record['notes'] = $leaveReason;
+                            } else {
+                                $record['status'] = 'Off';
+                                $record['notes'] = 'Jadwal Libur';
+                            }
                         }
                     } else {
                         if ($checkInLog) {
-                            $record['status'] = 'Hadir';
+                            $record['status'] = 'Tepat waktu';
                             $record['notes'] = 'Masuk Kerja';
                         } else {
-                            if ($dayOfWeek == 0) {
+                            if ($isOnLeave) {
+                                if ($statusCode === 'S') {
+                                    $record['status'] = 'Sakit';
+                                } elseif ($statusCode === 'C') {
+                                    $record['status'] = 'Cuti';
+                                } elseif ($statusCode === 'H' || $getsBonus) {
+                                    $record['status'] = 'Dinas';
+                                } else {
+                                    $record['status'] = 'Izin';
+                                }
+                                $record['notes'] = $leaveReason;
+                            } elseif ($dayOfWeek == 0) {
                                 $record['status'] = 'Libur';
                                 $record['notes'] = 'Hari Minggu (Non-Shift)';
                             } else {
@@ -526,25 +594,51 @@ class AttendanceHistoryController extends Controller
                     }
                 } elseif ($isOffShift) {
                     if ($checkInLog) {
-                        $record['status'] = 'Hadir';
+                        $record['status'] = 'Tepat waktu';
                         $record['notes'] = ($isShiftWorker || $matchedRosterAssignment) ? 'Masuk Kerja' : 'Masuk di Hari Libur Pekan';
                     } else {
-                        $record['status'] = 'Off';
-                        $record['notes'] = 'Jadwal Libur';
+                        if ($isOnLeave) {
+                            if ($statusCode === 'S') {
+                                $record['status'] = 'Sakit';
+                            } elseif ($statusCode === 'C') {
+                                $record['status'] = 'Cuti';
+                            } elseif ($statusCode === 'H' || $getsBonus) {
+                                $record['status'] = 'Dinas';
+                            } else {
+                                $record['status'] = 'Izin';
+                            }
+                            $record['notes'] = $leaveReason;
+                        } else {
+                            $record['status'] = 'Off';
+                            $record['notes'] = 'Jadwal Libur';
+                        }
                     }
                 } else {
                     // No shift/schedule assigned at all
                     if ($checkInLog) {
-                        $record['status'] = 'Hadir';
+                        $record['status'] = 'Tepat waktu';
                         $record['notes'] = 'Masuk Kerja (Tanpa Jadwal)';
                     } else {
-                        $record['status'] = '-';
-                        $record['notes'] = '-';
+                        if ($isOnLeave) {
+                            if ($statusCode === 'S') {
+                                $record['status'] = 'Sakit';
+                            } elseif ($statusCode === 'C') {
+                                $record['status'] = 'Cuti';
+                            } elseif ($statusCode === 'H' || $getsBonus) {
+                                $record['status'] = 'Dinas';
+                            } else {
+                                $record['status'] = 'Izin';
+                            }
+                            $record['notes'] = $leaveReason;
+                        } else {
+                            $record['status'] = '-';
+                            $record['notes'] = '-';
+                        }
                     }
                 }
 
-                // Override if leave is approved on working days
-                if ($isOnLeave && $hasShiftToday && ($record['status'] === 'Alfa' || $record['status'] === 'Pending')) {
+                // Override if leave is approved/pending on working days
+                if ($isOnLeave && ($record['status'] === 'Alfa' || $record['status'] === 'Pending')) {
                     if ($statusCode === 'S') {
                         $record['status'] = 'Sakit';
                     } elseif ($statusCode === 'C') {
@@ -555,6 +649,12 @@ class AttendanceHistoryController extends Controller
                         $record['status'] = 'Izin';
                     }
                     $record['notes'] = $leaveReason;
+                }
+
+                // Skip empty Libur/Off/- records if there is no actual attendance log and not on leave
+                if (in_array($record['status'], ['Libur', 'Off', '-']) && !$checkInLog && !$checkOutLog && !$isOnLeave) {
+                    $currentDate->addDay();
+                    continue;
                 }
 
                 $historyList[] = $record;
@@ -579,6 +679,9 @@ class AttendanceHistoryController extends Controller
         // Filter status
         if (!empty($selectedStatus)) {
             $historyList = array_filter($historyList, function ($item) use ($selectedStatus) {
+                if (strtolower($selectedStatus) === 'tepat waktu' || strtolower($selectedStatus) === 'hadir') {
+                    return in_array(strtolower($item['status']), ['tepat waktu', 'hadir']);
+                }
                 return strtolower($item['status']) === strtolower($selectedStatus);
             });
         }
@@ -684,16 +787,27 @@ class AttendanceHistoryController extends Controller
             }
         }
 
-        // 2. Fetch approved leaves
+        // 2. Fetch approved and pending leaves
         $leavesData = LeaveRequest::whereIn('employee_id', $employeeIds)
-            ->where('status', 'Approved')
+            ->whereIn('status', ['Approved', 'Pending'])
             ->where(function($q) use ($startDate, $endDate) {
                 $q->where('start_date', '<=', $endDate->format('Y-m-d'))
                   ->where('end_date', '>=', $startDate->format('Y-m-d'));
             })
             ->get()
             ->groupBy(function($leave) {
-                return $leave->school_unit_id . '_' . $leave->employee_id;
+                return ($leave->school_unit_id ?: '') . '_' . $leave->employee_id;
+            })
+            ->map(function($group) {
+                return $group->sort(function($a, $b) {
+                    $statusOrder = ['Approved' => 1, 'Pending' => 2, 'Rejected' => 3];
+                    $orderA = $statusOrder[$a->status] ?? 4;
+                    $orderB = $statusOrder[$b->status] ?? 4;
+                    if ($orderA !== $orderB) {
+                        return $orderA <=> $orderB;
+                    }
+                    return $b->id <=> $a->id;
+                });
             });
 
         $shiftsMonthStart = $startDate->copy()->startOfMonth()->format('Y-m-d');
@@ -755,30 +869,37 @@ class AttendanceHistoryController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeekIso;
 
-                $isHoliday = isset($unitHolidays[$unit][$dateStr]) ?? false;
+                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
+                $isHoliday = $unitHolidays[$empUnitKey][$dateStr] ?? false;
                 
                 $isOnLeave = false;
                 $getsBonus = false;
                 $statusCode = null;
                 $leaveReason = '';
+                $leaveApprovalStatus = null;
                 $leaveKey = $unit . '_' . $empId;
-                if (isset($leavesData[$leaveKey])) {
-                    foreach ($leavesData[$leaveKey] as $leave) {
-                        $leaveStart = substr($leave->start_date, 0, 10);
-                        $leaveEnd = substr($leave->end_date, 0, 10);
-                        if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
-                            $isOnLeave = true;
-                            $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
-                            $statusCode = $leave->status_code;
-                            $leaveReason = $leave->notes ?? $leave->reason ?? 'Izin disetujui';
-                            if (!$statusCode) {
-                                if ($leave->type_name === 'Sakit') $statusCode = 'S';
-                                elseif ($leave->type_name === 'Cuti') $statusCode = 'C';
-                                elseif ($leave->type_name === 'Dinas') $statusCode = 'H';
-                                else $statusCode = 'I';
-                            }
-                            break;
+                $fallbackLeaveKey = '_' . $empId;
+                $empLeaves = $leavesData->get($leaveKey) ?? $leavesData->get($fallbackLeaveKey) ?? [];
+                foreach ($empLeaves as $leave) {
+                    $leaveStart = $leave->start_date instanceof \Carbon\Carbon ? $leave->start_date->format('Y-m-d') : substr((string)$leave->start_date, 0, 10);
+                    $leaveEnd = $leave->end_date instanceof \Carbon\Carbon ? $leave->end_date->format('Y-m-d') : substr((string)$leave->end_date, 0, 10);
+                    if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
+                        $isOnLeave = true;
+                        $leaveApprovalStatus = $leave->status;
+                        $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
+                        $statusCode = $leave->status_code;
+                        $leaveReason = !empty($leave->reason) && $leave->reason !== '-' 
+                            ? $leave->reason 
+                            : (!empty($leave->notes) && $leave->notes !== '-' 
+                                ? $leave->notes 
+                                : (!empty($leave->type) ? $leave->type : ($leave->type_name ?? 'Izin')));
+                        if (!$statusCode) {
+                            if ($leave->type_name === 'Sakit' || str_contains(strtolower($leave->type ?? ''), 'sakit')) $statusCode = 'S';
+                            elseif ($leave->type_name === 'Cuti' || str_contains(strtolower($leave->type ?? ''), 'cuti')) $statusCode = 'C';
+                            elseif ($leave->type_name === 'Dinas' || str_contains(strtolower($leave->type ?? ''), 'dinas') || str_contains(strtolower($leave->type ?? ''), 'kedinasan')) $statusCode = 'H';
+                            else $statusCode = 'I';
                         }
+                        break;
                     }
                 }
 
@@ -1007,12 +1128,13 @@ class AttendanceHistoryController extends Controller
                     'status' => 'Off',
                     'late_minutes' => 0,
                     'notes' => '',
+                    'leave_status' => $isOnLeave ? $leaveApprovalStatus : null,
                 ];
 
                 // Status determination
                 if ($isHoliday) {
                     if ($checkInLog) {
-                        $record['status'] = 'Hadir';
+                        $record['status'] = 'Tepat waktu';
                         $record['notes'] = 'Masuk di Hari Libur';
                     } else {
                         $record['status'] = 'Libur';
@@ -1022,17 +1144,43 @@ class AttendanceHistoryController extends Controller
                     if ($hasShiftToday) {
                         if ($checkInLog || $checkOutLog) {
                             $isLate = false;
+                            $isRedLate = false;
                             $lateMinutes = 0;
                             if ($checkInLog && $shiftStartTime) {
                                 $checkInTime = Carbon::parse($checkInLog)->second(0);
                                 $expectedInTime = Carbon::parse($dateStr . ' ' . $shiftStartTime)->second(0);
                                 if ($checkInTime > $expectedInTime) {
                                     $isLate = true;
-                                    $lateMinutes = $checkInTime->diffInMinutes($expectedInTime);
+                                    $lateMinutes = (int) abs($checkInTime->diffInMinutes($expectedInTime));
+                                }
+
+                                $empPosition = strtolower($emp['position'] ?? $emp['subject_position'] ?? '');
+                                $isShiftExempt = $isShiftWorker 
+                                    || $matchedRosterAssignment
+                                    || str_contains($empPosition, 'keamanan') 
+                                    || str_contains($empPosition, 'satpam') 
+                                    || str_contains($empPosition, 'security') 
+                                    || str_contains($empPosition, 'mart') 
+                                    || str_contains($empPosition, 'toko') 
+                                    || str_contains($empPosition, 'salehmart');
+
+                                if (!$isShiftExempt && $checkInTime > Carbon::parse($dateStr . ' 07:25:00')->second(0)) {
+                                    if (!($isOnLeave && $leaveApprovalStatus === 'Approved')) {
+                                        $isRedLate = true;
+                                    }
                                 }
                             }
                             $record['late_minutes'] = $lateMinutes;
-                            $record['status'] = $isLate ? 'Terlambat' : 'Hadir';
+                            if ($isRedLate) {
+                                $record['status'] = 'Mengkhawatirkan';
+                            } elseif ($isLate) {
+                                $record['status'] = 'Terlambat';
+                            } else {
+                                $record['status'] = 'Tepat waktu';
+                            }
+                            if ($isOnLeave) {
+                                $record['notes'] = $leaveReason;
+                            }
                         } elseif ($isOnLeave) {
                             if ($statusCode === 'S') {
                                 $record['status'] = 'Sakit';
@@ -1055,18 +1203,42 @@ class AttendanceHistoryController extends Controller
                         }
                     } elseif ($isOffShift) {
                         if ($checkInLog) {
-                            $record['status'] = 'Hadir';
+                            $record['status'] = 'Tepat waktu';
                             $record['notes'] = ($isShiftWorker || $matchedRosterAssignment) ? 'Masuk Kerja' : 'Masuk di Hari Libur Pekan';
                         } else {
-                            $record['status'] = 'Off';
-                            $record['notes'] = 'Jadwal Libur';
+                            if ($isOnLeave) {
+                                if ($statusCode === 'S') {
+                                    $record['status'] = 'Sakit';
+                                } elseif ($statusCode === 'C') {
+                                    $record['status'] = 'Cuti';
+                                } elseif ($statusCode === 'H' || $getsBonus) {
+                                    $record['status'] = 'Dinas';
+                                } else {
+                                    $record['status'] = 'Izin';
+                                }
+                                $record['notes'] = $leaveReason;
+                            } else {
+                                $record['status'] = 'Off';
+                                $record['notes'] = 'Jadwal Libur';
+                            }
                         }
                     } else {
                         if ($checkInLog) {
-                            $record['status'] = 'Hadir';
+                            $record['status'] = 'Tepat waktu';
                             $record['notes'] = 'Masuk Kerja';
                         } else {
-                            if ($dayOfWeek == 0) {
+                            if ($isOnLeave) {
+                                if ($statusCode === 'S') {
+                                    $record['status'] = 'Sakit';
+                                } elseif ($statusCode === 'C') {
+                                    $record['status'] = 'Cuti';
+                                } elseif ($statusCode === 'H' || $getsBonus) {
+                                    $record['status'] = 'Dinas';
+                                } else {
+                                    $record['status'] = 'Izin';
+                                }
+                                $record['notes'] = $leaveReason;
+                            } elseif ($dayOfWeek == 0) {
                                 $record['status'] = 'Libur';
                                 $record['notes'] = 'Hari Minggu (Non-Shift)';
                             } else {
@@ -1076,25 +1248,51 @@ class AttendanceHistoryController extends Controller
                     }
                 } elseif ($isOffShift) {
                     if ($checkInLog) {
-                        $record['status'] = 'Hadir';
+                        $record['status'] = 'Tepat waktu';
                         $record['notes'] = ($isShiftWorker || $matchedRosterAssignment) ? 'Masuk Kerja' : 'Masuk di Hari Libur Pekan';
                     } else {
-                        $record['status'] = 'Off';
-                        $record['notes'] = 'Jadwal Libur';
+                        if ($isOnLeave) {
+                            if ($statusCode === 'S') {
+                                $record['status'] = 'Sakit';
+                            } elseif ($statusCode === 'C') {
+                                $record['status'] = 'Cuti';
+                            } elseif ($statusCode === 'H' || $getsBonus) {
+                                $record['status'] = 'Dinas';
+                            } else {
+                                $record['status'] = 'Izin';
+                            }
+                            $record['notes'] = $leaveReason;
+                        } else {
+                            $record['status'] = 'Off';
+                            $record['notes'] = 'Jadwal Libur';
+                        }
                     }
                 } else {
                     // No shift/schedule assigned at all
                     if ($checkInLog) {
-                        $record['status'] = 'Hadir';
+                        $record['status'] = 'Tepat waktu';
                         $record['notes'] = 'Masuk Kerja (Tanpa Jadwal)';
                     } else {
-                        $record['status'] = '-';
-                        $record['notes'] = '-';
+                        if ($isOnLeave) {
+                            if ($statusCode === 'S') {
+                                $record['status'] = 'Sakit';
+                            } elseif ($statusCode === 'C') {
+                                $record['status'] = 'Cuti';
+                            } elseif ($statusCode === 'H' || $getsBonus) {
+                                $record['status'] = 'Dinas';
+                            } else {
+                                $record['status'] = 'Izin';
+                            }
+                            $record['notes'] = $leaveReason;
+                        } else {
+                            $record['status'] = '-';
+                            $record['notes'] = '-';
+                        }
                     }
                 }
 
-                // Override if leave is approved on working days
-                if ($isOnLeave && $hasShiftToday && ($record['status'] === 'Alfa' || $record['status'] === 'Pending')) {
+                // Override if leave is approved/pending on working days
+                if ($isOnLeave && ($record['status'] === 'Alfa' || $record['status'] === 'Pending')) {
                     if ($statusCode === 'S') {
                         $record['status'] = 'Sakit';
                     } elseif ($statusCode === 'C') {
@@ -1105,6 +1303,12 @@ class AttendanceHistoryController extends Controller
                         $record['status'] = 'Izin';
                     }
                     $record['notes'] = $leaveReason;
+                }
+
+                // Skip empty Libur/Off/- records if there is no actual attendance log and not on leave
+                if (in_array($record['status'], ['Libur', 'Off', '-']) && !$checkInLog && !$checkOutLog && !$isOnLeave) {
+                    $currentDate->addDay();
+                    continue;
                 }
 
                 $historyList[] = $record;
@@ -1129,6 +1333,9 @@ class AttendanceHistoryController extends Controller
         // Filter status
         if (!empty($selectedStatus)) {
             $historyList = array_filter($historyList, function ($item) use ($selectedStatus) {
+                if (strtolower($selectedStatus) === 'tepat waktu' || strtolower($selectedStatus) === 'hadir') {
+                    return in_array(strtolower($item['status']), ['tepat waktu', 'hadir']);
+                }
                 return strtolower($item['status']) === strtolower($selectedStatus);
             });
         }
@@ -1146,50 +1353,112 @@ class AttendanceHistoryController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Riwayat Kehadiran');
 
-        // Headers
-        $sheet->setCellValue('A1', 'NO');
-        $sheet->setCellValue('B1', 'NAMA PEGAWAI');
-        $sheet->setCellValue('C1', 'NIP/NUPTK');
-        $sheet->setCellValue('D1', 'UNIT');
-        $sheet->setCellValue('E1', 'JABATAN');
-        $sheet->setCellValue('F1', 'HARI & TANGGAL');
-        $sheet->setCellValue('G1', 'SHIFT KERJA');
-        $sheet->setCellValue('H1', 'JAM MASUK SHIFT');
-        $sheet->setCellValue('I1', 'JAM KELUAR SHIFT');
-        $sheet->setCellValue('J1', 'JAM MASUK AKTUAL');
-        $sheet->setCellValue('K1', 'JAM KELUAR AKTUAL');
-        $sheet->setCellValue('L1', 'STATUS');
-        $sheet->setCellValue('M1', 'KETERLAMBATAN (MENIT)');
-        $sheet->setCellValue('N1', 'KETERANGAN / CATATAN');
+        // Headers (without NIP/NUPTK column)
+        $headers = [
+            'A1' => 'NO',
+            'B1' => 'NAMA PEGAWAI',
+            'C1' => 'UNIT',
+            'D1' => 'JABATAN',
+            'E1' => 'HARI & TANGGAL',
+            'F1' => 'SHIFT KERJA',
+            'G1' => 'JAM MASUK SHIFT',
+            'H1' => 'JAM KELUAR SHIFT',
+            'I1' => 'JAM MASUK AKTUAL',
+            'J1' => 'JAM KELUAR AKTUAL',
+            'K1' => 'STATUS',
+            'L1' => 'KETERLAMBATAN (MENIT)',
+            'M1' => 'KETERANGAN / CATATAN',
+        ];
+
+        foreach ($headers as $cell => $val) {
+            $sheet->setCellValue($cell, $val);
+        }
 
         // Styling headers
-        $headerRange = 'A1:N1';
-        $sheet->getStyle($headerRange)->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $headerRange = 'A1:M1';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true)->setSize(10)->getColor()->setRGB('FFFFFF');
+        $sheet->getStyle($headerRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('1E293B');
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(1)->setRowHeight(26);
         
         $rowIdx = 2;
         $no = 1;
         foreach ($historyList as $item) {
             $sheet->setCellValue('A' . $rowIdx, $no++);
             $sheet->setCellValue('B' . $rowIdx, $item['employee_name']);
-            $sheet->setCellValue('C' . $rowIdx, $item['employee_nip'] . ' ');
-            $sheet->setCellValue('D' . $rowIdx, $item['unit_name']);
-            $sheet->setCellValue('E' . $rowIdx, $item['position']);
-            $sheet->setCellValue('F' . $rowIdx, $item['date_formatted']);
-            $sheet->setCellValue('G' . $rowIdx, $item['shift_name']);
-            $sheet->setCellValue('H' . $rowIdx, $item['shift_start'] ?? '-');
-            $sheet->setCellValue('I' . $rowIdx, $item['shift_end'] ?? '-');
-            $sheet->setCellValue('J' . $rowIdx, $item['check_in'] ?? '-');
-            $sheet->setCellValue('K' . $rowIdx, $item['check_out'] ?? '-');
-            $sheet->setCellValue('L' . $rowIdx, $item['status'] === 'Libur' ? 'OFF' : $item['status']);
-            $sheet->setCellValue('M' . $rowIdx, $item['late_minutes'] > 0 ? $item['late_minutes'] : 0);
-            $sheet->setCellValue('N' . $rowIdx, $item['notes'] ?? '');
+            $sheet->setCellValue('C' . $rowIdx, $item['unit_name']);
+            $sheet->setCellValue('D' . $rowIdx, $item['position']);
+            $sheet->setCellValue('E' . $rowIdx, $item['date_formatted']);
+            $sheet->setCellValue('F' . $rowIdx, $item['shift_name']);
+            $sheet->setCellValue('G' . $rowIdx, $item['shift_start'] ?? '-');
+            $sheet->setCellValue('H' . $rowIdx, $item['shift_end'] ?? '-');
+            $sheet->setCellValue('I' . $rowIdx, $item['check_in'] ?? '-');
+            $sheet->setCellValue('J' . $rowIdx, $item['check_out'] ?? '-');
             
+            // Status text determination
+            $statusText = $item['status'] === 'Libur' ? 'OFF' : $item['status'];
+            if (!empty($item['leave_status']) && in_array($item['status'], ['Izin', 'Sakit', 'Cuti', 'Dinas', 'Terlambat', 'Mengkhawatirkan', 'Tepat waktu'])) {
+                $statusText .= ' (' . ($item['leave_status'] === 'Approved' ? 'Disetujui' : 'Pending') . ')';
+            }
+            $sheet->setCellValue('K' . $rowIdx, $statusText);
+            $sheet->setCellValue('L' . $rowIdx, $item['late_minutes'] > 0 ? $item['late_minutes'] : 0);
+            $sheet->setCellValue('M' . $rowIdx, $item['notes'] ?? '');
+            
+            // Row styling
+            $sheet->getRowDimension($rowIdx)->setRowHeight(20);
+            $isApprovedLate = ($item['status'] === 'Terlambat' && !empty($item['leave_status']) && $item['leave_status'] === 'Approved');
+
+            // Jam Masuk Color
+            if ($item['check_in']) {
+                $inColor = match($item['status']) {
+                    'Tepat waktu', 'Hadir' => '059669',
+                    'Terlambat' => $isApprovedLate ? '0284C7' : 'D97706',
+                    'Mengkhawatirkan' => 'E11D48',
+                    default => '1E293B',
+                };
+                $sheet->getStyle('I' . $rowIdx)->getFont()->setBold(true)->getColor()->setRGB($inColor);
+            }
+
+            // Status Cell Color & Background
+            $statusStyle = match($item['status']) {
+                'Tepat waktu', 'Hadir' => ['bg' => 'ECFDF5', 'color' => '047857'],
+                'Terlambat' => $isApprovedLate ? ['bg' => 'F0F9FF', 'color' => '0284C7'] : ['bg' => 'FFFBEB', 'color' => 'B45309'],
+                'Mengkhawatirkan' => ['bg' => 'FFF1F2', 'color' => 'BE123C'],
+                'Alfa' => ['bg' => 'FFF1F2', 'color' => 'BE123C'],
+                'Sakit' => ['bg' => 'FEF2F2', 'color' => 'B91C1C'],
+                'Izin' => ['bg' => 'FFF7ED', 'color' => 'C2410C'],
+                'Cuti' => ['bg' => 'EFF6FF', 'color' => '1D4ED8'],
+                'Dinas' => ['bg' => 'EEF2FF', 'color' => '4338CA'],
+                'Off' => ['bg' => 'F8FAFC', 'color' => '64748B'],
+                'Libur' => ['bg' => 'F3F4F6', 'color' => '4B5563'],
+                default => ['bg' => 'FFFFFF', 'color' => '1E293B'],
+            };
+            $sheet->getStyle('K' . $rowIdx)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB($statusStyle['bg']);
+            $sheet->getStyle('K' . $rowIdx)->getFont()->setBold(true)->getColor()->setRGB($statusStyle['color']);
+
+            // Keterlambatan Color
+            if ($item['late_minutes'] > 0) {
+                $lateColor = $item['status'] === 'Mengkhawatirkan' ? 'E11D48' : ($isApprovedLate ? '0284C7' : 'D97706');
+                $sheet->getStyle('L' . $rowIdx)->getFont()->setBold(true)->getColor()->setRGB($lateColor);
+            } else {
+                $sheet->getStyle('L' . $rowIdx)->getFont()->getColor()->setRGB('94A3B8');
+            }
+
             $rowIdx++;
         }
 
+        if ($rowIdx > 2) {
+            // Alignments
+            $sheet->getStyle('A2:A' . ($rowIdx - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('G2:L' . ($rowIdx - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            // Borders
+            $tableRange = 'A1:M' . ($rowIdx - 1);
+            $sheet->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)->getColor()->setRGB('E2E8F0');
+        }
+
         // Auto-fit columns
-        foreach (range('A', 'N') as $col) {
+        foreach (range('A', 'M') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
