@@ -56,7 +56,7 @@
                             </button>
 
                             <button type="submit" 
-                                :class="searchVal.trim() !== '' ? 'bg-indigo-650 text-white dark:bg-indigo-600' : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-350'"
+                                :class="searchVal.trim() !== '' ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white' : 'bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300'"
                                 class="h-10 px-4 font-bold text-xs transition-all duration-150 cursor-pointer whitespace-nowrap flex items-center justify-center border-0">
                                 Cari
                             </button>
