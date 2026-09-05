@@ -14,35 +14,7 @@
         <div id="payslip-report-container" class="space-y-6">
 
         <!-- FILTERS & CONTROLS -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm w-full text-left space-y-3">
-            <!-- Period Quick Selector Pills -->
-            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 border-b border-slate-150 dark:border-slate-800/60 w-full">
-                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1.5 flex items-center gap-1">
-                    <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                    Periode Gaji:
-                </span>
-                
-                <!-- Bulan Lalu (Rekomendasi) -->
-                @php
-                    $lastMonthVal = $lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m');
-                    $currentMonthVal = $currentMonth ?? \Carbon\Carbon::now()->format('Y-m');
-                @endphp
-                <button type="button" 
-                        onclick="selectMonthFilter('{{ $lastMonthVal }}', this)"
-                        class="h-7 px-3.5 inline-flex items-center justify-center gap-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer {{ $month == $lastMonthVal ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
-                    <i data-lucide="zap" class="w-3 h-3 {{ $month == $lastMonthVal ? 'text-amber-300' : 'text-slate-400' }}"></i>
-                    <span>Bulan Lalu ({{ \Carbon\Carbon::parse($lastMonthVal . '-01')->translatedFormat('F Y') }})</span>
-                    <span class="text-[9px] px-1.5 py-0.2 rounded font-semibold {{ $month == $lastMonthVal ? 'bg-indigo-700 text-indigo-100' : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/40' }}">Upload</span>
-                </button>
-                
-                <!-- Bulan Berjalan -->
-                <button type="button" 
-                        onclick="selectMonthFilter('{{ $currentMonthVal }}', this)"
-                        class="h-7 px-3.5 inline-flex items-center justify-center gap-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer {{ $month == $currentMonthVal ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
-                    <span>Bulan Ini ({{ \Carbon\Carbon::parse($currentMonthVal . '-01')->translatedFormat('F Y') }})</span>
-                </button>
-            </div>
-
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('payslips.index') }}" id="payslip-filter-form" data-no-loader="true" class="space-y-4">
                 <input type="hidden" name="unit_id" id="filter-unit-id" value="{{ request('unit_id', $unitId) }}">
 
