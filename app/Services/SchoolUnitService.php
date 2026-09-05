@@ -48,6 +48,16 @@ class SchoolUnitService
                         $emp['unit_id'] = $unit->id;
                         $emp['unit_url'] = $baseUrl;
                     }
+
+                    // Filter only active employees (Active / Aktif)
+                    $employees = array_values(array_filter($employees, function ($emp) {
+                        if (!isset($emp['status']) || $emp['status'] === null || $emp['status'] === '') {
+                            return true;
+                        }
+                        $status = strtolower(trim((string)$emp['status']));
+                        return in_array($status, ['active', 'aktif', '1', 'true']);
+                    }));
+
                     $allEmployees = array_merge($allEmployees, $employees);
                 } else {
                     $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';

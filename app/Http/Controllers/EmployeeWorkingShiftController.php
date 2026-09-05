@@ -429,6 +429,15 @@ class EmployeeWorkingShiftController extends Controller
             if ($response->successful()) {
                 $employees = $response->json('data') ?? [];
                 
+                // Filter only active employees (Active / Aktif)
+                $employees = array_values(array_filter($employees, function ($emp) {
+                    if (!isset($emp['status']) || $emp['status'] === null || $emp['status'] === '') {
+                        return true;
+                    }
+                    $status = strtolower(trim((string)$emp['status']));
+                    return in_array($status, ['active', 'aktif', '1', 'true']);
+                }));
+                
                 $month = $request->query('month');
                 $year = $request->query('year');
                 
