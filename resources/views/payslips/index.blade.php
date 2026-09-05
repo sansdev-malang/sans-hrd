@@ -14,12 +14,40 @@
         <div id="payslip-report-container" class="space-y-6">
 
         <!-- FILTERS & CONTROLS -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm w-full text-left">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm w-full text-left space-y-3">
+            <!-- Period Quick Selector Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 border-b border-slate-150 dark:border-slate-800/60 w-full">
+                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1.5 flex items-center gap-1">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                    Periode Gaji:
+                </span>
+                
+                <!-- Bulan Lalu (Rekomendasi) -->
+                @php
+                    $lastMonthVal = $lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m');
+                    $currentMonthVal = $currentMonth ?? \Carbon\Carbon::now()->format('Y-m');
+                @endphp
+                <button type="button" 
+                        onclick="selectMonthFilter('{{ $lastMonthVal }}', this)"
+                        class="h-7 px-3.5 inline-flex items-center justify-center gap-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer {{ $month == $lastMonthVal ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                    <i data-lucide="zap" class="w-3 h-3 {{ $month == $lastMonthVal ? 'text-amber-300' : 'text-slate-400' }}"></i>
+                    <span>Bulan Lalu ({{ \Carbon\Carbon::parse($lastMonthVal . '-01')->translatedFormat('F Y') }})</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded font-semibold {{ $month == $lastMonthVal ? 'bg-indigo-700 text-indigo-100' : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/40' }}">Upload</span>
+                </button>
+                
+                <!-- Bulan Berjalan -->
+                <button type="button" 
+                        onclick="selectMonthFilter('{{ $currentMonthVal }}', this)"
+                        class="h-7 px-3.5 inline-flex items-center justify-center gap-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer {{ $month == $currentMonthVal ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                    <span>Bulan Ini ({{ \Carbon\Carbon::parse($currentMonthVal . '-01')->translatedFormat('F Y') }})</span>
+                </button>
+            </div>
+
             <form method="GET" action="{{ route('payslips.index') }}" id="payslip-filter-form" data-no-loader="true" class="space-y-4">
                 <input type="hidden" name="unit_id" id="filter-unit-id" value="{{ request('unit_id', $unitId) }}">
 
                 <!-- Unit Pills Filter -->
-                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 border-b border-slate-150 dark:border-slate-800/60 w-full mb-4">
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 border-b border-slate-150 dark:border-slate-800/60 w-full">
                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1.5 flex items-center gap-1">
                         <i data-lucide="school" class="w-3.5 h-3.5"></i>
                         Unit:
@@ -62,9 +90,11 @@
                             </button>
                         </div>
 
-                        <!-- Bulan -->
-                        <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
-                            class="h-10 px-3 flex-1 sm:flex-initial sm:w-36 text-xs font-bold bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-mono">
+                        <!-- Bulan (Manual Custom Month) -->
+                        <div class="flex items-center gap-1.5">
+                            <input type="month" name="month" id="filter-month-input" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
+                                class="h-10 px-3 flex-1 sm:flex-initial sm:w-36 text-xs font-bold bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-mono" title="Pilih periode bulan kustom">
+                        </div>
 
                         <!-- Jabatan -->
                         <select name="position" onchange="triggerFilterForm(this)"
@@ -75,7 +105,7 @@
                             @endforeach
                         </select>
 
-                        @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != now()->format('Y-m') || request()->filled('per_page') && request('per_page') != 50)
+                        @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m')) || request()->filled('per_page') && request('per_page') != 50)
                             <a href="{{ route('payslips.index') }}" class="h-10 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-xl transition-colors reset-filter-btn" data-no-loader="true" title="Reset Filter">
                                 <i data-lucide="x" class="w-4 h-4"></i>
                             </a>
@@ -93,15 +123,50 @@
                         </form>
                         <select name="per_page" onchange="triggerFilterForm(this)"
                             class="h-10 pl-3 pr-8 flex-1 sm:flex-initial sm:w-24 text-xs font-bold bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-ellipsis overflow-hidden whitespace-nowrap">
-                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
-                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
-                        <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
-                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
-                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
-                    </select>
+                            <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
+                            <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
+                            <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
+                            <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 baris</option>
+                            <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 baris</option>
+                            <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                        </select>
+                    </div>
                 </div>
             </form>
+        </section>
+
+        <!-- ACTIVE PERIOD BANNER -->
+        <section class="bg-gradient-to-r from-indigo-50/90 via-slate-50/80 to-indigo-50/50 dark:from-indigo-950/40 dark:via-slate-900/60 dark:to-indigo-950/20 border border-indigo-200/70 dark:border-indigo-900/50 rounded-2xl p-4 shadow-2xs w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
+            <div class="flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <i data-lucide="calendar-check-2" class="w-5 h-5"></i>
+                </div>
+                <div class="space-y-0.5">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-100/90 dark:bg-indigo-900/60 px-2 py-0.5 rounded">Periode Slip Gaji Terpilih</span>
+                        @if($month === ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m')))
+                            <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-900/40 flex items-center gap-1">
+                                <i data-lucide="check-circle-2" class="w-3 h-3 text-emerald-600"></i> Periode Penggajian Terakhir
+                            </span>
+                        @elseif($month === ($currentMonth ?? \Carbon\Carbon::now()->format('Y-m')))
+                            <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/40 flex items-center gap-1">
+                                <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i> Bulan Berjalan (Masa Kerja Belum Selesai)
+                            </span>
+                        @else
+                            <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 bg-slate-200/70 dark:bg-slate-800 px-2 py-0.5 rounded">
+                                Arsip Lampau
+                            </span>
+                        @endif
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-slate-50 font-nasalization tracking-wide">
+                        {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
+                    </h3>
+                </div>
+            </div>
+
+            <div class="text-xs text-slate-600 dark:text-slate-400 bg-white/80 dark:bg-slate-900/80 px-3.5 py-2 rounded-xl border border-slate-200/60 dark:border-slate-800/80 shadow-2xs">
+                <span class="text-slate-400 dark:text-slate-500">Keterangan:</span> Semua slip gaji yang diunggah akan tercatat untuk masa kerja <strong class="text-indigo-600 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong>.
+            </div>
         </section>
 
 
@@ -277,11 +342,28 @@
     <!-- Upload Modal -->
     <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/50 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200 dark:border-slate-800 transform scale-95 opacity-0 transition-all duration-300" id="uploadModalContent">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3.5 mb-5">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 uppercase tracking-wider">Upload Slip Gaji - <span id="modal_period_title" class="text-indigo-650 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</span></h3>
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3.5 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 uppercase tracking-wider">Upload Slip Gaji</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Periode: <strong class="text-indigo-600 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong></p>
+                </div>
                 <button onclick="closeUploadModal()" class="text-slate-450 hover:text-slate-655 transition-colors border-0 bg-transparent cursor-pointer">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
+            </div>
+
+            <!-- Prominent Target Period Alert Box -->
+            <div class="p-3 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-900/60 rounded-xl flex items-center justify-between gap-3 text-xs mb-3 shadow-3xs">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-1.5 bg-indigo-600 text-white rounded-lg shrink-0">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Target Periode Gaji</div>
+                        <strong class="text-indigo-700 dark:text-indigo-300 font-bold text-xs">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong>
+                    </div>
+                </div>
+                <span class="text-[10px] bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-indigo-200/60 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold font-mono">{{ $month }}</span>
             </div>
 
             <form id="uploadForm" method="POST" action="{{ route('payslips.store') }}" enctype="multipart/form-data" class="space-y-4">
@@ -587,6 +669,14 @@
         if (input) {
             input.value = unitId;
             triggerFilterForm(btnEl);
+        }
+    }
+
+    function selectMonthFilter(monthVal, btnEl) {
+        const input = document.getElementById('filter-month-input') || document.querySelector('input[name="month"]');
+        if (input) {
+            input.value = monthVal;
+            triggerFilterForm(btnEl || input);
         }
     }
 

@@ -24,7 +24,9 @@ class PayslipController extends Controller
 
     public function index(Request $request)
     {
-        $month = $request->query('month', date('Y-m'));
+        $lastMonth = Carbon::now()->subMonth()->format('Y-m');
+        $currentMonth = Carbon::now()->format('Y-m');
+        $month = $request->query('month', $lastMonth);
         $unitId = $request->query('unit_id');
         $position = $request->query('position');
         $search = $request->query('search');
@@ -91,7 +93,7 @@ class PayslipController extends Controller
 
         $units = SchoolUnit::where('is_active', true)->get();
 
-        return view('payslips.index', compact('paginatedEmployees', 'units', 'month', 'unitId', 'positions', 'position'));
+        return view('payslips.index', compact('paginatedEmployees', 'units', 'month', 'unitId', 'positions', 'position', 'lastMonth', 'currentMonth'));
     }
 
     public function store(Request $request)
