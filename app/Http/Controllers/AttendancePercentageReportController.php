@@ -45,55 +45,29 @@ class AttendancePercentageReportController extends Controller
             $endDateReq = $endDate->format('Y-m-d');
         }
 
-        // Fetch Employees (Filter by unit if needed)
+        // Fetch all active employees (excluding Tukang from attendance percentage reports)
         $rawEmployees = $this->service->getAllEmployees();
-        $employeesCollection = collect($rawEmployees)->sort(function ($a, $b) {
-            $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
-            if ($unitCompare !== 0) {
-                return $unitCompare;
-            }
-            return strcmp($a['name'] ?? '', $b['name'] ?? '');
-        })->values();
+        $allEmployeesCollection = collect($rawEmployees)
+            ->filter(function ($emp) {
+                $pos = strtolower(trim($emp['position'] ?? $emp['subject_position'] ?? ''));
+                return $pos !== 'tukang' && !str_contains($pos, 'tukang');
+            })
+            ->sort(function ($a, $b) {
+                $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
+                if ($unitCompare !== 0) {
+                    return $unitCompare;
+                }
+                return strcmp($a['name'] ?? '', $b['name'] ?? '');
+            })
+            ->values();
 
-        if (!empty($unitId)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($unitId) {
-                return ($emp['unit_id'] ?? '') == $unitId;
-            });
-        }
-
-        // Extract unique positions for filter (adapts to selected unit)
-        $positions = $employeesCollection
-            ->map(fn($emp) => $emp['position'] ?? $emp['subject_position'] ?? 'Staf')
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
-
-        // Apply position filter
-        $selectedPosition = $request->query('position');
-        if (!empty($selectedPosition)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($selectedPosition) {
-                $pos = $emp['position'] ?? $emp['subject_position'] ?? 'Staf';
-                return $pos === $selectedPosition;
-            });
-        }
-
-        // Apply search filter
-        $search = $request->query('search');
-        if (!empty($search)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($search) {
-                return str_contains(strtolower($emp['name'] ?? ''), strtolower($search))
-                    || str_contains(strtolower($emp['nuptk_nip_nik'] ?? ''), strtolower($search));
-            });
-        }
-
-        $uids = $employeesCollection->pluck('zkteco_uid')->filter()->toArray();
-        $employeeIds = $employeesCollection->pluck('id')->filter()->toArray();
+        $uids = $allEmployeesCollection->pluck('zkteco_uid')->filter()->toArray();
+        $employeeIds = $allEmployeesCollection->pluck('id')->filter()->toArray();
 
         // Pre-fetch Attendance Logs for this month
         $attendanceLogs = AttendanceLog::whereIn('uid', $uids)
             ->whereBetween('timestamp', [$startDate->format('Y-m-d 00:00:00'), $endDate->format('Y-m-d 23:59:59')])
+            ->orderBy('timestamp', 'asc')
             ->get()
             ->groupBy(function($log) {
                 return $log->uid . '_' . Carbon::parse($log->timestamp)->format('Y-m-d');
@@ -202,9 +176,9 @@ class AttendancePercentageReportController extends Controller
         ]));
 
         // Calculate Report
-        $reports = [];
+        $allReports = [];
 
-        foreach ($employeesCollection as $emp) {
+        foreach ($allEmployeesCollection as $emp) {
             $uid = $emp['zkteco_uid'] ?? null;
             $empId = $emp['id'] ?? null;
             $unit = $emp['unit_id'] ?? null;
@@ -230,6 +204,8 @@ class AttendancePercentageReportController extends Controller
             $totalIzin = 0;
             $totalCuti = 0;
             $totalAbsent = 0;
+            $totalLateMinutes = 0;
+            $lateCount = 0;
 
             $sakitDates = [];
             $izinDates = [];
@@ -237,6 +213,7 @@ class AttendancePercentageReportController extends Controller
             $absentDates = [];
             $scanDates = [];
             $dinasDates = [];
+            $lateDates = [];
             $dayDetails = [];
 
             // Loop through each day of the month
@@ -262,73 +239,137 @@ class AttendancePercentageReportController extends Controller
                     continue;
                 }
 
-                // Check approved leaves
-                $isOnLeave = false;
-                $getsBonus = false;
-                $statusCode = null;
-                $leaveReason = '';
-                $leaveKey = $unit . '_' . $empId;
-                if (isset($leaves[$leaveKey])) {
-                    foreach ($leaves[$leaveKey] as $leave) {
-                        $leaveStart = $leave->formatted_start;
-                        $leaveEnd = $leave->formatted_end;
-                        if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
-                            $isOnLeave = true;
-                            $getsBonus = $leave->gets_presence_bonus || ($leave->status_code === 'H') || ($leave->type_name === 'Dinas');
-                            $statusCode = $leave->status_code;
-                            $leaveReason = $leave->notes ?? $leave->reason ?? 'Izin disetujui';
-                            if (!$statusCode) {
-                                if ($leave->type_name === 'Sakit') $statusCode = 'S';
-                                elseif ($leave->type_name === 'Cuti') $statusCode = 'C';
-                                elseif ($leave->type_name === 'Dinas') $statusCode = 'H';
-                                else $statusCode = 'I';
-                            }
-                            break;
-                        }
-                    }
-                }
-
                 // Check Shift Assignment
-                $hasShiftToday = false;
+                $activeShift = null;
                 $shiftKey = $unit . '_' . $empId;
-                $shiftName = 'Shift Kerja';
+                $shiftStartTime = null;
 
                 if (isset($assignedShifts[$shiftKey])) {
                     foreach ($assignedShifts[$shiftKey] as $assignment) {
-                        $assignStartDate = $assignment->formatted_start;
-                        $assignEndDate = $assignment->formatted_end;
-                        if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
-                            $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
-                            if ($detail && !$detail->is_off) {
-                                $hasShiftToday = true;
-                                $shiftName = $assignment->workingShift->name;
-                            }
+                        $start = $assignment->formatted_start;
+                        $end = $assignment->formatted_end;
+                        if ($dateStr >= $start && (!$end || $dateStr <= $end)) {
+                            $activeShift = $assignment->workingShift;
                             break;
                         }
                     }
                 }
 
-                if ($hasShiftToday) {
+                $shiftName = $activeShift ? $activeShift->name : 'Non-Shift';
+                $isDayOff = false;
+                $shiftEndTime = null;
+
+                if ($activeShift && $activeShift->details) {
+                    $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) to 6 (Sat)
+                    $dayDetail = $activeShift->details->firstWhere('day_of_week', $dayOfWeek);
+                    if ($dayDetail) {
+                        if ($dayDetail->is_off) {
+                            $isDayOff = true;
+                        } else {
+                            $shiftStartTime = $dayDetail->start_time;
+                            $shiftEndTime = $dayDetail->end_time;
+                        }
+                    } else {
+                        $isDayOff = true;
+                    }
+                } elseif ($currentDate->isSunday()) {
+                    $isDayOff = true;
+                }
+
+                // If not shift worker and it is holiday -> day off
+                if (!$isShiftWorker && $isHoliday) {
+                    $isDayOff = true;
+                }
+
+                $shiftScheduleText = $shiftStartTime ? substr($shiftStartTime, 0, 5) . ($shiftEndTime ? ' - ' . substr($shiftEndTime, 0, 5) : '') : null;
+
+                $logKey = $uid . '_' . $dateStr;
+                $hasScan = isset($attendanceLogs[$logKey]);
+
+                // Check approved leaves for this date
+                $activeLeave = null;
+                if (isset($leaves[$shiftKey])) {
+                    foreach ($leaves[$shiftKey] as $leave) {
+                        if ($dateStr >= $leave->formatted_start && $dateStr <= $leave->formatted_end) {
+                            $activeLeave = $leave;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$isDayOff) {
                     $totalWorkDays++;
-                    $logKey = $uid . '_' . $dateStr;
-                    $hasScan = isset($attendanceLogs[$logKey]);
 
                     if ($hasScan) {
                         $totalPresent++;
                         $actualScanCount++;
                         $scanDates[] = $currentDate->translatedFormat('d M');
-                        
-                        $firstLog = $attendanceLogs[$logKey]->sortBy('timestamp')->first();
-                        $scanTime = Carbon::parse($firstLog->timestamp)->format('H:i');
+
+                        $dayLogs = $attendanceLogs[$logKey]->sortBy('timestamp')->values();
+                        $firstLog = $dayLogs->first();
+                        $lastLog = $dayLogs->last();
+                        $firstLogCarbon = Carbon::parse($firstLog->timestamp);
+                        $firstScan = $firstLogCarbon->format('H:i');
+
+                        // Calculate late minutes if shift start time is set
+                        $dailyLateMinutes = 0;
+                        if ($shiftStartTime) {
+                            $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
+                            if ($firstLogCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
+                                $dailyLateMinutes = (int) $expectedStart->diffInMinutes($firstLogCarbon);
+                                $totalLateMinutes += $dailyLateMinutes;
+                                $lateCount++;
+                                $lateDates[] = $currentDate->translatedFormat('d M');
+                            }
+                        }
+
+                        $inTime = $firstScan;
+                        $outTime = '-';
+
+                        if ($dayLogs->count() > 1 && $firstLog->timestamp !== $lastLog->timestamp) {
+                            $outTime = Carbon::parse($lastLog->timestamp)->format('H:i');
+                            $scanDetail = "Masuk: {$inTime} • Pulang: {$outTime}";
+                        } else {
+                            if ($firstLogCarbon->hour < 12) {
+                                $inTime = $firstScan;
+                                $outTime = '-';
+                                $scanDetail = "Masuk: {$inTime} • Pulang: -";
+                            } else {
+                                $inTime = '-';
+                                $outTime = $firstScan;
+                                $scanDetail = "Masuk: - • Pulang: {$outTime}";
+                            }
+                        }
+
+                        if ($dailyLateMinutes > 0) {
+                            $scanDetail .= " • Terlambat: {$dailyLateMinutes} mnt";
+                        }
 
                         $dayDetails[] = [
                             'date' => $formattedDate,
                             'status' => 'Hadir',
-                            'label' => "Hadir (Scan: {$scanTime})",
-                            'detail' => "Shift: $shiftName",
+                            'label' => 'Hadir',
+                            'detail' => $scanDetail,
+                            'shift_name' => $shiftName,
+                            'shift_schedule' => $shiftScheduleText,
+                            'in_time' => $inTime,
+                            'out_time' => $outTime,
+                            'late_minutes' => $dailyLateMinutes,
+                            'notes' => null,
                             'color' => 'emerald'
                         ];
-                    } elseif ($isOnLeave) {
+                    } elseif ($activeLeave) {
+                        $statusCode = $activeLeave->status_code;
+                        $leaveReason = $activeLeave->notes ?? $activeLeave->reason ?? 'Izin disetujui';
+                        $getsBonus = $activeLeave->gets_presence_bonus || ($statusCode === 'H') || ($activeLeave->type_name === 'Dinas');
+
+                        if (!$statusCode) {
+                            if ($activeLeave->type_name === 'Sakit') $statusCode = 'S';
+                            elseif ($activeLeave->type_name === 'Cuti') $statusCode = 'C';
+                            elseif ($activeLeave->type_name === 'Dinas') $statusCode = 'H';
+                            else $statusCode = 'I';
+                        }
+
                         if ($statusCode === 'S') {
                             $totalSakit++;
                             $sakitDates[] = $currentDate->translatedFormat('d M');
@@ -337,7 +378,13 @@ class AttendancePercentageReportController extends Controller
                                 'status' => 'Sakit',
                                 'label' => 'Sakit',
                                 'detail' => $leaveReason,
-                                'color' => 'red'
+                                'shift_name' => $shiftName,
+                                'shift_schedule' => $shiftScheduleText,
+                                'in_time' => null,
+                                'out_time' => null,
+                                'late_minutes' => 0,
+                                'notes' => $leaveReason ?: 'Surat Dokter / Izin Sakit',
+                                'color' => 'amber'
                             ];
                         } elseif ($statusCode === 'C') {
                             $totalCuti++;
@@ -345,8 +392,14 @@ class AttendancePercentageReportController extends Controller
                             $dayDetails[] = [
                                 'date' => $formattedDate,
                                 'status' => 'Cuti',
-                                'label' => 'Cuti Tahunan',
+                                'label' => 'Cuti',
                                 'detail' => $leaveReason,
+                                'shift_name' => $shiftName,
+                                'shift_schedule' => $shiftScheduleText,
+                                'in_time' => null,
+                                'out_time' => null,
+                                'late_minutes' => 0,
+                                'notes' => $leaveReason ?: 'Cuti Tahunan / Resmi',
                                 'color' => 'blue'
                             ];
                         } elseif ($statusCode === 'H' || $getsBonus) {
@@ -356,8 +409,14 @@ class AttendancePercentageReportController extends Controller
                             $dayDetails[] = [
                                 'date' => $formattedDate,
                                 'status' => 'Dinas',
-                                'label' => 'Dinas / Tugas Luar',
+                                'label' => 'Dinas',
                                 'detail' => $leaveReason,
+                                'shift_name' => $shiftName,
+                                'shift_schedule' => $shiftScheduleText,
+                                'in_time' => null,
+                                'out_time' => null,
+                                'late_minutes' => 0,
+                                'notes' => $leaveReason ?: 'Dinas / Tugas Luar',
                                 'color' => 'indigo'
                             ];
                         } else {
@@ -366,8 +425,14 @@ class AttendancePercentageReportController extends Controller
                             $dayDetails[] = [
                                 'date' => $formattedDate,
                                 'status' => 'Izin',
-                                'label' => 'Izin Pribadi',
+                                'label' => 'Izin',
                                 'detail' => $leaveReason,
+                                'shift_name' => $shiftName,
+                                'shift_schedule' => $shiftScheduleText,
+                                'in_time' => null,
+                                'out_time' => null,
+                                'late_minutes' => 0,
+                                'notes' => $leaveReason ?: 'Izin Terverifikasi',
                                 'color' => 'amber'
                             ];
                         }
@@ -377,17 +442,29 @@ class AttendancePercentageReportController extends Controller
                         $dayDetails[] = [
                             'date' => $formattedDate,
                             'status' => 'Alpa',
-                            'label' => 'Alpa / Tanpa Keterangan',
-                            'detail' => "Tidak masuk pada jadwal $shiftName",
+                            'label' => 'Alpa',
+                            'detail' => "Tidak ada scan pada jadwal $shiftName" . ($shiftScheduleText ? " ($shiftScheduleText)" : ''),
+                            'shift_name' => $shiftName,
+                            'shift_schedule' => $shiftScheduleText,
+                            'in_time' => null,
+                            'out_time' => null,
+                            'late_minutes' => 0,
+                            'notes' => 'Tidak ada rekaman absensi',
                             'color' => 'rose'
                         ];
                     }
                 } else {
                     $dayDetails[] = [
                         'date' => $formattedDate,
-                        'status' => 'Off',
-                        'label' => 'Hari Libur Jadwal (Off)',
-                        'detail' => "Jadwal Libur Pekan/Shift",
+                        'status' => 'Libur',
+                        'label' => 'Libur',
+                        'detail' => $isHoliday ? 'Hari Libur Resmi' : "Jadwal Libur ($shiftName)",
+                        'shift_name' => $shiftName,
+                        'shift_schedule' => $shiftScheduleText,
+                        'in_time' => null,
+                        'out_time' => null,
+                        'late_minutes' => 0,
+                        'notes' => $isHoliday ? 'Hari Libur Resmi' : 'Jadwal Libur',
                         'color' => 'slate'
                     ];
                 }
@@ -399,7 +476,7 @@ class AttendancePercentageReportController extends Controller
             $totalActiveWorkDays = $totalPresent + $totalAbsent;
             $percentage = $totalActiveWorkDays > 0 ? round(($totalPresent / $totalActiveWorkDays) * 100, 1) : 100;
 
-            $reports[] = [
+            $allReports[] = [
                 'employee' => $emp,
                 'total_work_days' => $totalWorkDays,
                 'total_present' => $totalPresent,
@@ -415,6 +492,9 @@ class AttendancePercentageReportController extends Controller
                 'cuti_dates' => $cutiDates,
                 'total_absent' => $totalAbsent,
                 'absent_dates' => $absentDates,
+                'total_late_minutes' => $totalLateMinutes,
+                'late_count' => $lateCount,
+                'late_dates' => $lateDates,
                 'percentage' => $percentage,
                 'day_details' => $dayDetails,
             ];
@@ -422,24 +502,132 @@ class AttendancePercentageReportController extends Controller
 
         $schoolUnits = SchoolUnit::where('is_active', true)->get();
 
-        // Calculate average percentages per unit based on filtered/fetched reports
-        $unitStats = [];
-        $reportsGrouped = collect($reports)->groupBy(function ($rep) {
-            return $rep['employee']['unit_id'] ?? 0;
-        });
+        // 1. Calculate average percentages for 5 categories (PAUD, SD Reguler, SMP Reguler, GPK, GPQ)
+        $unitStats = [
+            'paud' => [
+                'name' => 'PAUD',
+                'count' => 0,
+                'total_present' => 0,
+                'total_absent' => 0,
+                'average' => 0
+            ],
+            'sd' => [
+                'name' => 'SD (Reguler)',
+                'count' => 0,
+                'total_present' => 0,
+                'total_absent' => 0,
+                'average' => 0
+            ],
+            'smp' => [
+                'name' => 'SMP (Reguler)',
+                'count' => 0,
+                'total_present' => 0,
+                'total_absent' => 0,
+                'average' => 0
+            ],
+            'gpk' => [
+                'name' => 'GPK (SD-SMP)',
+                'count' => 0,
+                'total_present' => 0,
+                'total_absent' => 0,
+                'average' => 0
+            ],
+            'gpq' => [
+                'name' => 'GPQ (SD-SMP)',
+                'count' => 0,
+                'total_present' => 0,
+                'total_absent' => 0,
+                'average' => 0
+            ],
+        ];
 
-        foreach ($schoolUnits as $unit) {
-            $unitReports = $reportsGrouped->get($unit->id) ?? collect();
-            $totalPresentUnit = $unitReports->sum('total_present');
-            $totalAbsentUnit = $unitReports->sum('total_absent');
-            $totalActiveUnit = $totalPresentUnit + $totalAbsentUnit;
-            
-            $unitStats[$unit->id] = [
-                'name' => $unit->name,
-                'average' => $totalActiveUnit > 0 ? round(($totalPresentUnit / $totalActiveUnit) * 100, 1) : 0,
-                'count' => $unitReports->count()
-            ];
+        foreach ($allReports as $rep) {
+            $pos = strtoupper(trim($rep['employee']['position'] ?? $rep['employee']['subject_position'] ?? ''));
+            $uName = strtolower(trim($rep['employee']['unit_name'] ?? ''));
+
+            if ($pos === 'GPK' || str_contains($pos, 'GPK')) {
+                $category = 'gpk';
+            } elseif ($pos === 'GPQ' || str_contains($pos, 'GPQ')) {
+                $category = 'gpq';
+            } elseif (str_contains($uName, 'paud')) {
+                $category = 'paud';
+            } elseif (str_contains($uName, 'smp')) {
+                $category = 'smp';
+            } else {
+                $category = 'sd';
+            }
+
+            if (isset($unitStats[$category])) {
+                $unitStats[$category]['count']++;
+                $unitStats[$category]['total_present'] += $rep['total_present'];
+                $unitStats[$category]['total_absent'] += $rep['total_absent'];
+            }
         }
+
+        foreach ($unitStats as $k => &$v) {
+            $totalActive = $v['total_present'] + $v['total_absent'];
+            $v['average'] = $totalActive > 0 ? round(($v['total_present'] / $totalActive) * 100, 1) : 0;
+        }
+        unset($v);
+
+        // 2. Filter reports by Unit / Category
+        $filteredCollection = collect($allReports);
+
+        if ($unitId === 'gpk') {
+            $filteredCollection = $filteredCollection->filter(function ($r) {
+                $pos = strtoupper(trim($r['employee']['position'] ?? $r['employee']['subject_position'] ?? ''));
+                return $pos === 'GPK' || str_contains($pos, 'GPK');
+            });
+        } elseif ($unitId === 'gpq') {
+            $filteredCollection = $filteredCollection->filter(function ($r) {
+                $pos = strtoupper(trim($r['employee']['position'] ?? $r['employee']['subject_position'] ?? ''));
+                return $pos === 'GPQ' || str_contains($pos, 'GPQ');
+            });
+        } elseif (!empty($unitId)) {
+            $filteredCollection = $filteredCollection->filter(function ($r) use ($unitId) {
+                $pos = strtoupper(trim($r['employee']['position'] ?? $r['employee']['subject_position'] ?? ''));
+                $isGpkGpq = in_array($pos, ['GPK', 'GPQ']) || str_contains($pos, 'GPK') || str_contains($pos, 'GPQ');
+                return ($r['employee']['unit_id'] ?? '') == $unitId && !$isGpkGpq;
+            });
+        }
+
+        // 3. Extract unique positions from current unit/category scope
+        $positions = $filteredCollection
+            ->map(fn($r) => $r['employee']['position'] ?? $r['employee']['subject_position'] ?? 'Staf')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+
+        // 4. Multi-select positions filter
+        $selectedPositions = $request->query('positions');
+        if (empty($selectedPositions) && $request->filled('position')) {
+            $selectedPositions = [$request->query('position')];
+        }
+        if (is_string($selectedPositions)) {
+            $selectedPositions = explode(',', $selectedPositions);
+        }
+        $selectedPositions = array_values(array_filter((array) $selectedPositions));
+
+        if (!empty($selectedPositions)) {
+            $filteredCollection = $filteredCollection->filter(function ($r) use ($selectedPositions) {
+                $pos = $r['employee']['position'] ?? $r['employee']['subject_position'] ?? 'Staf';
+                return in_array($pos, $selectedPositions);
+            });
+        }
+
+        // 5. Search filter
+        $search = $request->query('search');
+        if (!empty($search)) {
+            $filteredCollection = $filteredCollection->filter(function ($r) use ($search) {
+                $emp = $r['employee'];
+                return str_contains(strtolower($emp['name'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['nuptk_nip_nik'] ?? ''), strtolower($search));
+            });
+        }
+
+        $reports = $filteredCollection->values()->toArray();
 
         return view('attendance-percentage-reports.index', compact(
             'reports',
@@ -450,7 +638,7 @@ class AttendancePercentageReportController extends Controller
             'endDateReq',
             'unitStats',
             'positions',
-            'selectedPosition'
+            'selectedPositions'
         ));
     }
 }

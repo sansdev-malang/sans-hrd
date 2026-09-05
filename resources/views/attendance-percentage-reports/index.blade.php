@@ -151,7 +151,7 @@
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 border-b border-slate-150 dark:border-slate-800/60 w-full mb-4">
                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1.5 flex items-center gap-1">
                         <i data-lucide="school" class="w-3.5 h-3.5"></i>
-                        Unit:
+                        Unit / Kategori:
                     </span>
                     
                     <!-- Semua Unit Pill -->
@@ -164,10 +164,24 @@
                     @foreach($schoolUnits as $unit)
                         <button type="button"
                                 onclick="selectUnitFilter('{{ $unit->id }}', this)"
-                                class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ request('unit_id', $unitId ?? null) == $unit->id ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
-                            {{ $unit->name }}
+                                class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ request('unit_id', $unitId ?? null) == (string)$unit->id ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                            {{ $unit->name }} {{ in_array(strtoupper($unit->name), ['SD', 'SMP']) ? '(Reguler)' : '' }}
                         </button>
                     @endforeach
+
+                    <!-- GPK Pill -->
+                    <button type="button"
+                            onclick="selectUnitFilter('gpk', this)"
+                            class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ request('unit_id', $unitId ?? null) === 'gpk' ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                        GPK (SD-SMP)
+                    </button>
+
+                    <!-- GPQ Pill -->
+                    <button type="button"
+                            onclick="selectUnitFilter('gpq', this)"
+                            class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ request('unit_id', $unitId ?? null) === 'gpq' ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
+                        GPQ (SD-SMP)
+                    </button>
                 </div>
                 <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 w-full">
                     <!-- Search Input -->
@@ -188,29 +202,85 @@
                     </div>
 
                     <!-- Mulai Tanggal -->
-                    <div class="w-full lg:w-40 shrink-0">
+                    <div class="w-full lg:w-36 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai Tanggal</label>
                         <input type="date" name="start_date" value="{{ request('start_date', $startDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
                     </div>
 
                     <!-- Selesai Tanggal -->
-                    <div class="w-full lg:w-40 shrink-0">
+                    <div class="w-full lg:w-36 shrink-0">
                         <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai Tanggal</label>
                         <input type="date" name="end_date" value="{{ request('end_date', $endDateReq) }}" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-mono dark:[color-scheme:dark]">
                     </div>
 
-                    <!-- Filter Jabatan -->
+                    <!-- Filter Jabatan (Multi-Select Checkbox) -->
                     @if(isset($positions) && count($positions) > 0)
-                    <div class="w-full lg:w-48 shrink-0">
-                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Jabatan / Posisi</label>
-                        <select name="position" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                            <option value="">Semua Jabatan</option>
-                            @foreach($positions as $pos)
-                                <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>
-                                    {{ $pos }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="w-full lg:w-56 shrink-0 relative" x-data="{
+                        open: false,
+                        selectedPositions: {{ json_encode($selectedPositions ?? []) }},
+                        allPositions: {{ json_encode($positions ?? []) }},
+                        togglePosition(pos) {
+                            if (this.selectedPositions.includes(pos)) {
+                                this.selectedPositions = this.selectedPositions.filter(p => p !== pos);
+                            } else {
+                                this.selectedPositions.push(pos);
+                            }
+                        },
+                        selectAll() {
+                            this.selectedPositions = [...this.allPositions];
+                        },
+                        clearAll() {
+                            this.selectedPositions = [];
+                        }
+                    }" @click.outside="open = false">
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Jabatan / Posisi</span>
+                            <span x-show="selectedPositions.length > 0" class="text-indigo-600 dark:text-indigo-400 font-mono font-bold" x-text="selectedPositions.length + ' dipilih'"></span>
+                        </label>
+                        
+                        <!-- Trigger Button -->
+                        <button type="button" @click="open = !open" 
+                                class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer flex items-center justify-between text-left shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                            <span class="truncate pr-2 font-medium" x-text="selectedPositions.length === 0 ? 'Semua Jabatan' : (selectedPositions.length === 1 ? selectedPositions[0] : selectedPositions.length + ' Jabatan Terpilih')"></span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150" :class="open ? 'rotate-180' : ''"></i>
+                        </button>
+
+                        <!-- Hidden real inputs for form submission -->
+                        <template x-for="pos in selectedPositions" :key="pos">
+                            <input type="hidden" name="positions[]" :value="pos">
+                        </template>
+
+                        <!-- Dropdown Panel -->
+                        <div x-show="open" x-transition.opacity.duration.150ms style="display: none;"
+                             class="absolute z-50 left-0 mt-1 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-2.5 space-y-2">
+                            
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 text-[11px]">
+                                <span class="font-bold text-slate-700 dark:text-slate-300">Pilih Jabatan</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" @click="selectAll()" class="text-indigo-600 dark:text-indigo-400 hover:underline font-bold text-[10px] cursor-pointer border-0 bg-transparent">Pilih Semua</button>
+                                    <span class="text-slate-300 dark:text-slate-700">•</span>
+                                    <button type="button" @click="clearAll()" class="text-slate-400 hover:text-rose-500 font-bold text-[10px] cursor-pointer border-0 bg-transparent">Reset</button>
+                                </div>
+                            </div>
+
+                            <div class="max-h-56 overflow-y-auto space-y-0.5 pr-1 custom-scrollbar">
+                                @foreach($positions as $pos)
+                                    <label class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer text-xs select-none transition-colors">
+                                        <input type="checkbox" value="{{ $pos }}" 
+                                               :checked="selectedPositions.includes('{{ $pos }}')"
+                                               @change="togglePosition('{{ $pos }}')"
+                                               class="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                        <span class="text-slate-700 dark:text-slate-200 font-medium truncate">{{ $pos }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                                <button type="button" @click="open = false; triggerFilterForm()" class="h-7 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer border-0">
+                                    Terapkan
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     @endif
 
@@ -221,7 +291,7 @@
                             Terapkan
                         </button>
 
-                        @if(request()->hasAny(['unit_id', 'search', 'start_date', 'end_date', 'position']) && count(request()->except('page')) > 0)
+                        @if(request()->hasAny(['unit_id', 'search', 'start_date', 'end_date', 'position', 'positions']) && count(request()->except('page')) > 0)
                             <a href="{{ route('attendance-percentage-reports.index') }}" class="inline-flex items-center justify-center h-10 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg shadow-sm transition-colors gap-1.5 reset-filter-btn" data-no-loader="true">
                                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                                 Reset
@@ -317,12 +387,22 @@
                                         @if(!$hasAbsenceData || ($rep['total_present'] == $rep['total_work_days'] && $rep['total_absent'] == 0 && $rep['total_sakit'] == 0 && $rep['total_izin'] == 0 && $rep['total_cuti'] == 0))
                                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/30">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                🟢 Kehadiran 100% (Sempurna)
+                                                🟢 Hadir Penuh ({{ $rep['total_present'] }} Hari)
                                             </span>
+                                            @if(($rep['total_late_minutes'] ?? 0) > 0)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30">
+                                                    Terlambat: {{ $rep['total_late_minutes'] }} mnt ({{ $rep['late_count'] }}x)
+                                                </span>
+                                            @endif
                                         @else
                                             @if($rep['total_present'] > 0)
                                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 dark:border-emerald-900/30">
                                                     Hadir: {{ $rep['total_present'] }}
+                                                </span>
+                                            @endif
+                                            @if(($rep['total_late_minutes'] ?? 0) > 0)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30">
+                                                    Terlambat: {{ $rep['total_late_minutes'] }} mnt ({{ $rep['late_count'] }}x)
                                                 </span>
                                             @endif
                                             @if($rep['total_sakit'] > 0)
@@ -460,14 +540,18 @@
 
                         <!-- Body (Timeline) -->
                         <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-                            <div class="flex justify-between items-center mb-4 bg-slate-50/50 dark:bg-slate-850/20 p-3 rounded-lg border border-slate-200/50 dark:border-slate-800">
+                            <div class="grid grid-cols-3 gap-2 mb-4 bg-slate-100/90 dark:bg-slate-800/80 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700/70 shadow-xs">
                                 <div>
-                                    <span class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Persentase Kehadiran</span>
-                                    <span class="text-xl font-mono font-black" :class="selectedReport && selectedReport.percentage >= 95 ? 'text-emerald-600' : (selectedReport && selectedReport.percentage >= 90 ? 'text-amber-500' : 'text-rose-600')" x-text="selectedReport ? selectedReport.percentage + '%' : ''"></span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-bold">Persentase</span>
+                                    <span class="text-xl font-mono font-black" :class="selectedReport && selectedReport.percentage >= 95 ? 'text-emerald-600 dark:text-emerald-400' : (selectedReport && selectedReport.percentage >= 90 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400')" x-text="selectedReport ? selectedReport.percentage + '%' : ''"></span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-bold">Keterlambatan</span>
+                                    <span class="text-xs font-bold font-mono" :class="selectedReport && selectedReport.total_late_minutes > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'" x-text="selectedReport ? (selectedReport.total_late_minutes > 0 ? selectedReport.total_late_minutes + ' mnt (' + selectedReport.late_count + 'x)' : '0 mnt') : ''"></span>
                                 </div>
                                 <div class="text-right">
-                                    <span class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Total Kehadiran</span>
-                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-100" x-text="selectedReport ? selectedReport.total_present + ' / ' + selectedReport.total_work_days + ' Hari Kerja' : ''"></span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-bold">Total Kehadiran</span>
+                                    <span class="text-xs font-bold font-mono text-slate-800 dark:text-slate-100" x-text="selectedReport ? selectedReport.total_present + ' / ' + selectedReport.total_work_days + ' Hari' : ''"></span>
                                 </div>
                             </div>
 
@@ -490,11 +574,11 @@
                                                   }"></span>
                                             
                                             <!-- Details Card -->
-                                            <div class="p-3 rounded-lg border border-slate-200/50 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40 text-xs flex flex-col justify-between gap-1 shadow-2xs">
+                                            <div class="p-3.5 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40 text-xs flex flex-col gap-2 shadow-2xs">
                                                 <div class="flex justify-between items-start gap-2">
-                                                    <span class="font-bold text-slate-900 dark:text-slate-50" x-text="day.date"></span>
+                                                    <span class="font-bold text-slate-900 dark:text-slate-50 text-xs" x-text="day.date"></span>
                                                     
-                                                    <!-- Badge Status -->
+                                                    <!-- Badge Status (HADIR, SAKIT, IZIN, dll.) -->
                                                     <span x-text="day.label" 
                                                           :class="{
                                                               'bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200/20': day.color === 'emerald',
@@ -505,11 +589,45 @@
                                                               'bg-rose-500/10 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-200/20': day.color === 'rose',
                                                               'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200/30': day.color === 'slate'
                                                           }"
-                                                          class="px-2 py-0.5 rounded-[4px] text-[9px] font-black uppercase tracking-wider font-mono"></span>
+                                                          class="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider font-mono"></span>
                                                 </div>
-                                                <p class="text-[10px] text-slate-450 dark:text-slate-500 leading-normal" x-text="day.detail || 'Tidak ada detail khusus'"></p>
+
+                                                <div class="space-y-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/60 pt-2 font-mono">
+                                                    <!-- Baris 2: Jadwal -->
+                                                    <div class="flex items-start gap-1">
+                                                        <span class="text-slate-400 dark:text-slate-500 shrink-0 w-20">Jadwal</span>
+                                                        <span class="text-slate-400 dark:text-slate-500">:</span>
+                                                        <span class="text-slate-800 dark:text-slate-200 font-semibold" x-text="(day.shift_name && day.shift_name !== 'Non-Shift') ? day.shift_name + (day.shift_schedule ? ' (' + day.shift_schedule + ')' : '') : (day.status === 'Libur' ? 'Libur' : 'Non-Shift')"></span>
+                                                    </div>
+
+                                                    <!-- Baris 3: Masuk & Pulang (Saat Hadir) -->
+                                                    <template x-if="day.status === 'Hadir'">
+                                                        <div class="flex items-start gap-1">
+                                                            <span class="text-slate-400 dark:text-slate-500 shrink-0 w-20">Masuk</span>
+                                                            <span class="text-slate-400 dark:text-slate-500">:</span>
+                                                            <span class="text-slate-800 dark:text-slate-200 font-medium" x-text="(day.in_time || '-') + '  •  Pulang : ' + (day.out_time || '-')"></span>
+                                                        </div>
+                                                    </template>
+
+                                                    <!-- Baris 4: Terlambat (Saat Hadir) -->
+                                                    <template x-if="day.status === 'Hadir'">
+                                                        <div class="flex items-start gap-1">
+                                                            <span class="text-slate-400 dark:text-slate-500 shrink-0 w-20">Terlambat</span>
+                                                            <span class="text-slate-400 dark:text-slate-500">:</span>
+                                                            <span :class="day.late_minutes > 0 ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-500 dark:text-slate-400'" x-text="day.late_minutes > 0 ? day.late_minutes + ' mnt' : '-'"></span>
+                                                        </div>
+                                                    </template>
+
+                                                    <!-- Keterangan (Saat Izin/Sakit/Cuti/Alpa/Libur) -->
+                                                    <template x-if="day.status !== 'Hadir' && day.notes">
+                                                        <div class="flex items-start gap-1">
+                                                            <span class="text-slate-400 dark:text-slate-500 shrink-0 w-20">Keterangan</span>
+                                                            <span class="text-slate-400 dark:text-slate-500">:</span>
+                                                            <span class="text-slate-700 dark:text-slate-300 font-medium" x-text="day.notes"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
                                             </div>
-                                        </div>
                                     </template>
                                 </template>
                             </div>
