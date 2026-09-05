@@ -276,6 +276,11 @@ class AttendancePercentageReportController extends Controller
                     $isDayOff = true;
                 }
 
+                // If shift worker and has no assigned shift on this date -> day off (roster off)
+                if ($isShiftWorker && !$activeShift) {
+                    $isDayOff = true;
+                }
+
                 // If not shift worker and it is holiday -> day off
                 if (!$isShiftWorker && $isHoliday) {
                     $isDayOff = true;
