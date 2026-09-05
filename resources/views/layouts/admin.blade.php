@@ -265,7 +265,7 @@
         </div>
 
         <!-- TOAST NOTIFICATION CONTAINER -->
-        <div id="toast-notification" class="fixed bottom-5 right-5 z-50 hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 px-4 py-3 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 flex items-center gap-3 max-w-sm">
+        <div id="toast-notification" class="fixed top-5 right-5 z-[9999] hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 px-4 py-3 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 flex items-center gap-3 max-w-sm">
             <div id="toast-icon-bg" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
                 <svg id="toast-icon-success" class="w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 <svg id="toast-icon-error" class="w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -748,7 +748,7 @@
             }"
             @toast-dispatch.window="add($event.detail.message, $event.detail.type, $event.detail.token)"
             @toast-dismiss-dispatch.window="removeByToken($event.detail.token)"
-            class="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4">
+            class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4">
             
             <template x-for="t in toasts" :key="t.id">
                 <div x-transition:enter="transition ease-out duration-300 transform translate-y-2 opacity-0"
