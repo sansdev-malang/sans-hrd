@@ -255,8 +255,12 @@
                                 <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30 {{ $date->isSunday() ? 'bg-red-50/30 dark:bg-red-950/10' : '' }}" title="{{ $cellTooltip }}">
                                     @if($detail)
                                         @if($detail['status'] === 'Hadir')
-                                            <div class="flex flex-col gap-0.5 items-center justify-center">
-                                                <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}">{{ $detail['check_in'] ?? '-' }}</span>
+                                            @php
+                                                $isRedLate = !empty($detail['is_red_late']);
+                                                $isLate = !empty($detail['is_late']);
+                                            @endphp
+                                            <div class="flex flex-col gap-0.5 items-center justify-center {{ $isRedLate ? 'bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded px-1 py-0.5' : '' }}">
+                                                <span class="text-[10px] font-bold {{ $isRedLate ? 'text-rose-600 dark:text-rose-400 font-extrabold' : ($isLate ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400') }}">{{ $detail['check_in'] ?? '-' }}</span>
                                                 @if(!empty($detail['pending_leave']))
                                                     @php
                                                         $pCode = $detail['pending_leave']['leave_code'];
@@ -320,18 +324,26 @@
                                                 $colorClass = $colorMap[$leaveCode] ?? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
                                             @endphp
                                             @if(!empty($detail['check_in']) && !empty($detail['check_out']))
+                                                @php
+                                                    $isRedLate = !empty($detail['is_red_late']);
+                                                    $isLate = !empty($detail['is_late']);
+                                                @endphp
                                                 <!-- Both Check-In and Check-Out -->
-                                                <div class="flex flex-col gap-0.5 items-center justify-center">
-                                                    <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}">{{ $detail['check_in'] }}</span>
+                                                <div class="flex flex-col gap-0.5 items-center justify-center {{ $isRedLate ? 'bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded px-1 py-0.5' : '' }}">
+                                                    <span class="text-[10px] font-bold {{ $isRedLate ? 'text-rose-600 dark:text-rose-400 font-extrabold' : ($isLate ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400') }}">{{ $detail['check_in'] }}</span>
                                                     <div class="w-full flex justify-center scale-90">
                                                         <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}">{{ $leaveCode }}</span>
                                                     </div>
                                                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">{{ $detail['check_out'] }}</span>
                                                 </div>
                                             @elseif(!empty($detail['check_in']) && empty($detail['check_out']))
+                                                @php
+                                                    $isRedLate = !empty($detail['is_red_late']);
+                                                    $isLate = !empty($detail['is_late']);
+                                                @endphp
                                                 <!-- Only Check-In -->
-                                                <div class="flex flex-col gap-0.5 items-center justify-center">
-                                                    <span class="text-[10px] font-bold {{ (!empty($detail['is_late'])) ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }}">{{ $detail['check_in'] }}</span>
+                                                <div class="flex flex-col gap-0.5 items-center justify-center {{ $isRedLate ? 'bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded px-1 py-0.5' : '' }}">
+                                                    <span class="text-[10px] font-bold {{ $isRedLate ? 'text-rose-600 dark:text-rose-400 font-extrabold' : ($isLate ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400') }}">{{ $detail['check_in'] }}</span>
                                                     <div class="w-full flex justify-center scale-90">
                                                         <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $colorClass }}">{{ $leaveCode }}</span>
                                                     </div>
@@ -557,32 +569,34 @@
                                             <div class="w-full">
                                                 <!-- Present -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Hadir'">
-                                                    <div class="flex flex-col items-center leading-none">
+                                                    <div class="flex flex-col items-center leading-none w-full"
+                                                         :class="selectedReport.daily_details[day.dateStr].is_red_late ? 'bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded py-0.5' : ''">
                                                         <span class="text-[10px] font-bold" 
-                                                              :class="selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'"
+                                                              :class="selectedReport.daily_details[day.dateStr].is_red_late ? 'text-rose-600 dark:text-rose-400 font-extrabold' : (selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400')"
                                                               x-text="selectedReport.daily_details[day.dateStr].check_in || '-'"></span>
                                                         <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400" x-text="selectedReport.daily_details[day.dateStr].check_out || '-'"></span>
                                                     </div>
                                                 </template>
- 
+
                                                 <!-- Alfa -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Alfa'">
                                                     <div class="w-full py-1 text-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-md text-[9px] font-extrabold">A</div>
                                                 </template>
- 
+
                                                 <!-- Off -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Off'">
                                                     <div class="w-full py-1 text-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md text-[9px] font-extrabold">OFF</div>
                                                 </template>
- 
+
                                                 <!-- Cuti/Izin -->
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Cuti/Izin'">
                                                     <div class="flex flex-col items-center gap-0.5 w-full">
                                                         <!-- Both Check-In and Check-Out -->
                                                         <template x-if="selectedReport.daily_details[day.dateStr].check_in && selectedReport.daily_details[day.dateStr].check_out">
-                                                            <div class="flex flex-col items-center w-full leading-none">
+                                                            <div class="flex flex-col items-center w-full leading-none"
+                                                                 :class="selectedReport.daily_details[day.dateStr].is_red_late ? 'bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded py-0.5' : ''">
                                                                 <span class="text-[10px] font-bold" 
-                                                                      :class="selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'"
+                                                                      :class="selectedReport.daily_details[day.dateStr].is_red_late ? 'text-rose-600 dark:text-rose-400 font-extrabold' : (selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400')"
                                                                       x-text="selectedReport.daily_details[day.dateStr].check_in"></span>
                                                                 <div class="w-full py-0.5 text-center rounded text-[9px] font-extrabold"
                                                                      :class="getClassForLeave(selectedReport.daily_details[day.dateStr])"
@@ -593,8 +607,10 @@
                                                         
                                                         <!-- Only Check-In -->
                                                         <template x-if="selectedReport.daily_details[day.dateStr].check_in && !selectedReport.daily_details[day.dateStr].check_out">
-                                                            <div class="flex flex-col items-center w-full leading-none">
-                                                                <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400" 
+                                                            <div class="flex flex-col items-center w-full leading-none"
+                                                                 :class="selectedReport.daily_details[day.dateStr].is_red_late ? 'bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded py-0.5' : ''">
+                                                                <span class="text-[10px] font-bold" 
+                                                                      :class="selectedReport.daily_details[day.dateStr].is_red_late ? 'text-rose-600 dark:text-rose-400 font-extrabold' : (selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400')"
                                                                       x-text="selectedReport.daily_details[day.dateStr].check_in"></span>
                                                                 <div class="w-full py-0.5 text-center rounded text-[9px] font-extrabold"
                                                                      :class="getClassForLeave(selectedReport.daily_details[day.dateStr])"

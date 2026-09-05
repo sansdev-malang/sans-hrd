@@ -318,9 +318,27 @@ class AttendanceLogController extends Controller
 
                     if ($checkInLog || $checkOutLog) {
                         $isLate = false;
+                        $isRedLate = false;
+
                         if ($checkInLog) {
-                            if (\Carbon\Carbon::parse($checkInLog)->second(0) > $expectedIn->second(0)) {
+                            $empPosition = strtolower($emp['position'] ?? $emp['subject_position'] ?? '');
+                            $isShiftExempt = $isShiftWorker 
+                                || str_contains($empPosition, 'keamanan') 
+                                || str_contains($empPosition, 'satpam') 
+                                || str_contains($empPosition, 'security') 
+                                || str_contains($empPosition, 'mart') 
+                                || str_contains($empPosition, 'toko') 
+                                || str_contains($empPosition, 'salehmart');
+
+                            $checkInCarbon = \Carbon\Carbon::parse($checkInLog);
+
+                            if ($checkInCarbon->second(0) > $expectedIn->second(0)) {
                                 $isLate = true;
+                            }
+
+                            // Only non-roster/non-shift staff who arrive after 07:25 get is_red_late
+                            if (!$isShiftExempt && $checkInCarbon->second(0) > \Carbon\Carbon::parse($dateStr . ' 07:25:00')->second(0)) {
+                                $isRedLate = true;
                             }
                         }
 
@@ -350,7 +368,8 @@ class AttendanceLogController extends Controller
                             'status' => 'Hadir',
                             'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
                             'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
-                            'is_late' => $isLate
+                            'is_late' => $isLate,
+                            'is_red_late' => $isRedLate,
                         ];
                     } else {
                         // Determine if it is actually Alfa or if the shift hasn't started yet
@@ -393,6 +412,7 @@ class AttendanceLogController extends Controller
                             'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
                             'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
                             'is_late' => $isLateForLeave,
+                            'is_red_late' => ($isLateForLeave && $isRedLate),
                         ];
                     } elseif ($activeLeave->status === 'Rejected') {
                         $dailyDetails[$dateStr]['rejected_leave'] = [

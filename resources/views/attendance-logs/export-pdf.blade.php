@@ -14,6 +14,7 @@
         }
         /* Color-coded Cells for DomPDF (Flat styling without nested divs) */
         .cell-hadir { background-color: #ecfdf5; color: #047857; font-weight: bold; }
+        .cell-late { background-color: #fff1f2; color: #e11d48; font-weight: bold; }
         .cell-alfa { background-color: #fff1f2; color: #be123c; font-weight: bold; }
         .cell-cuti { background-color: #eff6ff; color: #1d4ed8; font-weight: bold; }
         .cell-sakit { background-color: #fffbeb; color: #d97706; font-weight: bold; }
@@ -113,7 +114,7 @@
                             if ($detail) {
                                 $status = $detail['status'];
                                 if ($status === 'Hadir') {
-                                    $cellClass = 'cell-hadir';
+                                    $cellClass = !empty($detail['is_late']) ? 'cell-late' : 'cell-hadir';
                                     $checkIn = isset($detail['check_in']) ? date('H:i', strtotime($detail['check_in'])) : '-';
                                     $checkOut = isset($detail['check_out']) ? date('H:i', strtotime($detail['check_out'])) : '-';
                                     $content = "{$checkIn}<br>{$checkOut}";
