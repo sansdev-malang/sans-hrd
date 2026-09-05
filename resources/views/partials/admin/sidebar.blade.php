@@ -334,14 +334,11 @@
                         Layanan SDM
                     </span>
                 </a>
-                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('coming-soon-profil') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                <a href="{{ route('profile.edit') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('profile.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="user" class="menu-icon w-4 h-4"></i>
-                        <span class="menu-text">Profil</span>
-                    </div>
-                    <span class="menu-text text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-95">Soon</span>
+                    <i data-lucide="user" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Profil</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
                         Profil
                     </span>
@@ -424,21 +421,12 @@
             x-transition:leave-start="transform opacity-100 scale-100"
             x-transition:leave-end="transform opacity-0 scale-95" style="display: none;">
 
-            <!-- Account Info -->
-            <a href="{{ route('profile.edit') }}"
-                class="flex items-center gap-2 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                <i data-lucide="badge-check" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
-                <span>Pengaturan Akun</span>
-            </a>
-
-            <div class="border-t border-slate-100 dark:border-slate-900 my-1"></div>
-
             <!-- Log Out -->
-            <form action="{{ route('logout') }}" method="POST">
+            <form action="{{ route('logout') }}" method="POST" class="p-1">
                 @csrf
                 <button type="submit"
-                    class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
-                    <i data-lucide="log-out" class="w-4 h-4 text-red-500 dark:text-red-400"></i>
+                    class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer">
+                    <i data-lucide="log-out" class="w-4 h-4 text-rose-500 dark:text-rose-400"></i>
                     <span>Keluar</span>
                 </button>
             </form>
