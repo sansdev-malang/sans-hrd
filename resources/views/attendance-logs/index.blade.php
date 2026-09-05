@@ -643,9 +643,9 @@
                                                     </div>
                                                 </template>
  
-                                                <!-- Libur -->
-                                                <template x-if="selectedReport.daily_details[day.dateStr].status === 'Libur'">
-                                                    <div class="text-center text-red-300 dark:text-red-900/30 text-[10px] font-bold">-</div>
+                                                <!-- Libur / Off -->
+                                                <template x-if="selectedReport.daily_details[day.dateStr].status === 'Libur' || selectedReport.daily_details[day.dateStr].status === 'Off'">
+                                                    <div class="text-center text-slate-400 dark:text-slate-500 text-[10px] font-bold">OFF</div>
                                                 </template>
                                             </div>
                                         </template>
@@ -764,6 +764,7 @@
                     return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
                 }
                 return name.substring(0, 2).toUpperCase();
+            }
         }));
     });
 </script>
