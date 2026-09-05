@@ -297,9 +297,7 @@
                                                     </div>
                                                 @endif
                                             </div>
-                                        @elseif($detail['status'] === 'Libur')
-                                            <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-red-50/50 dark:bg-red-950/20 text-rose-500 dark:text-rose-450 border border-red-100 dark:border-red-900/30 rounded font-bold text-[9px]">OFF</div>
-                                        @elseif($detail['status'] === 'Off')
+                                        @elseif($detail['status'] === 'Libur' || $detail['status'] === 'Off')
                                             <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-50 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[9px]">OFF</div>
                                         @elseif($detail['status'] === 'Cuti/Izin')
                                             @php

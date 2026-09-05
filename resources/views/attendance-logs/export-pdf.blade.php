@@ -12,17 +12,19 @@
         @page {
             margin: 0.8cm 0.5cm;
         }
-        /* Color-coded Cells for DomPDF (Flat styling without nested divs) */
-        .cell-hadir { background-color: #ecfdf5; color: #047857; font-weight: bold; }
-        .cell-late { background-color: #fff1f2; color: #e11d48; font-weight: bold; }
-        .cell-alfa { background-color: #fff1f2; color: #be123c; font-weight: bold; }
-        .cell-cuti { background-color: #eff6ff; color: #1d4ed8; font-weight: bold; }
-        .cell-sakit { background-color: #fffbeb; color: #d97706; font-weight: bold; }
-        .cell-izin { background-color: #fff7ed; color: #c2410c; font-weight: bold; }
-        .cell-dinas { background-color: #e0e7ff; color: #4338ca; font-weight: bold; }
-        .cell-libur { background-color: #fcf8f8; color: #ef4444; }
-        .cell-off { background-color: #f8fafc; color: #64748b; font-size: 5.5px; }
-        .cell-pending { background-color: #fafafa; color: #9ca3af; }
+        /* Color-coded Text for DomPDF (Text colors only, clean white background) */
+        .cell-hadir { color: #047857; font-weight: bold; }
+        .cell-late-amber { color: #d97706; font-weight: bold; }
+        .cell-late { color: #e11d48; font-weight: bold; }
+        .cell-alfa { color: #be123c; font-weight: bold; }
+        .cell-cuti { color: #1d4ed8; font-weight: bold; }
+        .cell-sakit { color: #d97706; font-weight: bold; }
+        .cell-izin { color: #7c3aed; font-weight: bold; }
+        .cell-dinas { color: #059669; font-weight: bold; }
+        .cell-libur { color: #94a3b8; font-size: 5.5px; }
+        .cell-off { color: #94a3b8; font-size: 5.5px; }
+        .cell-pending { color: #9ca3af; }
+        .time-out { color: #64748b; }
         h2 {
             text-align: center;
             margin-bottom: 5px;
@@ -114,43 +116,47 @@
                             if ($detail) {
                                 $status = $detail['status'];
                                 if ($status === 'Hadir') {
-                                    $cellClass = !empty($detail['is_late']) ? 'cell-late' : 'cell-hadir';
+                                    $inClass = 'cell-hadir';
+                                    if (!empty($detail['is_red_late'])) {
+                                        $inClass = 'cell-late';
+                                    } elseif (!empty($detail['is_late'])) {
+                                        $inClass = 'cell-late-amber';
+                                    }
                                     $checkIn = isset($detail['check_in']) ? date('H:i', strtotime($detail['check_in'])) : '-';
                                     $checkOut = isset($detail['check_out']) ? date('H:i', strtotime($detail['check_out'])) : '-';
-                                    $content = "{$checkIn}<br>{$checkOut}";
                                     
+                                    $content = "<span class='{$inClass}'>{$checkIn}</span>";
                                     if (!empty($detail['pending_leave'])) {
-                                        $cellClass = 'cell-pending';
-                                        $content .= "<br>(" . $detail['pending_leave']['leave_code'] . ")";
+                                        $content .= "<br><span class='cell-pending'>(" . $detail['pending_leave']['leave_code'] . ")</span>";
                                     }
+                                    $content .= "<br><span class='time-out'>{$checkOut}</span>";
                                 } elseif ($status === 'Alfa') {
                                     $cellClass = 'cell-alfa';
                                     $content = 'A';
                                     if (!empty($detail['pending_leave'])) {
-                                        $cellClass = 'cell-pending';
-                                        $content .= "<br>(" . $detail['pending_leave']['leave_code'] . ")";
+                                        $content .= "<br><span class='cell-pending'>(" . $detail['pending_leave']['leave_code'] . ")</span>";
                                     }
                                 } elseif ($status === 'Cuti/Izin') {
                                     $leaveCode = $detail['leave_code'] ?? 'I';
                                     $isPending = !empty($detail['is_pending']);
-                                    if ($leaveCode === 'S') $cellClass = 'cell-sakit';
-                                    elseif ($leaveCode === 'I') $cellClass = 'cell-izin';
-                                    elseif ($leaveCode === 'C') $cellClass = 'cell-cuti';
-                                    elseif ($leaveCode === 'H') $cellClass = 'cell-dinas';
-                                    else $cellClass = 'cell-cuti';
+                                    if ($leaveCode === 'S') $codeClass = 'cell-sakit';
+                                    elseif ($leaveCode === 'I') $codeClass = 'cell-izin';
+                                    elseif ($leaveCode === 'C') $codeClass = 'cell-cuti';
+                                    elseif ($leaveCode === 'H') $codeClass = 'cell-dinas';
+                                    else $codeClass = 'cell-cuti';
                                     
-                                    if ($isPending) $cellClass = 'cell-pending';
-                                    $content = $leaveCode;
+                                    if ($isPending) $codeClass .= ' cell-pending';
                                     
                                     if (!empty($detail['check_in']) || !empty($detail['check_out'])) {
                                         $ci = isset($detail['check_in']) ? date('H:i', strtotime($detail['check_in'])) : '-';
                                         $co = isset($detail['check_out']) ? date('H:i', strtotime($detail['check_out'])) : '-';
-                                        $content = "{$ci}<br>{$leaveCode}<br>{$co}";
+                                        $inClass = !empty($detail['is_red_late']) ? 'cell-late' : (!empty($detail['is_late']) ? 'cell-late-amber' : 'cell-hadir');
+                                        $content = "<span class='{$inClass}'>{$ci}</span><br><span class='{$codeClass}'>{$leaveCode}" . ($isPending ? ' (P)' : '') . "</span><br><span class='time-out'>{$co}</span>";
+                                    } else {
+                                        $cellClass = $codeClass;
+                                        $content = $leaveCode . ($isPending ? ' (P)' : '');
                                     }
-                                } elseif ($status === 'Libur') {
-                                    $cellClass = 'cell-libur';
-                                    $content = 'OFF';
-                                } elseif ($status === 'Off') {
+                                } elseif ($status === 'Libur' || $status === 'Off') {
                                     $cellClass = 'cell-off';
                                     $content = 'OFF';
                                 } else {
@@ -158,8 +164,8 @@
                                 }
                             } else {
                                 if ($date->isSunday()) {
-                                    $cellClass = 'cell-libur';
-                                    $content = '-';
+                                    $cellClass = 'cell-off';
+                                    $content = 'OFF';
                                 } else {
                                     $content = '-';
                                 }

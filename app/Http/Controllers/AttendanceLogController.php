@@ -621,61 +621,97 @@ class AttendanceLogController extends Controller
                 
                 $cellValue = '-';
                 if ($detail) {
-                    $sheet->getStyle($colLetter . $row)->getAlignment()->setWrapText(true)->setHorizontal('center')->setVertical('center');
+                    $cellStyle = $sheet->getStyle($colLetter . $row);
+                    $cellStyle->getAlignment()->setWrapText(true)->setHorizontal('center')->setVertical('center');
                     
                     if ($detail['status'] === 'Hadir') {
                         $in = $detail['check_in'] ?? '-';
                         $out = $detail['check_out'] ?? '-';
-                        if (!empty($detail['pending_leave'])) {
-                            $cellValue = $in . "\n" . $detail['pending_leave']['leave_code'] . "\n" . $out;
-                        } else {
-                            $cellValue = $in . "\n" . $out;
+
+                        $inColorHex = 'FF047857'; // Green On-time
+                        if (!empty($detail['is_red_late'])) {
+                            // Red Late (> 07:25 for non-roster)
+                            $inColorHex = 'FFE11D48';
+                        } elseif (!empty($detail['is_late'])) {
+                            // Yellow Late (<= 07:25 or roster late)
+                            $inColorHex = 'FFD97706';
                         }
+
+                        $richText = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
+                        $inRun = $richText->createTextRun($in);
+                        $inRun->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($inColorHex));
+
+                        if (!empty($detail['pending_leave'])) {
+                            $pRun = $richText->createTextRun("\n" . $detail['pending_leave']['leave_code']);
+                            $pRun->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
+                        }
+
+                        $outRun = $richText->createTextRun("\n" . $out);
+                        $outRun->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF64748B'));
+
+                        $cellValue = $richText;
                     } elseif ($detail['status'] === 'Alfa') {
                         $cellValue = 'A';
                         if (!empty($detail['pending_leave'])) {
                             $cellValue = "A\n" . $detail['pending_leave']['leave_code'];
                         }
-                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
+                        $cellStyle->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFBE123C'));
                     } elseif ($detail['status'] === 'Cuti/Izin') {
                         $leaveCode = $detail['leave_code'] ?? 'I';
                         $isPending = !empty($detail['is_pending']);
                         $in = $detail['check_in'] ?? null;
                         $out = $detail['check_out'] ?? null;
                         
+                        $excelColorMap = [
+                            'S' => 'FFD97706', // Warm Amber
+                            'I' => 'FF9333EA', // Purple
+                            'C' => 'FF2563EB', // Blue
+                            'H' => 'FF059669', // Emerald/Green
+                        ];
+
+                        $leaveColorHex = $excelColorMap[$leaveCode] ?? 'FF2563EB';
+
                         if ($in || $out) {
-                            $cellValue = ($in ?: '-') . "\n" . $leaveCode . ($isPending ? ' (P)' : '') . "\n" . ($out ?: '-');
+                            $inColorHex = !empty($detail['is_red_late']) ? 'FFE11D48' : (!empty($detail['is_late']) ? 'FFD97706' : 'FF047857');
+                            
+                            $richText = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
+                            $inRun = $richText->createTextRun($in ?: '-');
+                            if ($in) {
+                                $inRun->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($inColorHex));
+                            } else {
+                                $inRun->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF94A3B8'));
+                            }
+
+                            $leaveRun = $richText->createTextRun("\n" . $leaveCode . ($isPending ? ' (P)' : ''));
+                            $leaveRun->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($leaveColorHex));
+                            if ($isPending) {
+                                $leaveRun->getFont()->setItalic(true);
+                            }
+
+                            $outRun = $richText->createTextRun("\n" . ($out ?: '-'));
+                            $outRun->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF64748B'));
+
+                            $cellValue = $richText;
                         } else {
                             $cellValue = $leaveCode . ($isPending ? ' (P)' : '');
+                            $cellStyle->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($leaveColorHex));
+                            if ($isPending) {
+                                $cellStyle->getFont()->setItalic(true);
+                            }
                         }
-                        
-                        $excelColorMap = [
-                            'S' => 'FFE28743', // Warm Amber
-                            'I' => 'FF8A2BE2', // Purple
-                            'C' => 'FF1F75FE', // Blue
-                            'H' => 'FF10B981', // Emerald/Green
-                        ];
-                        $colorHex = $excelColorMap[$leaveCode] ?? 'FF1F75FE';
-                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($colorHex));
-                        if ($isPending) {
-                            $sheet->getStyle($colLetter . $row)->getFont()->setItalic(true);
-                        }
-                    } elseif ($detail['status'] === 'Libur') {
-                        $cellValue = '-';
-                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
-                    } elseif ($detail['status'] === 'Off') {
+                    } elseif ($detail['status'] === 'Libur' || $detail['status'] === 'Off') {
                         $cellValue = 'OFF';
-                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF9CA3AF'));
+                        $cellStyle->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF94A3B8'));
                     }
                 } else {
                     if ($date->isSunday()) {
-                        $cellValue = '-';
-                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
+                        $cellValue = 'OFF';
+                        $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF94A3B8'));
                     }
                 }
                 
                 $sheet->setCellValue($colLetter . $row, $cellValue);
-                if ($cellValue === 'A' || $cellValue === 'L' || $cellValue === '-' || $detail['status'] ?? '' === 'Cuti/Izin') {
+                if ($cellValue === 'A' || $cellValue === 'L' || $cellValue === '-' || ($detail && ($detail['status'] ?? '') === 'Cuti/Izin')) {
                     $sheet->getStyle($colLetter . $row)->getAlignment()->setHorizontal('center')->setVertical('center');
                 }
                 $colIndex++;
