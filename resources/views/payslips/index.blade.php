@@ -216,9 +216,9 @@
                                      <div class="flex gap-2 justify-end">
                                          @if($emp['payslip'])
                                              <a href="{{ Storage::url($emp['payslip']->file_path) }}" target="_blank"
-                                                class="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1" title="Lihat Slip">
-                                                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                                                 Lihat
+                                                class="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1.5" title="Lihat Slip Gaji">
+                                                 <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400"></i>
+                                                 Slip Gaji
                                              </a>
                                              @if($emp['payslip']->attachment_path)
                                                  <a href="{{ Storage::url($emp['payslip']->attachment_path) }}" target="_blank"
