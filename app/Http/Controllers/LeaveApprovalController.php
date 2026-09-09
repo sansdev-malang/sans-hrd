@@ -44,7 +44,10 @@ class LeaveApprovalController extends Controller
         $this->pullLeaveRequestsFromUnits();
 
         // 2. Load from local database with query filters
-        $query = LeaveRequest::with('schoolUnit')->orderBy('created_at', 'desc');
+        // Priority: Pending requests at the top, then sorted by newest created_at
+        $query = LeaveRequest::with('schoolUnit')
+            ->orderByRaw("CASE WHEN LOWER(status) = 'pending' THEN 0 ELSE 1 END")
+            ->orderBy('created_at', 'desc');
 
         if ($request->filled('unit_id')) {
             $query->where('school_unit_id', $request->input('unit_id'));
