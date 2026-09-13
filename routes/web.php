@@ -160,6 +160,12 @@ Route::redirect('/dashboard', '/');
 
 Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::resource('users', \App\Http\Controllers\UserController::class);
+
+    // System Logs
+    Route::get('system-logs', [\App\Http\Controllers\SystemLogController::class, 'index'])->name('system-logs.index');
+    Route::get('system-logs/download', [\App\Http\Controllers\SystemLogController::class, 'download'])->name('system-logs.download');
+    Route::post('system-logs/clear', [\App\Http\Controllers\SystemLogController::class, 'clear'])->name('system-logs.clear');
+    Route::delete('system-logs/delete', [\App\Http\Controllers\SystemLogController::class, 'destroy'])->name('system-logs.destroy');
 });
 
 Route::middleware('auth')->group(function () {
