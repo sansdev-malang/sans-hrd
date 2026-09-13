@@ -179,3 +179,7 @@ Route::get('/test-403', function () { abort(403); });
 Route::get('/test-419', function () { abort(419); });
 Route::get('/test-500', function () { abort(500); });
 Route::get('/test-503', function () { abort(503); });
+
+// PWA Offline Fallback Route
+Route::view('/offline', 'errors.offline')->name('offline');
+
