@@ -206,8 +206,8 @@ class WorkingShiftController extends Controller
         $failedUnits = [];
         foreach ($units as $unit) {
             $response = $responses[$unit->id] ?? null;
-            if (!$response || !$response->successful()) {
-                $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
+            if (!($response instanceof \Illuminate\Http\Client\Response) || !$response->successful()) {
+                $status = ($response instanceof \Illuminate\Http\Client\Response) ? $response->status() : 'Error/Connection';
                 Log::error("Failed to sync shifts to unit {$unit->name}. Status: {$status}");
                 $failedUnits[] = $unit->name;
             }
