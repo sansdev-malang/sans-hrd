@@ -27,25 +27,33 @@ class BonusSchemaController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'is_active' => 'sometimes|boolean',
+            'calculation_mode' => 'nullable|string|in:early_arrival,late_tolerance',
             'tiers' => 'required|array|min:1',
             'tiers.*.tier_level' => 'required|integer|min:1',
             'tiers.*.nominal' => 'required|numeric|min:0',
-            'tiers.*.max_late_minutes' => 'required|integer|min:0',
+            'tiers.*.min_early_minutes' => 'nullable|integer|min:0',
+            'tiers.*.max_late_minutes' => 'nullable|integer|min:0',
             'tiers.*.max_absent_days' => 'sometimes|integer|min:0',
         ]);
 
         $isActive = $request->has('is_active') ? (bool)$request->input('is_active') : true;
+        $calculationMode = $request->input('calculation_mode', 'early_arrival');
+        if (!in_array($calculationMode, ['early_arrival', 'late_tolerance'])) {
+            $calculationMode = 'early_arrival';
+        }
 
         $schema = BonusSchema::create([
             'name' => $validated['name'],
             'is_active' => $isActive,
+            'calculation_mode' => $calculationMode,
         ]);
 
         foreach ($validated['tiers'] as $tData) {
             $schema->tiers()->create([
                 'tier_level' => $tData['tier_level'],
                 'nominal' => $tData['nominal'],
-                'max_late_minutes' => $tData['max_late_minutes'],
+                'min_early_minutes' => $tData['min_early_minutes'] ?? 0,
+                'max_late_minutes' => $tData['max_late_minutes'] ?? 0,
                 'max_absent_days' => $tData['max_absent_days'] ?? 0,
             ]);
         }
@@ -70,18 +78,25 @@ class BonusSchemaController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'is_active' => 'sometimes|boolean',
+            'calculation_mode' => 'nullable|string|in:early_arrival,late_tolerance',
             'tiers' => 'required|array|min:1',
             'tiers.*.tier_level' => 'required|integer|min:1',
             'tiers.*.nominal' => 'required|numeric|min:0',
-            'tiers.*.max_late_minutes' => 'required|integer|min:0',
+            'tiers.*.min_early_minutes' => 'nullable|integer|min:0',
+            'tiers.*.max_late_minutes' => 'nullable|integer|min:0',
             'tiers.*.max_absent_days' => 'sometimes|integer|min:0',
         ]);
 
         $isActive = $request->has('is_active');
+        $calculationMode = $request->input('calculation_mode', $bonusSchema->calculation_mode ?? 'early_arrival');
+        if (!in_array($calculationMode, ['early_arrival', 'late_tolerance'])) {
+            $calculationMode = 'early_arrival';
+        }
 
         $bonusSchema->update([
             'name' => $validated['name'],
             'is_active' => $isActive,
+            'calculation_mode' => $calculationMode,
         ]);
 
         $bonusSchema->tiers()->delete();
@@ -90,7 +105,8 @@ class BonusSchemaController extends Controller
             $bonusSchema->tiers()->create([
                 'tier_level' => $tData['tier_level'],
                 'nominal' => $tData['nominal'],
-                'max_late_minutes' => $tData['max_late_minutes'],
+                'min_early_minutes' => $tData['min_early_minutes'] ?? 0,
+                'max_late_minutes' => $tData['max_late_minutes'] ?? 0,
                 'max_absent_days' => $tData['max_absent_days'] ?? 0,
             ]);
         }
@@ -153,12 +169,14 @@ class BonusSchemaController extends Controller
             return [
                 'name' => $schema->name,
                 'is_active' => $schema->is_active,
+                'calculation_mode' => $schema->calculation_mode ?? 'early_arrival',
                 'tiers' => $schema->tiers->map(function ($t) {
                     return [
                         'tier_level' => $t->tier_level,
                         'nominal' => $t->nominal,
-                        'max_late_minutes' => $t->max_late_minutes,
-                        'max_absent_days' => $t->max_absent_days,
+                        'min_early_minutes' => $t->min_early_minutes ?? 0,
+                        'max_late_minutes' => $t->max_late_minutes ?? 0,
+                        'max_absent_days' => $t->max_absent_days ?? 0,
                     ];
                 })->toArray()
             ];

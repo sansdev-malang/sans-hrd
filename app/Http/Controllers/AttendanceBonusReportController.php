@@ -281,6 +281,7 @@ class AttendanceBonusReportController extends Controller
 
                 if ($hasShiftToday) {
                     $dailyLateMinutes = 0;
+                    $earlyMinutes = 0;
                     $dailyStatus = 'Absent';
                     $dailyCheckIn = null;
                     $dailyBonus = 0;
@@ -294,7 +295,7 @@ class AttendanceBonusReportController extends Controller
                         $dailyStatus = $isDinas ? ($leaveType ?: 'Dinas') : 'Present';
                         $totalPresent++;
                         
-                        // Calculate Late
+                        // Calculate Early / Late
                         if (isset($attendanceLogs[$logKey]) && !$isDinas) {
                             $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
                             $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
@@ -305,15 +306,24 @@ class AttendanceBonusReportController extends Controller
 
                             if ($isForgiven) {
                                 $dailyLateMinutes = 0;
+                                $earlyMinutes = 0;
                             } else {
-                                if ($checkInCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
+                                $checkInMin = $checkInCarbon->copy()->second(0);
+                                $expectedMin = $expectedStart->copy()->second(0);
+
+                                if ($checkInMin->gt($expectedMin)) {
                                     $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
                                     $dailyLateMinutes = $diff;
                                     $totalLateMinutes += $diff;
+                                    $earlyMinutes = 0;
+                                } else {
+                                    $earlyMinutes = (int) $checkInCarbon->diffInMinutes($expectedStart);
+                                    $dailyLateMinutes = 0;
                                 }
                             }
                         } else {
                             $dailyLateMinutes = 0;
+                            $earlyMinutes = 999;
                             $dailyCheckIn = 'DINAS';
                         }
 
@@ -326,15 +336,43 @@ class AttendanceBonusReportController extends Controller
                             $currentSchema = $activeSchema;
                         }
 
-                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
-                            $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
-                                return $dailyLateMinutes <= $tier->max_late_minutes;
-                            })->sortByDesc('nominal');
+                        $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
 
-                            if ($qualifyingTiers->count() > 0) {
-                                $bestTier = $qualifyingTiers->first();
-                                $dailyBonus = $bestTier->nominal;
-                                $dailyTierLevel = $bestTier->tier_level;
+                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
+                            if ($schemaMode === 'early_arrival') {
+                                if ($isDinas) {
+                                    $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
+                                    if ($bestTier) {
+                                        $dailyBonus = $bestTier->nominal;
+                                        $dailyTierLevel = $bestTier->tier_level;
+                                    }
+                                } elseif ($dailyLateMinutes > 0) {
+                                    // Late arrival gets Rp 0 in early arrival policy
+                                    $dailyBonus = 0;
+                                    $dailyTierLevel = null;
+                                } else {
+                                    // Early arrival: find tiers where min_early_minutes <= earlyMinutes
+                                    $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
+                                        return ($tier->min_early_minutes ?? 0) <= $earlyMinutes;
+                                    })->sortByDesc('nominal');
+
+                                    if ($qualifyingTiers->count() > 0) {
+                                        $bestTier = $qualifyingTiers->first();
+                                        $dailyBonus = $bestTier->nominal;
+                                        $dailyTierLevel = $bestTier->tier_level;
+                                    }
+                                }
+                            } else {
+                                // Legacy: late tolerance
+                                $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
+                                    return $dailyLateMinutes <= $tier->max_late_minutes;
+                                })->sortByDesc('nominal');
+
+                                if ($qualifyingTiers->count() > 0) {
+                                    $bestTier = $qualifyingTiers->first();
+                                    $dailyBonus = $bestTier->nominal;
+                                    $dailyTierLevel = $bestTier->tier_level;
+                                }
                             }
                         }
 
@@ -355,9 +393,11 @@ class AttendanceBonusReportController extends Controller
                         'shift_start' => $shiftStartTime,
                         'check_in' => $dailyCheckIn,
                         'late_minutes' => $dailyLateMinutes,
+                        'early_minutes' => $earlyMinutes,
                         'status' => $dailyStatus,
                         'bonus_nominal' => $dailyBonus,
-                        'tier_level' => $dailyTierLevel
+                        'tier_level' => $dailyTierLevel,
+                        'calculation_mode' => $currentSchema ? ($currentSchema->calculation_mode ?? 'early_arrival') : 'early_arrival',
                     ];
                 }
 
@@ -640,6 +680,7 @@ class AttendanceBonusReportController extends Controller
 
                 if ($hasShiftToday) {
                     $dailyLateMinutes = 0;
+                    $earlyMinutes = 0;
                     $dailyBonus = 0;
                     $dailyStatus = 'Absent';
                     $dailyCheckIn = null;
@@ -655,20 +696,30 @@ class AttendanceBonusReportController extends Controller
                             $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
                             $checkInCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
                             $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
+                            $dailyCheckIn = $checkInCarbon->format('H:i:s');
 
                             $isForgiven = $hasRequiresAttendanceLeave && $activeLeave && (!$activeLeave->gets_presence_bonus && $activeLeave->status_code !== 'H');
 
                             if ($isForgiven) {
                                 $dailyLateMinutes = 0;
+                                $earlyMinutes = 0;
                             } else {
-                                if ($checkInCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
+                                $checkInMin = $checkInCarbon->copy()->second(0);
+                                $expectedMin = $expectedStart->copy()->second(0);
+
+                                if ($checkInMin->gt($expectedMin)) {
                                     $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
                                     $dailyLateMinutes = $diff;
                                     $totalLateMinutes += $diff;
+                                    $earlyMinutes = 0;
+                                } else {
+                                    $earlyMinutes = (int) $checkInCarbon->diffInMinutes($expectedStart);
+                                    $dailyLateMinutes = 0;
                                 }
                             }
                         } else {
                             $dailyLateMinutes = 0;
+                            $earlyMinutes = 999;
                             $dailyCheckIn = 'DINAS';
                         }
 
@@ -680,14 +731,36 @@ class AttendanceBonusReportController extends Controller
                             $currentSchema = $activeSchema;
                         }
 
-                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
-                            $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
-                                return $dailyLateMinutes <= $tier->max_late_minutes;
-                            })->sortByDesc('nominal');
+                        $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
 
-                            if ($qualifyingTiers->count() > 0) {
-                                $bestTier = $qualifyingTiers->first();
-                                $dailyBonus = $bestTier->nominal;
+                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
+                            if ($schemaMode === 'early_arrival') {
+                                if ($isDinas) {
+                                    $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
+                                    if ($bestTier) {
+                                        $dailyBonus = $bestTier->nominal;
+                                    }
+                                } elseif ($dailyLateMinutes > 0) {
+                                    $dailyBonus = 0;
+                                } else {
+                                    $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
+                                        return ($tier->min_early_minutes ?? 0) <= $earlyMinutes;
+                                    })->sortByDesc('nominal');
+
+                                    if ($qualifyingTiers->count() > 0) {
+                                        $bestTier = $qualifyingTiers->first();
+                                        $dailyBonus = $bestTier->nominal;
+                                    }
+                                }
+                            } else {
+                                $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
+                                    return $dailyLateMinutes <= $tier->max_late_minutes;
+                                })->sortByDesc('nominal');
+
+                                if ($qualifyingTiers->count() > 0) {
+                                    $bestTier = $qualifyingTiers->first();
+                                    $dailyBonus = $bestTier->nominal;
+                                }
                             }
                         }
                         $totalBonusNominal += $dailyBonus;
@@ -704,7 +777,9 @@ class AttendanceBonusReportController extends Controller
 
                     $dailyDetails[$dateStr] = [
                         'status' => $dailyStatus,
-                        'bonus_nominal' => $dailyBonus
+                        'bonus_nominal' => $dailyBonus,
+                        'early_minutes' => $earlyMinutes,
+                        'late_minutes' => $dailyLateMinutes,
                     ];
                 }
 

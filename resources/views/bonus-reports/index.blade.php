@@ -238,7 +238,13 @@
                                             @php 
                                                 $nominal = $detail['bonus_nominal'];
                                                 $shortNominal = ($nominal >= 1000) ? ($nominal / 1000) . 'k' : $nominal;
-                                                $titleText = (isset($detail['status']) && $detail['status'] === 'Dinas') ? 'Dinas: Rp ' . number_format($nominal, 0, ',', '.') : 'Rp ' . number_format($nominal, 0, ',', '.');
+                                                $tierStr = !empty($detail['tier_level']) ? "Tier {$detail['tier_level']}" : 'Bonus';
+                                                if (isset($detail['status']) && $detail['status'] === 'Dinas') {
+                                                    $titleText = "Dinas: Rp " . number_format($nominal, 0, ',', '.');
+                                                } else {
+                                                    $earlyStr = !empty($detail['early_minutes']) ? " (Hadir {$detail['early_minutes']} mnt sblm masuk)" : " (Tepat Waktu)";
+                                                    $titleText = "{$tierStr}: Rp " . number_format($nominal, 0, ',', '.') . $earlyStr;
+                                                }
                                             @endphp
                                             <div class="mx-auto w-7 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] rounded border border-emerald-200 dark:border-emerald-800/50" title="{{ $titleText }}">
                                                 {{ $shortNominal }}
@@ -248,7 +254,13 @@
                                                 <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px]">-</div>
                                             @else
                                                 @php
-                                                    $titleText = (isset($detail['status']) && $detail['status'] === 'Dinas') ? 'Dinas (Tidak ada bonus)' : 'Tidak ada bonus';
+                                                    if (isset($detail['status']) && $detail['status'] === 'Dinas') {
+                                                        $titleText = 'Dinas (Tidak ada bonus)';
+                                                    } elseif (!empty($detail['late_minutes'])) {
+                                                        $titleText = "Terlambat {$detail['late_minutes']} menit (Bonus Rp 0)";
+                                                    } else {
+                                                        $titleText = 'Tidak ada bonus';
+                                                    }
                                                 @endphp
                                                 <div class="mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border border-red-200 dark:border-red-800/50" title="{{ $titleText }}">
                                                     0K
