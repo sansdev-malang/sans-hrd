@@ -164,10 +164,27 @@
 
         <!-- TAB 1: HADIR LEBIH AWAL (SEBELUM JAM MASUK) -->
         <div x-show="activeTab === 'early_arrival'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-            <div class="mb-4 p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/30 text-xs text-emerald-900 dark:text-emerald-300 flex items-start gap-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                <div>
-                    <span class="font-bold">Ketentuan Skema Hadir Lebih Awal:</span> Bonus kehadiran harian dihitung berdasarkan kedatangan pegawai <strong>sebelum jam masuk shift</strong>. Pegawai yang datang lebih awal (misal &ge; 30 menit) akan mendapatkan bonus Tier 1 tertinggi. Pegawai yang scan tepat pada jam masuk tetap berhak memperoleh Tier 4, sedangkan kedatangan lewat dari jam masuk (terlambat &ge; 1 menit) mendapatkan bonus Rp 0.
+            <!-- Accordion Info Tab 1 -->
+            <div class="mb-5 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 overflow-hidden text-xs" x-data="{ open: false }">
+                <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between text-left font-bold text-emerald-900 dark:text-emerald-300 hover:bg-emerald-100/50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer border-0 bg-transparent">
+                    <div class="flex items-center gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                        <span class="text-xs">Informasi & Ketentuan Kebijakan Hadir Lebih Awal</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">
+                        <span x-text="open ? 'Tutup Informasi' : 'Lihat Informasi & Aturan'"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                    </div>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-emerald-200/40 dark:border-emerald-900/30 space-y-2.5">
+                    <p class="leading-relaxed">Bonus kehadiran harian dihitung berdasarkan selisih menit kedatangan pegawai <strong>sebelum jam masuk shift</strong>:</p>
+                    <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-400 ml-1">
+                        <li><strong>Tier 1:</strong> Pegawai yang datang paling awal (misal &ge; 30 menit sebelum shift) mendapatkan nominal bonus tertinggi.</li>
+                        <li><strong>Tier 2 - 3:</strong> Pegawai yang datang 15 atau 5 menit sebelum jam masuk shift.</li>
+                        <li><strong>Tier 4 (Tepat Waktu):</strong> Pegawai yang scan tepat pada jam masuk shift (0 menit sebelum masuk) tetap berhak memperoleh bonus.</li>
+                        <li><strong>Terlambat (&ge; 1 menit setelah jam masuk):</strong> Bonus kehadiran harian menjadi <strong>Rp 0</strong>.</li>
+                        <li><strong>Tugas Dinas / Izin Berbonus:</strong> Otomatis memperoleh bonus nominal Tier 1 tertinggi.</li>
+                    </ul>
                 </div>
             </div>
 
@@ -253,10 +270,20 @@
 
         <!-- TAB 2: TOLERANSI KETERLAMBATAN (SETELAH JAM MASUK) -->
         <div x-show="activeTab === 'late_tolerance'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display: none;">
-            <div class="mb-4 p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 text-xs text-amber-900 dark:text-amber-300 flex items-start gap-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>
-                <div>
-                    <span class="font-bold">Skema Lama (Toleransi Keterlambatan):</span> Skema ini digunakan untuk menghitung bonus berdasarkan toleransi menit keterlambatan setelah jam shift dimulai. Disimpan untuk arsip dan perhitungan data historis.
+            <!-- Accordion Info Tab 2 -->
+            <div class="mb-5 rounded-xl border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 overflow-hidden text-xs" x-data="{ open: false }">
+                <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between text-left font-bold text-amber-900 dark:text-amber-300 hover:bg-amber-100/50 dark:hover:bg-amber-950/30 transition-colors cursor-pointer border-0 bg-transparent">
+                    <div class="flex items-center gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>
+                        <span class="text-xs">Informasi & Ketentuan Skema Lama (Toleransi Keterlambatan)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400 font-semibold">
+                        <span x-text="open ? 'Tutup Informasi' : 'Lihat Informasi & Aturan'"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                    </div>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-amber-200/40 dark:border-amber-900/30 space-y-2">
+                    <p class="leading-relaxed">Skema ini merupakan kebijakan lama yang menghitung bonus berdasarkan toleransi menit keterlambatan setelah jam masuk shift. Disimpan rapi sebagai arsip agar riwayat laporan dan rekapitulasi data masa lalu tetap konsisten dan akurat.</p>
                 </div>
             </div>
 
