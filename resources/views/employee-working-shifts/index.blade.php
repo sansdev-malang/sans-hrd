@@ -1211,7 +1211,7 @@
                                             <option value="">Ikuti Default/Aktif</option>
                                             @if (isset($bonusSchemas))
                                                 @foreach ($bonusSchemas as $schema)
-                                                    <option value="{{ $schema->id }}">{{ $schema->name }} {{ $schema->is_active ? '(Aktif)' : '' }}</option>
+                                                    <option value="{{ $schema->id }}">{{ $schema->name }}</option>
                                                 @endforeach
                                             @endif
                                         </select>

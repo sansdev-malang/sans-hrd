@@ -27,7 +27,7 @@ class EmployeeWorkingShiftController extends Controller
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
         $shifts = WorkingShift::orderBy('name')->get();
-        $bonusSchemas = BonusSchema::orderBy('name')->get();
+        $bonusSchemas = BonusSchema::where('is_active', true)->orderBy('name')->get();
         
         $selectedUnitId = $request->query('unit_id');
         
@@ -407,7 +407,8 @@ class EmployeeWorkingShiftController extends Controller
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
         $shifts = WorkingShift::where('is_shift', false)->orderBy('name')->get();
-        $bonusSchemas = BonusSchema::all(); return view('employee-working-shifts.create', compact('units', 'shifts', 'bonusSchemas'));
+        $bonusSchemas = BonusSchema::where('is_active', true)->orderBy('name')->get(); 
+        return view('employee-working-shifts.create', compact('units', 'shifts', 'bonusSchemas'));
     }
 
     /**
@@ -759,7 +760,7 @@ class EmployeeWorkingShiftController extends Controller
             $shift->hex_text = $hexText[$index % count($hexText)] ?? '#4338ca';
         }
         
-        $bonusSchemas = \App\Models\BonusSchema::all();
+        $bonusSchemas = \App\Models\BonusSchema::where('is_active', true)->orderBy('name')->get();
 
         $employees = [];
         $rosterData = [];
