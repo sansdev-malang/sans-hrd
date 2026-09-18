@@ -650,7 +650,7 @@ class EmployeeController extends Controller
                 }
             }
 
-            return redirect()->route('employees.index')
+            return redirect()->back()
                 ->with('success', "Data pegawai berhasil diperbarui di unit {$unit->name}.");
         }
 
@@ -696,11 +696,11 @@ class EmployeeController extends Controller
                 EmployeeDeviceMapping::where('zkteco_uid', $zkteco_uid)->delete();
             }
 
-            return redirect()->route('employees.index')
+            return redirect()->back()
                 ->with('success', "Pegawai berhasil dihapus dari unit {$unit->name}.");
         }
 
-        return redirect()->route('employees.index')
+        return redirect()->back()
             ->withErrors(['error' => "Gagal menghapus pegawai dari unit {$unit->name}."]);
     }
 
@@ -890,11 +890,11 @@ class EmployeeController extends Controller
             \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
             $msg = "$importedCount pegawai berhasil diimpor.";
             if (count($errors) > 0) {
-                return redirect()->route('employees.index')->with('success', $msg)->with('import_errors', $errors);
+                return redirect()->back()->with('success', $msg)->with('import_errors', $errors);
             }
-            return redirect()->route('employees.index')->with('success', $msg);
+            return redirect()->back()->with('success', $msg);
         } else {
-            return redirect()->route('employees.index')->with('error', 'Tidak ada data yang berhasil diimpor.')->with('import_errors', $errors);
+            return redirect()->back()->with('error', 'Tidak ada data yang berhasil diimpor.')->with('import_errors', $errors);
         }
     }
 

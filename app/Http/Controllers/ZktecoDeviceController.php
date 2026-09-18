@@ -57,7 +57,7 @@ class ZktecoDeviceController extends Controller
 
         $zktecoDevice->update($validated);
 
-        return redirect()->route('zkteco-devices.index')
+        return redirect()->back()
             ->with('success', 'Perangkat ZKTeco berhasil diperbarui.');
     }
 
@@ -68,7 +68,7 @@ class ZktecoDeviceController extends Controller
     {
         $zktecoDevice->delete();
 
-        return redirect()->route('zkteco-devices.index')
+        return redirect()->back()
             ->with('success', 'Perangkat ZKTeco berhasil dihapus.');
     }
 

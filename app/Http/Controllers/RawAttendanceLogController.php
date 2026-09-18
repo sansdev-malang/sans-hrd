@@ -159,7 +159,7 @@ class RawAttendanceLogController extends Controller
 
         $log->update($validated);
 
-        return redirect()->route('raw-attendance-logs.index')->with('success', 'Log mentah mesin berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Log mentah mesin berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -167,7 +167,7 @@ class RawAttendanceLogController extends Controller
         $log = AttendanceLog::findOrFail($id);
         $log->delete();
 
-        return redirect()->route('raw-attendance-logs.index')->with('success', 'Log mentah mesin berhasil dihapus.');
+        return redirect()->back()->with('success', 'Log mentah mesin berhasil dihapus.');
     }
     public function downloadTemplate()
     {
@@ -354,11 +354,11 @@ class RawAttendanceLogController extends Controller
             
             DB::commit();
 
-            return redirect()->route('raw-attendance-logs.index')->with('success', "Berhasil mengimpor $count data log absensi.");
+            return redirect()->back()->with('success', "Berhasil mengimpor $count data log absensi.");
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('raw-attendance-logs.index')->withErrors(['file' => 'Gagal mengimpor file: ' . $e->getMessage()]);
+            return redirect()->back()->withErrors(['file' => 'Gagal mengimpor file: ' . $e->getMessage()]);
         }
     }
 

@@ -114,7 +114,7 @@ class LeaveTypeController extends Controller
         // Push to units
         $syncResult = $this->pushLeaveTypeToUnits($leaveType, 'save');
 
-        return redirect()->route('leave-types.index')
+        return redirect()->back()
             ->with('success', "Tipe izin '{$leaveType->name}' berhasil diperbarui dan disinkronkan ke unit sekolah ({$syncResult['success_count']} unit berhasil).");
     }
 
@@ -131,7 +131,7 @@ class LeaveTypeController extends Controller
 
         $leaveType->delete();
 
-        return redirect()->route('leave-types.index')
+        return redirect()->back()
             ->with('success', "Tipe izin '{$name}' berhasil dihapus dari HRD dan disinkronkan ke unit sekolah.");
     }
 
@@ -203,7 +203,7 @@ class LeaveTypeController extends Controller
         // Clean up any old duplicate non-standard slugs
         LeaveType::whereNotIn('code', array_keys($unitDataMap))->delete();
 
-        return redirect()->route('leave-types.index')
+        return redirect()->back()
             ->with('success', "Berhasil menarik dan menyinkronkan {$importedCount} tipe izin dari unit sekolah.");
     }
 
@@ -220,7 +220,7 @@ class LeaveTypeController extends Controller
             $totalSuccess += $res['success_count'];
         }
 
-        return redirect()->route('leave-types.index')
+        return redirect()->back()
             ->with('success', "Berhasil mendorong seluruh tipe izin ke seluruh unit sekolah terkait.");
     }
 

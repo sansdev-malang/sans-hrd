@@ -119,11 +119,11 @@ class WorkingShiftController extends Controller
         $failed = $this->syncShiftsToUnits();
 
         if (!empty($failed)) {
-            return redirect()->route('working-shifts.index')
+            return redirect()->back()
                 ->with('error', 'Shift kerja berhasil diperbarui secara lokal, namun gagal disinkronkan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
         }
 
-        return redirect()->route('working-shifts.index')
+        return redirect()->back()
             ->with('success', 'Shift kerja berhasil diperbarui dan disinkronkan ke semua unit.');
     }
 
@@ -138,11 +138,11 @@ class WorkingShiftController extends Controller
         $failed = $this->syncShiftsToUnits();
 
         if (!empty($failed)) {
-            return redirect()->route('working-shifts.index')
+            return redirect()->back()
                 ->with('error', 'Shift kerja berhasil dihapus secara lokal, namun gagal menyinkronkan penghapusan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
         }
 
-        return redirect()->route('working-shifts.index')
+        return redirect()->back()
             ->with('success', 'Shift kerja berhasil dihapus.');
     }
 
@@ -154,11 +154,11 @@ class WorkingShiftController extends Controller
         $failed = $this->syncShiftsToUnits();
 
         if (!empty($failed)) {
-            return redirect()->route('working-shifts.index')
+            return redirect()->back()
                 ->with('error', 'Gagal menyinkronkan data shift ke unit sekolah: ' . implode(', ', $failed) . '. Silakan coba beberapa saat lagi.');
         }
 
-        return redirect()->route('working-shifts.index')
+        return redirect()->back()
             ->with('success', 'Sinkronisasi data shift ke semua unit sekolah selesai dan berhasil.');
     }
 

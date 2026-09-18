@@ -202,7 +202,7 @@ class HolidayController extends Controller
         // Auto sync
         $this->syncHolidaysToUnits();
 
-        return redirect()->route('holidays.index')
+        return redirect()->back()
             ->with('success', 'Hari libur berhasil diperbarui.');
     }
 
@@ -217,7 +217,7 @@ class HolidayController extends Controller
         // Auto sync
         $this->syncHolidaysToUnits();
 
-        return redirect()->route('holidays.index')
+        return redirect()->back()
             ->with('success', 'Hari libur berhasil dihapus.');
     }
 
@@ -232,7 +232,7 @@ class HolidayController extends Controller
         // Auto sync
         $this->syncHolidaysToUnits();
 
-        return redirect()->route('holidays.index')
+        return redirect()->back()
             ->with('success', 'Penyesuaian hari libur berhasil dihapus.');
     }
 
@@ -242,7 +242,7 @@ class HolidayController extends Controller
     public function triggerSync()
     {
         $this->syncHolidaysToUnits();
-        return redirect()->route('holidays.index')
+        return redirect()->back()
             ->with('success', 'Sinkronisasi data libur selesai.');
     }
 

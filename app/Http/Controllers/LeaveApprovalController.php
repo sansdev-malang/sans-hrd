@@ -170,7 +170,7 @@ class LeaveApprovalController extends Controller
                     'notes' => 'Disetujui oleh HRD Pusat.',
                 ]);
 
-                return redirect()->route('leave-approvals.index')
+                return redirect()->back()
                     ->with('success', 'Pengajuan izin berhasil disetujui.');
             } else {
                 Log::error("Failed response approving leave: " . $response->body());
@@ -179,7 +179,7 @@ class LeaveApprovalController extends Controller
             Log::error("Error approving leave: " . $e->getMessage());
         }
 
-        return redirect()->route('leave-approvals.index')
+        return redirect()->back()
             ->with('error', 'Gagal memproses persetujuan izin ke unit sekolah.');
     }
 
@@ -213,14 +213,14 @@ class LeaveApprovalController extends Controller
                     'notes' => $validated['notes'],
                 ]);
 
-                return redirect()->route('leave-approvals.index')
+                return redirect()->back()
                     ->with('success', 'Pengajuan izin berhasil ditolak.');
             }
         } catch (\Exception $e) {
             Log::error("Error rejecting leave: " . $e->getMessage());
         }
 
-        return redirect()->route('leave-approvals.index')
+        return redirect()->back()
             ->with('error', 'Gagal memproses penolakan izin ke unit sekolah.');
     }
 
@@ -272,14 +272,14 @@ class LeaveApprovalController extends Controller
                     'gets_presence_bonus' => $getsPresenceBonus,
                 ]);
 
-                return redirect()->route('leave-approvals.index')
+                return redirect()->back()
                     ->with('success', 'Keputusan izin berhasil diperbarui.');
             }
         } catch (\Exception $e) {
             Log::error("Error updating leave decision: " . $e->getMessage());
         }
 
-        return redirect()->route('leave-approvals.index')
+        return redirect()->back()
             ->with('error', 'Gagal memproses pembaruan keputusan izin ke unit sekolah.');
     }
 
@@ -308,14 +308,14 @@ class LeaveApprovalController extends Controller
                 // Delete locally
                 $leave->delete();
 
-                return redirect()->route('leave-approvals.index')
+                return redirect()->back()
                     ->with('success', 'Pengajuan izin berhasil dihapus.');
             }
         } catch (\Exception $e) {
             Log::error("Error deleting leave: " . $e->getMessage());
         }
 
-        return redirect()->route('leave-approvals.index')
+        return redirect()->back()
             ->with('error', 'Gagal menyinkronkan penghapusan izin ke unit sekolah.');
     }
 

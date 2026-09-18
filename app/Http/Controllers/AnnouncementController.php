@@ -173,7 +173,7 @@ class AnnouncementController extends Controller
         // Sync to targeted school units
         $this->syncAnnouncementToUnits($announcement);
 
-        return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil diubah.');
+        return redirect()->back()->with('success', 'Pengumuman berhasil diubah.');
     }
 
     /**
@@ -191,7 +191,7 @@ class AnnouncementController extends Controller
 
         $announcement->delete();
 
-        return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil dihapus.');
+        return redirect()->back()->with('success', 'Pengumuman berhasil dihapus.');
     }
 
     /**
@@ -261,6 +261,6 @@ class AnnouncementController extends Controller
             $this->syncAnnouncementToUnits($announcement);
         }
         
-        return redirect()->route('announcements.index')->with('success', 'Sinkronisasi pengumuman ke unit sekolah berhasil dipicu.');
+        return redirect()->back()->with('success', 'Sinkronisasi pengumuman ke unit sekolah berhasil dipicu.');
     }
 }

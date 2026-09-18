@@ -52,7 +52,7 @@ class SchoolUnitController extends Controller
 
         $schoolUnit->update($validated);
 
-        return redirect()->route('school-units.index')
+        return redirect()->back()
             ->with('success', 'Unit sekolah berhasil diperbarui.');
     }
 
@@ -63,7 +63,7 @@ class SchoolUnitController extends Controller
     {
         $schoolUnit->delete();
 
-        return redirect()->route('school-units.index')
+        return redirect()->back()
             ->with('success', 'Unit sekolah berhasil dihapus.');
     }
 }
