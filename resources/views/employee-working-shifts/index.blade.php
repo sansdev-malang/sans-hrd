@@ -244,19 +244,7 @@
                 const response = await fetch(`/employee-working-shifts/unit/${this.createUnitId}/employees?month=${this.createMonth}&year=${this.createYear}`);
                 if (response.ok) {
                     this.empList = await response.json();
-                    if (!this.createBonusSchemaId && this.createUnitId) {
-                        const u = this.unitsList.find(x => x.id == this.createUnitId);
-                        if (u) {
-                            const matched = this.schemasList.find(s => 
-                                s.name.toLowerCase().trim() === u.name.toLowerCase().trim() ||
-                                u.name.toLowerCase().includes(s.name.toLowerCase()) ||
-                                s.name.toLowerCase().includes(u.name.toLowerCase())
-                            );
-                            if (matched) {
-                                this.createBonusSchemaId = matched.id;
-                            }
-                        }
-                    }
+                    
                 } else {
                     this.empList = [];
                 }
@@ -281,19 +269,7 @@
                 const response = await fetch(`/employee-working-shifts/unit/${unitId}/employees?month=${month}&year=${year}`);
                 if (response.ok) {
                     this.empList = await response.json();
-                    if (!this.createBonusSchemaId && this.createUnitId) {
-                        const u = this.unitsList.find(x => x.id == this.createUnitId);
-                        if (u) {
-                            const matched = this.schemasList.find(s => 
-                                s.name.toLowerCase().trim() === u.name.toLowerCase().trim() ||
-                                u.name.toLowerCase().includes(s.name.toLowerCase()) ||
-                                s.name.toLowerCase().includes(u.name.toLowerCase())
-                            );
-                            if (matched) {
-                                this.createBonusSchemaId = matched.id;
-                            }
-                        }
-                    }
+                    
                     
                     const activeRosterResponse = await fetch(`/employee-working-shifts/roster-employees?unit_id=${unitId}&month=${month}&year=${year}&roster_name=${encodeURIComponent(rosterName)}`);
                     if (activeRosterResponse.ok) {

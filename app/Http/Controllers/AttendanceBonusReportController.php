@@ -332,20 +332,6 @@ class AttendanceBonusReportController extends Controller
                         if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
                             $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
                         }
-                        if (!$currentSchema && !empty($emp['unit_name'])) {
-                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
-                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
-                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
-                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
-                            });
-                        }
-                        if (!$currentSchema && !empty($emp['unit_name'])) {
-                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
-                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
-                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
-                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
-                            });
-                        }
                         if (!$currentSchema) {
                             $currentSchema = $activeSchema;
                         }

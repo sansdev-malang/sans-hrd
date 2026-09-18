@@ -863,15 +863,7 @@ class EmployeeWorkingShiftController extends Controller
 
 
 
-                $unitSchema = null;
-                if (isset($unit) && $unit) {
-                    $unitSchema = $bonusSchemas->first(function($s) use ($unit) {
-                        return strtolower(trim($s->name)) === strtolower(trim($unit->name))
-                            || str_contains(strtolower($unit->name), strtolower($s->name))
-                            || str_contains(strtolower($s->name), strtolower($unit->name));
-                    });
-                }
-                $defaultSchemaId = $unitSchema ? $unitSchema->id : ($bonusSchemas->first()->id ?? null);
+                $defaultSchemaId = $bonusSchemas->first()->id ?? null;
 
                 // Build roster array
                 foreach ($employees as $emp) {
