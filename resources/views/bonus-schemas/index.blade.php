@@ -1,5 +1,9 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="{ 
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <div class="p-6 space-y-6" x-cloak x-data="{ 
         activeTab: (new URLSearchParams(window.location.search).get('tab')) || localStorage.getItem('bonus_schema_active_tab') || '{{ request('tab', 'early_arrival') }}',
         showAddModal: false, 
         showEditModal: false,
@@ -163,7 +167,7 @@
         </div>
 
         <!-- TAB 1: HADIR LEBIH AWAL (SEBELUM JAM MASUK) -->
-        <div x-show="activeTab === 'early_arrival'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+        <div x-cloak x-show="activeTab === 'early_arrival'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
             <!-- Accordion Info Tab 1 -->
             <div class="mb-5 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 overflow-hidden text-xs" x-data="{ open: false }">
                 <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between text-left font-bold text-emerald-900 dark:text-emerald-300 hover:bg-emerald-100/50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer border-0 bg-transparent">
@@ -176,14 +180,14 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
                     </div>
                 </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-emerald-200/40 dark:border-emerald-900/30 space-y-2.5">
-                    <p class="leading-relaxed">Bonus kehadiran harian dihitung berdasarkan selisih menit kedatangan pegawai <strong>sebelum jam masuk shift</strong>:</p>
+                <div x-cloak x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-emerald-200/40 dark:border-emerald-900/30 space-y-2.5">
+                    <p class="leading-relaxed">Bonus kehadiran harian dihitung secara berjenjang (<em>tiered</em>) berdasarkan selisih waktu kedatangan pegawai <strong>sebelum jam masuk shift</strong>:</p>
                     <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-400 ml-1">
-                        <li><strong>Tier 1:</strong> Pegawai yang datang paling awal (misal &ge; 30 menit sebelum shift) mendapatkan nominal bonus tertinggi.</li>
-                        <li><strong>Tier 2 - 3:</strong> Pegawai yang datang 15 atau 5 menit sebelum jam masuk shift.</li>
-                        <li><strong>Tier 4 (Tepat Waktu):</strong> Pegawai yang scan tepat pada jam masuk shift (0 menit sebelum masuk) tetap berhak memperoleh bonus.</li>
-                        <li><strong>Terlambat (&ge; 1 menit setelah jam masuk):</strong> Bonus kehadiran harian menjadi <strong>Rp 0</strong>.</li>
-                        <li><strong>Tugas Dinas / Izin Berbonus:</strong> Otomatis memperoleh bonus nominal Tier 1 tertinggi.</li>
+                        <li><strong>Jenjang Tier:</strong> Pegawai yang datang lebih awal akan memperoleh nominal bonus sesuai tingkatan tier yang memenuhi syarat (tier teratas untuk kehadiran paling awal).</li>
+                        <li><strong>Kehadiran Tepat Waktu:</strong> Jika skema memiliki batas 0 menit, pegawai yang scan tepat waktu pada jam masuk shift tetap berhak memperoleh nominal bonus tier tersebut.</li>
+                        <li><strong>Keterlambatan:</strong> Pegawai yang melakukan scan setelah jam masuk shift dimulai (&ge; 1 menit terlambat) tidak berhak memperoleh bonus kehadiran harian (Rp 0).</li>
+                        <li><strong>Tugas Dinas / Izin Khusus:</strong> Pegawai dengan status dinas/izin yang berhak bonus akan otomatis dihitung menggunakan nominal bonus tertinggi (Tier 1).</li>
+                        <li><strong>Fleksibilitas Konfigurasi:</strong> Jumlah tingkatan tier, batas minimal menit kehadiran lebih awal, dan besaran nominal bonus dapat diatur dan disesuaikan secara bebas sesuai kebutuhan unit.</li>
                     </ul>
                 </div>
             </div>
@@ -269,7 +273,7 @@
         </div>
 
         <!-- TAB 2: TOLERANSI KETERLAMBATAN (SETELAH JAM MASUK) -->
-        <div x-show="activeTab === 'late_tolerance'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display: none;">
+        <div x-cloak x-show="activeTab === 'late_tolerance'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display: none;">
             <!-- Accordion Info Tab 2 -->
             <div class="mb-5 rounded-xl border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 overflow-hidden text-xs" x-data="{ open: false }">
                 <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between text-left font-bold text-amber-900 dark:text-amber-300 hover:bg-amber-100/50 dark:hover:bg-amber-950/30 transition-colors cursor-pointer border-0 bg-transparent">
@@ -282,8 +286,8 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
                     </div>
                 </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-amber-200/40 dark:border-amber-900/30 space-y-2">
-                    <p class="leading-relaxed">Skema ini merupakan kebijakan lama yang menghitung bonus berdasarkan toleransi menit keterlambatan setelah jam masuk shift. Disimpan rapi sebagai arsip agar riwayat laporan dan rekapitulasi data masa lalu tetap konsisten dan akurat.</p>
+                <div x-cloak x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-amber-200/40 dark:border-amber-900/30 space-y-2">
+                    <p class="leading-relaxed">Skema ini merupakan kebijakan lama yang menghitung bonus berdasarkan batas toleransi menit keterlambatan <strong>setelah jam masuk shift</strong>. Disimpan rapi sebagai arsip agar riwayat laporan dan rekapitulasi data masa lalu tetap konsisten dan akurat.</p>
                 </div>
             </div>
 
@@ -461,12 +465,12 @@
 
                                 <!-- Helper Simulation Box -->
                                 <div class="mt-3 p-3 rounded-lg bg-slate-100 dark:bg-slate-950 text-[11px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
-                                    <span class="font-bold text-slate-800 dark:text-slate-200">💡 Simulasi Masuk Jam 07:00:</span>
+                                    <span class="font-bold text-slate-800 dark:text-slate-200">💡 Logika Evaluasi Sistem:</span>
                                     <template x-if="modalMode === 'early_arrival'">
-                                        <p class="mt-1">Pegawai scan &le; 06:30 dapat Tier 1. Scan 06:31 - 06:45 dapat Tier 2. Scan 06:46 - 06:55 dapat Tier 3. Scan 06:56 - 07:00 dapat Tier 4. Scan &ge; 07:01 (Telat) &rarr; <strong>Rp 0</strong>.</p>
+                                        <p class="mt-1">Sistem mengecek menit kedatangan sebelum jam masuk shift mulai dari Tier 1 (kehadiran paling awal). Pegawai yang memenuhi syarat memperoleh nominal tier tersebut. Jika scan setelah jam masuk (&ge; 1 menit terlambat), bonus otomatis <strong>Rp 0</strong>.</p>
                                     </template>
                                     <template x-if="modalMode === 'late_tolerance'">
-                                        <p class="mt-1">Pegawai scan &le; 07:00 dapat Tier 1. Scan 07:01 - 07:05 dapat Tier 2. Melewati batas telat tertinggi &rarr; <strong>Rp 0</strong>.</p>
+                                        <p class="mt-1">Sistem mengecek keterlambatan setelah jam shift dimulai. Jika menit terlambat melebihi batas tertinggi tier skema, bonus otomatis <strong>Rp 0</strong>.</p>
                                     </template>
                                 </div>
                             </div>
@@ -492,7 +496,7 @@
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
                     <div x-show="showEditModal" @click.away="showEditModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
-                            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Edit Skema Bonus Kehadiran</h3>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Edit Skema Bonus</h3>
                             <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors border-0 bg-transparent cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
                             </button>
@@ -581,18 +585,18 @@
 
                                 <!-- Helper Simulation Box -->
                                 <div class="mt-3 p-3 rounded-lg bg-slate-100 dark:bg-slate-950 text-[11px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
-                                    <span class="font-bold text-slate-800 dark:text-slate-200">💡 Simulasi Masuk Jam 07:00:</span>
+                                    <span class="font-bold text-slate-800 dark:text-slate-200">💡 Logika Evaluasi Sistem:</span>
                                     <template x-if="modalMode === 'early_arrival'">
-                                        <p class="mt-1">Pegawai scan &le; 06:30 dapat Tier 1. Scan 06:31 - 06:45 dapat Tier 2. Scan 06:46 - 06:55 dapat Tier 3. Scan 06:56 - 07:00 dapat Tier 4. Scan &ge; 07:01 (Telat) &rarr; <strong>Rp 0</strong>.</p>
+                                        <p class="mt-1">Sistem mengecek menit kedatangan sebelum jam masuk shift mulai dari Tier 1 (kehadiran paling awal). Pegawai yang memenuhi syarat memperoleh nominal tier tersebut. Jika scan setelah jam masuk (&ge; 1 menit terlambat), bonus otomatis <strong>Rp 0</strong>.</p>
                                     </template>
                                     <template x-if="modalMode === 'late_tolerance'">
-                                        <p class="mt-1">Pegawai scan &le; 07:00 dapat Tier 1. Scan 07:01 - 07:05 dapat Tier 2. Melewati batas telat tertinggi &rarr; <strong>Rp 0</strong>.</p>
+                                        <p class="mt-1">Sistem mengecek keterlambatan setelah jam shift dimulai. Jika menit terlambat melebihi batas tertinggi tier skema, bonus otomatis <strong>Rp 0</strong>.</p>
                                     </template>
                                 </div>
                             </div>
 
                             <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-900 justify-end">
-                                <button type="button" @click="showAddModal = false" class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
+                                <button type="button" @click="showEditModal = false" class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
                                     Batal
                                 </button>
                                 <button type="submit" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-[1.02] duration-150 border-0 cursor-pointer">
