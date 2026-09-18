@@ -60,7 +60,8 @@ class EmployeeWorkingShiftController extends Controller
                         'school_unit_id' => $assignment->school_unit_id,
                         'working_shift_id' => $assignment->working_shift_id,
                         'bonus_schema_id' => $assignment->bonus_schema_id,
-                        'bonus_schema_name' => $assignment->bonusSchema->name ?? 'Default (Skema Aktif)',
+                        'bonus_schema_name' => $assignment->bonusSchema->name ?? 'Default',
+                        'bonus_schema_mode' => $assignment->bonusSchema->calculation_mode ?? 'late_tolerance',
                         'start_date' => $assignment->start_date,
                         'end_date' => $assignment->end_date,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
@@ -86,7 +87,8 @@ class EmployeeWorkingShiftController extends Controller
                 $month = $assignment->start_date->format('m');
                 $year = $assignment->start_date->format('Y');
                 $rosterNameKey = $assignment->roster_name ?: 'Roster Shift Bulanan';
-                $key = 'roster|' . $assignment->school_unit_id . '|' . $year . '|' . $month . '|' . $rosterNameKey;
+                $bonusKey = $assignment->bonus_schema_id ?? 'null';
+                $key = 'roster|' . $assignment->school_unit_id . '|' . $year . '|' . $month . '|' . $rosterNameKey . '|' . $bonusKey;
 
                 if (!isset($rosterBatches[$key])) {
                     $rosterBatches[$key] = [
@@ -97,7 +99,8 @@ class EmployeeWorkingShiftController extends Controller
                         'year' => $year,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'roster_name' => $assignment->roster_name,
-                        'bonus_schema_name' => $assignment->bonusSchema->name ?? 'Default (Skema Aktif)',
+                        'bonus_schema_name' => $assignment->bonusSchema->name ?? 'Default',
+                        'bonus_schema_mode' => $assignment->bonusSchema->calculation_mode ?? 'late_tolerance',
                         'employees_map' => [],
                         'sort_date' => $year . '-' . $month . '-31'
                     ];
@@ -670,7 +673,7 @@ class EmployeeWorkingShiftController extends Controller
             $shift->hex_bg = $hexBg[$index % count($hexBg)];
             $shift->hex_text = $hexText[$index % count($hexText)];
         }
-        $bonusSchemas = \App\Models\BonusSchema::where('is_active', true)->orderBy('name')->get();
+        $bonusSchemas = \App\Models\BonusSchema::orderBy('name')->get();
         $employees = [];
         $rosterData = [];
         $daysInMonth = \Carbon\Carbon::create($year, $month, 1)->daysInMonth;
@@ -767,6 +770,7 @@ class EmployeeWorkingShiftController extends Controller
         }
         
         $bonusSchemas = \App\Models\BonusSchema::where('is_active', true)->orderBy('name')->get();
+        $allBonusSchemas = \App\Models\BonusSchema::orderBy('name')->get();
 
         $employees = [];
         $rosterData = [];
@@ -921,7 +925,7 @@ class EmployeeWorkingShiftController extends Controller
         $existingSchemaId = $assignments->firstWhere('bonus_schema_id', '!=', null)->bonus_schema_id ?? null;
         $selectedBonusSchemaId = $reqBonusSchemaId ?: ($existingSchemaId ?: $defaultSchemaId);
 
-        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'selectedBonusSchemaId', 'defaultSchemaId', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName', 'assignedEmployeeIds', 'empIdsParam'));
+        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'allBonusSchemas', 'selectedBonusSchemaId', 'defaultSchemaId', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName', 'assignedEmployeeIds', 'empIdsParam'));
     }
 
     /**

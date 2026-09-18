@@ -541,7 +541,7 @@
                                             <div class="flex flex-col gap-0.5">
                                                 <span @click="openModal({{ json_encode($batch) }})" class="font-semibold text-slate-800 dark:text-slate-200 text-xs cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors duration-150" title="Klik untuk melihat rincian daftar pegawai">{{ !empty($batch['roster_name']) ? $batch['roster_name'] : 'Roster Shift Bulanan' }}</span>
                                                 <span class="inline-flex w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wide">Roster Bulanan</span>
-                                                <span class="inline-flex items-center gap-1 w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-3 h-3"></i> {{ $batch['bonus_schema_name'] ?? 'Default' }}</span>
+                                                <span class="inline-flex items-center gap-1 w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-3 h-3"></i> {{ (($batch['bonus_schema_mode'] ?? '') === 'early_arrival' ? '⚡ ' : '⏱️ ') . ($batch['bonus_schema_name'] ?? 'Default') }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -617,7 +617,7 @@
                                             <div class="flex flex-col gap-0.5">
                                                 <span @click="openModal({{ json_encode($batch) }})" class="font-semibold text-slate-800 dark:text-slate-200 text-xs cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors duration-150" title="Klik untuk melihat rincian daftar pegawai">{{ $batch['shift_name'] }}</span>
                                                 <span class="inline-flex w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-955/30 text-emerald-700 dark:text-emerald-455 border border-emerald-100/30 dark:border-emerald-900/30 uppercase tracking-wide">Kode: {{ $batch['shift_code'] }}</span>
-                                                <span class="inline-flex items-center gap-1 w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-955/30 text-amber-750 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-3 h-3"></i> {{ $batch['bonus_schema_name'] ?? 'Default' }}</span>
+                                                <span class="inline-flex items-center gap-1 w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-955/30 text-amber-750 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-3 h-3"></i> {{ (($batch['bonus_schema_mode'] ?? '') === 'early_arrival' ? '⚡ ' : '⏱️ ') . ($batch['bonus_schema_name'] ?? 'Default') }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -768,7 +768,7 @@
                                  <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5 leading-relaxed">
                                      Jadwal: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.type === 'roster' ? (selectedBatch?.roster_name || 'Roster Shift Bulanan') : (selectedBatch?.shift_name || '-')"></span><br>
                                      Unit: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.unit_name"></span><br>
-                                     Skema Bonus: <span class="font-bold text-amber-600 dark:text-amber-400" x-text="selectedBatch?.bonus_schema_name || 'Default (Skema Aktif)'"></span><br>
+                                     Skema Bonus: <span class="font-bold text-amber-600 dark:text-amber-400" x-text="((selectedBatch?.bonus_schema_mode === 'early_arrival' ? '⚡ ' : '⏱️ ') + (selectedBatch?.bonus_schema_name || 'Default'))"></span><br>
                                      Periode: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.type === 'roster' ? formatRosterPeriod(selectedBatch?.month, selectedBatch?.year) : (formatDate(selectedBatch?.start_date) + ' s/d ' + (selectedBatch?.end_date ? formatDate(selectedBatch?.end_date) : 'Seterusnya'))"></span>
                                  </p>
                             </div>
@@ -1006,9 +1006,24 @@
                                         <select x-model="bonusSchemaId" name="bonus_schema_id" required
                                             class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
                                             <option value="">Pilih Skema Bonus...</option>
-                                            @foreach ($bonusSchemas as $schema)
-                                                <option value="{{ $schema->id }}">{{ $schema->name }}</option>
-                                            @endforeach
+                                            @php
+                                                $earlySchemas = $bonusSchemas->where('calculation_mode', 'early_arrival');
+                                                $lateSchemas = $bonusSchemas->where('calculation_mode', 'late_tolerance');
+                                            @endphp
+                                            @if($earlySchemas->count() > 0)
+                                                <optgroup label="⚡ Ketepatan Waktu (Hadir Lebih Awal)">
+                                                    @foreach ($earlySchemas as $schema)
+                                                        <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endif
+                                            @if($lateSchemas->count() > 0)
+                                                <optgroup label="⏱️ Toleransi Keterlambatan">
+                                                    @foreach ($lateSchemas as $schema)
+                                                        <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endif
                                         </select>
                                     </div>
 
@@ -1216,17 +1231,26 @@
                                     <!-- Bonus Schema -->
                                     <div>
                                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Skema Bonus <span class="text-rose-500">*</span></label>
-                                        <select name="bonus_schema_id" x-model="editBonusSchemaId"
+                                        <select name="bonus_schema_id" x-model="editBonusSchemaId" required
                                             class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
-                                            <option value="">Default (Mengikuti Skema Aktif)</option>
-                                            @if (isset($allBonusSchemas))
-                                                @foreach ($allBonusSchemas as $schema)
-                                                    <option value="{{ $schema->id }}">{{ $schema->name }}{{ !$schema->is_active ? ' (Non-aktif)' : '' }}</option>
-                                                @endforeach
-                                            @elseif (isset($bonusSchemas))
-                                                @foreach ($bonusSchemas as $schema)
-                                                    <option value="{{ $schema->id }}">{{ $schema->name }}</option>
-                                                @endforeach
+                                            <option value="">Pilih Skema Bonus...</option>
+                                            @php
+                                                $allEarly = ($allBonusSchemas ?? $bonusSchemas)->where('calculation_mode', 'early_arrival');
+                                                $allLate = ($allBonusSchemas ?? $bonusSchemas)->where('calculation_mode', 'late_tolerance');
+                                            @endphp
+                                            @if($allEarly->count() > 0)
+                                                <optgroup label="⚡ Ketepatan Waktu (Hadir Lebih Awal)">
+                                                    @foreach ($allEarly as $schema)
+                                                        <option value="{{ $schema->id }}">{{ $schema->name }}{{ !$schema->is_active ? ' (Non-aktif)' : '' }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endif
+                                            @if($allLate->count() > 0)
+                                                <optgroup label="⏱️ Toleransi Keterlambatan">
+                                                    @foreach ($allLate as $schema)
+                                                        <option value="{{ $schema->id }}">{{ $schema->name }}{{ !$schema->is_active ? ' (Non-aktif)' : '' }}</option>
+                                                    @endforeach
+                                                </optgroup>
                                             @endif
                                         </select>
                                     </div>
@@ -1427,9 +1451,24 @@
                                         <select x-model="createBonusSchemaId" name="bonus_schema_id" required
                                             class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
                                             <option value="">Pilih Skema Bonus...</option>
-                                            @foreach ($bonusSchemas as $schema)
-                                                <option value="{{ $schema->id }}">{{ $schema->name }}</option>
-                                            @endforeach
+                                            @php
+                                                $earlySchemas = $bonusSchemas->where('calculation_mode', 'early_arrival');
+                                                $lateSchemas = $bonusSchemas->where('calculation_mode', 'late_tolerance');
+                                            @endphp
+                                            @if($earlySchemas->count() > 0)
+                                                <optgroup label="⚡ Ketepatan Waktu (Hadir Lebih Awal)">
+                                                    @foreach ($earlySchemas as $schema)
+                                                        <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endif
+                                            @if($lateSchemas->count() > 0)
+                                                <optgroup label="⏱️ Toleransi Keterlambatan">
+                                                    @foreach ($lateSchemas as $schema)
+                                                        <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endif
                                         </select>
                                     </div>
 
