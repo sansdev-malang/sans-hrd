@@ -31,7 +31,7 @@
     </div>
 
     <!-- Navigation Links -->
-    <div class="flex-1 space-y-4 overflow-y-auto px-1 py-2 no-scrollbar">
+    <div id="sidebar-nav-container" class="flex-1 space-y-4 overflow-y-auto px-1 py-2 no-scrollbar">
         <div>
             <nav class="space-y-1 mb-4">
                 <a href="{{ route('dashboard') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
