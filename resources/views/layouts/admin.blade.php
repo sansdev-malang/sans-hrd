@@ -28,12 +28,12 @@
                     'announcements.index' => 'Pengumuman',
                     'layanan-sdm.index' => 'Layanan SDM',
                     'school-units.index' => 'Integrasi API Unit',
-                    'settings.index' => 'Setting Aplikasi',
+                    'settings.index' => 'Setting App',
                     'settings.adms' => 'Sinkronisasi ADMS',
                     'zkteco-devices.index' => 'Mesin Absensi',
                     'raw-attendance-logs.index' => 'Log Absensi',
-                    'users.index' => 'Manajemen Pengguna',
-                    'system-logs.index' => 'Log Sistem',
+                    'users.index' => 'Setting User',
+                    'system-logs.index' => 'Log System',
                 ];
                 $title = $routeTitles[$routeName] ?? 'Pusat Aggregator';
             }

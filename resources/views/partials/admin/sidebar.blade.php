@@ -265,9 +265,9 @@
                 </a>
             </nav>
 
-            <!-- MANAJEMEN SISTEM -->
+            <!-- SETTING SYSTEM -->
             @if(auth()->user()->hasRole('super_admin'))
-            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">MANAJEMEN SISTEM</h3>
+            <h3 class="school-info px-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4">SETTING SYSTEM</h3>
             <nav class="space-y-1 mb-4">
                 <a href="{{ route('school-units.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('school-units.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
@@ -276,16 +276,6 @@
                     <span class="menu-text">Integrasi API Unit</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
                         Integrasi API Unit
-                    </span>
-                </a>
-                
-                <a href="{{ route('settings.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('settings.index') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <i data-lucide="settings" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Setting Aplikasi</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Setting Aplikasi
                     </span>
                 </a>
                 
@@ -320,18 +310,27 @@
                     {{ Request::routeIs('users.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="user-cog" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Manajemen User</span>
+                    <span class="menu-text">Setting User</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Manajemen User
+                        Setting User
+                    </span>
+                </a>
+                <a href="{{ route('settings.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('settings.index') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="settings" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Setting App</span>
+                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
+                        Setting App
                     </span>
                 </a>
                 <a href="{{ route('system-logs.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('system-logs.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
                     <i data-lucide="file-text" class="menu-icon w-4 h-4"></i>
-                    <span class="menu-text">Log Sistem</span>
+                    <span class="menu-text">Log System</span>
                     <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Log Sistem
+                        Log System
                     </span>
                 </a>
             </nav>
