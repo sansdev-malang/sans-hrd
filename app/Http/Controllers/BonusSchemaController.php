@@ -62,11 +62,11 @@ class BonusSchemaController extends Controller
         $failed = $this->syncBonusSchemasToUnits();
 
         if (!empty($failed)) {
-            return redirect()->route('bonus-schemas.index')
+            return redirect()->route('bonus-schemas.index', ['tab' => $calculationMode])
                 ->with('error', 'Skema bonus berhasil dibuat lokal, namun gagal disinkronkan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
         }
 
-        return redirect()->route('bonus-schemas.index')
+        return redirect()->route('bonus-schemas.index', ['tab' => $calculationMode])
             ->with('success', 'Skema bonus berhasil dibuat dan disinkronkan ke semua unit.');
     }
 
@@ -115,46 +115,48 @@ class BonusSchemaController extends Controller
         $failed = $this->syncBonusSchemasToUnits();
 
         if (!empty($failed)) {
-            return redirect()->back()
+            return redirect()->route('bonus-schemas.index', ['tab' => $calculationMode])
                 ->with('error', 'Skema bonus berhasil diperbarui lokal, namun gagal disinkronkan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
         }
 
-        return redirect()->back()
+        return redirect()->route('bonus-schemas.index', ['tab' => $calculationMode])
             ->with('success', 'Skema bonus berhasil diperbarui dan disinkronkan ke semua unit.');
     }
 
     /**
      * Remove the specified bonus schema from storage.
      */
-    public function destroy(BonusSchema $bonusSchema)
+    public function destroy(Request $request, BonusSchema $bonusSchema)
     {
+        $mode = $bonusSchema->calculation_mode ?? $request->query('tab', 'early_arrival');
         $bonusSchema->delete();
 
         // Auto sync to units
         $failed = $this->syncBonusSchemasToUnits();
 
         if (!empty($failed)) {
-            return redirect()->back()
+            return redirect()->route('bonus-schemas.index', ['tab' => $mode])
                 ->with('error', 'Skema bonus berhasil dihapus lokal, namun gagal menyinkronkan penghapusan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
         }
 
-        return redirect()->back()
+        return redirect()->route('bonus-schemas.index', ['tab' => $mode])
             ->with('success', 'Skema bonus berhasil dihapus.');
     }
 
     /**
      * Trigger manual synchronization of all bonus schemas.
      */
-    public function triggerSync()
+    public function triggerSync(Request $request)
     {
+        $tab = $request->query('tab', 'early_arrival');
         $failed = $this->syncBonusSchemasToUnits();
 
         if (!empty($failed)) {
-            return redirect()->back()
+            return redirect()->route('bonus-schemas.index', ['tab' => $tab])
                 ->with('error', 'Gagal menyinkronkan skema bonus ke unit: ' . implode(', ', $failed) . '. Silakan coba beberapa saat lagi.');
         }
 
-        return redirect()->back()
+        return redirect()->route('bonus-schemas.index', ['tab' => $tab])
             ->with('success', 'Sinkronisasi data skema bonus selesai dan berhasil terkirim ke semua unit.');
     }
 

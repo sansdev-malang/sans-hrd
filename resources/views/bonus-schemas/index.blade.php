@@ -1,6 +1,6 @@
 <x-admin-layout>
     <div class="p-6 space-y-6" x-data="{ 
-        activeTab: 'early_arrival',
+        activeTab: (new URLSearchParams(window.location.search).get('tab')) || localStorage.getItem('bonus_schema_active_tab') || '{{ request('tab', 'early_arrival') }}',
         showAddModal: false, 
         showEditModal: false,
         modalMode: 'early_arrival',
@@ -8,6 +8,27 @@
         editName: '',
         editIsActive: true,
         tiers: [],
+
+        init() {
+            let paramTab = new URLSearchParams(window.location.search).get('tab');
+            if (paramTab && (paramTab === 'early_arrival' || paramTab === 'late_tolerance')) {
+                this.activeTab = paramTab;
+                localStorage.setItem('bonus_schema_active_tab', paramTab);
+            } else {
+                let storedTab = localStorage.getItem('bonus_schema_active_tab');
+                if (storedTab && (storedTab === 'early_arrival' || storedTab === 'late_tolerance')) {
+                    this.activeTab = storedTab;
+                }
+            }
+        },
+
+        setTab(tab) {
+            this.activeTab = tab;
+            localStorage.setItem('bonus_schema_active_tab', tab);
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tab);
+            window.history.replaceState({}, '', url);
+        },
 
         addTier() {
             let nextLevel = this.tiers.length + 1;
@@ -98,7 +119,7 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Kelola jenjang nominal bonus harian pegawai berdasarkan waktu kedatangan dan toleransi absensi.</p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('bonus-schemas.sync') }}" data-no-loader="true" onclick="this.style.pointerEvents = 'none'; let icon = this.querySelector('svg'); if(icon) icon.classList.add('animate-spin');" class="h-9 px-4 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
+                <a :href="'{{ route('bonus-schemas.sync') }}?tab=' + activeTab" data-no-loader="true" onclick="this.style.pointerEvents = 'none'; let icon = this.querySelector('svg'); if(icon) icon.classList.add('animate-spin');" class="h-9 px-4 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
                     <span>Sync Ulang ke Unit</span>
                 </a>
@@ -117,7 +138,7 @@
 
         <div class="flex border-b border-slate-200 dark:border-slate-800 gap-2">
             <button type="button" 
-                @click="activeTab = 'early_arrival'" 
+                @click="setTab('early_arrival')" 
                 :class="activeTab === 'early_arrival' 
                     ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
                     : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'" 
@@ -129,7 +150,7 @@
             </button>
 
             <button type="button" 
-                @click="activeTab = 'late_tolerance'" 
+                @click="setTab('late_tolerance')" 
                 :class="activeTab === 'late_tolerance' 
                     ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
                     : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'" 
@@ -210,7 +231,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                                 <span>Edit Skema</span>
                             </button>
-                            <form action="{{ route('bonus-schemas.destroy', $schema->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus skema bonus ini?')">
+                            <form :action="`{{ url('bonus-schemas') }}/${{ $schema->id }}?tab=early_arrival`" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus skema bonus ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="h-8 px-3.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-650 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
@@ -299,7 +320,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                                 <span>Edit Skema</span>
                             </button>
-                            <form action="{{ route('bonus-schemas.destroy', $schema->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus skema bonus ini?')">
+                            <form :action="`{{ url('bonus-schemas') }}/${{ $schema->id }}?tab=late_tolerance`" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus skema bonus ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="h-8 px-3.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-650 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
@@ -544,7 +565,7 @@
                             </div>
 
                             <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-900 justify-end">
-                                <button type="button" @click="showEditModal = false" class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
+                                <button type="button" @click="showAddModal = false" class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
                                     Batal
                                 </button>
                                 <button type="submit" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-[1.02] duration-150 border-0 cursor-pointer">
