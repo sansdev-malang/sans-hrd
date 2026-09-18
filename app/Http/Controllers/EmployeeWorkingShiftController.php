@@ -279,7 +279,7 @@ class EmployeeWorkingShiftController extends Controller
             'employee_ids' => 'required|array|min:1',
             'employee_ids.*' => 'integer',
             'working_shift_id' => 'required|exists:working_shifts,id',
-            'bonus_schema_id' => 'nullable|exists:bonus_schemas,id',
+            'bonus_schema_id' => 'required|exists:bonus_schemas,id',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -524,7 +524,7 @@ class EmployeeWorkingShiftController extends Controller
             'employee_ids' => 'required|array|min:1',
             'employee_ids.*' => 'integer',
             'working_shift_id' => 'required|exists:working_shifts,id',
-            'bonus_schema_id' => 'nullable|exists:bonus_schemas,id',
+            'bonus_schema_id' => 'required|exists:bonus_schemas,id',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -862,11 +862,21 @@ class EmployeeWorkingShiftController extends Controller
 
 
 
+                $unitSchema = null;
+                if (isset($unit) && $unit) {
+                    $unitSchema = $bonusSchemas->first(function($s) use ($unit) {
+                        return strtolower(trim($s->name)) === strtolower(trim($unit->name))
+                            || str_contains(strtolower($unit->name), strtolower($s->name))
+                            || str_contains(strtolower($s->name), strtolower($unit->name));
+                    });
+                }
+                $defaultSchemaId = $unitSchema ? $unitSchema->id : ($bonusSchemas->first()->id ?? null);
+
                 // Build roster array
                 foreach ($employees as $emp) {
                     $empId = $emp['id'];
                     $rosterData[$empId] = [
-                        'bonus_schema_id' => null,
+                        'bonus_schema_id' => $defaultSchemaId,
                         'days' => array_fill(1, $daysInMonth, null)
                     ];
                 }
@@ -909,7 +919,7 @@ class EmployeeWorkingShiftController extends Controller
         
         $oldRosterName = $rosterNameParam; // To know which roster to update
 
-        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName', 'assignedEmployeeIds', 'empIdsParam'));
+        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'defaultSchemaId', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName', 'assignedEmployeeIds', 'empIdsParam'));
     }
 
     /**

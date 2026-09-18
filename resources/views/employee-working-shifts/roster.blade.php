@@ -231,10 +231,10 @@
                                     </div>
                                 </td>
                                 <td class="p-2 border-r border-slate-200 dark:border-slate-800">
-                                    <select name="roster[{{ $empId }}][bonus_schema_id]" :disabled="!activeEmployeeIds.includes(String('{{ $empId }}'))" class="w-full text-xs px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
-                                        <option value="">Default/Aktif</option>
+                                    <select name="roster[{{ $empId }}][bonus_schema_id]" :disabled="!activeEmployeeIds.includes(String('{{ $empId }}'))" required class="w-full text-xs px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                        <option value="">Pilih Skema...</option>
                                         @foreach($bonusSchemas as $schema)
-                                            <option value="{{ $schema->id }}" {{ $bonusSchemaId == $schema->id ? 'selected' : '' }}>{{ $schema->name }}</option>
+                                            <option value="{{ $schema->id }}" {{ ($bonusSchemaId == $schema->id || (!$bonusSchemaId && isset($defaultSchemaId) && $defaultSchemaId == $schema->id)) ? 'selected' : '' }}>{{ $schema->name }}</option>
                                         @endforeach
                                     </select>
                                 </td>
