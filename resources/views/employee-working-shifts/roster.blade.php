@@ -84,6 +84,15 @@
                         @change="window.location.href = '/employee-working-shifts/roster?unit_id={{ $selectedUnitId }}&month={{ $month }}&year=' + $event.target.value + '&roster_name=' + encodeURIComponent(document.querySelector('input[name=roster_name]').value)">
 
                     <span class="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
+                    <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Skema Bonus:</span>
+                    <select name="bonus_schema_id" required
+                        class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50/60 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border border-amber-200/50 dark:border-amber-900/30 cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-500/30">
+                        @foreach($bonusSchemas as $schema)
+                            <option value="{{ $schema->id }}" {{ ($selectedBonusSchemaId == $schema->id) ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{{ $schema->name }}</option>
+                        @endforeach
+                    </select>
+
+                    <span class="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
                     <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Jumlah:</span>
                     <span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/40 dark:border-slate-700/40 font-bold text-[10px]">
                         <span x-text="activeEmployeeIds.length"></span>&nbsp;Orang
@@ -193,7 +202,7 @@
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-900/80">
                             <th class="p-3 text-xs font-bold text-slate-900 dark:text-slate-100 border-b border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-slate-50 dark:bg-slate-900/80 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)] min-w-[200px]">NAMA PEGAWAI</th>
-                            <th class="p-3 text-xs font-bold text-slate-900 dark:text-slate-100 border-b border-r border-slate-200 dark:border-slate-800 min-w-[150px]">SKEMA BONUS</th>
+                            
                             @for($d = 1; $d <= $daysInMonth; $d++)
                                 @php
                                     $timestamp = mktime(0,0,0,$month,$d,$year);
@@ -230,14 +239,7 @@
                                         </button>
                                     </div>
                                 </td>
-                                <td class="p-2 border-r border-slate-200 dark:border-slate-800">
-                                    <select name="roster[{{ $empId }}][bonus_schema_id]" :disabled="!activeEmployeeIds.includes(String('{{ $empId }}'))" required class="w-full text-xs px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
-                                        <option value="">Pilih Skema...</option>
-                                        @foreach($bonusSchemas as $schema)
-                                            <option value="{{ $schema->id }}" {{ ($bonusSchemaId == $schema->id || (!$bonusSchemaId && isset($defaultSchemaId) && $defaultSchemaId == $schema->id)) ? 'selected' : '' }}>{{ $schema->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </td>
+                                
                                 @for($d = 1; $d <= $daysInMonth; $d++)
                                     @php
                                         $shiftId = $rowData['days'][$d] ?? '';

@@ -95,6 +95,7 @@
         createUnitId: '',
         createRosterName: '',
         createOldRosterName: '',
+        createBonusSchemaId: '',
         createMonth: '{{ date('n') }}',
         createYear: '{{ date('Y') }}',
         empList: [],
@@ -243,6 +244,19 @@
                 const response = await fetch(`/employee-working-shifts/unit/${this.createUnitId}/employees?month=${this.createMonth}&year=${this.createYear}`);
                 if (response.ok) {
                     this.empList = await response.json();
+                    if (!this.createBonusSchemaId && this.createUnitId) {
+                        const u = this.unitsList.find(x => x.id == this.createUnitId);
+                        if (u) {
+                            const matched = this.schemasList.find(s => 
+                                s.name.toLowerCase().trim() === u.name.toLowerCase().trim() ||
+                                u.name.toLowerCase().includes(s.name.toLowerCase()) ||
+                                s.name.toLowerCase().includes(u.name.toLowerCase())
+                            );
+                            if (matched) {
+                                this.createBonusSchemaId = matched.id;
+                            }
+                        }
+                    }
                 } else {
                     this.empList = [];
                 }
@@ -253,12 +267,13 @@
             this.loadingEmp = false;
         },
 
-        async openEditRosterModal(unitId, month, year, rosterName) {
+        async openEditRosterModal(unitId, month, year, rosterName, bonusSchemaId = null) {
             this.createUnitId = unitId;
             this.createMonth = month;
             this.createYear = year;
             this.createRosterName = rosterName;
             this.createOldRosterName = rosterName;
+            this.createBonusSchemaId = bonusSchemaId || '';
             this.showCreateModal = true;
             
             this.loadingEmp = true;
@@ -266,6 +281,19 @@
                 const response = await fetch(`/employee-working-shifts/unit/${unitId}/employees?month=${month}&year=${year}`);
                 if (response.ok) {
                     this.empList = await response.json();
+                    if (!this.createBonusSchemaId && this.createUnitId) {
+                        const u = this.unitsList.find(x => x.id == this.createUnitId);
+                        if (u) {
+                            const matched = this.schemasList.find(s => 
+                                s.name.toLowerCase().trim() === u.name.toLowerCase().trim() ||
+                                u.name.toLowerCase().includes(s.name.toLowerCase()) ||
+                                s.name.toLowerCase().includes(u.name.toLowerCase())
+                            );
+                            if (matched) {
+                                this.createBonusSchemaId = matched.id;
+                            }
+                        }
+                    }
                     
                     const activeRosterResponse = await fetch(`/employee-working-shifts/roster-employees?unit_id=${unitId}&month=${month}&year=${year}&roster_name=${encodeURIComponent(rosterName)}`);
                     if (activeRosterResponse.ok) {
@@ -288,6 +316,7 @@
                     this.createUnitId = '';
                     this.createRosterName = '';
                     this.createOldRosterName = '';
+                    this.createBonusSchemaId = '';
                     this.createMonth = '{{ date('n') }}';
                     this.createYear = '{{ date('Y') }}';
                     this.empList = [];
@@ -561,6 +590,7 @@
                                                 'month' => $batch['month'],
                                                 'year' => $batch['year'],
                                                 'roster_name' => $batch['roster_name'] ?? '',
+                                                'bonus_schema_id' => $batch['bonus_schema_id'] ?? '',
                                             ]) }}"
                                                 class="h-8 w-8 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-600 dark:hover:bg-indigo-650 hover:text-white text-indigo-700 dark:text-indigo-400 rounded-lg border border-indigo-200/30 dark:border-indigo-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
                                                 title="Lihat Detail Roster">
@@ -571,6 +601,7 @@
                                                 'month' => $batch['month'],
                                                 'year' => $batch['year'],
                                                 'roster_name' => $batch['roster_name'] ?? '',
+                                                'bonus_schema_id' => $batch['bonus_schema_id'] ?? '',
                                             ]) }}"
                                                 class="h-8 w-8 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
                                                 title="Edit Roster">
@@ -1361,7 +1392,7 @@
                      class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
                     
                     <form action="{{ route('employee-working-shifts.roster') }}" method="GET" 
-                          @submit.prevent="if (!createUnitId || selectedEmps.length === 0 || selectedShifts.length === 0) { createShowError = true; } else { createShowError = false; $el.submit(); }"
+                          @submit.prevent="if (!createUnitId || !createBonusSchemaId || selectedEmps.length === 0 || selectedShifts.length === 0) { createShowError = true; } else { createShowError = false; $el.submit(); }"
                           class="flex flex-col flex-1 overflow-hidden">
                         <input type="hidden" name="old_roster_name" x-model="createOldRosterName">
                         <!-- Header -->
@@ -1402,6 +1433,21 @@
                                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Roster <span class="text-rose-500">*</span></label>
                                         <input type="text" name="roster_name" x-model="createRosterName" required placeholder="Misal: Roster Satpam"
                                             class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all">
+                                    </div>
+
+                                    <!-- Skema Bonus -->
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center">
+                                            <span>Skema Bonus <span class="text-rose-500">*</span></span>
+                                            <span x-show="createShowError && !createBonusSchemaId" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Wajib pilih skema</span>
+                                        </label>
+                                        <select x-model="createBonusSchemaId" name="bonus_schema_id" required
+                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            <option value="">Pilih Skema Bonus...</option>
+                                            @foreach ($bonusSchemas as $schema)
+                                                <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-4">

@@ -89,6 +89,7 @@ class EmployeeWorkingShiftController extends Controller
                     $rosterBatches[$key] = [
                         'type' => 'roster',
                         'school_unit_id' => $assignment->school_unit_id,
+                        'bonus_schema_id' => $assignment->bonus_schema_id,
                         'month' => $month,
                         'year' => $year,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
@@ -919,7 +920,11 @@ class EmployeeWorkingShiftController extends Controller
         
         $oldRosterName = $rosterNameParam; // To know which roster to update
 
-        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'defaultSchemaId', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName', 'assignedEmployeeIds', 'empIdsParam'));
+        $reqBonusSchemaId = $request->query('bonus_schema_id');
+        $existingSchemaId = $assignments->firstWhere('bonus_schema_id', '!=', null)->bonus_schema_id ?? null;
+        $selectedBonusSchemaId = $reqBonusSchemaId ?: ($existingSchemaId ?: $defaultSchemaId);
+
+        return view('employee-working-shifts.roster', compact('units', 'selectedUnitId', 'year', 'month', 'shifts', 'allShifts', 'selectedShiftIds', 'bonusSchemas', 'selectedBonusSchemaId', 'defaultSchemaId', 'employees', 'rosterData', 'daysInMonth', 'rosterName', 'oldRosterName', 'assignedEmployeeIds', 'empIdsParam'));
     }
 
     /**
@@ -1038,8 +1043,10 @@ class EmployeeWorkingShiftController extends Controller
                 }
             }
 
+            $topBonusSchemaId = $request->input('bonus_schema_id');
+
             foreach ($rosterInput as $empId => $data) {
-                $bonusSchemaId = $data['bonus_schema_id'] ?? null;
+                $bonusSchemaId = $topBonusSchemaId ?: ($data['bonus_schema_id'] ?? null);
                 $days = $data['days'] ?? [];
 
                 // 1. Splitting logic for existing shifts
