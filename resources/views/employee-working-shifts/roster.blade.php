@@ -85,8 +85,9 @@
 
                     <span class="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
                     <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Skema Bonus:</span>
-                    <select name="bonus_schema_id" required
+                    <select name="bonus_schema_id"
                         class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50/60 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border border-amber-200/50 dark:border-amber-900/30 cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-500/30">
+                        <option value="" {{ !$selectedBonusSchemaId ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Default (Skema Aktif)</option>
                         @foreach($bonusSchemas as $schema)
                             <option value="{{ $schema->id }}" {{ ($selectedBonusSchemaId == $schema->id) ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{{ $schema->name }}</option>
                         @endforeach

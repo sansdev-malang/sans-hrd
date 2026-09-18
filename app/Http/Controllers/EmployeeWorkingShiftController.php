@@ -28,11 +28,12 @@ class EmployeeWorkingShiftController extends Controller
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
         $shifts = WorkingShift::orderBy('name')->get();
         $bonusSchemas = BonusSchema::where('is_active', true)->orderBy('name')->get();
+        $allBonusSchemas = BonusSchema::orderBy('name')->get();
         
         $selectedUnitId = $request->query('unit_id');
         
         // Fetch all assignments
-        $query = EmployeeWorkingShift::with(['schoolUnit', 'workingShift']);
+        $query = EmployeeWorkingShift::with(['schoolUnit', 'workingShift', 'bonusSchema']);
         if ($selectedUnitId) {
             $query->where('school_unit_id', $selectedUnitId);
         }
@@ -50,7 +51,8 @@ class EmployeeWorkingShiftController extends Controller
         foreach ($assignments as $assignment) {
             if ($assignment->roster_name === null) {
                 // Permanent & Temporary Shifts (Standard Batch Assignments)
-                $key = 'perm|' . $assignment->school_unit_id . '|' . $assignment->working_shift_id . '|' . $assignment->start_date->format('Y-m-d') . '|' . ($assignment->end_date ? $assignment->end_date->format('Y-m-d') : 'null');
+                $bonusKey = $assignment->bonus_schema_id ?? 'null';
+                $key = 'perm|' . $assignment->school_unit_id . '|' . $assignment->working_shift_id . '|' . $bonusKey . '|' . $assignment->start_date->format('Y-m-d') . '|' . ($assignment->end_date ? $assignment->end_date->format('Y-m-d') : 'null');
                 
                 if (!isset($batches[$key])) {
                     $batches[$key] = [
@@ -58,6 +60,7 @@ class EmployeeWorkingShiftController extends Controller
                         'school_unit_id' => $assignment->school_unit_id,
                         'working_shift_id' => $assignment->working_shift_id,
                         'bonus_schema_id' => $assignment->bonus_schema_id,
+                        'bonus_schema_name' => $assignment->bonusSchema->name ?? 'Default (Skema Aktif)',
                         'start_date' => $assignment->start_date,
                         'end_date' => $assignment->end_date,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
@@ -94,6 +97,7 @@ class EmployeeWorkingShiftController extends Controller
                         'year' => $year,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'roster_name' => $assignment->roster_name,
+                        'bonus_schema_name' => $assignment->bonusSchema->name ?? 'Default (Skema Aktif)',
                         'employees_map' => [],
                         'sort_date' => $year . '-' . $month . '-31'
                     ];
@@ -256,6 +260,7 @@ class EmployeeWorkingShiftController extends Controller
             'units' => $units,
             'shifts' => $shifts,
             'bonusSchemas' => $bonusSchemas,
+            'allBonusSchemas' => $allBonusSchemas,
             'selectedUnitId' => $selectedUnitId,
             'perPage' => $perPageQuery,
             'neglectedEmployees' => $neglectedEmployees,
@@ -280,7 +285,7 @@ class EmployeeWorkingShiftController extends Controller
             'employee_ids' => 'required|array|min:1',
             'employee_ids.*' => 'integer',
             'working_shift_id' => 'required|exists:working_shifts,id',
-            'bonus_schema_id' => 'required|exists:bonus_schemas,id',
+            'bonus_schema_id' => 'nullable|exists:bonus_schemas,id',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -525,7 +530,7 @@ class EmployeeWorkingShiftController extends Controller
             'employee_ids' => 'required|array|min:1',
             'employee_ids.*' => 'integer',
             'working_shift_id' => 'required|exists:working_shifts,id',
-            'bonus_schema_id' => 'required|exists:bonus_schemas,id',
+            'bonus_schema_id' => 'nullable|exists:bonus_schemas,id',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
