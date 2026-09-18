@@ -57,30 +57,6 @@
                         Data Pegawai
                     </span>
                 </a>
-                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('coming-soon-sertifikat') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="award" class="menu-icon w-4 h-4"></i>
-                        <span class="menu-text">Sertifikat Pegawai</span>
-                    </div>
-                    <span class="menu-text text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-95">Soon</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Sertifikat Pegawai
-                    </span>
-                </a>
-                <a href="{{ route('coming-soon') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg
-                    {{ Request::routeIs('coming-soon-prestasi') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
-                    text-xs relative group">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="star" class="menu-icon w-4 h-4"></i>
-                        <span class="menu-text">Prestasi Pegawai</span>
-                    </div>
-                    <span class="menu-text text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-95">Soon</span>
-                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                        Prestasi Pegawai
-                    </span>
-                </a>
                 <a href="{{ route('performance-reports.index') }}" class="menu-item flex items-center justify-between gap-3 px-3 py-2 rounded-lg
                     {{ Request::routeIs('performance-reports.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
                     text-xs relative group">
@@ -124,13 +100,6 @@
                                 <span>Riwayat Kehadiran</span>
                             </div>
                         </a>
-                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
-                                <span>Rekap Kehadiran</span>
-                            </div>
-                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
-                        </a>
                     </div>
                 </div>
 
@@ -160,20 +129,6 @@
                                 <span>Tipe Izin</span>
                             </div>
                         </a>
-                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
-                                <span>Riwayat Izin</span>
-                            </div>
-                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
-                        </a>
-                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
-                                <span>Rekap Izin</span>
-                            </div>
-                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
-                        </a>
                     </div>
                 </div>
 
@@ -202,13 +157,6 @@
                                 <span class="w-1 h-1 rounded-full {{ Request::routeIs('bonus-reports.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
                                 <span>Data Bonus Kehadiran</span>
                             </div>
-                        </a>
-                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
-                                <span>Rekap Bonus</span>
-                            </div>
-                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
                         </a>
                     </div>
                 </div>
@@ -275,42 +223,16 @@
                     </span>
                 </a>
 
-                <!-- Gaji Pegawai Dropdown -->
-                <div x-data="{ open: {{ Request::routeIs('payslips.*') ? 'true' : 'false' }} }">
-                    <button @click="open = !open" class="menu-item flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors relative group
-                        {{ Request::routeIs('payslips.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="wallet" class="menu-icon w-4 h-4"></i>
-                            <span class="menu-text">Gaji Pegawai</span>
-                        </div>
-                        <i data-lucide="chevron-down" class="chevron-icon w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
-                        <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
-                            Gaji Pegawai
-                        </span>
-                    </button>
-                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
-                        <a href="{{ route('payslips.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('payslips.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-1 h-1 rounded-full {{ Request::routeIs('payslips.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
-                                <span>Slip Gaji</span>
-                            </div>
-                        </a>
-                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
-                                <span>Riwayat Gaji</span>
-                            </div>
-                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
-                        </a>
-                        <a href="{{ route('coming-soon') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0"></span>
-                                <span>Rekap Gaji</span>
-                            </div>
-                            <span class="text-[8px] font-bold bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">Soon</span>
-                        </a>
-                    </div>
-                </div>
+                <!-- Slip Gaji -->
+                <a href="{{ route('payslips.index') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
+                    {{ Request::routeIs('payslips.*') ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/50' }}
+                    text-xs relative group">
+                    <i data-lucide="wallet" class="menu-icon w-4 h-4"></i>
+                    <span class="menu-text">Slip Gaji</span>
+                    <span class="sidebar-tooltip absolute left-full ml-3 px-2 py-1 bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-50 dark:text-slate-100 text-xs font-semibold rounded-md shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all origin-left duration-100 pointer-events-none whitespace-nowrap z-50">
+                        Slip Gaji
+                    </span>
+                </a>
             </nav>
 
             <!-- MENU LAINNYA -->
