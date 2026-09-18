@@ -6,13 +6,13 @@
         <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex flex-col gap-1">
                 <div class="flex flex-wrap items-center gap-3">
-                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Bonus Kehadiran</h2>
+                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Bonus Ketepatan Waktu</h2>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-150/30 dark:border-indigo-900/30">
                         <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
                         <span>Siklus: {{ \Carbon\Carbon::parse($startDateReq)->translatedFormat('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->translatedFormat('d M Y') }}</span>
                     </span>
                 </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Evaluasi kehadiran pegawai berdasarkan skema bonus aktif.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Evaluasi ketepatan waktu kedatangan pegawai berdasarkan skema bonus aktif.</p>
             </div>
             
             <div class="flex items-center gap-3 w-full sm:w-auto justify-end">

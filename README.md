@@ -24,8 +24,8 @@ Sistem ini bertindak sebagai **Hub Pusat (Central Hub)** yang berkomunikasi seca
 * Tombol **"Tarik Absensi Mesin"** untuk penarikan data mentah secara real-time.
 * Kalkulasi otomatis status kehadiran harian (Hadir, Terlambat, Alfa, Sakit, Izin, Cuti, Dinas, Off, Libur, Pending) beserta durasi keterlambatan presisi dalam satuan menit.
 
-### 4. Skema & Riwayat Laporan Bonus Kehadiran
-* Pengaturan skema bonus keterlambatan masuk kerja berjenjang (multi-tier).
+### 4. Skema & Riwayat Laporan Bonus Ketepatan Waktu
+* Pengaturan skema bonus ketepatan waktu hadir lebih awal berjenjang (multi-tier).
 * Rekapitulasi laporan bonus bulanan pegawai berdasarkan data kehadiran riil dan cutoff payroll yang dikonfigurasi.
 
 ### 5. Pengumuman Pusat & Slip Gaji

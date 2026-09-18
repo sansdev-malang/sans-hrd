@@ -79,7 +79,7 @@
                         Pegawai Roster / Shift
                     </h5>
                     <p class="leading-relaxed pl-3 text-[11px]">
-                        Semua pegawai dengan jadwal roster / shift <strong>tidak terpengaruh otomatis</strong> oleh hari libur. Mereka tetap wajib masuk, absen, dan berhak atas bonus kehadiran harian sesuai dengan jadwal roster masing-masing.
+                        Semua pegawai dengan jadwal roster / shift <strong>tidak terpengaruh otomatis</strong> oleh hari libur. Mereka tetap wajib masuk, absen, dan berhak atas bonus ketepatan waktu harian sesuai dengan jadwal roster masing-masing.
                     </p>
                 </div>
             </div>

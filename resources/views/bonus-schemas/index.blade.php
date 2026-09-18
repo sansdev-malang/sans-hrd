@@ -117,10 +117,10 @@
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
             <div class="flex flex-col gap-0.5">
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2.5">
-                    <span>Skema Bonus Kehadiran</span>
+                    <span>Skema Bonus Ketepatan Waktu</span>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0 font-sans">Bonus</span>
                 </h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Kelola jenjang nominal bonus harian pegawai berdasarkan waktu kedatangan dan toleransi absensi.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Kelola jenjang nominal bonus ketepatan waktu harian pegawai berdasarkan waktu kedatangan dan toleransi absensi.</p>
             </div>
             <div class="flex items-center gap-2">
                 <a :href="'{{ route('bonus-schemas.sync') }}?tab=' + activeTab" data-no-loader="true" onclick="this.style.pointerEvents = 'none'; let icon = this.querySelector('svg'); if(icon) icon.classList.add('animate-spin');" class="h-9 px-4 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
@@ -181,11 +181,11 @@
                     </div>
                 </button>
                 <div x-cloak x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-emerald-200/40 dark:border-emerald-900/30 space-y-2.5">
-                    <p class="leading-relaxed">Bonus kehadiran harian dihitung secara berjenjang (<em>tiered</em>) berdasarkan selisih waktu kedatangan pegawai <strong>sebelum jam masuk shift</strong>:</p>
+                    <p class="leading-relaxed">Bonus ketepatan waktu harian dihitung secara berjenjang (<em>tiered</em>) berdasarkan selisih waktu kedatangan pegawai <strong>sebelum jam masuk shift</strong>:</p>
                     <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-400 ml-1">
                         <li><strong>Jenjang Tier:</strong> Pegawai yang datang lebih awal akan memperoleh nominal bonus sesuai tingkatan tier yang memenuhi syarat (tier teratas untuk kehadiran paling awal).</li>
                         <li><strong>Kehadiran Tepat Waktu:</strong> Jika skema memiliki batas 0 menit, pegawai yang scan tepat waktu pada jam masuk shift tetap berhak memperoleh nominal bonus tier tersebut.</li>
-                        <li><strong>Keterlambatan:</strong> Pegawai yang melakukan scan setelah jam masuk shift dimulai (&ge; 1 menit terlambat) tidak berhak memperoleh bonus kehadiran harian (Rp 0).</li>
+                        <li><strong>Keterlambatan:</strong> Pegawai yang melakukan scan setelah jam masuk shift dimulai (&ge; 1 menit terlambat) tidak berhak memperoleh bonus ketepatan waktu harian (Rp 0).</li>
                         <li><strong>Tugas Dinas / Izin Khusus:</strong> Pegawai dengan status dinas/izin yang berhak bonus akan otomatis dihitung menggunakan nominal bonus tertinggi (Tier 1).</li>
                         <li><strong>Fleksibilitas Konfigurasi:</strong> Jumlah tingkatan tier, batas minimal menit kehadiran lebih awal, dan besaran nominal bonus dapat diatur dan disesuaikan secara bebas sesuai kebutuhan unit.</li>
                     </ul>

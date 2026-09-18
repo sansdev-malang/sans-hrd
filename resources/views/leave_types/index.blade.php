@@ -35,7 +35,7 @@
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
             <div class="flex flex-col gap-0.5">
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization">Tipe Izin</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Pusat pengaturan jenis izin, aturan absensi fisik, hak bonus kehadiran, dan distribusi ke unit sekolah.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Pusat pengaturan jenis izin, aturan absensi fisik, hak bonus ketepatan waktu, dan distribusi ke unit sekolah.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <form action="{{ route('leave-types.pull') }}" method="POST" class="inline">
@@ -92,7 +92,7 @@
             <!-- Bonus Eligible -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
                 <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Dapat Bonus Kehadiran</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Dapat Bonus Ketepatan Waktu</span>
                     <span class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1 block">
                         <span>{{ $bonusCount }}</span> <span class="text-xs font-medium text-slate-400">Tipe</span>
                     </span>
@@ -165,7 +165,7 @@
                             <th class="px-6 py-3.5 text-center">Berlaku Di Unit</th>
                             <th class="px-6 py-3.5 text-center">Absensi Fisik</th>
                             <th class="px-6 py-3.5 text-center">Persetujuan</th>
-                            <th class="px-6 py-3.5 text-center">Bonus Kehadiran</th>
+                            <th class="px-6 py-3.5 text-center">Bonus Ketepatan Waktu</th>
                             <th class="px-6 py-3.5 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -360,9 +360,9 @@
                             </div>
                         </div>
 
-                        <!-- Bonus Kehadiran -->
+                        <!-- Bonus Ketepatan Waktu -->
                         <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Hak Bonus Kehadiran <span class="text-rose-500">*</span></label>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Hak Bonus Ketepatan Waktu <span class="text-rose-500">*</span></label>
                             <div class="grid grid-cols-2 gap-3">
                                 <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 cursor-pointer">
                                     <input type="radio" name="gets_presence_bonus" value="1" class="text-indigo-600 focus:ring-indigo-500">
@@ -462,9 +462,9 @@
                             </div>
                         </div>
 
-                        <!-- Bonus Kehadiran -->
+                        <!-- Bonus Ketepatan Waktu -->
                         <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Hak Bonus Kehadiran <span class="text-rose-500">*</span></label>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Hak Bonus Ketepatan Waktu <span class="text-rose-500">*</span></label>
                             <div class="grid grid-cols-2 gap-3">
                                 <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 cursor-pointer">
                                     <input type="radio" name="gets_presence_bonus" value="1" x-model="editGetsPresenceBonus" class="text-indigo-600 focus:ring-indigo-500">
