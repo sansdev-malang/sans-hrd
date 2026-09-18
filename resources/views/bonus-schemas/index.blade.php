@@ -167,7 +167,7 @@
             <div class="mb-4 p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/30 text-xs text-emerald-900 dark:text-emerald-300 flex items-start gap-2.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                 <div>
-                    <span class="font-bold">Ketentuan Skema Hadir Lebih Awal:</span> Bonus kehadiran harian dihitung berdasarkan kedatangan pegawai <strong>sebelum jam masuk shift</strong>. Pegawai yang datang lebih awal (misal $\ge$ 30 menit) akan mendapatkan bonus Tier 1 tertinggi. Pegawai yang scan tepat pada jam masuk tetap berhak memperoleh Tier 4, sedangkan kedatangan lewat dari jam masuk (terlambat $\ge$ 1 menit) mendapatkan bonus Rp 0.
+                    <span class="font-bold">Ketentuan Skema Hadir Lebih Awal:</span> Bonus kehadiran harian dihitung berdasarkan kedatangan pegawai <strong>sebelum jam masuk shift</strong>. Pegawai yang datang lebih awal (misal &ge; 30 menit) akan mendapatkan bonus Tier 1 tertinggi. Pegawai yang scan tepat pada jam masuk tetap berhak memperoleh Tier 4, sedangkan kedatangan lewat dari jam masuk (terlambat &ge; 1 menit) mendapatkan bonus Rp 0.
                 </div>
             </div>
 
@@ -436,10 +436,10 @@
                                 <div class="mt-3 p-3 rounded-lg bg-slate-100 dark:bg-slate-950 text-[11px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
                                     <span class="font-bold text-slate-800 dark:text-slate-200">💡 Simulasi Masuk Jam 07:00:</span>
                                     <template x-if="modalMode === 'early_arrival'">
-                                        <p class="mt-1">Pegawai scan $\le$ 06:30 dapat Tier 1. Scan 06:31 - 06:45 dapat Tier 2. Scan 06:46 - 06:55 dapat Tier 3. Scan 06:56 - 07:00 dapat Tier 4. Scan $\ge$ 07:01 (Telat) $\rightarrow$ <strong>Rp 0</strong>.</p>
+                                        <p class="mt-1">Pegawai scan &le; 06:30 dapat Tier 1. Scan 06:31 - 06:45 dapat Tier 2. Scan 06:46 - 06:55 dapat Tier 3. Scan 06:56 - 07:00 dapat Tier 4. Scan &ge; 07:01 (Telat) &rarr; <strong>Rp 0</strong>.</p>
                                     </template>
                                     <template x-if="modalMode === 'late_tolerance'">
-                                        <p class="mt-1">Pegawai scan $\le$ 07:00 dapat Tier 1. Scan 07:01 - 07:05 dapat Tier 2. Melewati batas telat tertinggi $\rightarrow$ <strong>Rp 0</strong>.</p>
+                                        <p class="mt-1">Pegawai scan &le; 07:00 dapat Tier 1. Scan 07:01 - 07:05 dapat Tier 2. Melewati batas telat tertinggi &rarr; <strong>Rp 0</strong>.</p>
                                     </template>
                                 </div>
                             </div>
@@ -556,10 +556,10 @@
                                 <div class="mt-3 p-3 rounded-lg bg-slate-100 dark:bg-slate-950 text-[11px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
                                     <span class="font-bold text-slate-800 dark:text-slate-200">💡 Simulasi Masuk Jam 07:00:</span>
                                     <template x-if="modalMode === 'early_arrival'">
-                                        <p class="mt-1">Pegawai scan $\le$ 06:30 dapat Tier 1. Scan 06:31 - 06:45 dapat Tier 2. Scan 06:46 - 06:55 dapat Tier 3. Scan 06:56 - 07:00 dapat Tier 4. Scan $\ge$ 07:01 (Telat) $\rightarrow$ <strong>Rp 0</strong>.</p>
+                                        <p class="mt-1">Pegawai scan &le; 06:30 dapat Tier 1. Scan 06:31 - 06:45 dapat Tier 2. Scan 06:46 - 06:55 dapat Tier 3. Scan 06:56 - 07:00 dapat Tier 4. Scan &ge; 07:01 (Telat) &rarr; <strong>Rp 0</strong>.</p>
                                     </template>
                                     <template x-if="modalMode === 'late_tolerance'">
-                                        <p class="mt-1">Pegawai scan $\le$ 07:00 dapat Tier 1. Scan 07:01 - 07:05 dapat Tier 2. Melewati batas telat tertinggi $\rightarrow$ <strong>Rp 0</strong>.</p>
+                                        <p class="mt-1">Pegawai scan &le; 07:00 dapat Tier 1. Scan 07:01 - 07:05 dapat Tier 2. Melewati batas telat tertinggi &rarr; <strong>Rp 0</strong>.</p>
                                     </template>
                                 </div>
                             </div>
