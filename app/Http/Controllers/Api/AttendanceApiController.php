@@ -28,7 +28,7 @@ class AttendanceApiController extends Controller
 
         public function matrixReport(Request $request)
     {
-        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 25);
         $month = $request->query('month');
         if (empty($month)) {
             $today = now();
@@ -419,7 +419,7 @@ class AttendanceApiController extends Controller
 
     public function bonusReport(Request $request)
     {
-        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 25);
         $month = $request->query('month');
         if (empty($month)) {
             $today = now();
@@ -545,6 +545,13 @@ class AttendanceApiController extends Controller
                 return $leave->school_unit_id . '_' . $leave->employee_id;
             });
 
+        // Pre-fetch Picket Schedules & Swaps
+        $picketData = $this->getPicketDataIndexed($startDateReq, $endDateReq);
+        $picketSchedulesMap = $picketData['schedulesMap'];
+        $picketSwapOverrides = $picketData['swapOverrides'];
+        $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
+        $picketEffectiveDate = \App\Models\Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+
         // 5. Calculate Attendance Report
         $reports = [];
 
@@ -643,7 +650,41 @@ class AttendanceApiController extends Controller
                     }
                 }
 
+                // Check Picket Duty for this employee on this date
+                $isPicketToday = false;
+                $picketAreaName = null;
+                $picketStartTime = '06:30:00';
+
+                // Picket integration takes effect starting from the October cutoff cycle (2026-09-27 onwards)
+                if ($dateStr >= $picketEffectiveDate) {
+                    $swapKey = $unit . '_' . $empId . '_' . $dateStr;
+                    if (isset($picketSwapOverrides[$swapKey])) {
+                        if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
+                            $isPicketToday = true;
+                            $picketAreaName = $picketSwapOverrides[$swapKey]['picket_area_name'] ?? 'Tukar Piket';
+                            $picketStartTime = $picketSwapOverrides[$swapKey]['start_time'] ?? '06:30:00';
+                        }
+                    } else {
+                        $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
+                        if (isset($picketSchedulesMap[$routineKey])) {
+                            $sched = $picketSchedulesMap[$routineKey];
+                            $schedStart = $sched['start_date'] ?? '2026-07-01';
+                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
+                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
+                                $isPicketToday = true;
+                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
+                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                            }
+                        }
+                    }
+                }
+
                 if ($hasShiftToday) {
+                    // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
+                    if ($isPicketToday) {
+                        $shiftStartTime = $picketStartTime;
+                    }
+
                     $dailyLateMinutes = 0;
                     $dailyStatus = 'Absent';
                     $dailyCheckIn = null;
@@ -716,6 +757,9 @@ class AttendanceApiController extends Controller
                         'late_minutes' => $dailyLateMinutes,
                         'status' => $dailyStatus,
                         'bonus_nominal' => $dailyBonus,
+                        'is_picket' => $isPicketToday,
+                        'picket_area' => $picketAreaName,
+                        'picket_start' => $isPicketToday ? $picketStartTime : null,
                     ];
                 } else {
                     $dailyDetails[$dateStr] = [
@@ -727,6 +771,9 @@ class AttendanceApiController extends Controller
                         'late_minutes' => 0,
                         'status' => 'Off',
                         'bonus_nominal' => 0,
+                        'is_picket' => false,
+                        'picket_area' => null,
+                        'picket_start' => null,
                     ];
                 }
 
@@ -1037,6 +1084,62 @@ class AttendanceApiController extends Controller
             'calculated_bonus' => $calculatedBonus,
             'shift_id' => $shift ? $shift->id : null,
             'shift_name' => $shift ? $shift->name : 'Unknown',
+        ];
+    }
+
+    /**
+     * Fetch and index picket schedules and swaps across all school units.
+     */
+    private function getPicketDataIndexed(string $startDateReq, string $endDateReq): array
+    {
+        $picketData = $this->service->getAllPicketAssignments($startDateReq, $endDateReq);
+        $schedules = $picketData['schedules'] ?? [];
+        $swaps = $picketData['swaps'] ?? [];
+
+        $schedulesMap = [];
+        foreach ($schedules as $ps) {
+            $pKey = ($ps['school_unit_id'] ?? '') . '_' . ($ps['employee_id'] ?? '') . '_' . ($ps['day_of_week'] ?? '');
+            $schedulesMap[$pKey] = $ps;
+        }
+
+        $swapOverrides = [];
+        foreach ($swaps as $sw) {
+            $swUnit = $sw['school_unit_id'] ?? '';
+            $reqId = $sw['requester_id'] ?? null;
+            $targetId = $sw['target_employee_id'] ?? null;
+            $reqDate = $sw['requested_date'] ?? null;
+            $targetDate = $sw['target_date'] ?? null;
+
+            if ($reqDate) {
+                if ($reqId) {
+                    $swapOverrides[$swUnit . '_' . $reqId . '_' . $reqDate] = ['action' => 'released'];
+                }
+                if ($targetId) {
+                    $swapOverrides[$swUnit . '_' . $targetId . '_' . $reqDate] = [
+                        'action' => 'assigned',
+                        'start_time' => '06:30:00',
+                        'picket_area_name' => 'Tukar Piket',
+                    ];
+                }
+            }
+
+            if ($targetDate) {
+                if ($targetId) {
+                    $swapOverrides[$swUnit . '_' . $targetId . '_' . $targetDate] = ['action' => 'released'];
+                }
+                if ($reqId) {
+                    $swapOverrides[$swUnit . '_' . $reqId . '_' . $targetDate] = [
+                        'action' => 'assigned',
+                        'start_time' => '06:30:00',
+                        'picket_area_name' => 'Tukar Piket',
+                    ];
+                }
+            }
+        }
+
+        return [
+            'schedulesMap' => $schedulesMap,
+            'swapOverrides' => $swapOverrides,
         ];
     }
 }

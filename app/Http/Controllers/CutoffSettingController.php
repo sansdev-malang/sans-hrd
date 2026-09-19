@@ -12,7 +12,7 @@ class CutoffSettingController extends Controller
      */
     public function index()
     {
-        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 26);
+        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 25);
         return view('settings.index', compact('cutoffDate'));
     }
 

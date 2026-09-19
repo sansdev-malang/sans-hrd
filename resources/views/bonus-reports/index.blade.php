@@ -231,39 +231,55 @@
                                 @php
                                     $dateStr = $date->format('Y-m-d');
                                     $detail = $report['daily_details'][$dateStr] ?? null;
+                                    $isPicket = $detail['is_picket'] ?? false;
+                                    $picketArea = $detail['picket_area'] ?? 'Area Piket';
                                 @endphp
                                 <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30 {{ $date->isSunday() ? 'bg-red-50/30 dark:bg-red-950/10' : '' }}">
                                     @if($detail)
+                                        @php
+                                            $picketPrefix = $isPicket ? "⚡ [PIKET: 06:30 ({$picketArea})] " : "";
+                                        @endphp
                                         @if($detail['bonus_nominal'] > 0)
                                             @php 
                                                 $nominal = $detail['bonus_nominal'];
                                                 $shortNominal = ($nominal >= 1000) ? ($nominal / 1000) . 'k' : $nominal;
                                                 $tierStr = !empty($detail['tier_level']) ? "Tier {$detail['tier_level']}" : 'Bonus';
                                                 if (isset($detail['status']) && $detail['status'] === 'Dinas') {
-                                                    $titleText = "Dinas: Rp " . number_format($nominal, 0, ',', '.');
+                                                    $titleText = $picketPrefix . "Dinas: Rp " . number_format($nominal, 0, ',', '.');
                                                 } else {
                                                     $earlyStr = !empty($detail['early_minutes']) ? " (Hadir {$detail['early_minutes']} mnt sblm masuk)" : " (Tepat Waktu)";
-                                                    $titleText = "{$tierStr}: Rp " . number_format($nominal, 0, ',', '.') . $earlyStr;
+                                                    $titleText = $picketPrefix . "{$tierStr}: Rp " . number_format($nominal, 0, ',', '.') . $earlyStr;
                                                 }
                                             @endphp
-                                            <div class="mx-auto w-7 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] rounded border border-emerald-200 dark:border-emerald-800/50" title="{{ $titleText }}">
+                                            <div class="relative mx-auto w-7 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] rounded border {{ $isPicket ? 'border-amber-400 dark:border-amber-500 shadow-sm' : 'border-emerald-200 dark:border-emerald-800/50' }}" title="{{ $titleText }}">
                                                 {{ $shortNominal }}
+                                                @if($isPicket)
+                                                    <span class="absolute -top-1 -right-1 flex h-2 w-2">
+                                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                                    </span>
+                                                @endif
                                             </div>
                                         @else
                                             @if($dateStr > date('Y-m-d'))
-                                                <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px]">-</div>
+                                                <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px] {{ $isPicket ? 'text-amber-500 font-bold' : '' }}" title="{{ $isPicket ? $picketPrefix . 'Jadwal Piket' : '' }}">-</div>
                                             @else
                                                 @php
                                                     if (isset($detail['status']) && $detail['status'] === 'Dinas') {
-                                                        $titleText = 'Dinas (Tidak ada bonus)';
+                                                        $titleText = $picketPrefix . 'Dinas (Tidak ada bonus)';
                                                     } elseif (!empty($detail['late_minutes'])) {
-                                                        $titleText = "Terlambat {$detail['late_minutes']} menit (Bonus Rp 0)";
+                                                        $titleText = $picketPrefix . "Terlambat {$detail['late_minutes']} menit (Bonus Rp 0)";
                                                     } else {
-                                                        $titleText = 'Tidak ada bonus';
+                                                        $titleText = $picketPrefix . 'Tidak ada bonus';
                                                     }
                                                 @endphp
-                                                <div class="mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border border-red-200 dark:border-red-800/50" title="{{ $titleText }}">
+                                                <div class="relative mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border {{ $isPicket ? 'border-amber-400 dark:border-amber-500' : 'border-red-200 dark:border-red-800/50' }}" title="{{ $titleText }}">
                                                     0K
+                                                    @if($isPicket)
+                                                        <span class="absolute -top-1 -right-1 flex h-2 w-2">
+                                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             @endif
                                         @endif
@@ -400,21 +416,27 @@
                                 <div class="text-red-500">Min</div>
                             </div>
 
-                            <!-- Grid Tanggal -->
+                                <!-- Grid Tanggal -->
                             <div class="grid grid-cols-7 gap-1">
                                 <template x-for="day in calendarDays" :key="day.dateStr">
-                                    <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between"
+                                    <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between relative"
                                          :class="[
-                                             day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40'
+                                             day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40',
+                                             (selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket) ? 'border-amber-400 dark:border-amber-500/80 ring-1 ring-amber-400/30' : ''
                                          ]">
                                          
-                                        <!-- Tanggal -->
-                                        <span class="text-[9px] font-semibold"
-                                              :class="[
-                                                  day.isCurrentMonth ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400',
-                                                  (day.dateStr && new Date(day.dateStr).getDay() === 0) ? 'text-red-500 font-bold' : ''
-                                              ]"
-                                              x-text="day.day"></span>
+                                        <!-- Header Tanggal & Picket Icon -->
+                                        <div class="flex items-center justify-between w-full px-0.5">
+                                            <span class="text-[9px] font-semibold"
+                                                  :class="[
+                                                      day.isCurrentMonth ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400',
+                                                      (day.dateStr && new Date(day.dateStr).getDay() === 0) ? 'text-red-500 font-bold' : ''
+                                                  ]"
+                                                  x-text="day.day"></span>
+                                            <template x-if="selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket">
+                                                <span class="text-[8px] leading-none text-amber-500 dark:text-amber-400 font-bold" :title="'Piket: 06:30 (' + (selectedReport.daily_details[day.dateStr].picket_area || 'Area Piket') + ')'">⚡</span>
+                                            </template>
+                                        </div>
                                               
                                         <!-- Bonus Nominal -->
                                         <div class="mt-auto w-full">

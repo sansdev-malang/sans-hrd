@@ -26,8 +26,8 @@ class AttendancePercentageReportController extends Controller
         $endDateReq = $request->query('end_date');
         $month = $request->query('month');
 
-        // Fetch cutoff date from settings, default to 26
-        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 26);
+        // Fetch cutoff date from settings, default to 25
+        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 25);
 
         if (!empty($startDateReq) && !empty($endDateReq)) {
             $startDate = Carbon::parse($startDateReq)->startOfDay();

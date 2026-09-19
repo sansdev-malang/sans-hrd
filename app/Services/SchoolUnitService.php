@@ -133,4 +133,66 @@ class SchoolUnitService
     {
         return $this->getAllAttendances($date);
     }
+
+    /**
+     * Get picket assignments (schedules & approved swaps) from all active school units.
+     */
+    public function getAllPicketAssignments(?string $startDate = null, ?string $endDate = null): array
+    {
+        $cacheKey = 'hrd_picket_assignments_' . ($startDate ?: 'all') . '_' . ($endDate ?: 'all');
+        
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function() use ($startDate, $endDate) {
+            $activeUnits = SchoolUnit::where('is_active', true)->get();
+            $picketData = [
+                'schedules' => [],
+                'swaps' => [],
+            ];
+
+            if ($activeUnits->isEmpty()) {
+                return $picketData;
+            }
+
+            $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($activeUnits, $startDate, $endDate) {
+                return $activeUnits->map(function ($unit) use ($pool, $startDate, $endDate) {
+                    $params = [];
+                    if ($startDate && $endDate) {
+                        $params['start_date'] = $startDate;
+                        $params['end_date'] = $endDate;
+                    }
+                    return $pool->as($unit->id)
+                        ->withHeaders([
+                            'X-API-TOKEN' => $unit->api_token,
+                            'Accept' => 'application/json',
+                        ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/picket-assignments', $params);
+                });
+            });
+
+            foreach ($activeUnits as $unit) {
+                $response = $responses[$unit->id] ?? null;
+
+                if ($response instanceof \Illuminate\Http\Client\Response && $response->successful()) {
+                    $unitData = $response->json('data') ?? [];
+                    
+                    $unitSchedules = $unitData['schedules'] ?? [];
+                    foreach ($unitSchedules as &$sched) {
+                        $sched['school_unit_id'] = $unit->id;
+                        $sched['unit_name'] = $unit->name;
+                    }
+                    $picketData['schedules'] = array_merge($picketData['schedules'], $unitSchedules);
+
+                    $unitSwaps = $unitData['swaps'] ?? [];
+                    foreach ($unitSwaps as &$sw) {
+                        $sw['school_unit_id'] = $unit->id;
+                        $sw['unit_name'] = $unit->name;
+                    }
+                    $picketData['swaps'] = array_merge($picketData['swaps'], $unitSwaps);
+                } else {
+                    $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
+                    Log::warning("Failed to fetch picket assignments from unit {$unit->name}. Status: {$status}");
+                }
+            }
+
+            return $picketData;
+        });
+    }
 }

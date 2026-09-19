@@ -22,7 +22,7 @@ class AttendanceBonusReportController extends Controller
 
     public function index(Request $request)
     {
-        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 26);
+        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 25);
         $month = $request->query('month');
         if (empty($month)) {
             $today = now();
@@ -183,6 +183,13 @@ class AttendanceBonusReportController extends Controller
                 return $leave->school_unit_id . '_' . $leave->employee_id;
             });
 
+        // Pre-fetch Picket Schedules & Swaps
+        $picketData = $this->getPicketDataIndexed($startDateReq, $endDateReq);
+        $picketSchedulesMap = $picketData['schedulesMap'];
+        $picketSwapOverrides = $picketData['swapOverrides'];
+        $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
+        $picketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+
         // 5. Calculate Attendance Report
         $reports = [];
 
@@ -279,7 +286,49 @@ class AttendanceBonusReportController extends Controller
                     }
                 }
 
+                // Check Picket Duty for this employee on this date
+                $isPicketToday = false;
+                $picketAreaName = null;
+                $picketStartTime = '06:30:00';
+
+                // Picket integration takes effect starting from the October cutoff cycle (2026-09-27 onwards)
+                if ($dateStr >= $picketEffectiveDate) {
+                    $swapKey = $unit . '_' . $empId . '_' . $dateStr;
+                    if (isset($picketSwapOverrides[$swapKey])) {
+                        if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
+                            $isPicketToday = true;
+                            $picketAreaName = $picketSwapOverrides[$swapKey]['picket_area_name'] ?? 'Tukar Piket';
+                            $picketStartTime = $picketSwapOverrides[$swapKey]['start_time'] ?? '06:30:00';
+                        }
+                    } else {
+                        $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
+                        if (isset($picketSchedulesMap[$routineKey])) {
+                            $sched = $picketSchedulesMap[$routineKey];
+                            $schedStart = $sched['start_date'] ?? '2026-07-01';
+                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
+                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
+                                $isPicketToday = true;
+                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
+                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                            }
+                        }
+                    }
+                }
+
                 if ($hasShiftToday) {
+                    // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
+                    if ($isPicketToday) {
+                        $shiftStartTime = $picketStartTime;
+                    }
+
+                    $currentSchema = null;
+                    if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
+                        $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
+                    }
+                    if (!$currentSchema) {
+                        $currentSchema = $activeSchema;
+                    }
+
                     $dailyLateMinutes = 0;
                     $earlyMinutes = 0;
                     $dailyStatus = 'Absent';
@@ -328,14 +377,6 @@ class AttendanceBonusReportController extends Controller
                         }
 
                         // Calculate Daily Bonus
-                        $currentSchema = null;
-                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
-                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
-                        }
-                        if (!$currentSchema) {
-                            $currentSchema = $activeSchema;
-                        }
-
                         $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
 
                         if ($currentSchema && $currentSchema->tiers->count() > 0) {
@@ -398,6 +439,9 @@ class AttendanceBonusReportController extends Controller
                         'bonus_nominal' => $dailyBonus,
                         'tier_level' => $dailyTierLevel,
                         'calculation_mode' => $currentSchema ? ($currentSchema->calculation_mode ?? 'early_arrival') : 'early_arrival',
+                        'is_picket' => $isPicketToday,
+                        'picket_area' => $picketAreaName,
+                        'picket_start' => $isPicketToday ? $picketStartTime : null,
                     ];
                 }
 
@@ -410,12 +454,11 @@ class AttendanceBonusReportController extends Controller
                 'total_late_minutes' => $totalLateMinutes,
                 'total_absent' => $totalAbsent,
                 'bonus_nominal' => $totalBonusNominal,
-                'daily_details' => $dailyDetails ?? [],
                 'daily_details' => $dailyDetails,
             ];
         }
 
-                // Convert array to a length-aware paginator for the view
+        // Convert array to a length-aware paginator for the view
         $total = count($reports);
         
         $perPageReq = $request->query('per_page', 50);
@@ -438,7 +481,7 @@ class AttendanceBonusReportController extends Controller
 
         public function export(Request $request)
     {
-        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 26);
+        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 25);
         $month = $request->query('month');
         if (empty($month)) {
             $today = now();
@@ -584,6 +627,13 @@ class AttendanceBonusReportController extends Controller
                 return $leave->school_unit_id . '_' . $leave->employee_id;
             });
 
+        // Pre-fetch Picket Schedules & Swaps
+        $picketData = $this->getPicketDataIndexed($startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
+        $picketSchedulesMap = $picketData['schedulesMap'];
+        $picketSwapOverrides = $picketData['swapOverrides'];
+        $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
+        $picketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+
         $reports = [];
         $totalSemuaBonus = 0;
 
@@ -594,7 +644,7 @@ class AttendanceBonusReportController extends Controller
 
             if (!$uid || !$empId) continue;
 
-                        $totalPresent = 0;
+            $totalPresent = 0;
             $totalLateMinutes = 0;
             $totalAbsent = 0;
             $totalBonusNominal = 0;
@@ -678,7 +728,56 @@ class AttendanceBonusReportController extends Controller
                     }
                 }
 
+                // Check Picket Duty for this employee on this date
+                $isPicketToday = false;
+                $picketAreaName = null;
+                $picketStartTime = '06:30:00';
+
+                // Picket integration takes effect starting from the October cutoff cycle (2026-09-27 onwards)
+                if ($dateStr >= $picketEffectiveDate) {
+                    $swapKey = $unit . '_' . $empId . '_' . $dateStr;
+                    if (isset($picketSwapOverrides[$swapKey])) {
+                        if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
+                            $isPicketToday = true;
+                            $picketAreaName = $picketSwapOverrides[$swapKey]['picket_area_name'] ?? 'Tukar Piket';
+                            $picketStartTime = $picketSwapOverrides[$swapKey]['start_time'] ?? '06:30:00';
+                        }
+                    } else {
+                        $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
+                        if (isset($picketSchedulesMap[$routineKey])) {
+                            $sched = $picketSchedulesMap[$routineKey];
+                            $schedStart = $sched['start_date'] ?? '2026-07-01';
+                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
+                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
+                                $isPicketToday = true;
+                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
+                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                            }
+                        }
+                    }
+                }
+
                 if ($hasShiftToday) {
+                    // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
+                    if ($isPicketToday) {
+                        $shiftStartTime = $picketStartTime;
+                    }
+
+                    $currentSchema = null;
+                    if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
+                        $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
+                    }
+                    if (!$currentSchema && !empty($emp['unit_name'])) {
+                        $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
+                            return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
+                                || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
+                                || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
+                        });
+                    }
+                    if (!$currentSchema) {
+                        $currentSchema = $activeSchema;
+                    }
+
                     $dailyLateMinutes = 0;
                     $earlyMinutes = 0;
                     $dailyBonus = 0;
@@ -721,28 +820,6 @@ class AttendanceBonusReportController extends Controller
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 999;
                             $dailyCheckIn = 'DINAS';
-                        }
-
-                        $currentSchema = null;
-                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
-                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
-                        }
-                        if (!$currentSchema && !empty($emp['unit_name'])) {
-                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
-                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
-                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
-                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
-                            });
-                        }
-                        if (!$currentSchema && !empty($emp['unit_name'])) {
-                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
-                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
-                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
-                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
-                            });
-                        }
-                        if (!$currentSchema) {
-                            $currentSchema = $activeSchema;
                         }
 
                         $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
@@ -794,6 +871,9 @@ class AttendanceBonusReportController extends Controller
                         'bonus_nominal' => $dailyBonus,
                         'early_minutes' => $earlyMinutes,
                         'late_minutes' => $dailyLateMinutes,
+                        'is_picket' => $isPicketToday,
+                        'picket_area' => $picketAreaName,
+                        'picket_start' => $isPicketToday ? $picketStartTime : null,
                     ];
                 }
 
@@ -813,14 +893,14 @@ class AttendanceBonusReportController extends Controller
         
         $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
 
-                $dates = [];
+        $dates = [];
         $start = $startDate->copy();
         while($start <= $endDate) {
             $dates[] = $start->copy();
             $start->addDay();
         }
 
-                        $unitName = 'Semua_Unit';
+        $unitName = 'Semua_Unit';
         if ($unitId) {
             $unitObj = \App\Models\SchoolUnit::find($unitId);
             if ($unitObj) {
@@ -932,4 +1012,61 @@ class AttendanceBonusReportController extends Controller
         $writer->save('php://output');
         exit;
     }
+
+    /**
+     * Fetch and index picket schedules and swaps across all school units.
+     */
+    private function getPicketDataIndexed(string $startDateReq, string $endDateReq): array
+    {
+        $picketData = $this->service->getAllPicketAssignments($startDateReq, $endDateReq);
+        $schedules = $picketData['schedules'] ?? [];
+        $swaps = $picketData['swaps'] ?? [];
+
+        $schedulesMap = [];
+        foreach ($schedules as $ps) {
+            $pKey = ($ps['school_unit_id'] ?? '') . '_' . ($ps['employee_id'] ?? '') . '_' . ($ps['day_of_week'] ?? '');
+            $schedulesMap[$pKey] = $ps;
+        }
+
+        $swapOverrides = [];
+        foreach ($swaps as $sw) {
+            $swUnit = $sw['school_unit_id'] ?? '';
+            $reqId = $sw['requester_id'] ?? null;
+            $targetId = $sw['target_employee_id'] ?? null;
+            $reqDate = $sw['requested_date'] ?? null;
+            $targetDate = $sw['target_date'] ?? null;
+
+            if ($reqDate) {
+                if ($reqId) {
+                    $swapOverrides[$swUnit . '_' . $reqId . '_' . $reqDate] = ['action' => 'released'];
+                }
+                if ($targetId) {
+                    $swapOverrides[$swUnit . '_' . $targetId . '_' . $reqDate] = [
+                        'action' => 'assigned',
+                        'start_time' => '06:30:00',
+                        'picket_area_name' => 'Tukar Piket',
+                    ];
+                }
+            }
+
+            if ($targetDate) {
+                if ($targetId) {
+                    $swapOverrides[$swUnit . '_' . $targetId . '_' . $targetDate] = ['action' => 'released'];
+                }
+                if ($reqId) {
+                    $swapOverrides[$swUnit . '_' . $reqId . '_' . $targetDate] = [
+                        'action' => 'assigned',
+                        'start_time' => '06:30:00',
+                        'picket_area_name' => 'Tukar Piket',
+                    ];
+                }
+            }
+        }
+
+        return [
+            'schedulesMap' => $schedulesMap,
+            'swapOverrides' => $swapOverrides,
+        ];
+    }
 }
+

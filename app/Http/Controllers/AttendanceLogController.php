@@ -436,7 +436,7 @@ class AttendanceLogController extends Controller
 
     public function index(Request $request)
     {
-        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 25);
         $month = $request->query('month');
         if (empty($month)) {
             $today = now();
@@ -525,7 +525,7 @@ class AttendanceLogController extends Controller
         ini_set('memory_limit', '512M');
         ini_set('max_execution_time', 300);
         
-        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 26);
+        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 25);
         $month = $request->query('month');
         if (empty($month)) {
             $today = now();
