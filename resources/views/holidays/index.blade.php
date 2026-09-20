@@ -6,10 +6,38 @@
     </style>
 
     <div class="p-6 space-y-6" x-data="{ 
+        // ACTIVE TAB
+        activeTab: '{{ request('tab', 'reward') }}',
+
+        // MODAL STATES
+        showAddRewardModal: false,
+        showEditRewardModal: false,
         showAddModal: false, 
         showAdjModal: false,
         showEditModal: false,
         isDrawerOpen: false,
+
+        // REWARD HARI LIBUR - TAMBAH
+        rewardTargetType: 'all',
+        rewardSelectedUnits: @json($units->pluck('id')->toArray()),
+        rewardSelectedEmployees: [],
+        employeeSearch: '',
+        employeePositionFilter: '',
+        allUnitIds: @json($units->pluck('id')->toArray()),
+
+        // REWARD HARI LIBUR - EDIT
+        editRewardId: '',
+        editRewardName: '',
+        editRewardStartDate: '',
+        editRewardEndDate: '',
+        editRewardUnits: [],
+        editRewardTargetType: 'all',
+        editRewardEmployees: [],
+        editRewardNotes: '',
+        editEmployeeSearch: '',
+        editEmployeePositionFilter: '',
+
+        // HARI LIBUR RESMI & PENGALIHAN
         selectedHolidayId: '',
         selectedHolidayName: '',
         selectedHolidayDates: [],
@@ -23,71 +51,336 @@
         editHolidayOldIds: [],
         drawerHolidayName: '',
         drawerHolidayRange: '',
-        drawerAdjustments: []
+        drawerAdjustments: [],
+
+        // Raw Employee List for reactive filtering
+        employees: @json($rawEmployees ?? []),
+
+        getFilteredEmployees(unitIds, search, position) {
+            let targetUnitIds = unitIds;
+            if (!targetUnitIds || targetUnitIds.length === 0) {
+                targetUnitIds = this.allUnitIds;
+            }
+            const strUnitIds = targetUnitIds.map(String);
+            return this.employees.filter(emp => {
+                const matchesUnit = strUnitIds.includes(String(emp.unit_id));
+                if (!matchesUnit) return false;
+                
+                if (position && position !== '') {
+                    const empPos = emp.position || emp.subject_position || '';
+                    if (empPos !== position) return false;
+                }
+
+                if (!search || search.trim() === '') return true;
+                const s = search.toLowerCase();
+                const name = (emp.name || '').toLowerCase();
+                const pos = (emp.position || emp.subject_position || '').toLowerCase();
+                const nip = (emp.nuptk_nip_nik || emp.nik || '').toLowerCase();
+                return name.includes(s) || pos.includes(s) || nip.includes(s);
+            });
+        },
+
+        toggleSelectAllRewardEmployees(unitIds) {
+            const visible = this.getFilteredEmployees(unitIds, this.employeeSearch, this.employeePositionFilter);
+            const visibleKeys = visible.map(e => `${e.unit_id}_${e.id}`);
+            const allSelected = visibleKeys.length > 0 && visibleKeys.every(k => this.rewardSelectedEmployees.includes(k));
+            if (allSelected) {
+                this.rewardSelectedEmployees = this.rewardSelectedEmployees.filter(k => !visibleKeys.includes(k));
+            } else {
+                const set = new Set([...this.rewardSelectedEmployees, ...visibleKeys]);
+                this.rewardSelectedEmployees = Array.from(set);
+            }
+        },
+
+        clearAllRewardEmployees() {
+            this.rewardSelectedEmployees = [];
+        },
+
+        toggleSelectAllEditRewardEmployees(unitIds) {
+            const visible = this.getFilteredEmployees(unitIds, this.editEmployeeSearch, this.editEmployeePositionFilter);
+            const visibleKeys = visible.map(e => `${e.unit_id}_${e.id}`);
+            const allSelected = visibleKeys.length > 0 && visibleKeys.every(k => this.editRewardEmployees.includes(k));
+            if (allSelected) {
+                this.editRewardEmployees = this.editRewardEmployees.filter(k => !visibleKeys.includes(k));
+            } else {
+                const set = new Set([...this.editRewardEmployees, ...visibleKeys]);
+                this.editRewardEmployees = Array.from(set);
+            }
+        },
+
+        clearAllEditRewardEmployees() {
+            this.editRewardEmployees = [];
+        }
     }">
 
-        <!-- HEADER -->
+        <!-- ========================================================================= -->
+        <!-- PAGE HEADER -->
+        <!-- ========================================================================= -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
             <div class="flex flex-col gap-0.5">
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2.5">
-                    <span>Hari Libur & Pengalihan Libur</span>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0">Kalender</span>
+                    <span>Manajemen Hari Libur</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0">HRD & Operasional</span>
                 </h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Atur hari libur nasional serta kebijakan pengalihan libur kerja operasional antar unit sekolah.</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('holidays.sync') }}" data-no-loader="true" onclick="this.style.pointerEvents = 'none'; let icon = this.querySelector('svg'); if(icon) icon.classList.add('animate-spin');" class="h-9 px-4 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350 text-xs font-bold rounded-xl shadow-3xs border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-                    <span>Sync Ulang ke Unit</span>
-                </a>
-                <button @click="showAddModal = true" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-105 duration-150 flex items-center gap-1.5 border-0 cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                    <span>Tambah Libur Baru</span>
-                </button>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Kelola reward hari libur unit/pegawai (bonus penuh) serta kalender hari libur resmi & pengalihan libur kerja.</p>
             </div>
         </header>
 
-        <!-- PANDUAN MEKANISME & KONSEP HARI LIBUR -->
-        <div class="bg-indigo-50/40 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/40 rounded-xl p-5 text-left space-y-4">
-            <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-650 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/></svg>
-                <h4 class="text-xs font-black uppercase tracking-wider font-mono">Panduan & Mekanisme Kalender Hari Libur</h4>
+        <!-- ========================================================================= -->
+        <!-- TABS NAVIGATION -->
+        <!-- ========================================================================= -->
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+                <!-- Tab 1: Reward Hari Libur -->
+                <button type="button" 
+                        @click="activeTab = 'reward'" 
+                        :class="activeTab === 'reward' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'" 
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H4.5a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
+                    <span>Reward Hari Libur</span>
+                    <span :class="activeTab === 'reward' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">
+                        {{ count($holidayRewards) }}
+                    </span>
+                </button>
+
+                <!-- Tab 2: Hari Libur & Pengalihan Libur -->
+                <button type="button" 
+                        @click="activeTab = 'standard'" 
+                        :class="activeTab === 'standard' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'" 
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+                    <span>Hari Libur & Pengalihan Libur</span>
+                    <span :class="activeTab === 'standard' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">
+                        {{ count($groupedHolidays) }}
+                    </span>
+                </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-600 dark:text-slate-400">
-                <div class="space-y-1.5">
-                    <h5 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                        Cakupan Libur (Global vs Lokal)
-                    </h5>
-                    <p class="leading-relaxed pl-3 text-[11px]">
-                        <strong>Libur Nasional:</strong> Berlaku global untuk seluruh unit sekolah (PAUD, SD, SMP).<br>
-                        <strong>Libur Lokal:</strong> Hanya berlaku untuk unit sekolah yang Anda pilih saat penambahan libur.
-                    </p>
+
+            <!-- Tab Context Action Buttons -->
+            <div class="flex items-center gap-2">
+                <template x-if="activeTab === 'reward'">
+                    <button @click="showAddRewardModal = true; rewardSelectedUnits = allUnitIds; rewardSelectedEmployees = []; rewardTargetType = 'all'; employeeSearch = ''; employeePositionFilter = '';" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-105 duration-150 flex items-center gap-1.5 border-0 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        <span>+ Tambah Reward Libur</span>
+                    </button>
+                </template>
+                <template x-if="activeTab === 'standard'">
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('holidays.sync') }}" data-no-loader="true" onclick="this.style.pointerEvents = 'none'; let icon = this.querySelector('svg'); if(icon) icon.classList.add('animate-spin');" class="h-9 px-4 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350 text-xs font-bold rounded-xl shadow-3xs border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                            <span>Sync Ulang ke Unit</span>
+                        </a>
+                        <button @click="showAddModal = true" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-105 duration-150 flex items-center gap-1.5 border-0 cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                            <span>+ Tambah Libur Baru</span>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 1: REWARD HARI LIBUR CONTENT -->
+        <!-- ========================================================================= -->
+        <div x-show="activeTab === 'reward'" class="space-y-6 text-left" x-cloak>
+            <!-- Banner Penjelasan Konsep Reward Libur -->
+            <div class="bg-gradient-to-r from-emerald-50/70 via-indigo-50/50 to-purple-50/40 dark:from-emerald-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 border border-emerald-200/60 dark:border-emerald-900/40 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.496m5.007 0a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H9.496a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                    </div>
+                    <div class="space-y-1 text-xs">
+                        <h4 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <span>Mekanisme Reward Hari Libur (Hak Bonus Penuh)</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300">FULL BONUS</span>
+                        </h4>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
+                            Fitur ini memungkinkan HRD membuat hari libur khusus untuk <strong>unit tertentu (bisa lebih dari 1 unit)</strong> dan/atau <strong>beberapa pegawai tertentu saja</strong>. Pegawai yang mendapatkan Reward Hari Libur <strong>tetap berhak mendapatkan bonus kehadiran penuh (Tier 1)</strong> tanpa harus presensi.
+                        </p>
+                    </div>
                 </div>
-                <div class="space-y-1.5">
-                    <h5 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                        Pengalihan Libur (Reschedule)
-                    </h5>
-                    <p class="leading-relaxed pl-3 text-[11px]">
-                        Gunakan fitur <strong>"Alihkan Libur"</strong> untuk memindahkan libur nasional ke tanggal pengganti spesifik per unit sekolah tanpa memengaruhi tanggal libur unit sekolah lainnya.
-                    </p>
+            </div>
+
+            <!-- Reward Holidays Table -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between">
+                <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                        <span>Daftar Reward Hari Libur Aktif</span>
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono font-normal">({{ count($holidayRewards) }} Data)</span>
+                    </h4>
                 </div>
-                <div class="space-y-1.5">
-                    <h5 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                        Pegawai Roster / Shift
-                    </h5>
-                    <p class="leading-relaxed pl-3 text-[11px]">
-                        Semua pegawai dengan jadwal roster / shift <strong>tidak terpengaruh otomatis</strong> oleh hari libur. Mereka tetap wajib masuk, absen, dan berhak atas bonus ketepatan waktu harian sesuai dengan jadwal roster masing-masing.
-                    </p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                            <tr>
+                                <th class="px-6 py-3 text-left">Nama Reward & Keterangan</th>
+                                <th class="px-6 py-3 text-center">Tanggal Pelaksanaan</th>
+                                <th class="px-6 py-3 text-center">Unit Penerima</th>
+                                <th class="px-6 py-3 text-center">Target Pegawai</th>
+                                <th class="px-6 py-3 text-center">Kompensasi Bonus</th>
+                                <th class="px-6 py-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-700 dark:text-slate-300 font-medium">
+                            @forelse($holidayRewards as $reward)
+                                @php
+                                    $diffDays = $reward->start_date->diffInDays($reward->end_date) + 1;
+                                    $empCount = count($reward->employee_ids ?? []);
+                                @endphp
+                                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-850/40 transition-colors">
+                                    <td class="px-6 py-4 text-left">
+                                        <div class="font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                                            <span>{{ $reward->name }}</span>
+                                        </div>
+                                        @if(!empty($reward->notes))
+                                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{{ $reward->notes }}</p>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-mono">
+                                        <div class="font-semibold text-slate-800 dark:text-slate-200">
+                                            {{ $reward->start_date->format('d M Y') }}
+                                            @if($reward->start_date->format('Y-m-d') !== $reward->end_date->format('Y-m-d'))
+                                                <span class="text-slate-400">s/d</span> {{ $reward->end_date->format('d M Y') }}
+                                            @endif
+                                        </div>
+                                        <span class="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded">
+                                            {{ $diffDays }} Hari
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex flex-wrap items-center justify-center gap-1 max-w-[200px] mx-auto">
+                                            @forelse($reward->unit_names_list as $uName)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50">
+                                                    {{ $uName }}
+                                                </span>
+                                            @empty
+                                                <span class="text-[10px] text-slate-400">-</span>
+                                            @endforelse
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        @if($reward->is_all_employees)
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/40 dark:border-emerald-800/40">
+                                                👥 Semua Pegawai Unit Terkait
+                                            </span>
+                                        @else
+                                            <div class="flex flex-col items-center gap-0.5">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/40 dark:border-indigo-800/40" title="{{ implode(', ', $reward->employee_names_list) }}">
+                                                    🎯 {{ $empCount }} Pegawai Terpilih
+                                                </span>
+                                                <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[160px]" title="{{ implode(', ', $reward->employee_names_list) }}">
+                                                    {{ implode(', ', array_slice($reward->employee_names_list, 0, 2)) }}{{ $empCount > 2 ? ' +' . ($empCount - 2) . ' lainnya' : '' }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                                            ✨ Full Bonus (100%)
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button 
+                                                data-id="{{ $reward->id }}"
+                                                data-name="{{ $reward->name }}"
+                                                data-start="{{ $reward->start_date->format('Y-m-d') }}"
+                                                data-end="{{ $reward->end_date->format('Y-m-d') }}"
+                                                data-units="{{ json_encode($reward->school_unit_ids ?? []) }}"
+                                                data-target-type="{{ $reward->is_all_employees ? 'all' : 'specific' }}"
+                                                data-employees="{{ json_encode($reward->employee_ids ?? []) }}"
+                                                data-notes="{{ $reward->notes ?? '' }}"
+                                                @click="
+                                                    editRewardId = $event.currentTarget.getAttribute('data-id');
+                                                    editRewardName = $event.currentTarget.getAttribute('data-name');
+                                                    editRewardStartDate = $event.currentTarget.getAttribute('data-start');
+                                                    editRewardEndDate = $event.currentTarget.getAttribute('data-end');
+                                                    editRewardUnits = JSON.parse($event.currentTarget.getAttribute('data-units')) || [];
+                                                    editRewardTargetType = $event.currentTarget.getAttribute('data-target-type');
+                                                    editRewardEmployees = JSON.parse($event.currentTarget.getAttribute('data-employees')) || [];
+                                                    editRewardNotes = $event.currentTarget.getAttribute('data-notes');
+                                                    editEmployeeSearch = '';
+                                                    editEmployeePositionFilter = '';
+                                                    showEditRewardModal = true;
+                                                "
+                                                class="h-7 px-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-955/30 dark:hover:bg-amber-955/50 text-amber-600 dark:text-amber-400 text-[10px] font-bold rounded-lg border border-amber-200/30 dark:border-amber-900/30 transition-all hover:scale-105 duration-150 flex items-center gap-1 cursor-pointer">
+                                                <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                                                <span>Edit</span>
+                                            </button>
+
+                                            <form action="{{ route('holidays.destroy-reward', $reward->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Reward Hari Libur ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="h-7 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/30 dark:hover:bg-rose-955/50 text-rose-650 dark:text-rose-400 text-[10px] font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 flex items-center gap-1 cursor-pointer">
+                                                    <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                                                    <span>Hapus</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                        <div class="flex flex-col items-center justify-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H4.5a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
+                                            <span class="font-semibold text-xs">Belum ada Reward Hari Libur yang dibuat.</span>
+                                            <p class="text-[11px] text-slate-400">Klik tombol "+ Tambah Reward Libur" untuk memberikan reward libur khusus ke unit atau pegawai tertentu.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <div class="w-full text-left">
+        <!-- ========================================================================= -->
+        <!-- TAB 2: HARI LIBUR & PENGALIHAN LIBUR RESMI CONTENT -->
+        <!-- ========================================================================= -->
+        <div x-show="activeTab === 'standard'" class="space-y-6 text-left" x-cloak>
+            <!-- PANDUAN MEKANISME & KONSEP HARI LIBUR -->
+            <div class="bg-indigo-50/40 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/40 rounded-xl p-5 text-left space-y-4">
+                <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-650 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/></svg>
+                    <h4 class="text-xs font-black uppercase tracking-wider font-mono">Panduan & Mekanisme Kalender Hari Libur</h4>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-600 dark:text-slate-400">
+                    <div class="space-y-1.5">
+                        <h5 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                            Cakupan Libur (Global vs Lokal)
+                        </h5>
+                        <p class="leading-relaxed pl-3 text-[11px]">
+                            <strong>Libur Nasional:</strong> Berlaku global untuk seluruh unit sekolah (PAUD, SD, SMP).<br>
+                            <strong>Libur Lokal:</strong> Hanya berlaku untuk unit sekolah yang Anda pilih saat penambahan libur.
+                        </p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <h5 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                            Pengalihan Libur (Reschedule)
+                        </h5>
+                        <p class="leading-relaxed pl-3 text-[11px]">
+                            Gunakan fitur <strong>"Alihkan Libur"</strong> untuk memindahkan libur nasional ke tanggal pengganti spesifik per unit sekolah tanpa memengaruhi tanggal libur unit sekolah lainnya.
+                        </p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <h5 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                            Pegawai Roster / Shift
+                        </h5>
+                        <p class="leading-relaxed pl-3 text-[11px]">
+                            Semua pegawai dengan jadwal roster / shift <strong>tidak terpengaruh otomatis</strong> oleh hari libur. Mereka tetap wajib masuk, absen, dan berhak atas bonus ketepatan waktu harian sesuai dengan jadwal roster masing-masing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Holidays List -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between">
                 <div>
                     <div class="p-4 border-b border-slate-100 dark:border-slate-900">
                         <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Daftar Hari Libur Resmi</h4>
@@ -105,7 +398,7 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
                                 @forelse($groupedHolidays as $group)
-                                    <tr>
+                                    <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-850/40 transition-colors">
                                         <td class="px-6 py-4 text-left">
                                             <div class="font-bold text-slate-900 dark:text-slate-50">{{ $group['name'] }}</div>
                                         </td>
@@ -178,7 +471,7 @@
                                                 @endforeach
                                                 <button type="submit" class="h-7 px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/30 dark:hover:bg-rose-955/50 text-rose-650 dark:text-rose-400 text-[10px] font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 flex items-center gap-1 cursor-pointer">
                                                     <i data-lucide="trash" class="w-3.5 h-3.5"></i>
-                                                    Hapus
+                                                    <span class="pointer-events-none">Hapus</span>
                                                 </button>
                                             </form>
                                         </td>
@@ -186,7 +479,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="5" class="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
-                                            Belum ada hari libur yang ditambahkan.
+                                            Belum ada hari libur resmi yang ditambahkan.
                                         </td>
                                     </tr>
                                 @endforelse
@@ -197,7 +490,354 @@
             </div>
         </div>
 
-        <!-- ADD HOLIDAY MODAL -->
+        <!-- ========================================================================= -->
+        <!-- MODAL 1: TAMBAH REWARD HARI LIBUR -->
+        <!-- ========================================================================= -->
+        <div x-show="showAddRewardModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
+            <div x-show="showAddRewardModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+                    <div x-show="showAddRewardModal" @click.away="showAddRewardModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
+                        
+                        <!-- Modal Header -->
+                        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Tambah Reward Hari Libur</h3>
+                                    <p class="text-[10px] text-slate-400">Penerima reward tetap berhak mendapatkan bonus kehadiran penuh (100%).</p>
+                                </div>
+                            </div>
+                            <button @click="showAddRewardModal = false" class="text-slate-450 hover:text-slate-650 transition-colors border-0 bg-transparent cursor-pointer">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <!-- Form Body -->
+                        <form method="POST" action="{{ route('holidays.store-reward') }}" class="space-y-4 text-xs overflow-y-auto pr-1">
+                            @csrf
+                            
+                            <!-- Nama Reward -->
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Reward Hari Libur <span class="text-rose-500">*</span></label>
+                                <input type="text" name="name" required placeholder="Contoh: Reward Libur Sukses Akreditasi SD & SMP" class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            </div>
+
+                            <!-- Rentang Tanggal -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai <span class="text-rose-500">*</span></label>
+                                    <input type="date" name="start_date" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                                    <input type="date" name="end_date" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                </div>
+                            </div>
+
+                            <!-- Pilih Unit Penerima (Multi-select) -->
+                            <div class="space-y-1.5">
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300">Pilih Unit Sekolah Penerima <span class="text-rose-500">*</span></label>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                                    @foreach($units as $unit)
+                                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-900 transition-colors select-none">
+                                            <input type="checkbox" name="school_unit_ids[]" value="{{ $unit->id }}" x-model="rewardSelectedUnits" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900">
+                                            <span class="font-bold text-xs text-slate-700 dark:text-slate-200">{{ $unit->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Target Penerima (Semua vs Spesifik) -->
+                            <div class="space-y-2">
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300">Target Pegawai Penerima</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all select-none"
+                                           :class="rewardTargetType === 'all' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'">
+                                        <input type="radio" name="target_type" value="all" x-model="rewardTargetType" class="text-indigo-600 focus:ring-indigo-500">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-xs">Semua Pegawai Unit Terkait</span>
+                                            <span class="text-[9px] opacity-80">Seluruh staf di unit terpilih otomatis dapat libur</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all select-none"
+                                           :class="rewardTargetType === 'specific' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'">
+                                        <input type="radio" name="target_type" value="specific" x-model="rewardTargetType" class="text-indigo-600 focus:ring-indigo-500">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-xs">Pilih Pegawai Tertentu</span>
+                                            <span class="text-[9px] opacity-80">Centang nama-nama pegawai yang berhak</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- DIRECT SEARCHABLE & JABATAN FILTERED EMPLOYEE PICKER BOX -->
+                            <div x-show="rewardTargetType === 'specific'" x-transition class="space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200">Daftar Pegawai Penerima</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">
+                                            <span x-text="rewardSelectedEmployees.length"></span> Terpilih
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" @click="toggleSelectAllRewardEmployees(rewardSelectedUnits)" class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 cursor-pointer border-0 bg-transparent">
+                                            Centang Semua Sesuai Filter
+                                        </button>
+                                        <span class="text-slate-300 dark:text-slate-700">|</span>
+                                        <button type="button" @click="clearAllRewardEmployees()" class="text-[11px] font-bold text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer border-0 bg-transparent">
+                                            Reset Pilihan
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Filter Tools: Search & Jabatan/Posisi Filter -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <!-- Live Search -->
+                                    <div class="relative">
+                                        <input type="text" x-model="employeeSearch" placeholder="Cari nama pegawai / NIK..." class="w-full text-xs pl-8 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                                    </div>
+
+                                    <!-- Filter Jabatan / Posisi -->
+                                    <div>
+                                        <select x-model="employeePositionFilter" class="w-full text-xs px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                            <option value="">Semua Jabatan / Posisi</option>
+                                            @foreach($positions as $pos)
+                                                <option value="{{ $pos }}">{{ $pos }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Checklist Box -->
+                                <div class="max-h-56 overflow-y-auto space-y-1 pr-1 border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 rounded-xl p-2 divide-y divide-slate-100 dark:divide-slate-850">
+                                    <template x-for="emp in getFilteredEmployees(rewardSelectedUnits, employeeSearch, employeePositionFilter)" :key="`${emp.unit_id}_${emp.id}`">
+                                        <label class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-850 cursor-pointer select-none transition-colors"
+                                               :class="rewardSelectedEmployees.includes(`${emp.unit_id}_${emp.id}`) ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''">
+                                            <div class="flex items-center gap-3">
+                                                <input type="checkbox" name="employee_ids[]" :value="`${emp.unit_id}_${emp.id}`" x-model="rewardSelectedEmployees" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900">
+                                                <div class="flex flex-col text-left">
+                                                    <span class="font-bold text-xs text-slate-800 dark:text-slate-200" x-text="emp.name"></span>
+                                                    <div class="flex items-center gap-2 mt-0.5">
+                                                        <span class="text-[10px] text-slate-500 dark:text-slate-400" x-text="emp.position || emp.subject_position || '-'"></span>
+                                                        <template x-if="emp.nuptk_nip_nik">
+                                                            <span class="text-[9px] font-mono text-slate-400" x-text="'NIK: ' + emp.nuptk_nip_nik"></span>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50" x-text="emp.unit_name"></span>
+                                        </label>
+                                    </template>
+                                    <template x-if="getFilteredEmployees(rewardSelectedUnits, employeeSearch, employeePositionFilter).length === 0">
+                                        <div class="py-8 text-center text-slate-400 text-xs">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto mb-1.5 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                                            <span>Tidak ada pegawai yang cocok dengan filter atau pencarian.</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Catatan / Keterangan -->
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Keterangan Tambahan</label>
+                                <textarea name="notes" rows="2" placeholder="Contoh: Diberikan atas apresiasi pencapaian target sekolah..." class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"></textarea>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800 justify-end">
+                                <button type="button" @click="showAddRewardModal = false" class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
+                                    Batal
+                                </button>
+                                <button type="submit" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-[1.02] duration-150 border-0 cursor-pointer">
+                                    Simpan Reward Libur
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL 2: EDIT REWARD HARI LIBUR -->
+        <!-- ========================================================================= -->
+        <div x-show="showEditRewardModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
+            <div x-show="showEditRewardModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+                    <div x-show="showEditRewardModal" @click.away="showEditRewardModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
+                        
+                        <!-- Modal Header -->
+                        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-100 dark:border-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Edit Reward Hari Libur</h3>
+                                    <p class="text-[10px] text-slate-400">Perbarui cakupan unit atau daftar pegawai penerima reward libur.</p>
+                                </div>
+                            </div>
+                            <button @click="showEditRewardModal = false" class="text-slate-450 hover:text-slate-650 transition-colors border-0 bg-transparent cursor-pointer">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <!-- Form Body -->
+                        <form method="POST" :action="`{{ url('holidays/rewards') }}/${editRewardId}`" class="space-y-4 text-xs overflow-y-auto pr-1">
+                            @csrf
+                            @method('PUT')
+                            
+                            <!-- Nama Reward -->
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Reward Hari Libur <span class="text-rose-500">*</span></label>
+                                <input type="text" name="name" x-model="editRewardName" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            </div>
+
+                            <!-- Rentang Tanggal -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai <span class="text-rose-500">*</span></label>
+                                    <input type="date" name="start_date" x-model="editRewardStartDate" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                                    <input type="date" name="end_date" x-model="editRewardEndDate" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                </div>
+                            </div>
+
+                            <!-- Pilih Unit Penerima (Multi-select) -->
+                            <div class="space-y-1.5">
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300">Pilih Unit Sekolah Penerima <span class="text-rose-500">*</span></label>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                                    @foreach($units as $unit)
+                                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-900 transition-colors select-none">
+                                            <input type="checkbox" name="school_unit_ids[]" value="{{ $unit->id }}" :checked="editRewardUnits.map(Number).includes({{ $unit->id }})" @change="if($event.target.checked) { if(!editRewardUnits.map(Number).includes({{ $unit->id }})) editRewardUnits.push({{ $unit->id }}); } else { editRewardUnits = editRewardUnits.filter(u => Number(u) !== {{ $unit->id }}); }" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900">
+                                            <span class="font-bold text-xs text-slate-700 dark:text-slate-200">{{ $unit->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Target Penerima (Semua vs Spesifik) -->
+                            <div class="space-y-2">
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300">Target Pegawai Penerima</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all select-none"
+                                           :class="editRewardTargetType === 'all' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'">
+                                        <input type="radio" name="target_type" value="all" x-model="editRewardTargetType" class="text-indigo-600 focus:ring-indigo-500">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-xs">Semua Pegawai Unit Terkait</span>
+                                            <span class="text-[9px] opacity-80">Seluruh staf di unit terpilih otomatis dapat libur</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all select-none"
+                                           :class="editRewardTargetType === 'specific' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'">
+                                        <input type="radio" name="target_type" value="specific" x-model="editRewardTargetType" class="text-indigo-600 focus:ring-indigo-500">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-xs">Pilih Pegawai Tertentu</span>
+                                            <span class="text-[9px] opacity-80">Centang nama-nama pegawai yang berhak</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- DIRECT SEARCHABLE & JABATAN FILTERED EMPLOYEE PICKER BOX FOR EDIT -->
+                            <div x-show="editRewardTargetType === 'specific'" x-transition class="space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200">Daftar Pegawai Penerima</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">
+                                            <span x-text="editRewardEmployees.length"></span> Terpilih
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" @click="toggleSelectAllEditRewardEmployees(editRewardUnits)" class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 cursor-pointer border-0 bg-transparent">
+                                            Centang Semua Sesuai Filter
+                                        </button>
+                                        <span class="text-slate-300 dark:text-slate-700">|</span>
+                                        <button type="button" @click="clearAllEditRewardEmployees()" class="text-[11px] font-bold text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer border-0 bg-transparent">
+                                            Reset Pilihan
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Filter Tools: Search & Jabatan/Posisi Filter -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <!-- Live Search -->
+                                    <div class="relative">
+                                        <input type="text" x-model="editEmployeeSearch" placeholder="Cari nama pegawai / NIK..." class="w-full text-xs pl-8 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                                    </div>
+
+                                    <!-- Filter Jabatan / Posisi -->
+                                    <div>
+                                        <select x-model="editEmployeePositionFilter" class="w-full text-xs px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                            <option value="">Semua Jabatan / Posisi</option>
+                                            @foreach($positions as $pos)
+                                                <option value="{{ $pos }}">{{ $pos }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Checklist Box -->
+                                <div class="max-h-56 overflow-y-auto space-y-1 pr-1 border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 rounded-xl p-2 divide-y divide-slate-100 dark:divide-slate-850">
+                                    <template x-for="emp in getFilteredEmployees(editRewardUnits, editEmployeeSearch, editEmployeePositionFilter)" :key="`${emp.unit_id}_${emp.id}`">
+                                        <label class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-855 cursor-pointer select-none transition-colors"
+                                               :class="(editRewardEmployees.includes(`${emp.unit_id}_${emp.id}`) || editRewardEmployees.includes(String(emp.id))) ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''">
+                                            <div class="flex items-center gap-3">
+                                                <input type="checkbox" name="employee_ids[]" :value="`${emp.unit_id}_${emp.id}`" :checked="editRewardEmployees.includes(`${emp.unit_id}_${emp.id}`) || editRewardEmployees.includes(String(emp.id))" @change="if($event.target.checked) { if(!editRewardEmployees.includes(`${emp.unit_id}_${emp.id}`)) editRewardEmployees.push(`${emp.unit_id}_${emp.id}`); } else { editRewardEmployees = editRewardEmployees.filter(k => k !== `${emp.unit_id}_${emp.id}` && k !== String(emp.id)); }" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900">
+                                                <div class="flex flex-col text-left">
+                                                    <span class="font-bold text-xs text-slate-800 dark:text-slate-200" x-text="emp.name"></span>
+                                                    <div class="flex items-center gap-2 mt-0.5">
+                                                        <span class="text-[10px] text-slate-500 dark:text-slate-400" x-text="emp.position || emp.subject_position || '-'"></span>
+                                                        <template x-if="emp.nuptk_nip_nik">
+                                                            <span class="text-[9px] font-mono text-slate-400" x-text="'NIK: ' + emp.nuptk_nip_nik"></span>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50" x-text="emp.unit_name"></span>
+                                        </label>
+                                    </template>
+                                    <template x-if="getFilteredEmployees(editRewardUnits, editEmployeeSearch, editEmployeePositionFilter).length === 0">
+                                        <div class="py-8 text-center text-slate-400 text-xs">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto mb-1.5 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                                            <span>Tidak ada pegawai yang cocok dengan filter atau pencarian.</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Catatan / Keterangan -->
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Keterangan Tambahan</label>
+                                <textarea name="notes" x-model="editRewardNotes" rows="2" class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"></textarea>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800 justify-end">
+                                <button type="button" @click="showEditRewardModal = false" class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
+                                    Batal
+                                </button>
+                                <button type="submit" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-[1.02] duration-150 border-0 cursor-pointer">
+                                    Simpan Perubahan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL 3: TAMBAH LIBUR RESMI -->
+        <!-- ========================================================================= -->
         <div x-show="showAddModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
             <div x-show="showAddModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
@@ -213,17 +853,17 @@
                         <form method="POST" action="{{ route('holidays.store') }}" class="space-y-4 text-xs">
                             @csrf
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Hari Libur</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Hari Libur <span class="text-rose-500">*</span></label>
                                 <input type="text" name="name" required placeholder="Contoh: Tahun Baru Hijriah" class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Mulai</label>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Mulai <span class="text-rose-500">*</span></label>
                                     <input type="date" name="start_date" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
                                 </div>
                                 <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Selesai</label>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Selesai <span class="text-rose-500">*</span></label>
                                     <input type="date" name="end_date" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
                                 </div>
                             </div>
@@ -268,19 +908,21 @@
             </div>
         </div>
 
-        <!-- EDIT HOLIDAY MODAL -->
+        <!-- ========================================================================= -->
+        <!-- MODAL 4: EDIT LIBUR RESMI -->
+        <!-- ========================================================================= -->
         <div x-show="showEditModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
             <div x-show="showEditModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
                     <div x-show="showEditModal" @click.away="showEditModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-md p-6 text-left flex flex-col">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
-                            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Edit Hari Libur</h3>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Edit Hari Libur Resmi</h3>
                             <button @click="showEditModal = false" class="text-slate-450 hover:text-slate-650 transition-colors border-0 bg-transparent cursor-pointer">
                                 <i data-lucide="x" class="w-4 h-4"></i>
                             </button>
                         </div>
- 
+
                         <form method="POST" :action="`{{ url('holidays') }}/${editHolidayId}`" class="space-y-4 text-xs">
                             @csrf
                             @method('PUT')
@@ -289,21 +931,21 @@
                             </template>
 
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Hari Libur</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Hari Libur <span class="text-rose-500">*</span></label>
                                 <input type="text" name="name" x-model="editHolidayName" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-sans text-xs">
                             </div>
- 
+
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Mulai</label>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Mulai <span class="text-rose-500">*</span></label>
                                     <input type="date" name="start_date" x-model="editHolidayStartDate" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
                                 </div>
                                 <div>
-                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Selesai</label>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tanggal Selesai <span class="text-rose-500">*</span></label>
                                     <input type="date" name="end_date" x-model="editHolidayEndDate" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
                                 </div>
                             </div>
- 
+
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Cakupan Hari Libur</label>
                                 <div class="flex gap-4">
@@ -317,7 +959,7 @@
                                     </label>
                                 </div>
                             </div>
- 
+
                             <div x-show="editHolidayAppliesTo === 'custom'" x-transition class="space-y-2.5 bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200/50 dark:border-slate-800 mt-2">
                                 <label class="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Pilih Unit Terkena Dampak</label>
                                 <div class="flex flex-wrap gap-4">
@@ -329,7 +971,7 @@
                                     @endforeach
                                 </div>
                             </div>
- 
+
                             <div class="flex gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-900 justify-end">
                                 <button type="button" @click="showEditModal = false" class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
                                     Batal
@@ -344,7 +986,9 @@
             </div>
         </div>
 
-        <!-- RESCHEDULE/ADJUST HOLIDAY MODAL -->
+        <!-- ========================================================================= -->
+        <!-- MODAL 5: ALIKHAN LIBUR (PENGALIHAN) -->
+        <!-- ========================================================================= -->
         <div x-show="showAdjModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
             <div x-show="showAdjModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
@@ -363,16 +1007,16 @@
                         <form method="POST" action="{{ route('holidays.store-adjustment') }}" class="space-y-4 text-xs">
                             @csrf
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Pilih Tanggal Libur yang Dialihkan</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Pilih Tanggal Libur yang Dialihkan <span class="text-rose-500">*</span></label>
                                 <select name="holiday_id" x-model="selectedHolidayId" required class="w-full text-xs px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                                     <template x-for="item in selectedHolidayDates" :key="item.id">
                                         <option :value="item.id" x-text="item.date_formatted"></option>
                                     </template>
                                 </select>
                             </div>
- 
+
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Alihkan Libur ke Tanggal</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Alihkan Libur ke Tanggal <span class="text-rose-500">*</span></label>
                                 <input type="date" name="adjusted_date" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
                             </div>
 
@@ -407,7 +1051,9 @@
             </div>
         </div>
 
+        <!-- ========================================================================= -->
         <!-- SLIDE-OVER DRAWER (LACI DETAIL PENGALIHAN) -->
+        <!-- ========================================================================= -->
         <div x-cloak x-show="isDrawerOpen" class="fixed inset-0 z-[9999] overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
             <div class="absolute inset-0 overflow-hidden">
                 <!-- Backdrop overlay -->
@@ -422,7 +1068,7 @@
                      class="fixed inset-0 transition-opacity z-[9999]" 
                      style="background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);" 
                      aria-hidden="true"></div>
- 
+
                 <!-- Content Panel -->
                 <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex z-[9999]">
                     <div x-show="isDrawerOpen" 
@@ -445,7 +1091,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
- 
+
                         <!-- Body (Adjustments List) -->
                         <div class="flex-1 overflow-y-auto p-6 space-y-4">
                             <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Daftar Pengalihan Unit</h4>
@@ -457,7 +1103,7 @@
                                     <p class="text-[10px] leading-relaxed">Gunakan fitur "Alihkan Libur" pada baris tabel untuk memindahkan libur unit.</p>
                                 </div>
                             </template>
- 
+
                             <div class="space-y-3">
                                 <template x-for="adj in drawerAdjustments" :key="adj.id">
                                     <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-xl border border-slate-200/50 dark:border-slate-800/40 text-xs flex flex-col justify-between space-y-2.5 hover:shadow-2xs transition-all duration-150">
@@ -475,7 +1121,7 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             </button>
                                         </div>
- 
+
                                         <div class="grid grid-cols-2 gap-2 text-[10px] font-mono border-t border-slate-200/50 dark:border-slate-800 pt-2 text-slate-500 dark:text-slate-400">
                                             <div>
                                                 <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-wider">Tanggal Asli</span>
@@ -486,7 +1132,7 @@
                                                 <span class="text-amber-600 dark:text-amber-400 font-bold" x-text="adj.adjusted_date_formatted"></span>
                                             </div>
                                         </div>
- 
+
                                         <div class="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-950 p-2 rounded-lg border border-slate-200/20 dark:border-slate-900/50">
                                             <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Alasan</span>
                                             <span class="font-sans font-semibold text-slate-650 dark:text-slate-350" x-text="adj.reason"></span>
@@ -495,7 +1141,7 @@
                                 </template>
                             </div>
                         </div>
- 
+
                         <!-- Footer -->
                         <div class="px-6 py-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-end">
                             <button @click="isDrawerOpen = false" class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
@@ -506,7 +1152,7 @@
                 </div>
             </div>
         </div>
- 
+
         <!-- HIDDEN DELETE FORM FOR DRAWER -->
         <form id="delete-adj-form" method="POST" style="display:none;">
             @csrf

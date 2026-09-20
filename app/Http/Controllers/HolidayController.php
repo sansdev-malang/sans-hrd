@@ -4,22 +4,73 @@ namespace App\Http\Controllers;
 
 use App\Models\Holiday;
 use App\Models\HolidayAdjustment;
+use App\Models\HolidayReward;
 use App\Models\SchoolUnit;
+use App\Services\SchoolUnitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class HolidayController extends Controller
 {
+    protected SchoolUnitService $schoolUnitService;
+
+    public function __construct(SchoolUnitService $schoolUnitService)
+    {
+        $this->schoolUnitService = $schoolUnitService;
+    }
+
     /**
-     * Display a listing of holidays and adjustments.
+     * Display a listing of holidays, adjustments, and holiday rewards.
      */
     public function index()
     {
         $groupedHolidays = $this->getGroupedHolidays();
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
+        $unitsMap = $units->keyBy('id');
         $adjustments = HolidayAdjustment::with(['holiday', 'schoolUnit'])->orderBy('original_date', 'desc')->get();
-        return view('holidays.index', compact('groupedHolidays', 'units', 'adjustments'));
+        $rawEmployees = $this->schoolUnitService->getAllEmployees();
+
+        // Index raw employees for fast lookup
+        $employeesMap = [];
+        foreach ($rawEmployees as $emp) {
+            $compositeKey = ($emp['unit_id'] ?? '') . '_' . ($emp['id'] ?? '');
+            $employeesMap[$compositeKey] = $emp;
+            $employeesMap[(string)($emp['id'] ?? '')] = $emp;
+        }
+
+        $holidayRewards = HolidayReward::orderBy('start_date', 'desc')->get()->map(function ($hr) use ($unitsMap, $employeesMap) {
+            $unitIds = $hr->school_unit_ids ?? [];
+            $unitNames = [];
+            foreach ($unitIds as $uId) {
+                if (isset($unitsMap[$uId])) {
+                    $unitNames[] = $unitsMap[$uId]->name;
+                }
+            }
+
+            $empIds = $hr->employee_ids ?? [];
+            $empNames = [];
+            if (!empty($empIds)) {
+                foreach ($empIds as $eKey) {
+                    if (isset($employeesMap[$eKey])) {
+                        $empNames[] = $employeesMap[$eKey]['name'] . ' (' . ($employeesMap[$eKey]['unit_name'] ?? '') . ')';
+                    } else {
+                        $empNames[] = 'ID #' . $eKey;
+                    }
+                }
+            }
+
+            $hr->unit_names_list = $unitNames;
+            $hr->employee_names_list = $empNames;
+            $hr->is_all_employees = empty($empIds);
+            return $hr;
+        });
+
+        $positions = collect($rawEmployees)->map(function ($emp) {
+            return $emp['position'] ?? $emp['subject_position'] ?? null;
+        })->filter()->unique()->sort()->values();
+
+        return view('holidays.index', compact('groupedHolidays', 'units', 'adjustments', 'holidayRewards', 'rawEmployees', 'positions'));
     }
 
     /**
@@ -234,6 +285,88 @@ class HolidayController extends Controller
 
         return redirect()->back()
             ->with('success', 'Penyesuaian hari libur berhasil dihapus.');
+    }
+
+    /**
+     * Store a newly created Holiday Reward.
+     */
+    public function storeReward(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'school_unit_ids' => 'required|array|min:1',
+            'school_unit_ids.*' => 'exists:school_units,id',
+            'target_type' => 'required|in:all,specific',
+            'employee_ids' => 'nullable|array',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $employeeIds = null;
+        if ($validated['target_type'] === 'specific' && !empty($request->input('employee_ids'))) {
+            $employeeIds = array_values(array_unique($request->input('employee_ids')));
+        }
+
+        HolidayReward::create([
+            'name' => $validated['name'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            'school_unit_ids' => array_values(array_map('intval', $validated['school_unit_ids'])),
+            'employee_ids' => $employeeIds,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        return redirect()->route('holidays.index', ['tab' => 'reward'])
+            ->with('success', 'Reward Hari Libur berhasil ditambahkan. Pegawai yang berhak akan menerima bonus kehadiran penuh pada tanggal tersebut.');
+    }
+
+    /**
+     * Update the specified Holiday Reward.
+     */
+    public function updateReward(Request $request, $id)
+    {
+        $reward = HolidayReward::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'school_unit_ids' => 'required|array|min:1',
+            'school_unit_ids.*' => 'exists:school_units,id',
+            'target_type' => 'required|in:all,specific',
+            'employee_ids' => 'nullable|array',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $employeeIds = null;
+        if ($validated['target_type'] === 'specific' && !empty($request->input('employee_ids'))) {
+            $employeeIds = array_values(array_unique($request->input('employee_ids')));
+        }
+
+        $reward->update([
+            'name' => $validated['name'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            'school_unit_ids' => array_values(array_map('intval', $validated['school_unit_ids'])),
+            'employee_ids' => $employeeIds,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        return redirect()->route('holidays.index', ['tab' => 'reward'])
+            ->with('success', 'Reward Hari Libur berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified Holiday Reward.
+     */
+    public function destroyReward($id)
+    {
+        $reward = HolidayReward::findOrFail($id);
+        $reward->delete();
+
+        return redirect()->route('holidays.index', ['tab' => 'reward'])
+            ->with('success', 'Reward Hari Libur berhasil dihapus.');
     }
 
     /**

@@ -22,6 +22,7 @@
                     'bonus-reports.index' => 'Data Bonus Ketepatan Waktu',
                     'working-shifts.index' => 'Shift Kerja',
                     'employee-working-shifts.index' => 'Jadwal Kerja',
+                    'picket-schedules.index' => 'Jadwal Piket Unit',
                     'holidays.index' => 'Hari Libur',
                     'cutoff-settings.index' => 'Setting Cut-OFF',
                     'payslips.index' => 'Slip Gaji',

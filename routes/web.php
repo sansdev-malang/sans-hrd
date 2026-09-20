@@ -41,8 +41,15 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::post('employee-working-shifts/sync', [\App\Http\Controllers\EmployeeWorkingShiftController::class, 'triggerSync'])->name('employee-working-shifts.sync-trigger');
     Route::resource('employee-working-shifts', \App\Http\Controllers\EmployeeWorkingShiftController::class);
 
-    // Holidays & Reschedules (Adjustments)
+    // Picket Schedules (Read-Only Monitoring from Units)
+    Route::get('picket-schedules', [\App\Http\Controllers\PicketScheduleController::class, 'index'])->name('picket-schedules.index');
+    Route::post('picket-schedules/sync', [\App\Http\Controllers\PicketScheduleController::class, 'sync'])->name('picket-schedules.sync');
+
+    // Holidays, Reschedules & Holiday Rewards
     Route::get('holidays/sync', [\App\Http\Controllers\HolidayController::class, 'triggerSync'])->name('holidays.sync');
+    Route::post('holidays/rewards', [\App\Http\Controllers\HolidayController::class, 'storeReward'])->name('holidays.store-reward');
+    Route::put('holidays/rewards/{id}', [\App\Http\Controllers\HolidayController::class, 'updateReward'])->name('holidays.update-reward');
+    Route::delete('holidays/rewards/{id}', [\App\Http\Controllers\HolidayController::class, 'destroyReward'])->name('holidays.destroy-reward');
     Route::post('holidays/adjustments', [\App\Http\Controllers\HolidayController::class, 'storeAdjustment'])->name('holidays.store-adjustment');
     Route::delete('holidays/adjustments/{id}', [\App\Http\Controllers\HolidayController::class, 'destroyAdjustment'])->name('holidays.destroy-adjustment');
     Route::resource('holidays', \App\Http\Controllers\HolidayController::class);

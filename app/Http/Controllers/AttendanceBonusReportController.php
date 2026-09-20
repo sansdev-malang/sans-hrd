@@ -130,9 +130,12 @@ class AttendanceBonusReportController extends Controller
                 });
             });
 
-        // Pre-fetch Holidays
+        // Pre-fetch Holidays & Holiday Rewards
         $holidays = \App\Models\Holiday::all();
         $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+        $holidayRewards = \App\Models\HolidayReward::where('end_date', '>=', $startDate->format('Y-m-d'))
+            ->where('start_date', '<=', $endDate->format('Y-m-d'))
+            ->get();
         $schoolUnitsList = \App\Models\SchoolUnit::all();
         $unitHolidays = [];
         $unitHolidays[''] = [];
@@ -188,7 +191,12 @@ class AttendanceBonusReportController extends Controller
         $picketSchedulesMap = $picketData['schedulesMap'];
         $picketSwapOverrides = $picketData['swapOverrides'];
         $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
-        $picketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+        $globalPicketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+        
+        $unitPicketEffectiveDates = [];
+        foreach ($schoolUnitsList as $su) {
+            $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
+        }
 
         // 5. Calculate Attendance Report
         $reports = [];
@@ -212,10 +220,21 @@ class AttendanceBonusReportController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
-                // Skip Holidays only for non-shift workers
+                // Check Reward Holiday for this employee on this date
+                $isRewardHoliday = false;
+                $rewardHolidayName = null;
+                foreach ($holidayRewards as $hr) {
+                    if ($hr->appliesToDate($dateStr) && $hr->appliesToEmployee($unit, $empId)) {
+                        $isRewardHoliday = true;
+                        $rewardHolidayName = $hr->name;
+                        break;
+                    }
+                }
+
+                // Skip Holidays only for non-shift workers (unless it is a Reward Holiday)
                 $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
                 $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false);
-                if ($isHoliday) {
+                if ($isHoliday && !$isRewardHoliday) {
                     $isShiftOnDate = false;
                     $shiftKey = $unit . '_' . $empId;
                     if (isset($assignedShifts[$shiftKey])) {
@@ -258,7 +277,7 @@ class AttendanceBonusReportController extends Controller
                         }
                     }
                 }
-                if ($isOnLeave && !$getsBonus && !$hasRequiresAttendanceLeave) {
+                if ($isOnLeave && !$getsBonus && !$hasRequiresAttendanceLeave && !$isRewardHoliday) {
                     $currentDate->addDay();
                     continue;
                 }
@@ -291,8 +310,9 @@ class AttendanceBonusReportController extends Controller
                 $picketAreaName = null;
                 $picketStartTime = '06:30:00';
 
-                // Picket integration takes effect starting from the October cutoff cycle (2026-09-27 onwards)
-                if ($dateStr >= $picketEffectiveDate) {
+                // Picket integration takes effect starting from unit-specific effective date
+                $unitEffectiveDate = $unitPicketEffectiveDates[$unit] ?? $globalPicketEffectiveDate;
+                if ($dateStr >= $unitEffectiveDate) {
                     $swapKey = $unit . '_' . $empId . '_' . $dateStr;
                     if (isset($picketSwapOverrides[$swapKey])) {
                         if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
@@ -336,16 +356,28 @@ class AttendanceBonusReportController extends Controller
                     $dailyBonus = 0;
                     $dailyTierLevel = null;
 
-                    // Check Attendance or Dinas/getsBonus
+                    // Check Attendance, Dinas/getsBonus, or Reward Holiday
                     $logKey = $uid . '_' . $dateStr;
                     $isDinas = ($isOnLeave && $getsBonus && !$hasRequiresAttendanceLeave);
 
-                    if (isset($attendanceLogs[$logKey]) || $isDinas) {
-                        $dailyStatus = $isDinas ? ($leaveType ?: 'Dinas') : 'Present';
+                    if (isset($attendanceLogs[$logKey]) || $isDinas || $isRewardHoliday) {
+                        if ($isRewardHoliday) {
+                            $dailyStatus = 'Reward Libur';
+                            $dailyCheckIn = 'REWARD';
+                            $dailyLateMinutes = 0;
+                            $earlyMinutes = 999;
+                        } elseif ($isDinas) {
+                            $dailyStatus = ($leaveType ?: 'Dinas');
+                            $dailyCheckIn = 'DINAS';
+                            $dailyLateMinutes = 0;
+                            $earlyMinutes = 999;
+                        } else {
+                            $dailyStatus = 'Present';
+                        }
                         $totalPresent++;
                         
                         // Calculate Early / Late
-                        if (isset($attendanceLogs[$logKey]) && !$isDinas) {
+                        if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday) {
                             $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
                             $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
@@ -370,7 +402,7 @@ class AttendanceBonusReportController extends Controller
                                     $dailyLateMinutes = 0;
                                 }
                             }
-                        } else {
+                        } elseif (!$isRewardHoliday && $isDinas) {
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 999;
                             $dailyCheckIn = 'DINAS';
@@ -380,14 +412,15 @@ class AttendanceBonusReportController extends Controller
                         $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
 
                         if ($currentSchema && $currentSchema->tiers->count() > 0) {
-                            if ($schemaMode === 'early_arrival') {
-                                if ($isDinas) {
-                                    $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
-                                    if ($bestTier) {
-                                        $dailyBonus = $bestTier->nominal;
-                                        $dailyTierLevel = $bestTier->tier_level;
-                                    }
-                                } elseif ($dailyLateMinutes > 0) {
+                            if ($isRewardHoliday || $isDinas) {
+                                // Full bonus for Reward Holiday or Dinas
+                                $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
+                                if ($bestTier) {
+                                    $dailyBonus = $bestTier->nominal;
+                                    $dailyTierLevel = $bestTier->tier_level;
+                                }
+                            } elseif ($schemaMode === 'early_arrival') {
+                                if ($dailyLateMinutes > 0) {
                                     // Late arrival gets Rp 0 in early arrival policy
                                     $dailyBonus = 0;
                                     $dailyTierLevel = null;
@@ -442,6 +475,8 @@ class AttendanceBonusReportController extends Controller
                         'is_picket' => $isPicketToday,
                         'picket_area' => $picketAreaName,
                         'picket_start' => $isPicketToday ? $picketStartTime : null,
+                        'is_reward_holiday' => $isRewardHoliday,
+                        'reward_name' => $rewardHolidayName,
                     ];
                 }
 
@@ -578,6 +613,9 @@ class AttendanceBonusReportController extends Controller
 
         $holidays = \App\Models\Holiday::all();
         $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+        $holidayRewards = \App\Models\HolidayReward::where('end_date', '>=', $startDate->format('Y-m-d'))
+            ->where('start_date', '<=', $endDate->format('Y-m-d'))
+            ->get();
         $schoolUnitsList = \App\Models\SchoolUnit::all();
         $unitHolidays = [];
         $unitHolidays[''] = [];
@@ -632,7 +670,12 @@ class AttendanceBonusReportController extends Controller
         $picketSchedulesMap = $picketData['schedulesMap'];
         $picketSwapOverrides = $picketData['swapOverrides'];
         $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
-        $picketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+        $globalPicketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+
+        $unitPicketEffectiveDates = [];
+        foreach ($schoolUnitsList as $su) {
+            $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
+        }
 
         $reports = [];
         $totalSemuaBonus = 0;
@@ -656,10 +699,21 @@ class AttendanceBonusReportController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek;
 
-                // Skip Holidays only for non-shift workers
+                // Check Reward Holiday for this employee on this date
+                $isRewardHoliday = false;
+                $rewardHolidayName = null;
+                foreach ($holidayRewards as $hr) {
+                    if ($hr->appliesToDate($dateStr) && $hr->appliesToEmployee($unit, $empId)) {
+                        $isRewardHoliday = true;
+                        $rewardHolidayName = $hr->name;
+                        break;
+                    }
+                }
+
+                // Skip Holidays only for non-shift workers (unless it is a Reward Holiday)
                 $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
                 $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false);
-                if ($isHoliday) {
+                if ($isHoliday && !$isRewardHoliday) {
                     $isShiftOnDate = false;
                     $shiftKey = $unit . '_' . $empId;
                     if (isset($assignedShifts[$shiftKey])) {
@@ -702,7 +756,7 @@ class AttendanceBonusReportController extends Controller
                         }
                     }
                 }
-                if ($isOnLeave && !$getsBonus && !$hasRequiresAttendanceLeave) {
+                if ($isOnLeave && !$getsBonus && !$hasRequiresAttendanceLeave && !$isRewardHoliday) {
                     $currentDate->addDay();
                     continue;
                 }
@@ -733,8 +787,9 @@ class AttendanceBonusReportController extends Controller
                 $picketAreaName = null;
                 $picketStartTime = '06:30:00';
 
-                // Picket integration takes effect starting from the October cutoff cycle (2026-09-27 onwards)
-                if ($dateStr >= $picketEffectiveDate) {
+                // Picket integration takes effect starting from unit-specific effective date
+                $unitEffectiveDate = $unitPicketEffectiveDates[$unit] ?? $globalPicketEffectiveDate;
+                if ($dateStr >= $unitEffectiveDate) {
                     $swapKey = $unit . '_' . $empId . '_' . $dateStr;
                     if (isset($picketSwapOverrides[$swapKey])) {
                         if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
@@ -787,11 +842,23 @@ class AttendanceBonusReportController extends Controller
                     $logKey = $uid . '_' . $dateStr;
                     $isDinas = ($isOnLeave && $getsBonus && !$hasRequiresAttendanceLeave);
 
-                    if (isset($attendanceLogs[$logKey]) || $isDinas) {
-                        $dailyStatus = $isDinas ? ($leaveType ?: 'Dinas') : 'Present';
+                    if (isset($attendanceLogs[$logKey]) || $isDinas || $isRewardHoliday) {
+                        if ($isRewardHoliday) {
+                            $dailyStatus = 'Reward Libur';
+                            $dailyCheckIn = 'REWARD';
+                            $dailyLateMinutes = 0;
+                            $earlyMinutes = 999;
+                        } elseif ($isDinas) {
+                            $dailyStatus = ($leaveType ?: 'Dinas');
+                            $dailyCheckIn = 'DINAS';
+                            $dailyLateMinutes = 0;
+                            $earlyMinutes = 999;
+                        } else {
+                            $dailyStatus = 'Present';
+                        }
                         $totalPresent++;
                         
-                        if (isset($attendanceLogs[$logKey]) && !$isDinas) {
+                        if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday) {
                             $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
                             $checkInCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
                             $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
@@ -816,7 +883,7 @@ class AttendanceBonusReportController extends Controller
                                     $dailyLateMinutes = 0;
                                 }
                             }
-                        } else {
+                        } elseif (!$isRewardHoliday && $isDinas) {
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 999;
                             $dailyCheckIn = 'DINAS';
@@ -825,13 +892,13 @@ class AttendanceBonusReportController extends Controller
                         $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
 
                         if ($currentSchema && $currentSchema->tiers->count() > 0) {
-                            if ($schemaMode === 'early_arrival') {
-                                if ($isDinas) {
-                                    $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
-                                    if ($bestTier) {
-                                        $dailyBonus = $bestTier->nominal;
-                                    }
-                                } elseif ($dailyLateMinutes > 0) {
+                            if ($isRewardHoliday || $isDinas) {
+                                $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
+                                if ($bestTier) {
+                                    $dailyBonus = $bestTier->nominal;
+                                }
+                            } elseif ($schemaMode === 'early_arrival') {
+                                if ($dailyLateMinutes > 0) {
                                     $dailyBonus = 0;
                                 } else {
                                     $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
@@ -874,6 +941,8 @@ class AttendanceBonusReportController extends Controller
                         'is_picket' => $isPicketToday,
                         'picket_area' => $picketAreaName,
                         'picket_start' => $isPicketToday ? $picketStartTime : null,
+                        'is_reward_holiday' => $isRewardHoliday,
+                        'reward_name' => $rewardHolidayName,
                     ];
                 }
 

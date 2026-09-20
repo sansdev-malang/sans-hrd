@@ -244,7 +244,10 @@
                                                 $nominal = $detail['bonus_nominal'];
                                                 $shortNominal = ($nominal >= 1000) ? ($nominal / 1000) . 'k' : $nominal;
                                                 $tierStr = !empty($detail['tier_level']) ? "Tier {$detail['tier_level']}" : 'Bonus';
-                                                if (isset($detail['status']) && $detail['status'] === 'Dinas') {
+                                                if (isset($detail['status']) && $detail['status'] === 'Reward Libur') {
+                                                    $rName = $detail['reward_name'] ?? 'Reward Libur';
+                                                    $titleText = "🎁 Reward Libur ({$rName}): Rp " . number_format($nominal, 0, ',', '.');
+                                                } elseif (isset($detail['status']) && $detail['status'] === 'Dinas') {
                                                     $titleText = $picketPrefix . "Dinas: Rp " . number_format($nominal, 0, ',', '.');
                                                 } else {
                                                     $earlyStr = !empty($detail['early_minutes']) ? " (Hadir {$detail['early_minutes']} mnt sblm masuk)" : " (Tepat Waktu)";
