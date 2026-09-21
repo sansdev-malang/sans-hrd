@@ -737,10 +737,10 @@
                 
                 <!-- Backdrop overlay -->
                 <div x-show="showModal" 
-                     x-transition:enter="ease-in-out duration-300" 
+                     x-transition:enter="ease-out duration-150" 
                      x-transition:enter-start="opacity-0" 
                      x-transition:enter-end="opacity-100" 
-                     x-transition:leave="ease-in-out duration-300" 
+                     x-transition:leave="ease-in duration-100" 
                      x-transition:leave-start="opacity-100" 
                      x-transition:leave-end="opacity-0" 
                      @click="showModal = false"
@@ -751,10 +751,10 @@
                 <!-- Content Panel -->
                 <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
                     <div x-show="showModal" 
-                         x-transition:enter="transform transition ease-in-out duration-300" 
+                         x-transition:enter="transform transition ease-out duration-150" 
                          x-transition:enter-start="translate-x-full" 
                          x-transition:enter-end="translate-x-0" 
-                         x-transition:leave="transform transition ease-in-out duration-300" 
+                         x-transition:leave="transform transition ease-in duration-100" 
                          x-transition:leave-start="translate-x-0" 
                          x-transition:leave-end="translate-x-full" 
                          class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between text-left">
@@ -837,10 +837,10 @@
         <!-- MODAL TUGASKAN SHIFT BARU -->
         <template x-teleport="body">
             <div x-cloak x-show="showAssignmentModal" 
-                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter="transition ease-out duration-150"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave="transition ease-in duration-100"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @keydown.escape.window="showAssignmentModal = false"
@@ -853,10 +853,10 @@
                 
                 <!-- Content Box -->
                 <div x-show="showAssignmentModal"
-                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter="transition ease-out duration-150 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave="transition ease-in duration-100 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10"
@@ -1149,10 +1149,10 @@
         <!-- MODAL EDIT BATCH SHIFT -->
         <template x-teleport="body">
             <div x-cloak x-show="showEditModal" 
-                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter="transition ease-out duration-150"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave="transition ease-in duration-100"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @keydown.escape.window="showEditModal = false"
@@ -1165,10 +1165,10 @@
                 
                 <!-- Content Box -->
                 <div x-show="showEditModal"
-                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter="transition ease-out duration-150 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave="transition ease-in duration-100 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
@@ -1377,10 +1377,10 @@
         <!-- MODAL BUAT ROSTER BARU -->
         <template x-teleport="body">
             <div x-cloak x-show="showCreateModal" 
-                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter="transition ease-out duration-150"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave="transition ease-in duration-100"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @keydown.escape.window="showCreateModal = false"
@@ -1393,10 +1393,10 @@
                 
                 <!-- Content Box -->
                 <div x-show="showCreateModal"
-                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter="transition ease-out duration-150 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave="transition ease-in duration-100 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
@@ -1682,10 +1682,10 @@
         <!-- MODAL DAFTAR PEGAWAI TANPA JADWAL -->
         <template x-teleport="body">
             <div x-cloak x-show="showNeglectedModal" 
-                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter="transition ease-out duration-150"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave="transition ease-in duration-100"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @keydown.escape.window="showNeglectedModal = false"
@@ -1698,10 +1698,10 @@
                 
                 <!-- Content Box -->
                 <div x-show="showNeglectedModal"
-                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter="transition ease-out duration-150 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave="transition ease-in duration-100 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative w-full sm:max-w-2xl rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 max-h-[80vh] flex flex-col overflow-hidden text-left text-xs z-10">

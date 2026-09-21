@@ -24,6 +24,18 @@
         editIsActive: {{ old('is_active') && old('_method') === 'PUT' ? 'true' : 'false' }},
         editDescription: '{{ old('description') && old('_method') === 'PUT' ? old('description') : '' }}',
         deleteShift: null,
+        showToggleModal: false,
+        toggleShift: null,
+        toggleIsActiveTarget: false,
+        confirmToggle(shift, targetIsActive) {
+            this.toggleShift = shift;
+            this.toggleIsActiveTarget = targetIsActive;
+            this.showToggleModal = true;
+        },
+        confirmDelete(shift) {
+            this.deleteShift = shift;
+            this.showDeleteModal = true;
+        },
         days: [
             { name: 'Minggu', start_time: '', end_time: '', is_off: true },
             { name: 'Senin', start_time: '', end_time: '', is_off: false },
@@ -211,15 +223,11 @@
                         </div>
 
                         <div class="flex items-center gap-2 mt-5 border-t border-slate-50 dark:border-slate-900/60 pt-4 justify-between flex-wrap">
-                            <!-- Toggle Active Form -->
-                            <form action="{{ route('working-shifts.toggle-active', $shift->id) }}" method="POST" onsubmit="return confirm('Nonaktifkan shift ini? Shift yang dinonaktifkan akan dipindahkan ke tab Riwayat dan tidak muncul di form penugasan jadwal baru, namun seluruh histori jadwal lama tetap aman.')">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="h-8 px-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-lg border border-amber-200/50 dark:border-amber-900/40 transition-all cursor-pointer flex items-center gap-1.5" title="Arsipkan / Nonaktifkan shift ini">
-                                    <i data-lucide="archive" class="w-3.5 h-3.5"></i>
-                                    <span>Nonaktifkan</span>
-                                </button>
-                            </form>
+                            <!-- Toggle Active Button -->
+                            <button type="button" @click="confirmToggle({{ json_encode($shift) }}, false)" class="h-8 px-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-lg border border-amber-200/50 dark:border-amber-900/40 transition-all cursor-pointer flex items-center gap-1.5" title="Arsipkan / Nonaktifkan shift ini">
+                                <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+                                <span>Nonaktifkan</span>
+                            </button>
 
                             <div class="flex items-center gap-2">
                                 <button @click="openEdit({{ json_encode($shift) }})" class="h-8 px-3 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-900 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1.5">
@@ -321,15 +329,11 @@
                         </div>
 
                         <div class="flex items-center gap-2 mt-5 border-t border-slate-200 dark:border-slate-800 pt-4 justify-between flex-wrap">
-                            <!-- Toggle Active Form -->
-                            <form action="{{ route('working-shifts.toggle-active', $shift->id) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="h-8 px-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-xs font-semibold rounded-lg border border-emerald-200/50 dark:border-emerald-800/40 transition-all cursor-pointer flex items-center gap-1.5" title="Aktifkan kembali shift ini agar dapat dipilih di jadwal baru">
-                                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                                    <span>Aktifkan Kembali</span>
-                                </button>
-                            </form>
+                            <!-- Toggle Active Button -->
+                            <button type="button" @click="confirmToggle({{ json_encode($shift) }}, true)" class="h-8 px-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-xs font-semibold rounded-lg border border-emerald-200/50 dark:border-emerald-800/40 transition-all cursor-pointer flex items-center gap-1.5" title="Aktifkan kembali shift ini agar dapat dipilih di jadwal baru">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                                <span>Aktifkan Kembali</span>
+                            </button>
 
                             <div class="flex items-center gap-2">
                                 <button @click="openEdit({{ json_encode($shift) }})" class="h-8 px-3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1.5">
@@ -632,6 +636,61 @@
             </div>
         </template>
  
+        <!-- TOGGLE ACTIVE/INACTIVE CONFIRMATION MODAL -->
+        <template x-teleport="body">
+            <div x-cloak x-show="showToggleModal" 
+                 x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-100"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @keydown.escape.window="showToggleModal = false"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="z-index: 9999; display: none;">
+                <div @click.outside="showToggleModal = false"
+                     x-transition:enter="transition ease-out duration-150 transform"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-100 transform"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-sm w-full overflow-hidden text-xs">
+                    <div class="p-6 text-center">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" :class="toggleIsActiveTarget ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400'">
+                            <template x-if="!toggleIsActiveTarget">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                            </template>
+                            <template x-if="toggleIsActiveTarget">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </template>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-slate-50 mb-2" x-text="toggleIsActiveTarget ? 'Aktifkan Kembali Shift?' : 'Nonaktifkan (Arsipkan) Shift?'"></h3>
+                        <p class="text-[12px] text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                            <span x-show="!toggleIsActiveTarget">
+                                Shift <strong class="text-slate-700 dark:text-slate-300" x-text="toggleShift ? toggleShift.name : ''"></strong> akan dipindahkan ke tab Riwayat dan disembunyikan dari penugasan jadwal baru. Riwayat jadwal & absensi lampau tetap aman.
+                            </span>
+                            <span x-show="toggleIsActiveTarget">
+                                Shift <strong class="text-slate-700 dark:text-slate-300" x-text="toggleShift ? toggleShift.name : ''"></strong> akan diaktifkan kembali dan dapat dipilih di form penugasan jadwal baru.
+                            </span>
+                        </p>
+                        
+                        <div class="flex justify-center gap-3">
+                            <button type="button" @click="showToggleModal = false" class="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-xl cursor-pointer transition-colors shadow-2xs hover:shadow-xs">
+                                Batal
+                            </button>
+                            <form method="POST" :action="toggleShift ? `{{ url('working-shifts') }}/${toggleShift.id}/toggle-active` : ''" class="flex-1">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="w-full text-xs px-4 py-2.5 text-white font-bold rounded-xl cursor-pointer transition-colors shadow-sm flex items-center justify-center gap-1.5" :class="toggleIsActiveTarget ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'">
+                                    <span x-text="toggleIsActiveTarget ? 'Ya, Aktifkan' : 'Ya, Nonaktifkan'"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
         <!-- DELETE MODAL -->
         <template x-teleport="body">
             <div x-cloak x-show="showDeleteModal" 
