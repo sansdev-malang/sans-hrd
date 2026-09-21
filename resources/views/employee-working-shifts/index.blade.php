@@ -63,6 +63,12 @@
         showModal: false,
         selectedBatch: null,
         searchModal: '',
+        showDeleteBatchModal: false,
+        deleteTarget: null,
+        confirmDeleteBatch(batch) {
+            this.deleteTarget = batch;
+            this.showDeleteBatchModal = true;
+        },
 
         formatDate(dateStr) {
             if (!dateStr) return '';
@@ -584,26 +590,12 @@
                                                 title="Edit Roster">
                                                 <i data-lucide="edit-3" class="w-4 h-4"></i>
                                             </a>
-                                            <form action="{{ route('employee-working-shifts.destroy-roster') }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus roster bulanan ini?')"
-                                                data-no-loader
-                                                class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="tab" value="{{ $activeTab }}">
-                                                <input type="hidden" name="unit_id"
-                                                    value="{{ $batch['school_unit_id'] }}">
-                                                <input type="hidden" name="month" value="{{ $batch['month'] }}">
-                                                <input type="hidden" name="year" value="{{ $batch['year'] }}">
-                                                <input type="hidden" name="roster_name"
-                                                    value="{{ $batch['roster_name'] ?? '' }}">
-                                                <button type="submit"
-                                                    class="h-8 w-8 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
-                                                    title="Hapus Roster">
-                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                @click="confirmDeleteBatch({{ json_encode($batch) }})"
+                                                class="h-8 w-8 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
+                                                title="Hapus Roster">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -649,29 +641,12 @@
                                                 <i data-lucide="edit-3" class="w-4 h-4"></i>
                                             </button>
 
-                                            <form action="{{ route('employee-working-shifts.destroy-batch') }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Apakah Anda yakin ingin membatalkan/menghapus seluruh penugasan shift pada grup ini?')"
-                                                data-no-loader
-                                                class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="tab" value="{{ $activeTab }}">
-                                                <input type="hidden" name="unit_id"
-                                                    value="{{ $batch['school_unit_id'] }}">
-                                                <input type="hidden" name="shift_id"
-                                                    value="{{ $batch['working_shift_id'] }}">
-                                                <input type="hidden" name="start_date"
-                                                    value="{{ \Carbon\Carbon::parse($batch['start_date'])->format('Y-m-d') }}">
-                                                <input type="hidden" name="end_date"
-                                                    value="{{ $batch['end_date'] ? \Carbon\Carbon::parse($batch['end_date'])->format('Y-m-d') : 'null' }}">
-
-                                                <button type="submit"
-                                                    class="h-8 w-8 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
-                                                    title="Hapus Penugasan">
-                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                @click="confirmDeleteBatch({{ json_encode($batch) }})"
+                                                class="h-8 w-8 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
+                                                title="Hapus Penugasan">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1777,6 +1752,83 @@
                              </table>
                          </div>
                      </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- MODAL KONFIRMASI HAPUS PENJADWALAN (ROSTER / BATCH) -->
+        <template x-teleport="body">
+            <div x-cloak x-show="showDeleteBatchModal" 
+                 x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-100"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @keydown.escape.window="showDeleteBatchModal = false"
+                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="display: none;">
+                <div @click.outside="showDeleteBatchModal = false"
+                     x-transition:enter="transition ease-out duration-150 transform"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-100 transform"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-sm w-full overflow-hidden text-xs">
+                    <div class="p-6 text-center">
+                        <div class="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-slate-50 mb-2" x-text="deleteTarget?.type === 'roster' ? 'Hapus Roster Bulanan?' : 'Hapus Penugasan Shift?'"></h3>
+                        <p class="text-[12px] text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                            <template x-if="deleteTarget?.type === 'roster'">
+                                <span>Apakah Anda yakin ingin menghapus roster <strong class="text-slate-700 dark:text-slate-300" x-text="deleteTarget?.roster_name || 'Roster Shift Bulanan'"></strong> untuk unit <strong class="text-slate-700 dark:text-slate-300" x-text="deleteTarget?.unit_name"></strong>? Seluruh jadwal pegawai di roster ini akan dihapus.</span>
+                            </template>
+                            <template x-if="deleteTarget?.type !== 'roster'">
+                                <span>Apakah Anda yakin ingin membatalkan/menghapus penugasan shift <strong class="text-slate-700 dark:text-slate-300" x-text="deleteTarget?.shift_name"></strong> untuk unit <strong class="text-slate-700 dark:text-slate-300" x-text="deleteTarget?.unit_name"></strong>?</span>
+                            </template>
+                        </p>
+                        
+                        <div class="flex justify-center gap-3">
+                            <button type="button" @click="showDeleteBatchModal = false" class="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-xl cursor-pointer transition-colors shadow-2xs hover:shadow-xs">
+                                Batal
+                            </button>
+                            
+                            <!-- Form if Roster -->
+                            <template x-if="deleteTarget?.type === 'roster'">
+                                <form action="{{ route('employee-working-shifts.destroy-roster') }}" method="POST" class="flex-1" data-no-loader>
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="hidden" name="tab" value="{{ $activeTab }}">
+                                    <input type="hidden" name="unit_id" :value="deleteTarget?.school_unit_id">
+                                    <input type="hidden" name="month" :value="deleteTarget?.month">
+                                    <input type="hidden" name="year" :value="deleteTarget?.year">
+                                    <input type="hidden" name="roster_name" :value="deleteTarget?.roster_name || ''">
+                                    <button type="submit" class="w-full text-xs px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl cursor-pointer transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                        Ya, Hapus
+                                    </button>
+                                </form>
+                            </template>
+
+                            <!-- Form if Batch -->
+                            <template x-if="deleteTarget?.type !== 'roster'">
+                                <form action="{{ route('employee-working-shifts.destroy-batch') }}" method="POST" class="flex-1" data-no-loader>
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="hidden" name="tab" value="{{ $activeTab }}">
+                                    <input type="hidden" name="unit_id" :value="deleteTarget?.school_unit_id">
+                                    <input type="hidden" name="shift_id" :value="deleteTarget?.working_shift_id">
+                                    <input type="hidden" name="start_date" :value="deleteTarget?.start_date ? getLocalYmd(deleteTarget.start_date) : ''">
+                                    <input type="hidden" name="end_date" :value="deleteTarget?.end_date ? getLocalYmd(deleteTarget.end_date) : 'null'">
+                                    <button type="submit" class="w-full text-xs px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl cursor-pointer transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                        Ya, Hapus
+                                    </button>
+                                </form>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </div>
         </template>
