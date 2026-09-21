@@ -277,7 +277,7 @@
                                                     }
                                                 @endphp
                                                 <div class="relative mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border {{ $isPicket ? 'border-amber-400 dark:border-amber-500' : 'border-red-200 dark:border-red-800/50' }}" title="{{ $titleText }}">
-                                                    0K
+                                                    0k
                                                     @if($isPicket)
                                                         <span class="absolute -top-1 -right-1 flex h-2 w-2">
                                                             <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
@@ -428,7 +428,7 @@
                                              (selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket) ? 'border-amber-400 dark:border-amber-500/80 ring-1 ring-amber-400/30' : ''
                                          ]">
                                          
-                                        <!-- Header Tanggal & Picket Icon -->
+                                        <!-- Header Tanggal & Picket / Reward Icon -->
                                         <div class="flex items-center justify-between w-full px-0.5">
                                             <span class="text-[9px] font-semibold"
                                                   :class="[
@@ -436,9 +436,14 @@
                                                       (day.dateStr && new Date(day.dateStr).getDay() === 0) ? 'text-red-500 font-bold' : ''
                                                   ]"
                                                   x-text="day.day"></span>
-                                            <template x-if="selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket">
-                                                <span class="text-[8px] leading-none text-amber-500 dark:text-amber-400 font-bold" :title="'Piket: 06:30 (' + (selectedReport.daily_details[day.dateStr].picket_area || 'Area Piket') + ')'">⚡</span>
-                                            </template>
+                                            <div class="flex items-center gap-0.5">
+                                                <template x-if="selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_reward_holiday">
+                                                    <span class="text-[8px] leading-none text-emerald-500 font-bold" :title="'Reward: ' + (selectedReport.daily_details[day.dateStr].reward_name || 'Reward Libur')">🎁</span>
+                                                </template>
+                                                <template x-if="selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket">
+                                                    <span class="text-[8px] leading-none text-amber-500 dark:text-amber-400 font-bold" :title="'Piket: 06:30 (' + (selectedReport.daily_details[day.dateStr].picket_area || 'Area Piket') + ')'">⚡</span>
+                                                </template>
+                                            </div>
                                         </div>
                                               
                                         <!-- Bonus Nominal -->
@@ -455,7 +460,7 @@
                                                                 <div class="text-center text-slate-300 dark:text-slate-700 rounded text-[7px] font-medium">-</div>
                                                             </template>
                                                             <template x-if="day.dateStr <= new Date().toLocaleDateString('en-CA')">
-                                                                <div class="w-full py-0.5 text-center bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded text-[7px] font-bold">0K</div>
+                                                                <div class="w-full py-0.5 text-center bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded text-[7px] font-bold">0k</div>
                                                             </template>
                                                         </div>
                                                     </template>
@@ -505,6 +510,11 @@
                 this.calendarDays = this.buildCutOffCalendar(this.cycleDates);
                 this.stats = this.calculateStats(report);
                 this.showCalendarModal = true;
+                this.$nextTick(() => {
+                    if (window.lucide) {
+                        window.lucide.createIcons();
+                    }
+                });
             },
             calculateStats(report) {
                 let stats = { totalBonus: 0, bonusDays: 0 };

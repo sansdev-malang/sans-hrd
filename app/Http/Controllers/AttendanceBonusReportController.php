@@ -293,12 +293,12 @@ class AttendanceBonusReportController extends Controller
                         $assignStartDate = substr($assignment->start_date, 0, 10);
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                            $activeAssignmentOnDate = $assignment;
                             // Find detail for this day of week
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
                             if ($detail && !$detail->is_off) {
                                 $hasShiftToday = true;
                                 $shiftStartTime = $detail->start_time;
-                                $activeAssignmentOnDate = $assignment;
                             }
                             break;
                         }
@@ -335,7 +335,8 @@ class AttendanceBonusReportController extends Controller
                     }
                 }
 
-                if ($hasShiftToday) {
+                if ($hasShiftToday || $isRewardHoliday) {
+                    $shiftStartTime = $shiftStartTime ?: '07:00:00';
                     // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
                     if ($isPicketToday) {
                         $shiftStartTime = $picketStartTime;
@@ -771,11 +772,11 @@ class AttendanceBonusReportController extends Controller
                         $assignStartDate = substr($assignment->start_date, 0, 10);
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                            $activeAssignmentOnDate = $assignment;
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
                             if ($detail && !$detail->is_off) {
                                 $hasShiftToday = true;
                                 $shiftStartTime = $detail->start_time;
-                                $activeAssignmentOnDate = $assignment;
                             }
                             break;
                         }
@@ -812,7 +813,8 @@ class AttendanceBonusReportController extends Controller
                     }
                 }
 
-                if ($hasShiftToday) {
+                if ($hasShiftToday || $isRewardHoliday) {
+                    $shiftStartTime = $shiftStartTime ?: '07:00:00';
                     // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
                     if ($isPicketToday) {
                         $shiftStartTime = $picketStartTime;
@@ -1043,7 +1045,7 @@ class AttendanceBonusReportController extends Controller
                     if ($detail['bonus_nominal'] > 0) {
                         $sheet->setCellValue($colLetter . $row, $detail['bonus_nominal']);
                     } else {
-                        $sheet->setCellValue($colLetter . $row, '0K');
+                        $sheet->setCellValue($colLetter . $row, '0k');
                         $sheet->getStyle($colLetter . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
                     }
                 } else {

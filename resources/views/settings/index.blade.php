@@ -31,7 +31,7 @@
                         </p>
                         
                         <div class="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 text-xs">Tanggal Cut-off (1 - 31) <span class="text-red-500">*</span></label>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 text-xs">Tanggal Cut-off <span class="text-red-500">*</span></label>
                             <div class="flex items-center gap-2">
                                 <input type="number" min="1" max="31" name="payroll_cutoff_date" value="{{ old('payroll_cutoff_date', $cutoffDate) }}" required class="text-xs w-32 h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-mono font-bold">
                                 <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Setiap bulannya</span>

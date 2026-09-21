@@ -151,6 +151,10 @@ class AttendanceApiController extends Controller
             });
         }
 
+        $holidayRewards = \App\Models\HolidayReward::where('end_date', '>=', $startDate->format('Y-m-d'))
+            ->where('start_date', '<=', $endDate->format('Y-m-d'))
+            ->get();
+
         // Fetch logs up to next day noon to catch night shift clock outs
         $logsData = \App\Models\AttendanceLog::whereBetween('timestamp', [
             $startDate->format('Y-m-d 00:00:00'),
@@ -167,9 +171,6 @@ class AttendanceApiController extends Controller
 
         $reports = [];
         $lastDay = clone $endDate;
-        if ($endDate > now()) {
-            $lastDay = now()->endOfDay();
-        }
 
         foreach ($employeesCollection as $emp) {
             $uid = $emp['zkteco_uid'] ?? null;
@@ -197,9 +198,20 @@ class AttendanceApiController extends Controller
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) to 6 (Sat)
 
+                // Check Reward Holiday for this employee on this date
+                $isRewardHoliday = false;
+                $rewardHolidayName = null;
+                foreach ($holidayRewards as $hr) {
+                    if ($hr->appliesToDate($dateStr) && $hr->appliesToEmployee($unit, $empId)) {
+                        $isRewardHoliday = true;
+                        $rewardHolidayName = $hr->name;
+                        break;
+                    }
+                }
+
                 $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
                 $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false) && !$isShiftWorker;
-                if ($isHoliday) {
+                if ($isHoliday && !$isRewardHoliday) {
                     $dailyDetails[$dateStr] = ['status' => 'Libur'];
                     $currentDate->addDay();
                     continue;
@@ -347,18 +359,34 @@ class AttendanceApiController extends Controller
                             'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
                             'is_late' => $isLate,
                             'is_red_late' => $isRedLate,
+                            'is_reward' => $isRewardHoliday,
+                            'reward_name' => $rewardHolidayName,
                         ];
                     } else {
-                        // Determine if it is actually Alfa or if the shift hasn't started yet
-                        $now = \Carbon\Carbon::now('Asia/Jakarta');
-                        $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
-                        
-                        if ($now->lessThan($shiftStartDateTime)) {
-                            $dailyDetails[$dateStr] = ['status' => 'Pending'];
+                        if ($isRewardHoliday) {
+                            $dailyDetails[$dateStr] = [
+                                'status' => 'Reward Libur',
+                                'reward_name' => $rewardHolidayName,
+                                'is_reward' => true,
+                            ];
                         } else {
-                            $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                            // Determine if it is actually Alfa or if the shift hasn't started yet
+                            $now = \Carbon\Carbon::now('Asia/Jakarta');
+                            $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                            
+                            if ($now->lessThan($shiftStartDateTime)) {
+                                $dailyDetails[$dateStr] = ['status' => 'Pending'];
+                            } else {
+                                $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                            }
                         }
                     }
+                } elseif ($isRewardHoliday) {
+                    $dailyDetails[$dateStr] = [
+                        'status' => 'Reward Libur',
+                        'reward_name' => $rewardHolidayName,
+                        'is_reward' => true,
+                    ];
                 } elseif ($isOffShift) {
                     $dailyDetails[$dateStr] = ['status' => 'Off'];
                 } else {
@@ -701,7 +729,8 @@ class AttendanceApiController extends Controller
                     }
                 }
 
-                if ($hasShiftToday) {
+                if ($hasShiftToday || $isRewardHoliday) {
+                    $shiftStartTime = $shiftStartTime ?: '07:00:00';
                     // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
                     if ($isPicketToday) {
                         $shiftStartTime = $picketStartTime;

@@ -21,6 +21,7 @@
         .cell-sakit { color: #d97706; font-weight: bold; }
         .cell-izin { color: #7c3aed; font-weight: bold; }
         .cell-dinas { color: #059669; font-weight: bold; }
+        .cell-reward { color: #059669; font-weight: bold; }
         .cell-libur { color: #94a3b8; font-size: 5.5px; }
         .cell-off { color: #94a3b8; font-size: 5.5px; }
         .cell-pending { color: #9ca3af; }
@@ -126,10 +127,15 @@
                                     $checkOut = isset($detail['check_out']) ? date('H:i', strtotime($detail['check_out'])) : '-';
                                     
                                     $content = "<span class='{$inClass}'>{$checkIn}</span>";
-                                    if (!empty($detail['pending_leave'])) {
+                                    if (!empty($detail['is_reward'])) {
+                                        $content .= "<br><span class='cell-reward' style='font-size: 5.5px;'>OFF</span>";
+                                    } elseif (!empty($detail['pending_leave'])) {
                                         $content .= "<br><span class='cell-pending'>(" . $detail['pending_leave']['leave_code'] . ")</span>";
                                     }
                                     $content .= "<br><span class='time-out'>{$checkOut}</span>";
+                                } elseif ($status === 'Reward Libur') {
+                                    $cellClass = 'cell-reward';
+                                    $content = 'OFF';
                                 } elseif ($status === 'Alfa') {
                                     $cellClass = 'cell-alfa';
                                     $content = 'A';

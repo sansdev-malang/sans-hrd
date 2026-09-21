@@ -264,9 +264,14 @@
                                             if (!empty($detail['is_late'])) {
                                                 $cellTooltip .= " (Terlambat)";
                                             }
+                                            if (!empty($detail['is_reward'])) {
+                                                $cellTooltip .= " | Reward: " . ($detail['reward_name'] ?? 'Reward Hari Libur');
+                                            }
                                             if (!empty($detail['rejected_leave'])) {
                                                 $cellTooltip .= " | Ditolak: " . $detail['rejected_leave']['leave_type'];
                                             }
+                                        } elseif ($detail['status'] === 'Reward Libur') {
+                                            $cellTooltip = "Reward Hari Libur: " . ($detail['reward_name'] ?? 'Libur Reward') . " (Bonus Full)";
                                         } elseif ($detail['status'] === 'Alfa') {
                                             $cellTooltip = "Alfa (Tanpa Keterangan)";
                                             if (!empty($detail['rejected_leave'])) {
@@ -281,7 +286,7 @@
                                             $isPending = !empty($detail['is_pending']);
                                             $prefix = $isPending ? 'Pending: ' : 'Disetujui: ';
                                             
-                                            if (!empty($detail['check_in']) || !empty($detail['check_out'])) {
+                                             if (!empty($detail['check_in']) || !empty($detail['check_out'])) {
                                                 $cellTooltip = $prefix . $leaveName . " | Masuk: " . ($detail['check_in'] ?? '-') . " | Pulang: " . ($detail['check_out'] ?? '-');
                                                 if (!empty($detail['is_late'])) {
                                                     $cellTooltip .= " (Terlambat)";
@@ -303,11 +308,18 @@
                                             @endphp
                                             <div class="flex flex-col gap-0.5 items-center justify-center {{ $isRedLate ? 'bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded px-1 py-0.5' : '' }}">
                                                 <span class="text-[10px] font-bold {{ $isRedLate ? 'text-rose-600 dark:text-rose-400 font-extrabold' : ($isLate ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400') }}">{{ $detail['check_in'] ?? '-' }}</span>
-                                                @if(!empty($detail['pending_leave']))
+                                                @if(!empty($detail['is_reward']))
+                                                    <div class="w-full flex items-center justify-center gap-0.5 scale-90" title="{{ $detail['reward_name'] ?? 'Reward Libur' }}">
+                                                        <span class="px-1 py-0.2 rounded font-black text-[7.5px] leading-none uppercase bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-0.5">
+                                                            <i data-lucide="gift" class="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400"></i>
+                                                            <span>OFF</span>
+                                                        </span>
+                                                    </div>
+                                                @elseif(!empty($detail['pending_leave']))
                                                     @php
                                                         $pCode = $detail['pending_leave']['leave_code'];
                                                         $colorMap = [
-                                                            'S' => 'bg-amber-50/40 dark:bg-amber-955/10 text-amber-500 dark:text-amber-500 border border-dashed border-amber-200/50',
+                                                             'S' => 'bg-amber-50/40 dark:bg-amber-955/10 text-amber-500 dark:text-amber-500 border border-dashed border-amber-200/50',
                                                             'I' => 'bg-purple-50/40 dark:bg-purple-955/10 text-purple-500 dark:text-purple-500 border border-dashed border-purple-200/50',
                                                             'C' => 'bg-blue-50/40 dark:bg-blue-955/10 text-blue-500 dark:text-blue-500 border border-dashed border-blue-200/50',
                                                             'H' => 'bg-emerald-50/40 dark:bg-emerald-955/10 text-emerald-500 dark:text-emerald-500 border border-dashed border-emerald-200/50'
@@ -319,6 +331,13 @@
                                                     </div>
                                                 @endif
                                                 <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">{{ $detail['check_out'] ?? '-' }}</span>
+                                            </div>
+                                        @elseif($detail['status'] === 'Reward Libur')
+                                            <div class="mx-auto w-full h-full min-h-[28px] flex flex-col items-center justify-center bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 rounded px-0.5 py-1" title="{{ $detail['reward_name'] ?? 'Reward Hari Libur' }}">
+                                                <div class="flex items-center gap-0.5">
+                                                    <i data-lucide="gift" class="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+                                                    <span class="font-extrabold text-[8.5px] leading-none tracking-tight">OFF</span>
+                                                </div>
                                             </div>
                                         @elseif($detail['status'] === 'Alfa')
                                             <div class="flex flex-col gap-0.5 items-center justify-center">
@@ -501,6 +520,14 @@
                 <div class="w-5 h-5 flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 rounded font-bold text-[9px]">H</div>
                 <span>Dinas / Tugas Luar</span>
             </div>
+            <!-- Reward Hari Libur -->
+            <div class="flex items-center gap-1.5">
+                <div class="px-1.5 h-5 flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 rounded font-extrabold text-[8.5px]">
+                    <i data-lucide="gift" class="w-3 h-3 text-emerald-600 dark:text-emerald-400"></i>
+                    <span>OFF</span>
+                </div>
+                <span>Reward Hari Libur (Bonus Full)</span>
+            </div>
             <!-- Off -->
             <div class="flex items-center gap-1.5">
                 <div class="w-7 h-5 flex items-center justify-center bg-slate-100 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[8px]">OFF</div>
@@ -614,7 +641,22 @@
                                                         <span class="text-[10px] font-bold" 
                                                               :class="selectedReport.daily_details[day.dateStr].is_red_late ? 'text-rose-600 dark:text-rose-400 font-extrabold' : (selectedReport.daily_details[day.dateStr].is_late ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400')"
                                                               x-text="selectedReport.daily_details[day.dateStr].check_in || '-'"></span>
+                                                        <template x-if="selectedReport.daily_details[day.dateStr].is_reward">
+                                                            <div class="flex items-center gap-0.5 py-0.5" :title="selectedReport.daily_details[day.dateStr].reward_name || 'Reward Libur'">
+                                                                <i data-lucide="gift" class="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400"></i>
+                                                                <span class="text-[7.5px] font-black text-emerald-600 dark:text-emerald-400">OFF</span>
+                                                            </div>
+                                                        </template>
                                                         <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400" x-text="selectedReport.daily_details[day.dateStr].check_out || '-'"></span>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Reward Libur -->
+                                                <template x-if="selectedReport.daily_details[day.dateStr].status === 'Reward Libur'">
+                                                    <div class="w-full py-1 text-center bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 rounded-md flex items-center justify-center gap-1 font-extrabold text-[9px]"
+                                                         :title="selectedReport.daily_details[day.dateStr].reward_name || 'Reward Libur'">
+                                                        <i data-lucide="gift" class="w-3 h-3 text-emerald-600 dark:text-emerald-400"></i>
+                                                        <span>OFF</span>
                                                     </div>
                                                 </template>
 
@@ -703,6 +745,9 @@
                         <div class="flex flex-wrap gap-2.5 text-[9px] md:text-xs">
                             <span class="font-bold text-slate-700 dark:text-slate-350">Ringkasan:</span>
                             <span class="text-slate-600 dark:text-slate-400">Hadir: <strong class="text-emerald-650 dark:text-emerald-405" x-text="stats.hadir"></strong></span>
+                            <template x-if="stats.reward > 0">
+                                <span class="text-slate-600 dark:text-slate-400">Reward: <strong class="text-emerald-600 dark:text-emerald-400" x-text="stats.reward"></strong></span>
+                            </template>
                             <span class="text-slate-600 dark:text-slate-400">Telat: <strong class="text-amber-500" x-text="stats.telat"></strong></span>
                             <span class="text-slate-600 dark:text-slate-400">Alfa: <strong class="text-rose-500" x-text="stats.alfa"></strong></span>
                             <span class="text-slate-600 dark:text-slate-400">Izin/Cuti: <strong class="text-purple-600 dark:text-purple-400" x-text="stats.izin"></strong></span>
@@ -734,7 +779,7 @@
             endDateStr: '{{ \Carbon\Carbon::parse($endDateReq)->translatedFormat("d M Y") }}',
             cycleDates: @json($cycleDateData),
             calendarDays: [],
-            stats: { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 },
+            stats: { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0, reward: 0 },
             
             getClassForLeave(day) {
                 if (!day) return '';
@@ -754,9 +799,14 @@
                 this.calendarDays = this.buildCutOffCalendar(this.cycleDates);
                 this.stats = this.calculateStats(report);
                 this.showCalendarModal = true;
+                this.$nextTick(() => {
+                    if (window.lucide) {
+                        window.lucide.createIcons();
+                    }
+                });
             },
             calculateStats(report) {
-                let stats = { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0 };
+                let stats = { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0, reward: 0 };
                 if (!report || !report.daily_details) return stats;
                 
                 Object.values(report.daily_details).forEach(function(day) {
@@ -765,6 +815,8 @@
                         if (day.is_late) {
                             stats.telat++;
                         }
+                    } else if (day.status === 'Reward Libur') {
+                        stats.reward = (stats.reward || 0) + 1;
                     } else if (day.status === 'Alfa') {
                         stats.alfa++;
                     } else if (day.status === 'Cuti/Izin') {
