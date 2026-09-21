@@ -354,20 +354,20 @@
 
         <!-- ADD MODAL -->
         <template x-teleport="body">
-            <div x-show="showAddModal" 
-                 x-transition:enter="transition ease-out duration-300"
+            <div x-cloak x-show="showAddModal" 
+                 x-transition:enter="transition ease-out duration-150"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave="transition ease-in duration-100"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @keydown.escape.window="showAddModal = false"
                  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="z-index: 9999; display: none;">
                 <div @click.outside="showAddModal = false"
-                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter="transition ease-out duration-150 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave="transition ease-in duration-100 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden text-left text-xs">
@@ -493,20 +493,20 @@
  
         <!-- EDIT MODAL -->
         <template x-teleport="body">
-            <div x-show="showEditModal" 
-                 x-transition:enter="transition ease-out duration-300"
+            <div x-cloak x-show="showEditModal" 
+                 x-transition:enter="transition ease-out duration-150"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave="transition ease-in duration-100"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @keydown.escape.window="showEditModal = false"
                  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="z-index: 9999; display: none;">
                 <div @click.outside="showEditModal = false"
-                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter="transition ease-out duration-150 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave="transition ease-in duration-100 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden text-left text-xs">
@@ -634,20 +634,20 @@
  
         <!-- DELETE MODAL -->
         <template x-teleport="body">
-            <div x-show="showDeleteModal" 
-                 x-transition:enter="transition ease-out duration-300"
+            <div x-cloak x-show="showDeleteModal" 
+                 x-transition:enter="transition ease-out duration-150"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave="transition ease-in duration-100"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @keydown.escape.window="showDeleteModal = false"
                  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="z-index: 9999; display: none;">
                 <div @click.outside="showDeleteModal = false"
-                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter="transition ease-out duration-150 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave="transition ease-in duration-100 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-sm w-full overflow-hidden text-xs">
