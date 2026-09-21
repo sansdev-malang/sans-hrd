@@ -14,12 +14,22 @@ class WorkingShift extends Model
         'code',
         'short_code',
         'is_shift',
+        'is_active',
         'description',
     ];
 
     protected $casts = [
         'is_shift' => 'boolean',
+        'is_active' => 'boolean',
     ];
+
+    /**
+     * Scope a query to only include active shifts.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     public function details()
     {

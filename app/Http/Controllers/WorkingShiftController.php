@@ -39,6 +39,7 @@ class WorkingShiftController extends Controller
             'code' => 'required|string|max:255|unique:working_shifts,code',
             'short_code' => 'nullable|string|max:10',
             'is_shift' => 'sometimes|boolean',
+            'is_active' => 'sometimes|boolean',
             'description' => 'nullable|string',
             'days' => 'required|array|min:7|max:7',
             'days.*.start_time' => 'nullable|string',
@@ -47,12 +48,14 @@ class WorkingShiftController extends Controller
         ]);
 
         $isShift = $request->has('is_shift') ? (bool)$request->input('is_shift') : false;
+        $isActive = $request->has('is_active') ? (bool)$request->input('is_active') : true;
 
         $shift = WorkingShift::create([
             'name' => $validated['name'],
             'code' => $validated['code'],
             'short_code' => $validated['short_code'] ?? null,
             'is_shift' => $isShift,
+            'is_active' => $isActive,
             'description' => $validated['description'] ?? null,
         ]);
 
@@ -87,6 +90,7 @@ class WorkingShiftController extends Controller
             'name' => 'required|string|max:255',
             'short_code' => 'nullable|string|max:10',
             'is_shift' => 'sometimes|boolean',
+            'is_active' => 'sometimes|boolean',
             'description' => 'nullable|string',
             'days' => 'required|array|min:7|max:7',
             'days.*.start_time' => 'nullable|string',
@@ -95,11 +99,13 @@ class WorkingShiftController extends Controller
         ]);
 
         $isShift = $request->has('is_shift');
+        $isActive = $request->has('is_active');
 
         $workingShift->update([
             'name' => $validated['name'],
             'short_code' => $validated['short_code'] ?? null,
             'is_shift' => $isShift,
+            'is_active' => $isActive,
             'description' => $validated['description'] ?? null,
         ]);
 
@@ -125,6 +131,28 @@ class WorkingShiftController extends Controller
 
         return redirect()->back()
             ->with('success', 'Shift kerja berhasil diperbarui dan disinkronkan ke semua unit.');
+    }
+
+    /**
+     * Toggle active/inactive status of a working shift.
+     */
+    public function toggleActive(WorkingShift $workingShift)
+    {
+        $newStatus = !$workingShift->is_active;
+        $workingShift->update(['is_active' => $newStatus]);
+
+        $statusText = $newStatus ? 'diaktifkan kembali' : 'dinonaktifkan (diarsipkan)';
+
+        // Auto sync to units
+        $failed = $this->syncShiftsToUnits();
+
+        if (!empty($failed)) {
+            return redirect()->back()
+                ->with('error', "Status shift berhasil {$statusText} secara lokal, namun gagal disinkronkan ke unit: " . implode(', ', $failed));
+        }
+
+        return redirect()->back()
+            ->with('success', "Shift kerja '{$workingShift->name}' berhasil {$statusText}.");
     }
 
     /**
@@ -175,6 +203,7 @@ class WorkingShiftController extends Controller
                 'code' => $shift->code,
                 'short_code' => $shift->short_code,
                 'is_shift' => $shift->is_shift,
+                'is_active' => (bool)$shift->is_active,
                 'description' => $shift->description,
                 'details' => $shift->details->map(function ($d) {
                     return [

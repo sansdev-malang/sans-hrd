@@ -25,6 +25,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
 
     // Working Shifts Template CRUD & Sync
     Route::get('working-shifts/sync', [\App\Http\Controllers\WorkingShiftController::class, 'triggerSync'])->name('working-shifts.sync');
+    Route::patch('working-shifts/{workingShift}/toggle-active', [\App\Http\Controllers\WorkingShiftController::class, 'toggleActive'])->name('working-shifts.toggle-active');
     Route::resource('working-shifts', \App\Http\Controllers\WorkingShiftController::class);
 
     // Employee Working Shift Scheduling

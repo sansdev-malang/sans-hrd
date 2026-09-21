@@ -26,7 +26,8 @@ class EmployeeWorkingShiftController extends Controller
     public function index(Request $request)
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
-        $shifts = WorkingShift::orderBy('name')->get();
+        $shifts = WorkingShift::where('is_active', true)->orderBy('name')->get();
+        $allShifts = WorkingShift::orderBy('name')->get();
         $bonusSchemas = BonusSchema::where('is_active', true)->orderBy('name')->get();
         $allBonusSchemas = BonusSchema::orderBy('name')->get();
         
@@ -415,7 +416,7 @@ class EmployeeWorkingShiftController extends Controller
     public function create()
     {
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
-        $shifts = WorkingShift::where('is_shift', false)->orderBy('name')->get();
+        $shifts = WorkingShift::where('is_shift', false)->where('is_active', true)->orderBy('name')->get();
         $bonusSchemas = BonusSchema::where('is_active', true)->orderBy('name')->get(); 
         return view('employee-working-shifts.create', compact('units', 'shifts', 'bonusSchemas'));
     }
@@ -663,7 +664,7 @@ class EmployeeWorkingShiftController extends Controller
             return redirect()->route('employee-working-shifts.index')->with('error', 'Parameter tidak lengkap.');
         }
 
-        $shifts = WorkingShift::orderBy('name')->get();
+        $shifts = WorkingShift::where('is_active', true)->orderBy('name')->get();
         
         $colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-sky-100 text-sky-700', 'bg-purple-100 text-purple-700'];
         $hexBg = ['#e0e7ff', '#d1fae5', '#fef3c7', '#e0f2fe', '#f3e8ff'];
@@ -906,6 +907,9 @@ class EmployeeWorkingShiftController extends Controller
                 
                 if ($selectedShiftIds === null) {
                     $selectedShiftIds = $assignments->whereNotNull('end_date')->pluck('working_shift_id')->filter()->unique()->toArray();
+                    if (empty($selectedShiftIds)) {
+                        $selectedShiftIds = $allShifts->where('is_active', true)->pluck('id')->toArray();
+                    }
                 }
             }
         }
@@ -914,7 +918,7 @@ class EmployeeWorkingShiftController extends Controller
         if (is_array($selectedShiftIds) && count($selectedShiftIds) > 0) {
             $shifts = $allShifts->whereIn('id', $selectedShiftIds)->values();
         } else {
-            $shifts = $allShifts;
+            $shifts = $allShifts->where('is_active', true)->values();
         }
 
         $daysInMonth = \Carbon\Carbon::create($year, $month, 1)->daysInMonth;
