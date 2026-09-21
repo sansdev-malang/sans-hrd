@@ -5,113 +5,7 @@
         }
     </style>
 
-    <div class="p-6 space-y-6" x-data="{ 
-        // ACTIVE TAB
-        activeTab: '{{ request('tab', 'reward') }}',
-
-        // MODAL STATES
-        showAddRewardModal: false,
-        showEditRewardModal: false,
-        showAddModal: false, 
-        showAdjModal: false,
-        showEditModal: false,
-        isDrawerOpen: false,
-
-        // REWARD HARI LIBUR - TAMBAH
-        rewardTargetType: 'all',
-        rewardSelectedUnits: @json($units->pluck('id')->toArray()),
-        rewardSelectedEmployees: [],
-        employeeSearch: '',
-        employeePositionFilter: '',
-        allUnitIds: @json($units->pluck('id')->toArray()),
-
-        // REWARD HARI LIBUR - EDIT
-        editRewardId: '',
-        editRewardName: '',
-        editRewardStartDate: '',
-        editRewardEndDate: '',
-        editRewardUnits: [],
-        editRewardTargetType: 'all',
-        editRewardEmployees: [],
-        editRewardNotes: '',
-        editEmployeeSearch: '',
-        editEmployeePositionFilter: '',
-
-        // HARI LIBUR RESMI & PENGALIHAN
-        selectedHolidayId: '',
-        selectedHolidayName: '',
-        selectedHolidayDates: [],
-        appliesTo: 'global',
-        editHolidayId: '',
-        editHolidayName: '',
-        editHolidayStartDate: '',
-        editHolidayEndDate: '',
-        editHolidayAppliesTo: 'global',
-        editHolidayUnitIds: [],
-        editHolidayOldIds: [],
-        drawerHolidayName: '',
-        drawerHolidayRange: '',
-        drawerAdjustments: [],
-
-        // Raw Employee List for reactive filtering
-        employees: @json($rawEmployees ?? []),
-
-        getFilteredEmployees(unitIds, search, position) {
-            let targetUnitIds = unitIds;
-            if (!targetUnitIds || targetUnitIds.length === 0) {
-                targetUnitIds = this.allUnitIds;
-            }
-            const strUnitIds = targetUnitIds.map(String);
-            return this.employees.filter(emp => {
-                const matchesUnit = strUnitIds.includes(String(emp.unit_id));
-                if (!matchesUnit) return false;
-                
-                if (position && position !== '') {
-                    const empPos = emp.position || emp.subject_position || '';
-                    if (empPos !== position) return false;
-                }
-
-                if (!search || search.trim() === '') return true;
-                const s = search.toLowerCase();
-                const name = (emp.name || '').toLowerCase();
-                const pos = (emp.position || emp.subject_position || '').toLowerCase();
-                const nip = (emp.nuptk_nip_nik || emp.nik || '').toLowerCase();
-                return name.includes(s) || pos.includes(s) || nip.includes(s);
-            });
-        },
-
-        toggleSelectAllRewardEmployees(unitIds) {
-            const visible = this.getFilteredEmployees(unitIds, this.employeeSearch, this.employeePositionFilter);
-            const visibleKeys = visible.map(e => `${e.unit_id}_${e.id}`);
-            const allSelected = visibleKeys.length > 0 && visibleKeys.every(k => this.rewardSelectedEmployees.includes(k));
-            if (allSelected) {
-                this.rewardSelectedEmployees = this.rewardSelectedEmployees.filter(k => !visibleKeys.includes(k));
-            } else {
-                const set = new Set([...this.rewardSelectedEmployees, ...visibleKeys]);
-                this.rewardSelectedEmployees = Array.from(set);
-            }
-        },
-
-        clearAllRewardEmployees() {
-            this.rewardSelectedEmployees = [];
-        },
-
-        toggleSelectAllEditRewardEmployees(unitIds) {
-            const visible = this.getFilteredEmployees(unitIds, this.editEmployeeSearch, this.editEmployeePositionFilter);
-            const visibleKeys = visible.map(e => `${e.unit_id}_${e.id}`);
-            const allSelected = visibleKeys.length > 0 && visibleKeys.every(k => this.editRewardEmployees.includes(k));
-            if (allSelected) {
-                this.editRewardEmployees = this.editRewardEmployees.filter(k => !visibleKeys.includes(k));
-            } else {
-                const set = new Set([...this.editRewardEmployees, ...visibleKeys]);
-                this.editRewardEmployees = Array.from(set);
-            }
-        },
-
-        clearAllEditRewardEmployees() {
-            this.editRewardEmployees = [];
-        }
-    }">
+    <div class="p-6 space-y-6" x-data="holidayManager()">
 
         <!-- ========================================================================= -->
         <!-- PAGE HEADER -->
@@ -265,11 +159,16 @@
                                                 👥 Semua Pegawai Unit Terkait
                                             </span>
                                         @else
-                                            <div class="flex flex-col items-center gap-0.5">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/40 dark:border-indigo-800/40" title="{{ implode(', ', $reward->employee_names_list) }}">
-                                                    🎯 {{ $empCount }} Pegawai Terpilih
-                                                </span>
-                                                <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[160px]" title="{{ implode(', ', $reward->employee_names_list) }}">
+                                            <div class="flex flex-col items-center gap-1">
+                                                <button type="button" 
+                                                        data-reward-name="{{ $reward->name }}"
+                                                        data-employees="{{ json_encode($reward->employee_details_list ?? []) }}"
+                                                        @click="openDetailEmployeesModal($event.currentTarget.getAttribute('data-reward-name'), JSON.parse($event.currentTarget.getAttribute('data-employees')))"
+                                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50 transition-all hover:scale-105 duration-150 cursor-pointer shadow-3xs">
+                                                    <span>🎯 {{ $empCount }} Pegawai Terpilih</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                                </button>
+                                                <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[160px]">
                                                     {{ implode(', ', array_slice($reward->employee_names_list, 0, 2)) }}{{ $empCount > 2 ? ' +' . ($empCount - 2) . ' lainnya' : '' }}
                                                 </span>
                                             </div>
@@ -287,9 +186,9 @@
                                                 data-name="{{ $reward->name }}"
                                                 data-start="{{ $reward->start_date->format('Y-m-d') }}"
                                                 data-end="{{ $reward->end_date->format('Y-m-d') }}"
-                                                data-units="{{ json_encode($reward->school_unit_ids ?? []) }}"
+                                                data-units="{{ json_encode(array_values(array_map('strval', $reward->school_unit_ids ?? []))) }}"
                                                 data-target-type="{{ $reward->is_all_employees ? 'all' : 'specific' }}"
-                                                data-employees="{{ json_encode($reward->employee_ids ?? []) }}"
+                                                data-employees="{{ json_encode(array_values(array_map('strval', $reward->employee_ids ?? []))) }}"
                                                 data-notes="{{ $reward->notes ?? '' }}"
                                                 @click="
                                                     editRewardId = $event.currentTarget.getAttribute('data-id');
@@ -299,7 +198,7 @@
                                                     editRewardUnits = JSON.parse($event.currentTarget.getAttribute('data-units')) || [];
                                                     editRewardTargetType = $event.currentTarget.getAttribute('data-target-type');
                                                     editRewardEmployees = JSON.parse($event.currentTarget.getAttribute('data-employees')) || [];
-                                                    editRewardNotes = $event.currentTarget.getAttribute('data-notes');
+                                                    editRewardNotes = $event.currentTarget.getAttribute('data-notes') || '';
                                                     editEmployeeSearch = '';
                                                     editEmployeePositionFilter = '';
                                                     showEditRewardModal = true;
@@ -519,6 +418,15 @@
                         <form method="POST" action="{{ route('holidays.store-reward') }}" class="space-y-4 text-xs overflow-y-auto pr-1">
                             @csrf
                             
+                            <!-- Hidden inputs for all selected employees (persists across search/filter) -->
+                            <template x-if="rewardTargetType === 'specific'">
+                                <div>
+                                    <template x-for="empKey in rewardSelectedEmployees" :key="empKey">
+                                        <input type="hidden" name="employee_ids[]" :value="empKey">
+                                    </template>
+                                </div>
+                            </template>
+
                             <!-- Nama Reward -->
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Reward Hari Libur <span class="text-rose-500">*</span></label>
@@ -616,9 +524,12 @@
                                 <div class="max-h-56 overflow-y-auto space-y-1 pr-1 border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 rounded-xl p-2 divide-y divide-slate-100 dark:divide-slate-850">
                                     <template x-for="emp in getFilteredEmployees(rewardSelectedUnits, employeeSearch, employeePositionFilter)" :key="`${emp.unit_id}_${emp.id}`">
                                         <label class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-850 cursor-pointer select-none transition-colors"
-                                               :class="rewardSelectedEmployees.includes(`${emp.unit_id}_${emp.id}`) ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''">
+                                               :class="isRewardEmployeeSelected(emp.unit_id, emp.id) ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''"
+                                               @click.prevent="toggleRewardEmployee(emp.unit_id, emp.id)">
                                             <div class="flex items-center gap-3">
-                                                <input type="checkbox" name="employee_ids[]" :value="`${emp.unit_id}_${emp.id}`" x-model="rewardSelectedEmployees" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900">
+                                                <input type="checkbox" 
+                                                       :checked="isRewardEmployeeSelected(emp.unit_id, emp.id)" 
+                                                       class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900 pointer-events-none">
                                                 <div class="flex flex-col text-left">
                                                     <span class="font-bold text-xs text-slate-800 dark:text-slate-200" x-text="emp.name"></span>
                                                     <div class="flex items-center gap-2 mt-0.5">
@@ -692,6 +603,15 @@
                             @csrf
                             @method('PUT')
                             
+                            <!-- Hidden inputs for all selected employees in edit modal (persists across search/filter) -->
+                            <template x-if="editRewardTargetType === 'specific'">
+                                <div>
+                                    <template x-for="empKey in editRewardEmployees" :key="empKey">
+                                        <input type="hidden" name="employee_ids[]" :value="empKey">
+                                    </template>
+                                </div>
+                            </template>
+
                             <!-- Nama Reward -->
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Reward Hari Libur <span class="text-rose-500">*</span></label>
@@ -716,7 +636,7 @@
                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/60 dark:border-slate-800">
                                     @foreach($units as $unit)
                                         <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-900 transition-colors select-none">
-                                            <input type="checkbox" name="school_unit_ids[]" value="{{ $unit->id }}" :checked="editRewardUnits.map(Number).includes({{ $unit->id }})" @change="if($event.target.checked) { if(!editRewardUnits.map(Number).includes({{ $unit->id }})) editRewardUnits.push({{ $unit->id }}); } else { editRewardUnits = editRewardUnits.filter(u => Number(u) !== {{ $unit->id }}); }" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900">
+                                            <input type="checkbox" name="school_unit_ids[]" value="{{ $unit->id }}" x-model="editRewardUnits" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900">
                                             <span class="font-bold text-xs text-slate-700 dark:text-slate-200">{{ $unit->name }}</span>
                                         </label>
                                     @endforeach
@@ -789,9 +709,12 @@
                                 <div class="max-h-56 overflow-y-auto space-y-1 pr-1 border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 rounded-xl p-2 divide-y divide-slate-100 dark:divide-slate-850">
                                     <template x-for="emp in getFilteredEmployees(editRewardUnits, editEmployeeSearch, editEmployeePositionFilter)" :key="`${emp.unit_id}_${emp.id}`">
                                         <label class="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-855 cursor-pointer select-none transition-colors"
-                                               :class="(editRewardEmployees.includes(`${emp.unit_id}_${emp.id}`) || editRewardEmployees.includes(String(emp.id))) ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''">
+                                               :class="isEditRewardEmployeeSelected(emp.unit_id, emp.id) ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''"
+                                               @click.prevent="toggleEditRewardEmployee(emp.unit_id, emp.id)">
                                             <div class="flex items-center gap-3">
-                                                <input type="checkbox" name="employee_ids[]" :value="`${emp.unit_id}_${emp.id}`" :checked="editRewardEmployees.includes(`${emp.unit_id}_${emp.id}`) || editRewardEmployees.includes(String(emp.id))" @change="if($event.target.checked) { if(!editRewardEmployees.includes(`${emp.unit_id}_${emp.id}`)) editRewardEmployees.push(`${emp.unit_id}_${emp.id}`); } else { editRewardEmployees = editRewardEmployees.filter(k => k !== `${emp.unit_id}_${emp.id}` && k !== String(emp.id)); }" class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900">
+                                                <input type="checkbox" 
+                                                       :checked="isEditRewardEmployeeSelected(emp.unit_id, emp.id)" 
+                                                       class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4 bg-white dark:bg-slate-900 pointer-events-none">
                                                 <div class="flex flex-col text-left">
                                                     <span class="font-bold text-xs text-slate-800 dark:text-slate-200" x-text="emp.name"></span>
                                                     <div class="flex items-center gap-2 mt-0.5">
@@ -830,6 +753,79 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL: DAFTAR PEGAWAI PENERIMA REWARD (DETAIL) -->
+        <!-- ========================================================================= -->
+        <div x-show="showEmployeeDetailModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
+            <div x-show="showEmployeeDetailModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+                    <div x-show="showEmployeeDetailModal" @click.away="showEmployeeDetailModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-lg p-6 text-left flex flex-col max-h-[85vh]">
+                        
+                        <!-- Header -->
+                        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                                        <span>Pegawai Penerima Reward</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300" x-text="`${detailEmployeesList.length} Orang`"></span>
+                                    </h3>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-sm" x-text="detailRewardName"></p>
+                                </div>
+                            </div>
+                            <button @click="showEmployeeDetailModal = false" class="text-slate-450 hover:text-slate-650 transition-colors border-0 bg-transparent cursor-pointer">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="relative mb-3">
+                            <input type="text" x-model="detailEmployeeSearch" placeholder="Cari nama pegawai, jabatan, atau unit..." class="w-full text-xs pl-8 pr-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                        </div>
+
+                        <!-- Employee List -->
+                        <div class="flex-1 overflow-y-auto max-h-80 space-y-1.5 pr-1 border border-slate-100 dark:border-slate-800/80 rounded-xl p-2 bg-slate-50/50 dark:bg-slate-950/40 divide-y divide-slate-100 dark:divide-slate-850">
+                            <template x-for="(emp, idx) in getFilteredDetailEmployees()" :key="emp.id || idx">
+                                <div class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 hover:shadow-3xs transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold shrink-0">
+                                            <span x-text="emp.name ? emp.name.charAt(0).toUpperCase() : '?'"></span>
+                                        </div>
+                                        <div class="flex flex-col text-left">
+                                            <span class="font-bold text-xs text-slate-900 dark:text-slate-100" x-text="emp.name"></span>
+                                            <div class="flex items-center gap-2 mt-0.5">
+                                                <span class="text-[10px] text-slate-500 dark:text-slate-400" x-text="emp.position"></span>
+                                                <template x-if="emp.nik">
+                                                    <span class="text-[9px] font-mono text-slate-400" x-text="'NIK: ' + emp.nik"></span>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 shrink-0" x-text="emp.unit_name"></span>
+                                </div>
+                            </template>
+                            <template x-if="getFilteredDetailEmployees().length === 0">
+                                <div class="py-8 text-center text-slate-400 text-xs">
+                                    <p>Tidak ada pegawai yang cocok dengan pencarian.</p>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                            <button type="button" @click="showEmployeeDetailModal = false" class="h-8 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer">
+                                Tutup
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1160,3 +1156,199 @@
         </form>
     </div>
 </x-admin-layout>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('holidayManager', () => ({
+            // ACTIVE TAB
+            activeTab: '{{ request('tab', 'reward') }}',
+
+            // MODAL STATES
+            showAddRewardModal: false,
+            showEditRewardModal: false,
+            showEmployeeDetailModal: false,
+            showAddModal: false, 
+            showAdjModal: false,
+            showEditModal: false,
+            isDrawerOpen: false,
+
+            // DETAIL MODAL EMPLOYEES
+            detailRewardName: '',
+            detailEmployeesList: [],
+            detailEmployeeSearch: '',
+
+            openDetailEmployeesModal(rewardName, employees) {
+                this.detailRewardName = rewardName;
+                this.detailEmployeesList = employees || [];
+                this.detailEmployeeSearch = '';
+                this.showEmployeeDetailModal = true;
+            },
+
+            getFilteredDetailEmployees() {
+                if (!this.detailEmployeeSearch || this.detailEmployeeSearch.trim() === '') {
+                    return this.detailEmployeesList;
+                }
+                const s = this.detailEmployeeSearch.toLowerCase();
+                return this.detailEmployeesList.filter(e => {
+                    return (e.name || '').toLowerCase().includes(s)
+                        || (e.position || '').toLowerCase().includes(s)
+                        || (e.unit_name || '').toLowerCase().includes(s)
+                        || (e.nik || '').toLowerCase().includes(s);
+                });
+            },
+
+            // REWARD HARI LIBUR - TAMBAH
+            rewardTargetType: 'all',
+            rewardSelectedUnits: @json($units->pluck('id')->map(fn($id) => (string)$id)->toArray()),
+            rewardSelectedEmployees: [],
+            employeeSearch: '',
+            employeePositionFilter: '',
+            allUnitIds: @json($units->pluck('id')->map(fn($id) => (string)$id)->toArray()),
+
+            // REWARD HARI LIBUR - EDIT
+            editRewardId: '',
+            editRewardName: '',
+            editRewardStartDate: '',
+            editRewardEndDate: '',
+            editRewardUnits: [],
+            editRewardTargetType: 'all',
+            editRewardEmployees: [],
+            editRewardNotes: '',
+            editEmployeeSearch: '',
+            editEmployeePositionFilter: '',
+
+            // HARI LIBUR RESMI & PENGALIHAN
+            selectedHolidayId: '',
+            selectedHolidayName: '',
+            selectedHolidayDates: [],
+            appliesTo: 'global',
+            editHolidayId: '',
+            editHolidayName: '',
+            editHolidayStartDate: '',
+            editHolidayEndDate: '',
+            editHolidayAppliesTo: 'global',
+            editHolidayUnitIds: [],
+            editHolidayOldIds: [],
+            drawerHolidayName: '',
+            drawerHolidayRange: '',
+            drawerAdjustments: [],
+
+            // Raw Employee List for reactive filtering
+            employees: @json($rawEmployees ?? []),
+
+            getFilteredEmployees(unitIds, search, position) {
+                let targetUnitIds = unitIds;
+                if (!targetUnitIds || targetUnitIds.length === 0) {
+                    return [];
+                }
+                const strUnitIds = targetUnitIds.map(String);
+                return this.employees.filter(emp => {
+                    const matchesUnit = strUnitIds.includes(String(emp.unit_id));
+                    if (!matchesUnit) return false;
+                    
+                    if (position && position !== '') {
+                        const empPos = emp.position || emp.subject_position || '';
+                        if (empPos !== position) return false;
+                    }
+
+                    if (!search || search.trim() === '') return true;
+                    const s = search.toLowerCase();
+                    const name = (emp.name || '').toLowerCase();
+                    const pos = (emp.position || emp.subject_position || '').toLowerCase();
+                    const nip = (emp.nuptk_nip_nik || emp.nik || '').toLowerCase();
+                    return name.includes(s) || pos.includes(s) || nip.includes(s);
+                });
+            },
+
+            // Selection Helpers for Tambah Reward
+            isRewardEmployeeSelected(unitId, empId) {
+                const key = `${unitId}_${empId}`;
+                const sId = String(empId);
+                const nId = Number(empId);
+                return this.rewardSelectedEmployees.some(k => k == key || k == sId || k == nId);
+            },
+
+            toggleRewardEmployee(unitId, empId) {
+                const key = `${unitId}_${empId}`;
+                const sId = String(empId);
+                const nId = Number(empId);
+                if (this.isRewardEmployeeSelected(unitId, empId)) {
+                    this.rewardSelectedEmployees = this.rewardSelectedEmployees.filter(k => k != key && k != sId && k != nId);
+                } else {
+                    this.rewardSelectedEmployees.push(key);
+                }
+            },
+
+            toggleSelectAllRewardEmployees(unitIds) {
+                const visible = this.getFilteredEmployees(unitIds, this.employeeSearch, this.employeePositionFilter);
+                const visibleKeys = visible.map(e => `${e.unit_id}_${e.id}`);
+                const allSelected = visible.length > 0 && visible.every(e => this.isRewardEmployeeSelected(e.unit_id, e.id));
+                if (allSelected) {
+                    visible.forEach(e => {
+                        const key = `${e.unit_id}_${e.id}`;
+                        const sId = String(e.id);
+                        const nId = Number(e.id);
+                        this.rewardSelectedEmployees = this.rewardSelectedEmployees.filter(k => k != key && k != sId && k != nId);
+                    });
+                } else {
+                    const current = [...this.rewardSelectedEmployees];
+                    visibleKeys.forEach(k => {
+                        if (!current.includes(k)) {
+                            current.push(k);
+                        }
+                    });
+                    this.rewardSelectedEmployees = current;
+                }
+            },
+
+            clearAllRewardEmployees() {
+                this.rewardSelectedEmployees = [];
+            },
+
+            // Selection Helpers for Edit Reward
+            isEditRewardEmployeeSelected(unitId, empId) {
+                const key = `${unitId}_${empId}`;
+                const sId = String(empId);
+                const nId = Number(empId);
+                return this.editRewardEmployees.some(k => k == key || k == sId || k == nId);
+            },
+
+            toggleEditRewardEmployee(unitId, empId) {
+                const key = `${unitId}_${empId}`;
+                const sId = String(empId);
+                const nId = Number(empId);
+                if (this.isEditRewardEmployeeSelected(unitId, empId)) {
+                    this.editRewardEmployees = this.editRewardEmployees.filter(k => k != key && k != sId && k != nId);
+                } else {
+                    this.editRewardEmployees.push(key);
+                }
+            },
+
+            toggleSelectAllEditRewardEmployees(unitIds) {
+                const visible = this.getFilteredEmployees(unitIds, this.editEmployeeSearch, this.editEmployeePositionFilter);
+                const visibleKeys = visible.map(e => `${e.unit_id}_${e.id}`);
+                const allSelected = visible.length > 0 && visible.every(e => this.isEditRewardEmployeeSelected(e.unit_id, e.id));
+                if (allSelected) {
+                    visible.forEach(e => {
+                        const key = `${e.unit_id}_${e.id}`;
+                        const sId = String(e.id);
+                        const nId = Number(e.id);
+                        this.editRewardEmployees = this.editRewardEmployees.filter(k => k != key && k != sId && k != nId);
+                    });
+                } else {
+                    const current = [...this.editRewardEmployees];
+                    visibleKeys.forEach(k => {
+                        if (!current.includes(k)) {
+                            current.push(k);
+                        }
+                    });
+                    this.editRewardEmployees = current;
+                }
+            },
+
+            clearAllEditRewardEmployees() {
+                this.editRewardEmployees = [];
+            }
+        }));
+    });
+</script>

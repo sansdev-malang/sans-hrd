@@ -50,18 +50,35 @@ class HolidayController extends Controller
 
             $empIds = $hr->employee_ids ?? [];
             $empNames = [];
+            $empDetails = [];
             if (!empty($empIds)) {
                 foreach ($empIds as $eKey) {
                     if (isset($employeesMap[$eKey])) {
-                        $empNames[] = $employeesMap[$eKey]['name'] . ' (' . ($employeesMap[$eKey]['unit_name'] ?? '') . ')';
+                        $emp = $employeesMap[$eKey];
+                        $empNames[] = $emp['name'] . ' (' . ($emp['unit_name'] ?? '') . ')';
+                        $empDetails[] = [
+                            'id' => $emp['id'] ?? '',
+                            'name' => $emp['name'] ?? '',
+                            'unit_name' => $emp['unit_name'] ?? '',
+                            'position' => $emp['position'] ?? $emp['subject_position'] ?? '-',
+                            'nik' => $emp['nuptk_nip_nik'] ?? $emp['nik'] ?? '',
+                        ];
                     } else {
                         $empNames[] = 'ID #' . $eKey;
+                        $empDetails[] = [
+                            'id' => $eKey,
+                            'name' => 'Pegawai #' . $eKey,
+                            'unit_name' => '-',
+                            'position' => '-',
+                            'nik' => '',
+                        ];
                     }
                 }
             }
 
             $hr->unit_names_list = $unitNames;
             $hr->employee_names_list = $empNames;
+            $hr->employee_details_list = $empDetails;
             $hr->is_all_employees = empty($empIds);
             return $hr;
         });
