@@ -68,6 +68,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
 
     // Manajemen Gaji
     Route::post('payslips/sync', [\App\Http\Controllers\PayslipController::class, 'triggerSync'])->name('payslips.sync');
+    Route::post('payslips/notes', [\App\Http\Controllers\PayslipController::class, 'updateNotes'])->name('payslips.notes.update');
     Route::get('payslips', [\App\Http\Controllers\PayslipController::class, 'index'])->name('payslips.index');
     Route::post('payslips', [\App\Http\Controllers\PayslipController::class, 'store'])->name('payslips.store');
     Route::delete('payslips/{payslip}', [\App\Http\Controllers\PayslipController::class, 'destroy'])->name('payslips.destroy');

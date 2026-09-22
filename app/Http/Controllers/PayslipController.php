@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payslip;
 use App\Models\SchoolUnit;
+use App\Models\Setting;
 use App\Services\SchoolUnitService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -93,7 +94,10 @@ class PayslipController extends Controller
 
         $units = SchoolUnit::where('is_active', true)->get();
 
-        return view('payslips.index', compact('paginatedEmployees', 'units', 'month', 'unitId', 'positions', 'position', 'lastMonth', 'currentMonth'));
+        $globalNote = Setting::get('payslip_global_note', '');
+        $periodNote = Setting::get("payslip_note_{$month}", '');
+
+        return view('payslips.index', compact('paginatedEmployees', 'units', 'month', 'unitId', 'positions', 'position', 'lastMonth', 'currentMonth', 'globalNote', 'periodNote'));
     }
 
     public function store(Request $request)
@@ -210,6 +214,53 @@ class PayslipController extends Controller
     }
 
     /**
+     * Update payslip notes (global SOP note and period-specific note).
+     */
+    public function updateNotes(Request $request)
+    {
+        $request->validate([
+            'period' => 'required|string|size:7',
+            'global_note' => 'nullable|string',
+            'period_note' => 'nullable|string',
+        ]);
+
+        $period = $request->input('period');
+        $globalNote = $request->input('global_note');
+        $periodNote = $request->input('period_note');
+
+        Setting::set('payslip_global_note', $globalNote);
+        Setting::set("payslip_note_{$period}", $periodNote);
+
+        // Notify active units about notes update
+        $units = SchoolUnit::where('is_active', true)->get();
+        foreach ($units as $unit) {
+            try {
+                Http::timeout(3)->withHeaders([
+                    'X-API-TOKEN' => $unit->api_token,
+                    'Accept' => 'application/json',
+                ])->post(rtrim($unit->api_url, '/') . '/sync/payslip-notes', [
+                    'period' => $period,
+                    'global_note' => $globalNote,
+                    'period_note' => $periodNote,
+                ]);
+            } catch (\Exception $e) {
+                Log::warning("Failed to sync payslip notes to unit {$unit->name}: " . $e->getMessage());
+            }
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Catatan slip gaji berhasil disimpan dan disinkronkan.',
+                'global_note' => $globalNote,
+                'period_note' => $periodNote,
+            ]);
+        }
+
+        return back()->with('success', 'Catatan slip gaji berhasil disimpan.');
+    }
+
+    /**
      * Send payslip notification to the unit application.
      */
     private function notifyUnitAboutPayslip(Payslip $payslip)
@@ -220,6 +271,9 @@ class PayslipController extends Controller
         $fileUrl = $payslip->file_path ? asset('storage/' . $payslip->file_path) : null;
         $attachmentUrl = $payslip->attachment_path ? asset('storage/' . $payslip->attachment_path) : null;
 
+        $globalNote = Setting::get('payslip_global_note', '');
+        $periodNote = Setting::get("payslip_note_{$payslip->period}", '');
+
         try {
             Http::timeout(3)->withHeaders([
                 'X-API-TOKEN' => $unit->api_token,
@@ -229,6 +283,8 @@ class PayslipController extends Controller
                 'period' => $payslip->period,
                 'file_url' => $fileUrl,
                 'attachment_url' => $attachmentUrl,
+                'global_note' => $globalNote,
+                'period_note' => $periodNote,
             ]);
         } catch (\Exception $e) {
             Log::error("Failed to send payslip notification to unit {$unit->name}: " . $e->getMessage());
@@ -319,11 +375,31 @@ class PayslipController extends Controller
     {
         $month = $request->query('month', date('Y-m'));
         $payslips = Payslip::where('period', $month)->get();
+
+        $globalNote = Setting::get('payslip_global_note', '');
+        $periodNote = Setting::get("payslip_note_{$month}", '');
+
+        // Sync notes to all units
+        $units = SchoolUnit::where('is_active', true)->get();
+        foreach ($units as $unit) {
+            try {
+                Http::timeout(3)->withHeaders([
+                    'X-API-TOKEN' => $unit->api_token,
+                    'Accept' => 'application/json',
+                ])->post(rtrim($unit->api_url, '/') . '/sync/payslip-notes', [
+                    'period' => $month,
+                    'global_note' => $globalNote,
+                    'period_note' => $periodNote,
+                ]);
+            } catch (\Exception $e) {
+                // Ignore
+            }
+        }
         
         foreach ($payslips as $payslip) {
             $this->notifyUnitAboutPayslip($payslip);
         }
         
-        return redirect()->back()->with('success', 'Sinkronisasi slip gaji periode ' . $month . ' ke unit sekolah berhasil dipicu.');
+        return redirect()->back()->with('success', 'Sinkronisasi slip gaji dan catatan periode ' . $month . ' ke unit sekolah berhasil dipicu.');
     }
 }

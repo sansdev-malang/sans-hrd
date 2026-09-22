@@ -39,13 +39,20 @@ class PayslipApiController extends Controller
             return [
                 'employee_id' => $p->employee_id,
                 'period' => $p->period,
-                'file_url' => url(Storage::url($p->file_path)),
+                'file_url' => $p->file_path ? url(Storage::url($p->file_path)) : null,
+                'original_filename' => $p->original_filename,
                 'attachment_url' => $p->attachment_path ? url(Storage::url($p->attachment_path)) : null,
+                'original_attachment_name' => $p->original_attachment_name,
             ];
         })->keyBy('employee_id');
 
+        $globalNote = \App\Models\Setting::get('payslip_global_note', '');
+        $periodNote = \App\Models\Setting::get("payslip_note_{$month}", '');
+
         return response()->json([
-            'data' => $formatted
+            'data' => $formatted,
+            'global_note' => $globalNote,
+            'period_note' => $periodNote,
         ]);
     }
 }
