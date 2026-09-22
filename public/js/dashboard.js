@@ -5,169 +5,20 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initial Entry Animations (Staggered fade-in and scale-up)
-    const animateEntry = () => {
-        const isDesktop = window.innerWidth >= 768;
-
-        // Sidebar entrance (Desktop only to prevent auto-opening on mobile)
-        if (isDesktop) {
-            anime({
-                targets: '#sidebar',
-                translateX: [-100, 0],
-                opacity: [0, 1],
-                easing: 'easeOutExpo',
-                duration: 1200
-            });
-        }
-
-        // Header entrance
-        anime({
-            targets: '#header',
-            translateY: [-50, 0],
-            opacity: [0, 1],
-            easing: 'easeOutExpo',
-            duration: 1200,
-            delay: 150
-        });
-
-        // Grid cards entrance (staggered)
-        anime({
-            targets: '.animate-card',
-            scale: [0.9, 1],
-            translateY: [30, 0],
-            opacity: [0, 1],
-            delay: anime.stagger(100, { start: 300 }),
-            duration: 1000,
-            easing: 'easeOutElastic(1, .8)'
-        });
-    };
-
-    // 2. Stat Counter Animations
+    // Stat Counter Animations (Lightweight for dashboard counters if present)
     const animateCounters = () => {
         const counters = document.querySelectorAll('.stat-counter');
         counters.forEach(counter => {
             const targetVal = parseInt(counter.getAttribute('data-target') || '0', 10);
-            const obj = { value: 0 };
-            
-            anime({
-                targets: obj,
-                value: targetVal,
-                round: 1,
-                easing: 'easeOutExpo',
-                duration: 2000,
-                delay: 500,
-                update: () => {
-                    counter.innerHTML = obj.value.toLocaleString('id-ID');
-                }
-            });
+            counter.innerHTML = targetVal.toLocaleString('id-ID');
         });
     };
 
-    // 3. Hover Micro-animations
-    const setupHoverAnimations = () => {
-        // Menu item hovers
-        const menuItems = document.querySelectorAll('.menu-item');
-        menuItems.forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                const icon = item.querySelector('.menu-icon');
-                const text = item.querySelector('.menu-text');
-                if (icon) {
-                    anime({
-                        targets: icon,
-                        scale: 1.2,
-                        rotate: '5deg',
-                        duration: 300,
-                        easing: 'easeOutQuad'
-                    });
-                }
-                if (text) {
-                    anime({
-                        targets: text,
-                        translateX: 5,
-                        duration: 300,
-                        easing: 'easeOutQuad'
-                    });
-                }
-            });
-
-            item.addEventListener('mouseleave', () => {
-                const icon = item.querySelector('.menu-icon');
-                const text = item.querySelector('.menu-text');
-                if (icon) {
-                    anime({
-                        targets: icon,
-                        scale: 1.0,
-                        rotate: '0deg',
-                        duration: 300,
-                        easing: 'easeOutQuad'
-                    });
-                }
-                if (text) {
-                    anime({
-                        targets: text,
-                        translateX: 0,
-                        duration: 300,
-                        easing: 'easeOutQuad'
-                    });
-                }
-            });
-        });
-
-        // Stat Card hovers
-        const cards = document.querySelectorAll('.animate-card');
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                anime({
-                    targets: card,
-                    translateY: -6,
-                    scale: 1.02,
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                    duration: 250,
-                    easing: 'easeOutQuad'
-                });
-            });
-            card.addEventListener('mouseleave', () => {
-                anime({
-                    targets: card,
-                    translateY: 0,
-                    scale: 1.0,
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    duration: 250,
-                    easing: 'easeOutQuad'
-                });
-            });
-        });
-    };
-
-    // 4. Quick Notification Toast
-    const setupNotifications = () => {
-        // Handled by Alpine in header component
-    };
-
-    // 5. Mini Interactive Performance Chart Animation (SVG path)
-    const animateChart = () => {
-        const path = document.querySelector('.chart-line path');
-        if (path) {
-            const length = path.getTotalLength();
-            path.style.strokeDasharray = length;
-            path.style.strokeDashoffset = length;
-
-            anime({
-                targets: path,
-                strokeDashoffset: [length, 0],
-                duration: 2500,
-                easing: 'easeOutSine',
-                delay: 800
-            });
-        }
-    };
-
-    // 6. Theme Toggle Switch (Dark / Light Mode)
+    // Theme Toggle Switch (Dark / Light Mode)
     const setupThemeToggle = () => {
         const themeToggleBtn = document.getElementById('theme-toggle');
         if (themeToggleBtn) {
             themeToggleBtn.addEventListener('click', () => {
-                // Toggle dark class on HTML document
                 if (document.documentElement.classList.contains('dark')) {
                     document.documentElement.classList.remove('dark');
                     localStorage.setItem('color-theme', 'light');
@@ -175,18 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.documentElement.classList.add('dark');
                     localStorage.setItem('color-theme', 'dark');
                 }
-                
-                // Micro-animation for theme button click
-                anime({
-                    targets: themeToggleBtn,
-                    rotate: '360deg',
-                    scale: [0.8, 1],
-                    duration: 500,
-                    easing: 'easeOutElastic(1, .8)',
-                    complete: () => {
-                        themeToggleBtn.style.transform = 'none'; // reset style for future clicks
-                    }
-                });
             });
         }
     };
@@ -362,12 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(scrollActiveIntoView, 350);
     };
 
-    // Execute animations
-    animateEntry();
+    // Execute initial setup
     animateCounters();
-    setupHoverAnimations();
-    setupNotifications();
-    animateChart();
     setupThemeToggle();
     setupSidebarToggle();
     setupSidebarScroll();

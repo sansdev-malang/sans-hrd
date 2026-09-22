@@ -59,7 +59,7 @@
         }
     </style>
 
-    <div class="p-6 space-y-6 relative animate-fade-in" x-data="{
+    <div class="p-6 space-y-6 relative" x-data="{
         showModal: false,
         selectedBatch: null,
         searchModal: '',

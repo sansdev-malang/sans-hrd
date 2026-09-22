@@ -413,8 +413,8 @@
                 modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem; box-sizing: border-box;';
                 
                 modal.innerHTML = `
-                    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: opacity 0.3s ease; opacity: 0;" id="global-delete-backdrop"></div>
-                    <div style="position: relative; background: ${panelBg}; color: ${panelText}; border-radius: 1rem; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid ${panelBorder}; padding: 1.5rem; z-index: 10; transition: all 0.3s ease; transform: scale(0.95); opacity: 0; box-sizing: border-box;" id="global-delete-panel">
+                    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.6); transition: opacity 0.15s ease; opacity: 0;" id="global-delete-backdrop"></div>
+                    <div style="position: relative; background: ${panelBg}; color: ${panelText}; border-radius: 1rem; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid ${panelBorder}; padding: 1.5rem; z-index: 10; transition: transform 0.15s ease, opacity 0.15s ease; transform: scale(0.96); opacity: 0; box-sizing: border-box;" id="global-delete-panel">
                         <div style="text-align: center; font-family: system-ui, -apple-system, sans-serif;">
                             <div style="width: 4rem; height: 4rem; border-radius: 9999px; background-color: ${iconBg}; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
                                 ${iconSvg}
@@ -422,10 +422,10 @@
                             <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 0.5rem 0; line-height: 1.25;">${titleText}</h3>
                             <p style="font-size: 0.875rem; color: ${descText}; margin: 0 0 1.5rem 0; line-height: 1.5;" id="global-delete-message"></p>
                             <div style="display: flex; gap: 0.75rem; justify-content: center;">
-                                <button type="button" id="global-delete-cancel" style="flex: 1; height: 2.5rem; padding: 0 1rem; border: 1px solid ${cancelBorder}; color: ${cancelText}; background: ${cancelBg}; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: background 0.2s; outline: none;" class="text-xs">
+                                <button type="button" id="global-delete-cancel" style="flex: 1; height: 2.5rem; padding: 0 1rem; border: 1px solid ${cancelBorder}; color: ${cancelText}; background: ${cancelBg}; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: background 0.15s; outline: none;" class="text-xs">
                                     Batal
                                 </button>
-                                <button type="button" id="global-delete-confirm" style="flex: 1; height: 2.5rem; padding: 0 1rem; border: none; color: #ffffff; background: ${confirmBg}; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: background 0.2s; outline: none;" class="text-xs">
+                                <button type="button" id="global-delete-confirm" style="flex: 1; height: 2.5rem; padding: 0 1rem; border: none; color: #ffffff; background: ${confirmBg}; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: background 0.15s; outline: none;" class="text-xs">
                                     ${confirmText}
                                 </button>
                             </div>
@@ -459,9 +459,9 @@
                     if (backdrop) backdrop.style.opacity = '0';
                     if (panel) {
                         panel.style.opacity = '0';
-                        panel.style.transform = 'scale(0.95)';
+                        panel.style.transform = 'scale(0.96)';
                     }
-                    setTimeout(() => modal.remove(), 300);
+                    setTimeout(() => modal.remove(), 150);
                 };
                 
                 document.getElementById('global-delete-cancel').addEventListener('click', closeModal);
@@ -766,10 +766,10 @@
             class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4">
             
             <template x-for="t in toasts" :key="t.id">
-                <div x-transition:enter="transition ease-out duration-300 transform translate-y-2 opacity-0"
+                <div x-transition:enter="transition ease-out duration-150 transform translate-y-2 opacity-0"
                      x-transition:enter-start="translate-y-2 opacity-0"
                      x-transition:enter-end="translate-y-0 opacity-100"
-                     x-transition:leave="transition ease-in duration-200 opacity-0"
+                     x-transition:leave="transition ease-in duration-100 opacity-0"
                      class="pointer-events-auto flex items-center gap-3 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full">
                      
                      <template x-if="t.type === 'info'">

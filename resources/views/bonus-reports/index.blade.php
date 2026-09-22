@@ -36,7 +36,7 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                     </button>
                     
-                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                    <div x-show="open" x-transition.opacity.duration.150ms style="display: none;" class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
                         <a href="{{ route('bonus-reports.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                             Excel (.xlsx)
@@ -363,10 +363,10 @@
         <div x-show="showCalendarModal" 
              class="fixed inset-0 z-50 overflow-y-auto" 
              style="display: none;"
-             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter="transition ease-out "
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave="transition ease-in "
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0">
              
@@ -377,10 +377,10 @@
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 <div @click.outside="showCalendarModal = false"
                      class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-200 dark:border-slate-800"
-                     x-transition:enter="transition ease-out duration-300 transform scale-95"
+                     x-transition:enter="transition ease-out  transform scale-95"
                      x-transition:enter-start="transform scale-95 opacity-0"
                      x-transition:enter-end="transform scale-100 opacity-100"
-                     x-transition:leave="transition ease-in duration-200 transform scale-100"
+                     x-transition:leave="transition ease-in  transform scale-100"
                      x-transition:leave-start="transform scale-100 opacity-100"
                      x-transition:leave-end="transform scale-95 opacity-0">
                      

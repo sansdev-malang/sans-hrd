@@ -390,10 +390,10 @@
         <!-- MODAL 1: TAMBAH REWARD HARI LIBUR -->
         <!-- ========================================================================= -->
         <div x-show="showAddRewardModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-            <div x-show="showAddRewardModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div x-show="showAddRewardModal" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
-                    <div x-show="showAddRewardModal" @click.away="showAddRewardModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
+                    <div x-show="showAddRewardModal" @click.away="showAddRewardModal = false" x-transition:enter="ease-out " x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
                         
                         <!-- Modal Header -->
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
@@ -574,10 +574,10 @@
         <!-- MODAL 2: EDIT REWARD HARI LIBUR -->
         <!-- ========================================================================= -->
         <div x-show="showEditRewardModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-            <div x-show="showEditRewardModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div x-show="showEditRewardModal" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
-                    <div x-show="showEditRewardModal" @click.away="showEditRewardModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
+                    <div x-show="showEditRewardModal" @click.away="showEditRewardModal = false" x-transition:enter="ease-out " x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
                         
                         <!-- Modal Header -->
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
@@ -759,10 +759,10 @@
         <!-- MODAL: DAFTAR PEGAWAI PENERIMA REWARD (DETAIL) -->
         <!-- ========================================================================= -->
         <div x-show="showEmployeeDetailModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-            <div x-show="showEmployeeDetailModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div x-show="showEmployeeDetailModal" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
-                    <div x-show="showEmployeeDetailModal" @click.away="showEmployeeDetailModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-lg p-6 text-left flex flex-col max-h-[85vh]">
+                    <div x-show="showEmployeeDetailModal" @click.away="showEmployeeDetailModal = false" x-transition:enter="ease-out " x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-lg p-6 text-left flex flex-col max-h-[85vh]">
                         
                         <!-- Header -->
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
@@ -832,10 +832,10 @@
         <!-- MODAL 3: TAMBAH LIBUR RESMI -->
         <!-- ========================================================================= -->
         <div x-show="showAddModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-            <div x-show="showAddModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div x-show="showAddModal" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
-                    <div x-show="showAddModal" @click.away="showAddModal = false; appliesTo = 'global';" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-md p-6 text-left flex flex-col">
+                    <div x-show="showAddModal" @click.away="showAddModal = false; appliesTo = 'global';" x-transition:enter="ease-out " x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-md p-6 text-left flex flex-col">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                             <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Tambah Hari Libur Resmi</h3>
                             <button @click="showAddModal = false; appliesTo = 'global';" class="text-slate-450 hover:text-slate-650 transition-colors border-0 bg-transparent cursor-pointer">
@@ -905,10 +905,10 @@
         <!-- MODAL 4: EDIT LIBUR RESMI -->
         <!-- ========================================================================= -->
         <div x-show="showEditModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-            <div x-show="showEditModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div x-show="showEditModal" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
-                    <div x-show="showEditModal" @click.away="showEditModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-md p-6 text-left flex flex-col">
+                    <div x-show="showEditModal" @click.away="showEditModal = false" x-transition:enter="ease-out " x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-md p-6 text-left flex flex-col">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                             <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Edit Hari Libur Resmi</h3>
                             <button @click="showEditModal = false" class="text-slate-450 hover:text-slate-650 transition-colors border-0 bg-transparent cursor-pointer">
@@ -983,10 +983,10 @@
         <!-- MODAL 5: ALIKHAN LIBUR (PENGALIHAN) -->
         <!-- ========================================================================= -->
         <div x-show="showAdjModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-            <div x-show="showAdjModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div x-show="showAdjModal" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
-                    <div x-show="showAdjModal" @click.away="showAdjModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-sm p-6 text-left flex flex-col">
+                    <div x-show="showAdjModal" @click.away="showAdjModal = false" x-transition:enter="ease-out " x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-sm p-6 text-left flex flex-col">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                             <div>
                                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Pengalihan Hari Libur</h3>
@@ -1051,10 +1051,10 @@
             <div class="absolute inset-0 overflow-hidden">
                 <!-- Backdrop overlay -->
                 <div x-show="isDrawerOpen" 
-                     x-transition:enter="ease-in-out duration-300" 
+                     x-transition:enter="ease-in-out " 
                      x-transition:enter-start="opacity-0" 
                      x-transition:enter-end="opacity-100" 
-                     x-transition:leave="ease-in-out duration-300" 
+                     x-transition:leave="ease-in-out " 
                      x-transition:leave-start="opacity-100" 
                      x-transition:leave-end="opacity-0" 
                      @click="isDrawerOpen = false"
@@ -1065,10 +1065,10 @@
                 <!-- Content Panel -->
                 <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex z-[9999]">
                     <div x-show="isDrawerOpen" 
-                         x-transition:enter="transform transition ease-in-out duration-300 sm:duration-300" 
+                         x-transition:enter="transform transition ease-in-out  sm:duration-150" 
                          x-transition:enter-start="translate-x-full" 
                          x-transition:enter-end="translate-x-0" 
-                         x-transition:leave="transform transition ease-in-out duration-300 sm:duration-300" 
+                         x-transition:leave="transform transition ease-in-out  sm:duration-100" 
                          x-transition:leave-start="translate-x-0" 
                          x-transition:leave-end="translate-x-full" 
                          class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between text-left font-sans">

@@ -169,7 +169,7 @@
         <!-- ========================================================================= -->
         <!-- TAB 1: SHIFT KERJA AKTIF -->
         <!-- ========================================================================= -->
-        <div x-cloak x-show="activeTab === 'active'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+        <div x-cloak x-show="activeTab === 'active'" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
             <!-- CARDS GRID AKTIF -->
             <section class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 text-left">
                 @forelse($activeShifts as $shift)
@@ -253,7 +253,7 @@
         <!-- ========================================================================= -->
         <!-- TAB 2: SHIFT KERJA NONAKTIF (RIWAYAT / ARSIP LAMA) -->
         <!-- ========================================================================= -->
-        <div x-cloak x-show="activeTab === 'inactive'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+        <div x-cloak x-show="activeTab === 'inactive'" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
             <!-- Accordion Info Tab 2 -->
             <div class="mb-5 rounded-xl border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 overflow-hidden text-xs" x-data="{ open: true }">
                 <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between text-left font-bold text-amber-900 dark:text-amber-300 hover:bg-amber-100/50 dark:hover:bg-amber-950/30 transition-colors cursor-pointer border-0 bg-transparent">
@@ -392,7 +392,7 @@
                             
                             <!-- Validation Errors inside Modal -->
                             @if(isset($errors) && $errors->any() && !old('_method'))
-                                <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 rounded-xl p-4 text-xs text-rose-800 dark:text-rose-400 text-left flex gap-3 items-start animate-fade-in shrink-0">
+                                <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 rounded-xl p-4 text-xs text-rose-800 dark:text-rose-400 text-left flex gap-3 items-start shrink-0">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                                     <div>
                                         <h5 class="font-bold mb-1">Gagal menyimpan data:</h5>
@@ -534,7 +534,7 @@
                             
                             <!-- Validation Errors inside Modal -->
                             @if(isset($errors) && $errors->any() && old('_method') === 'PUT')
-                                <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 rounded-xl p-4 text-xs text-rose-800 dark:text-rose-400 text-left flex gap-3 items-start animate-fade-in shrink-0">
+                                <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 rounded-xl p-4 text-xs text-rose-800 dark:text-rose-400 text-left flex gap-3 items-start shrink-0">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                                     <div>
                                         <h5 class="font-bold mb-1">Gagal menyimpan data:</h5>

@@ -29,7 +29,7 @@
         }
     </style>
 
-<div class="p-6 space-y-6 animate-fade-in" x-data="rosterGrid()">
+<div class="p-6 space-y-6" x-data="rosterGrid()">
     <form method="POST" action="{{ route('employee-working-shifts.update-roster') }}" class="space-y-6">
         @csrf
         <input type="hidden" name="school_unit_id" value="{{ $selectedUnitId }}">

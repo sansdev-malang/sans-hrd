@@ -40,7 +40,7 @@
                             <span>Info Update</span>
                         </button>
                         
-                        <div x-show="infoOpen" x-transition.opacity.duration.200ms style="display: none;" 
+                        <div x-show="infoOpen" x-transition.opacity.duration.150ms style="display: none;" 
                             class="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 p-4 space-y-3">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-center gap-2.5">
@@ -83,7 +83,7 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                     </button>
                     
-                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                    <div x-show="open" x-transition.opacity.duration.150ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
                         <a href="{{ route('attendance-logs.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                             Excel (.xlsx)
@@ -544,10 +544,10 @@
         <div x-show="showCalendarModal" 
              class="fixed inset-0 z-50 overflow-y-auto" 
              style="display: none;"
-             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter="transition ease-out "
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave="transition ease-in "
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0">
              
@@ -557,10 +557,10 @@
             <!-- Modal Wrapper -->
             <div class="flex min-h-full items-center justify-center p-4 text-center">
                 <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all w-full max-w-lg border border-slate-200 dark:border-slate-800"
-                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter="transition ease-out "
                      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave="transition ease-in "
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
                      

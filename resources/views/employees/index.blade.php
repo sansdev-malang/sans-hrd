@@ -17,7 +17,7 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                     </button>
                     
-                    <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
+                    <div x-show="open" x-transition.opacity.duration.150ms style="display: none;" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50">
                         <a href="{{ route('employees.export.excel', request()->query()) }}" class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border-b border-slate-100 dark:border-slate-800">
                             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 dark:text-emerald-500"></i>
                             Excel (.xlsx)
@@ -339,10 +339,10 @@
              
             <!-- Backdrop -->
             <div x-show="showImportModal" 
-                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter="ease-out "
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave="ease-in "
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
@@ -351,10 +351,10 @@
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 <!-- Modal Panel -->
                 <div x-show="showImportModal"
-                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter="ease-out "
                      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave="ease-in "
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-lg border border-slate-200 dark:border-slate-800">
@@ -426,10 +426,10 @@
              
             <!-- Backdrop -->
             <div x-show="showEmpDetailModal" 
-                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter="ease-out "
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave="ease-in "
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
@@ -438,10 +438,10 @@
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 <!-- Modal Panel -->
                 <div x-show="showEmpDetailModal"
-                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter="ease-out "
                      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave="ease-in "
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl border border-slate-200 dark:border-slate-800">
@@ -616,10 +616,10 @@
              
             <!-- Backdrop -->
             <div x-show="showCreateModal" 
-                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter="ease-out "
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave="ease-in "
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
@@ -628,10 +628,10 @@
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 <!-- Modal Panel -->
                 <div x-show="showCreateModal"
-                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter="ease-out "
                      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave="ease-in "
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-3xl border border-slate-200 dark:border-slate-800">
@@ -961,10 +961,10 @@
 
             <!-- Backdrop -->
             <div x-show="showEditModal"
-                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter="ease-out "
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave="ease-in "
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
@@ -973,10 +973,10 @@
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 <!-- Modal Panel -->
                 <div x-show="showEditModal"
-                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter="ease-out "
                      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave="ease-in "
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-3xl border border-slate-200 dark:border-slate-800">
@@ -1318,10 +1318,10 @@
 
             <!-- Backdrop -->
             <div x-show="showDeleteModal"
-                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter="ease-out "
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave="ease-in "
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
@@ -1330,10 +1330,10 @@
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 <!-- Modal Panel -->
                 <div x-show="showDeleteModal"
-                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter="ease-out "
                      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave="ease-in "
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-sm border border-slate-200 dark:border-slate-800">

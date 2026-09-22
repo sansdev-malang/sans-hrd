@@ -323,27 +323,27 @@
         <div x-show="showDrawer" x-cloak
             class="fixed inset-0 flex justify-end"
             style="margin-top: 0px !important; z-index: 9999;"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:leave="transition ease-in duration-200">
+            x-transition:enter="transition ease-out "
+            x-transition:leave="transition ease-in ">
             
             <!-- Backdrop Overlay -->
             <div x-show="showDrawer" 
                 class="absolute inset-0 bg-slate-950/40 backdrop-blur-xs"
                 @click="showDrawer = false"
-                x-transition:enter="transition-opacity ease-out duration-300"
+                x-transition:enter="transition-opacity ease-out "
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
-                x-transition:leave="transition-opacity ease-in duration-200"
+                x-transition:leave="transition-opacity ease-in "
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"></div>
 
             <!-- Slide-out Drawer Panel -->
             <div x-show="showDrawer"
                 class="relative w-full max-w-lg h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl flex flex-col justify-between text-left p-6 space-y-6"
-                x-transition:enter="transition-transform ease-out duration-300"
+                x-transition:enter="transition-transform ease-out "
                 x-transition:enter-start="translate-x-full"
                 x-transition:enter-end="translate-x-0"
-                x-transition:leave="transition-transform ease-in duration-200"
+                x-transition:leave="transition-transform ease-in "
                 x-transition:leave-start="translate-x-0"
                 x-transition:leave-end="translate-x-full">
                 

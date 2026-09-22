@@ -355,7 +355,7 @@
                 
                 <!-- Backdrop -->
                 <div x-show="showClearModal"
-                     x-transition:enter="ease-out duration-200"
+                     x-transition:enter="ease-out "
                      x-transition:enter-start="opacity-0"
                      x-transition:enter-end="opacity-100"
                      x-transition:leave="ease-in duration-150"
@@ -367,7 +367,7 @@
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                     <!-- Modal Panel -->
                     <div x-show="showClearModal"
-                         x-transition:enter="ease-out duration-200"
+                         x-transition:enter="ease-out "
                          x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
                          x-transition:leave="ease-in duration-150"

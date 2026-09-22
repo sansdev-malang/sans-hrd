@@ -9,7 +9,7 @@
         $countRed = collect($reports)->filter(fn($r) => $r['percentage'] < 90)->count();
     @endphp
 
-    <div class="p-6 space-y-6 relative animate-fade-in" x-data="{
+    <div class="p-6 space-y-6 relative" x-data="{
         activeCategoryFilter: 'all',
         selectedReport: null,
         isDrawerOpen: false,
@@ -554,14 +554,14 @@
     </div>
 
         <!-- SLIDE-OVER DRAWER (LACI DETAIL) - FULL VIEWPORT OVERLAY WITH FIXED STACKING -->
-        <div x-cloak x-show="isDrawerOpen" class="fixed inset-0 z-[9999] overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+        <div x-cloak x-show="isDrawerOpen" @keydown.window.escape="closeDrawer()" class="fixed inset-0 z-[9999] overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
             <div class="absolute inset-0 overflow-hidden">
                 <!-- Backdrop overlay (Covering Sidebar & Topbar cleanly) -->
                 <div x-show="isDrawerOpen" 
-                     x-transition:enter="ease-in-out duration-300" 
+                     x-transition:enter="ease-out duration-150" 
                      x-transition:enter-start="opacity-0" 
                      x-transition:enter-end="opacity-100" 
-                     x-transition:leave="ease-in-out duration-300" 
+                     x-transition:leave="ease-in duration-100" 
                      x-transition:leave-start="opacity-100" 
                      x-transition:leave-end="opacity-0" 
                      @click="closeDrawer()"
@@ -572,10 +572,10 @@
                 <!-- Content Panel (Fixed position viewport relative) -->
                 <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex z-[9999]">
                     <div x-show="isDrawerOpen" 
-                         x-transition:enter="transform transition ease-in-out duration-300 sm:duration-300" 
+                         x-transition:enter="transform transition ease-out duration-150" 
                          x-transition:enter-start="translate-x-full" 
                          x-transition:enter-end="translate-x-0" 
-                         x-transition:leave="transform transition ease-in-out duration-300 sm:duration-300" 
+                         x-transition:leave="transform transition ease-in duration-100" 
                          x-transition:leave-start="translate-x-0" 
                          x-transition:leave-end="translate-x-full" 
                          class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between text-left">

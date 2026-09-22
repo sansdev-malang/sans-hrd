@@ -473,7 +473,7 @@
 
                     <!-- Status Banner -->
                     <template x-if="selectedEmp">
-                        <div class="rounded-lg p-3 border text-[11px] font-medium flex items-center gap-2 animate-fade-in"
+                        <div class="rounded-lg p-3 border text-[11px] font-medium flex items-center gap-2"
                             :class="{
                                 'bg-emerald-50/50 dark:bg-emerald-955/20 text-emerald-800 dark:text-emerald-450 border-emerald-100 dark:border-emerald-900/40': selectedEmp.leave_status === 'Approved',
                                 'bg-rose-50/50 dark:bg-rose-955/20 text-rose-800 dark:text-rose-455 border-rose-100 dark:border-rose-900/40': selectedEmp.leave_status === 'Rejected',

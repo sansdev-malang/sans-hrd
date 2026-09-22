@@ -167,7 +167,7 @@
         </div>
 
         <!-- TAB 1: HADIR LEBIH AWAL (SEBELUM JAM MASUK) -->
-        <div x-cloak x-show="activeTab === 'early_arrival'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+        <div x-cloak x-show="activeTab === 'early_arrival'" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
             <!-- Accordion Info Tab 1 -->
             <div class="mb-5 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 overflow-hidden text-xs" x-data="{ open: false }">
                 <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between text-left font-bold text-emerald-900 dark:text-emerald-300 hover:bg-emerald-100/50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer border-0 bg-transparent">
@@ -180,7 +180,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
                     </div>
                 </button>
-                <div x-cloak x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-emerald-200/40 dark:border-emerald-900/30 space-y-2.5">
+                <div x-cloak x-show="open" x-transition:enter="transition ease-out " x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-emerald-200/40 dark:border-emerald-900/30 space-y-2.5">
                     <p class="leading-relaxed">Bonus ketepatan waktu harian dihitung secara berjenjang (<em>tiered</em>) berdasarkan selisih waktu kedatangan pegawai <strong>sebelum jam masuk shift</strong>:</p>
                     <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-400 ml-1">
                         <li><strong>Jenjang Tier:</strong> Pegawai yang datang lebih awal akan memperoleh nominal bonus sesuai tingkatan tier yang memenuhi syarat (tier teratas untuk kehadiran paling awal).</li>
@@ -273,7 +273,7 @@
         </div>
 
         <!-- TAB 2: TOLERANSI KETERLAMBATAN (SETELAH JAM MASUK) -->
-        <div x-cloak x-show="activeTab === 'late_tolerance'" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display: none;">
+        <div x-cloak x-show="activeTab === 'late_tolerance'" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display: none;">
             <!-- Accordion Info Tab 2 -->
             <div class="mb-5 rounded-xl border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 overflow-hidden text-xs" x-data="{ open: false }">
                 <button type="button" @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between text-left font-bold text-amber-900 dark:text-amber-300 hover:bg-amber-100/50 dark:hover:bg-amber-950/30 transition-colors cursor-pointer border-0 bg-transparent">
@@ -286,7 +286,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
                     </div>
                 </button>
-                <div x-cloak x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-amber-200/40 dark:border-amber-900/30 space-y-2">
+                <div x-cloak x-show="open" x-transition:enter="transition ease-out " x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 border-t border-amber-200/40 dark:border-amber-900/30 space-y-2">
                     <p class="leading-relaxed">Skema ini merupakan kebijakan lama yang menghitung bonus berdasarkan batas toleransi menit keterlambatan <strong>setelah jam masuk shift</strong>. Disimpan rapi sebagai arsip agar riwayat laporan dan rekapitulasi data masa lalu tetap konsisten dan akurat.</p>
                 </div>
             </div>
@@ -372,10 +372,10 @@
 
         <!-- ADD MODAL -->
         <div x-show="showAddModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-            <div x-show="showAddModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div x-show="showAddModal" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
-                    <div x-show="showAddModal" @click.away="showAddModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
+                    <div x-show="showAddModal" @click.away="showAddModal = false" x-transition:enter="ease-out " x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                             <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Buat Skema Bonus Baru</h3>
                             <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors border-0 bg-transparent cursor-pointer">
@@ -491,10 +491,10 @@
 
         <!-- EDIT MODAL -->
         <div x-show="showEditModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-            <div x-show="showEditModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+            <div x-show="showEditModal" x-transition:enter="ease-out " x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
             <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center">
-                    <div x-show="showEditModal" @click.away="showEditModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
+                    <div x-show="showEditModal" @click.away="showEditModal = false" x-transition:enter="ease-out " x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in " x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-xl p-6 text-left flex flex-col max-h-[90vh]">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-900 pb-3 mb-4">
                             <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Edit Skema Bonus</h3>
                             <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors border-0 bg-transparent cursor-pointer">
