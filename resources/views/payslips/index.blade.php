@@ -107,42 +107,6 @@
             </form>
         </section>
 
-        <!-- ACTIVE PERIOD BANNER -->
-        <section class="bg-gradient-to-r from-indigo-50/90 via-slate-50/80 to-indigo-50/50 dark:from-indigo-950/40 dark:via-slate-900/60 dark:to-indigo-950/20 border border-indigo-200/70 dark:border-indigo-900/50 rounded-2xl p-4 shadow-2xs w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
-            <div class="flex items-center gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <i data-lucide="calendar-check-2" class="w-5 h-5"></i>
-                </div>
-                <div class="space-y-0.5">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-100/90 dark:bg-indigo-900/60 px-2 py-0.5 rounded">Periode Slip Gaji Terpilih</span>
-                        @if($month === ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m')))
-                            <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-900/40 flex items-center gap-1">
-                                <i data-lucide="check-circle-2" class="w-3 h-3 text-emerald-600"></i> Periode Penggajian Terakhir
-                            </span>
-                        @elseif($month === ($currentMonth ?? \Carbon\Carbon::now()->format('Y-m')))
-                            <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/40 flex items-center gap-1">
-                                <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i> Bulan Berjalan (Masa Kerja Belum Selesai)
-                            </span>
-                        @else
-                            <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 bg-slate-200/70 dark:bg-slate-800 px-2 py-0.5 rounded">
-                                Arsip Lampau
-                            </span>
-                        @endif
-                    </div>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-slate-50 font-nasalization tracking-wide">
-                        {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
-                    </h3>
-                </div>
-            </div>
-
-            <div class="text-xs text-slate-600 dark:text-slate-400 bg-white/80 dark:bg-slate-900/80 px-3.5 py-2 rounded-xl border border-slate-200/60 dark:border-slate-800/80 shadow-2xs">
-                <span class="text-slate-400 dark:text-slate-500">Keterangan:</span> Semua slip gaji yang diunggah akan tercatat untuk masa kerja <strong class="text-indigo-600 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong>.
-            </div>
-        </section>
-
-
-
         @php
             if (!function_exists('getInitials')) {
                 function getInitials($name) {
@@ -157,31 +121,80 @@
             $colors = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#14b8a6', '#f43f5e', '#0ea5e9', '#d946ef'];
         @endphp
 
-        <!-- MAIN TABLE -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full p-0">
-            <div class="overflow-x-auto" style="max-height: calc(100vh - 280px); overflow-y: auto;">
-                <table class="w-full text-sm text-left">
+        <!-- MAIN TABLE WITH INTEGRATED PERIOD HEADER -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden w-full p-0">
+            <!-- Integrated Card Header -->
+            <div class="px-5 py-3.5 bg-gradient-to-r from-slate-50 via-indigo-50/20 to-slate-50 dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <i data-lucide="calendar-check-2" class="w-4.5 h-4.5"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 font-nasalization tracking-wide">
+                                {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
+                            </h3>
+                            @if($month === ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m')))
+                                <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-900/40 flex items-center gap-1">
+                                    <i data-lucide="check-circle-2" class="w-3 h-3 text-emerald-600"></i> Periode Penggajian Terakhir
+                                </span>
+                            @elseif($month === ($currentMonth ?? \Carbon\Carbon::now()->format('Y-m')))
+                                <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/40 flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i> Bulan Berjalan (Masa Kerja Belum Selesai)
+                                </span>
+                            @else
+                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400 bg-slate-200/70 dark:bg-slate-800 px-2 py-0.5 rounded">
+                                    Arsip Lampau
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            Semua slip gaji dan lampiran yang diunggah tercatat untuk masa kerja <strong class="text-indigo-600 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 shadow-3xs font-medium">
+                        Total: <strong class="text-slate-800 dark:text-slate-200">{{ $paginatedEmployees instanceof \Illuminate\Pagination\LengthAwarePaginator ? $paginatedEmployees->total() : count($paginatedEmployees) }}</strong> Pegawai
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto" id="payslip-table-scroll-container" style="max-height: calc(100vh - 250px); overflow-y: auto;">
+                <table class="w-full text-sm text-left" id="payslip-main-table">
                     <thead class="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 uppercase font-semibold border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
                         <tr>
-                            <th class="px-6 py-4 min-w-[200px]">Profil Pegawai</th>
-                            <th class="px-6 py-4">Periode</th>
-                            <th class="px-6 py-4 text-center">Status File</th>
-                            <th class="px-6 py-4 text-right">Aksi</th>
+                            <th class="px-5 py-3.5 min-w-[210px]">Profil Pegawai</th>
+                            <th class="px-4 py-3.5 min-w-[110px]">Periode</th>
+                            <th class="px-5 py-3.5 min-w-[190px]">Lampiran (Opsional)</th>
+                            <th class="px-5 py-3.5 min-w-[260px]">Slip Gaji (PDF)</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="payslip-table-tbody">
                         @forelse($paginatedEmployees as $index => $emp)
                             @php
                                 $empName = $emp['name'] ?? 'Tidak Diketahui';
                                 $color = $colors[$index % count($colors)];
                                 $initial = getInitials($empName);
+                                $rowId = 'emp-row-' . $emp['unit_id'] . '-' . $emp['id'];
+                                $payslip = $emp['payslip'] ?? null;
                             @endphp
-                            <tr class="group hover:bg-slate-50/60 dark:hover:bg-slate-900/30 transition-colors">
-                                <td class="px-6 py-3">
+                            <tr class="payslip-row group hover:bg-slate-50/60 dark:hover:bg-slate-900/30 transition-all duration-150 relative"
+                                id="{{ $rowId }}"
+                                data-employee-id="{{ $emp['id'] }}"
+                                data-unit-id="{{ $emp['unit_id'] }}"
+                                data-employee-name="{{ $empName }}"
+                                data-nik="{{ $emp['nik'] ?? $emp['nuptk_nip_nik'] ?? '' }}"
+                                data-nuptk="{{ $emp['nuptk'] ?? '' }}"
+                                data-niy="{{ $emp['niy'] ?? '' }}"
+                                data-period="{{ $month }}">
+                                
+                                <td class="px-5 py-3.5">
                                     <div class="flex items-center gap-3">
                                         <!-- Photo/Avatar -->
                                         <div class="shrink-0">
-                                            @if(!empty($emp['photo']))
+                                             @if(!empty($emp['photo']))
                                                 <img src="{{ str_contains($emp['photo'], 'photos/') ? rtrim($emp['unit_url'], '/') . '/storage/' . $emp['photo'] : rtrim($emp['unit_url'], '/') . '/storage/photos/' . $emp['photo'] }}" class="w-8 h-8 rounded-full object-cover border border-slate-200/50 dark:border-slate-800/40">
                                             @else
                                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm" style="background:{{ $color }}">{{ $initial }}</div>
@@ -196,73 +209,79 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-3 text-xs font-bold text-slate-605 dark:text-slate-300">
+
+                                <td class="px-4 py-3.5 text-xs font-bold text-slate-605 dark:text-slate-300 whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
                                 </td>
-                                 <td class="px-6 py-3 text-center">
-                                     @if($emp['payslip'])
-                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-450 border border-emerald-100/30 dark:border-emerald-900/30">
-                                             <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                                             Tersedia
-                                         </span>
-                                     @else
-                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/20 text-rose-650 dark:text-rose-450 border border-rose-100/20 dark:border-rose-900/30">
-                                             <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                             Kosong
-                                         </span>
-                                     @endif
-                                 </td>
-                                 <td class="px-6 py-3 text-right">
-                                     <div class="flex gap-2 justify-end">
-                                         @if($emp['payslip'])
-                                             <a href="{{ Storage::url($emp['payslip']->file_path) }}" target="_blank"
-                                                class="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1.5" title="Lihat Slip Gaji">
-                                                 <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400"></i>
-                                                 Slip Gaji
-                                             </a>
-                                             @if($emp['payslip']->attachment_path)
-                                                 <a href="{{ Storage::url($emp['payslip']->attachment_path) }}" target="_blank"
-                                                    class="h-8 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:hover:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 text-xs font-bold rounded-lg border border-indigo-100/30 dark:border-indigo-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Lihat Lampiran">
-                                                     <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
-                                                     Lampiran
-                                                 </a>
-                                             @endif
-                                             <button type="button" onclick="openUploadModal(this)"
-                                                     data-employee-id="{{ $emp['id'] }}"
-                                                     data-unit-id="{{ $emp['unit_id'] }}"
-                                                     data-employee-name="{{ $emp['name'] }}"
-                                                     data-has-payslip="true"
-                                                     data-payslip-url="{{ Storage::url($emp['payslip']->file_path) }}"
-                                                     data-payslip-name="{{ basename($emp['payslip']->file_path) }}"
-                                                     data-attachment-url="{{ $emp['payslip']->attachment_path ? Storage::url($emp['payslip']->attachment_path) : '' }}"
-                                                     data-attachment-name="{{ $emp['payslip']->attachment_path ? basename($emp['payslip']->attachment_path) : '' }}"
-                                                     class="h-8 px-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-955/20 dark:hover:bg-amber-955/40 text-amber-600 dark:text-amber-400 text-xs font-bold rounded-lg border border-amber-100/30 dark:border-amber-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Edit Slip Gaji">
-                                                 <i data-lucide="edit" class="w-3.5 h-3.5"></i>
-                                                 Edit
-                                             </button>
-                                             <form method="POST" action="{{ route('payslips.destroy', $emp['payslip']->id) }}" onsubmit="return confirm('Hapus slip gaji ini?');" class="inline">
-                                                 @csrf
-                                                 @method('DELETE')
-                                                 <input type="hidden" name="redirect_url" value="{{ request()->fullUrl() }}">
-                                                 <button type="submit"
-                                                         class="h-8 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/30 dark:hover:bg-rose-955/50 text-rose-650 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0" title="Hapus">
-                                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                                     Hapus
-                                                 </button>
-                                             </form>
-                                         @else
-                                             <button type="button" onclick="openUploadModal(this)"
-                                                     data-employee-id="{{ $emp['id'] }}"
-                                                     data-unit-id="{{ $emp['unit_id'] }}"
-                                                     data-employee-name="{{ $emp['name'] }}"
-                                                     data-has-payslip="false"
-                                                     class="h-8 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:hover:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 text-xs font-bold rounded-lg border border-indigo-100/30 dark:border-indigo-900/30 transition-all hover:scale-105 duration-150 cursor-pointer flex items-center gap-1 border-0">
-                                                 <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                                                 Upload
-                                             </button>
-                                         @endif
-                                     </div>
-                                 </td>
+
+                                <!-- LAMPIRAN CELL (KOLOM KE-3) -->
+                                <td class="px-5 py-3.5 payslip-attachment-cell">
+                                    @if($payslip && $payslip->attachment_path)
+                                        <div class="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/80 shadow-3xs max-w-full">
+                                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-indigo-500 shrink-0"></i>
+                                            <a href="{{ Storage::url($payslip->attachment_path) }}" target="_blank"
+                                               class="text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 truncate max-w-[120px] transition-colors"
+                                               title="{{ $payslip->original_attachment_name ?? basename($payslip->attachment_path) }} (Klik untuk melihat)">
+                                                {{ $payslip->original_attachment_name ?? basename($payslip->attachment_path) }}
+                                            </a>
+                                            <div class="flex items-center gap-0.5 ml-1 pl-1 border-l border-slate-200 dark:border-slate-700 shrink-0">
+                                                <label class="btn-replace-attachment p-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded transition-colors cursor-pointer" title="Ganti File Lampiran">
+                                                    <i data-lucide="upload" class="w-3 h-3"></i>
+                                                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden inline-attachment-file-input" onchange="handleDirectFileSelect(this, 'attachment')">
+                                                </label>
+                                                <button type="button"
+                                                        onclick="handleDirectDelete(this, '{{ route('payslips.destroyAttachment', $payslip->id) }}', 'attachment')"
+                                                        class="btn-delete-attachment p-1 hover:bg-rose-100 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded transition-colors cursor-pointer" title="Hapus Lampiran">
+                                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <label class="attachment-dropzone-btn inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-xs font-medium transition-all hover:scale-[1.02] cursor-pointer shadow-3xs group" title="Unggah Berkas Pendukung (PDF/Gambar)">
+                                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+                                            <span>+ Lampiran</span>
+                                            <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden inline-attachment-file-input" onchange="handleDirectFileSelect(this, 'attachment')">
+                                        </label>
+                                    @endif
+                                </td>
+
+                                <!-- SLIP GAJI CELL (KOLOM KE-4 / TERAKHIR) -->
+                                <td class="px-5 py-3.5 payslip-slip-cell">
+                                    @if($payslip && $payslip->file_path)
+                                        <div class="inline-flex items-center gap-2 bg-emerald-50/60 dark:bg-emerald-950/20 px-2.5 py-1.5 rounded-lg border border-emerald-200/70 dark:border-emerald-900/50 shadow-3xs max-w-full">
+                                            <div class="flex items-center gap-1.5 min-w-0 pr-1">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                                                <a href="{{ Storage::url($payslip->file_path) }}" target="_blank"
+                                                   class="text-xs font-semibold text-emerald-900 dark:text-emerald-200 hover:underline truncate max-w-[130px]"
+                                                   title="{{ $payslip->original_filename ?? basename($payslip->file_path) }} (Klik untuk membuka)">
+                                                    {{ $payslip->original_filename ?? basename($payslip->file_path) }}
+                                                </a>
+                                            </div>
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                <a href="{{ Storage::url($payslip->file_path) }}" target="_blank"
+                                                   class="btn-view-payslip h-6 px-2 bg-white dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold rounded border border-emerald-200 dark:border-emerald-800/80 transition-all flex items-center gap-1 shadow-3xs" title="Buka Berkas Slip Gaji">
+                                                    <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+                                                    Buka
+                                                </a>
+                                                <label class="btn-replace-payslip h-6 px-1.5 bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-600 dark:text-amber-400 text-[11px] font-bold rounded border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1 shadow-3xs cursor-pointer" title="Ganti Berkas Slip Gaji">
+                                                    <i data-lucide="upload" class="w-2.5 h-2.5"></i>
+                                                    <input type="file" accept=".pdf" class="hidden inline-payslip-file-input" onchange="handleDirectFileSelect(this, 'payslip')">
+                                                </label>
+                                                <button type="button"
+                                                        onclick="handleDirectDelete(this, '{{ route('payslips.destroy', $payslip->id) }}', 'all')"
+                                                        class="btn-delete-payslip h-6 px-1.5 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[11px] font-bold rounded border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1 shadow-3xs cursor-pointer" title="Hapus Slip Gaji">
+                                                    <i data-lucide="trash-2" class="w-2.5 h-2.5"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <label class="payslip-dropzone-btn inline-flex items-center gap-2 h-8 px-3 rounded-lg border-2 border-dashed border-indigo-200 hover:border-indigo-400 dark:border-indigo-900/60 dark:hover:border-indigo-700 bg-indigo-50/50 hover:bg-indigo-100/60 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 text-xs font-semibold transition-all hover:scale-[1.02] cursor-pointer shadow-3xs group" title="Seret file PDF atau klik untuk unggah slip gaji">
+                                            <i data-lucide="file-up" class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:-translate-y-0.5 transition-transform"></i>
+                                            <span>Upload PDF Slip Gaji</span>
+                                            <input type="file" accept=".pdf" class="hidden inline-payslip-file-input" onchange="handleDirectFileSelect(this, 'payslip')">
+                                        </label>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -312,376 +331,393 @@
     </div>
 </div>
 
-    <!-- Upload Modal -->
-    <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/50 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200 dark:border-slate-800 transform scale-95 opacity-0 transition-all duration-300" id="uploadModalContent">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3.5 mb-4">
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 uppercase tracking-wider">Upload Slip Gaji</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Periode: <strong id="modal_period_title" class="text-indigo-600 dark:text-indigo-400">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong></p>
-                </div>
-                <button onclick="closeUploadModal()" class="text-slate-450 hover:text-slate-655 transition-colors border-0 bg-transparent cursor-pointer">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-
-            <!-- Prominent Target Period Alert Box -->
-            <div class="p-3 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-900/60 rounded-xl flex items-center justify-between gap-3 text-xs mb-3 shadow-3xs">
-                <div class="flex items-center gap-2.5">
-                    <div class="p-1.5 bg-indigo-600 text-white rounded-lg shrink-0">
-                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                    </div>
-                    <div>
-                        <div class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Target Periode Gaji</div>
-                        <strong id="modal_period_badge" class="text-indigo-700 dark:text-indigo-300 font-bold text-xs">{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}</strong>
-                    </div>
-                </div>
-                <span id="modal_period_code" class="text-[10px] bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-indigo-200/60 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold font-mono">{{ $month }}</span>
-            </div>
-
-            <form id="uploadForm" method="POST" action="{{ route('payslips.store') }}" enctype="multipart/form-data" class="space-y-4">
-                @csrf
-                <input type="hidden" name="employee_id" id="modal_employee_id">
-                <input type="hidden" name="school_unit_id" id="modal_unit_id">
-                <input type="hidden" name="period" value="{{ $month }}">
-                <input type="hidden" name="redirect_url" id="modal_redirect_url" value="{{ request()->fullUrl() }}">
-
-                <div class="text-left">
-                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Nama Pegawai</label>
-                    <div id="modal_employee_name" class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl text-slate-800 dark:text-slate-200 font-semibold border border-slate-200/50 dark:border-slate-800 text-xs"></div>
-                </div>
-
-                <div class="text-left">
-                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File PDF Slip Gaji <span class="text-rose-500">*</span></label>
-                    
-                    <!-- Hidden Real Input -->
-                    <input type="file" name="payslip_file" id="payslip_file_input" accept=".pdf" required class="hidden" onchange="handleFileSelected(this, 'payslip_dropzone', 'payslip_info_box', 'payslip_progress_bar', 'payslip_file_name', 'payslip_file_size', 'payslip_status_text')">
-                    
-                    <!-- Premium Dropzone Box -->
-                    <div id="payslip_dropzone" onclick="document.getElementById('payslip_file_input').click()" class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-950 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-900/30 group">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                        <div class="text-[11px] font-bold text-slate-700 dark:text-slate-350">Pilih atau Seret File Slip Gaji</div>
-                        <div class="text-[9px] text-slate-400 dark:text-slate-500">PDF saja (Maks. 500KB)</div>
-                    </div>
-
-                    <!-- Premium Info & Progress Box -->
-                    <div id="payslip_info_box" class="hidden p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex-col gap-2.5">
-                        <div class="flex items-center justify-between gap-3">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                <div class="flex flex-col min-w-0 text-left">
-                                    <span id="payslip_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.pdf</span>
-                                    <span id="payslip_file_size" class="text-[9px] text-slate-400 dark:text-slate-500 font-mono">0 KB</span>
-                                </div>
-                            </div>
-                            <button type="button" onclick="clearFileSelection('payslip_file_input', 'payslip_dropzone', 'payslip_info_box', 'payslip_progress_bar')" class="text-slate-400 hover:text-rose-500 transition-colors cursor-pointer border-0 bg-transparent shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-                        
-                        <div class="space-y-1.5">
-                            <!-- Progress Bar Container -->
-                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                <div id="payslip_progress_bar" class="bg-indigo-600 h-full w-0 transition-all duration-300 ease-out rounded-full"></div>
-                            </div>
-                            <div class="flex justify-between items-center text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-                                <span id="payslip_status_text">Mengunggah...</span>
-                                <span class="font-mono">100%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-left">
-                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Lampiran Tambahan <span class="text-slate-400 dark:text-slate-500 font-medium">(Opsional)</span></label>
-                    
-                    <!-- Hidden Real Input -->
-                    <input type="file" name="attachment_file" id="attachment_file_input" accept=".pdf,.png,.jpg,.jpeg" class="hidden" onchange="handleFileSelected(this, 'attachment_dropzone', 'attachment_info_box', 'attachment_progress_bar', 'attachment_file_name', 'attachment_file_size', 'attachment_status_text')">
-                    
-                    <!-- Premium Dropzone Box -->
-                    <div id="attachment_dropzone" onclick="document.getElementById('attachment_file_input').click()" class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-950 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-900/30 group">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                        <div class="text-[11px] font-bold text-slate-700 dark:text-slate-350">Pilih atau Seret Lampiran</div>
-                        <div class="text-[9px] text-slate-400 dark:text-slate-500">PDF atau Gambar (Maks. 2MB)</div>
-                    </div>
-
-                    <!-- Premium Info & Progress Box -->
-                    <div id="attachment_info_box" class="hidden p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex-col gap-2.5">
-                        <div class="flex items-center justify-between gap-3">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                <div class="flex flex-col min-w-0 text-left">
-                                    <span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>
-                                    <span id="attachment_file_size" class="text-[9px] text-slate-400 dark:text-slate-500 font-mono">0 KB</span>
-                                </div>
-                            </div>
-                            <button type="button" onclick="clearFileSelection('attachment_file_input', 'attachment_dropzone', 'attachment_info_box', 'attachment_progress_bar')" class="text-slate-400 hover:text-rose-500 transition-colors cursor-pointer border-0 bg-transparent shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-                        
-                        <div class="space-y-1.5">
-                            <!-- Progress Bar Container -->
-                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                <div id="attachment_progress_bar" class="bg-indigo-600 h-full w-0 transition-all duration-300 ease-out rounded-full"></div>
-                            </div>
-                            <div class="flex justify-between items-center text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-                                <span id="attachment_status_text">Mengunggah...</span>
-                                <span class="font-mono">100%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-                    <button type="button" onclick="closeUploadModal()"
-                            class="h-9 px-4 bg-white dark:bg-slate-900 border border-slate-350 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-750 dark:text-slate-300 rounded-xl transition-all font-bold text-xs cursor-pointer shadow-3xs">Batal</button>
-                    <button type="submit"
-                            class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all font-bold text-xs cursor-pointer shadow-2xs hover:scale-[1.02] duration-150 border-0">Upload File</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    <!-- INLINE DRAG & DROP & DIRECT AJAX PAYSLIP SCRIPT -->
     <script>
-        function formatIndonesianMonth(yearMonth) {
-            if (!yearMonth) return '';
-            const [year, month] = yearMonth.split('-');
-            const months = [
-                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-            ];
-            const monthIndex = parseInt(month, 10) - 1;
-            return (months[monthIndex] || '') + ' ' + year;
-        }
-
-        function openUploadModal(btn) {
-            const monthInput = document.querySelector('input[name="month"]');
-            const selectedMonth = (monthInput && monthInput.value) ? monthInput.value : '{{ $month }}';
-
-            const empId = btn.getAttribute('data-employee-id') || '';
-            const unitId = btn.getAttribute('data-unit-id') || '';
-            const empName = btn.getAttribute('data-employee-name') || '';
-            const hasPayslip = btn.getAttribute('data-has-payslip') === 'true';
-            const payslipUrl = btn.getAttribute('data-payslip-url') || '';
-            const attachmentUrl = btn.getAttribute('data-attachment-url') || '';
-            const payslipName = btn.getAttribute('data-payslip-name') || '';
-            const attachmentName = btn.getAttribute('data-attachment-name') || '';
-
-            const empIdEl = document.getElementById('modal_employee_id');
-            const unitIdEl = document.getElementById('modal_unit_id');
-            const empNameEl = document.getElementById('modal_employee_name');
-            const redirectUrlEl = document.getElementById('modal_redirect_url');
-
-            if (empIdEl) empIdEl.value = empId;
-            if (unitIdEl) unitIdEl.value = unitId;
-            if (empNameEl) empNameEl.innerText = empName;
-            if (redirectUrlEl) redirectUrlEl.value = window.location.href;
-
-            // Dynamically update form period input & title text to match selected filter month
-            const uploadForm = document.getElementById('uploadForm');
-            if (uploadForm) {
-                const periodInput = uploadForm.querySelector('input[name="period"]');
-                if (periodInput) periodInput.value = selectedMonth;
-            }
-
-            const formattedMonth = formatIndonesianMonth(selectedMonth);
-            const titleEl = document.getElementById('modal_period_title');
-            const badgeEl = document.getElementById('modal_period_badge');
-            const codeEl = document.getElementById('modal_period_code');
-
-            if (titleEl) titleEl.innerText = formattedMonth;
-            if (badgeEl) badgeEl.innerText = formattedMonth;
-            if (codeEl) codeEl.innerText = selectedMonth;
-
-            const fileInput = document.getElementById('payslip_file_input');
-            const dropzone = document.getElementById('payslip_dropzone');
-            const infoBox = document.getElementById('payslip_info_box');
-            const progressBar = document.getElementById('payslip_progress_bar');
-            const statusText = document.getElementById('payslip_status_text');
-            
-            const attachInput = document.getElementById('attachment_file_input');
-            const attachDropzone = document.getElementById('attachment_dropzone');
-            const attachInfoBox = document.getElementById('attachment_info_box');
-            const attachProgressBar = document.getElementById('attachment_progress_bar');
-            const attachStatusText = document.getElementById('attachment_status_text');
-
-            if (hasPayslip) {
-                // Edit mode: make main payslip file input optional
-                if (fileInput) fileInput.removeAttribute('required');
-                
-                // Show existing payslip file info
-                if (dropzone) dropzone.classList.add('hidden');
-                if (infoBox) {
-                    infoBox.classList.remove('hidden');
-                    infoBox.classList.add('flex');
+        // Prevent browser default open-file behavior on whole window when dragging files
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            window.addEventListener(eventName, function (e) {
+                if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+                    e.preventDefault();
                 }
-                const fileNameEl = document.getElementById('payslip_file_name');
-                if (fileNameEl) {
-                    fileNameEl.outerHTML = `<a href="${payslipUrl}" target="_blank" id="payslip_file_name" class="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 truncate pr-2">${payslipName}</a>`;
-                }
-                const fileSizeEl = document.getElementById('payslip_file_size');
-                if (fileSizeEl) fileSizeEl.innerText = 'Sudah Diunggah';
-                if (progressBar) progressBar.style.width = '100%';
-                if (statusText) {
-                    statusText.innerText = 'File Eksis (Akan Dipertahankan)';
-                    statusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
-                }
-
-                // Show existing attachment if exists
-                if (attachmentUrl && attachmentName) {
-                    if (attachDropzone) attachDropzone.classList.add('hidden');
-                    if (attachInfoBox) {
-                        attachInfoBox.classList.remove('hidden');
-                        attachInfoBox.classList.add('flex');
-                    }
-                    const attachNameEl = document.getElementById('attachment_file_name');
-                    if (attachNameEl) {
-                        attachNameEl.outerHTML = `<a href="${attachmentUrl}" target="_blank" id="attachment_file_name" class="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 truncate pr-2">${attachmentName}</a>`;
-                    }
-                    const attachSizeEl = document.getElementById('attachment_file_size');
-                    if (attachSizeEl) attachSizeEl.innerText = 'Sudah Diunggah';
-                    if (attachProgressBar) attachProgressBar.style.width = '100%';
-                    if (attachStatusText) {
-                        attachStatusText.innerText = 'File Eksis (Akan Dipertahankan)';
-                        attachStatusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
-                    }
-                } else {
-                    // Reset attachment fields
-                    if (attachInput) attachInput.value = '';
-                    if (attachDropzone) attachDropzone.classList.remove('hidden');
-                    if (attachInfoBox) {
-                        attachInfoBox.classList.add('hidden');
-                        attachInfoBox.classList.remove('flex');
-                    }
-                    const attachNameEl = document.getElementById('attachment_file_name');
-                    if (attachNameEl) {
-                        attachNameEl.outerHTML = `<span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>`;
-                    }
-                    const attachSizeEl = document.getElementById('attachment_file_size');
-                    if (attachSizeEl) attachSizeEl.innerText = '0 KB';
-                }
-            } else {
-                // Create mode: make main payslip file input required
-                if (fileInput) {
-                    fileInput.setAttribute('required', 'required');
-                    fileInput.value = '';
-                }
-                
-                // Reset payslip fields
-                if (dropzone) dropzone.classList.remove('hidden');
-                if (infoBox) {
-                    infoBox.classList.add('hidden');
-                    infoBox.classList.remove('flex');
-                }
-                const fileNameEl = document.getElementById('payslip_file_name');
-                if (fileNameEl) {
-                    fileNameEl.outerHTML = `<span id="payslip_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.pdf</span>`;
-                }
-                const fileSizeEl = document.getElementById('payslip_file_size');
-                if (fileSizeEl) fileSizeEl.innerText = '0 KB';
-
-                // Reset attachment fields
-                if (attachInput) attachInput.value = '';
-                if (attachDropzone) attachDropzone.classList.remove('hidden');
-                if (attachInfoBox) {
-                    attachInfoBox.classList.add('hidden');
-                    attachInfoBox.classList.remove('flex');
-                }
-                const attachNameEl = document.getElementById('attachment_file_name');
-                if (attachNameEl) {
-                    attachNameEl.outerHTML = `<span id="attachment_file_name" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate pr-2">file.png</span>`;
-                }
-                const attachSizeEl = document.getElementById('attachment_file_size');
-                if (attachSizeEl) attachSizeEl.innerText = '0 KB';
-            }
-
-            const modal = document.getElementById('uploadModal');
-            const content = document.getElementById('uploadModalContent');
-
-            if (modal && content) {
-                modal.classList.remove('hidden');
-                void modal.offsetWidth;
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }
-        }
-
-        function closeUploadModal() {
-            const modal = document.getElementById('uploadModal');
-            const content = document.getElementById('uploadModalContent');
-
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                document.getElementById('uploadForm').reset();
-                
-                // Clear selection styling for both inputs
-                clearFileSelection('payslip_file_input', 'payslip_dropzone', 'payslip_info_box', 'payslip_progress_bar');
-                clearFileSelection('attachment_file_input', 'attachment_dropzone', 'attachment_info_box', 'attachment_progress_bar');
-            }, 300);
-        }
-
-        // Close modal when clicking outside the content box
-        document.getElementById('uploadModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeUploadModal();
-            }
+            }, false);
         });
 
-        // Premium dynamic file inputs handlers
-        function handleFileSelected(input, dropzoneId, infoBoxId, progressBarId, fileNameId, fileSizeId, statusTextId) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                
-                // Show Name and Size
-                document.getElementById(fileNameId).innerText = file.name;
-                
-                let sizeStr = (file.size / 1024).toFixed(1) + ' KB';
-                if (file.size > 1024 * 1024) {
-                    sizeStr = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-                }
-                document.getElementById(fileSizeId).innerText = sizeStr;
-
-                // Hide dropzone and show progress box
-                document.getElementById(dropzoneId).classList.add('hidden');
-                const infoBox = document.getElementById(infoBoxId);
-                infoBox.classList.remove('hidden');
-                infoBox.classList.add('flex');
-
-                // Animate Progress Bar
-                const progressBar = document.getElementById(progressBarId);
-                const statusText = document.getElementById(statusTextId);
-                progressBar.style.width = '0%';
-                statusText.innerText = 'Membaca file...';
-                statusText.className = 'text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider';
-
-                setTimeout(() => {
-                    progressBar.style.width = '50%';
-                    statusText.innerText = 'Memverifikasi berkas...';
-                    
-                    setTimeout(() => {
-                        progressBar.style.width = '100%';
-                        statusText.innerText = 'Siap Diunggah!';
-                        statusText.className = 'text-[9px] text-emerald-500 font-bold uppercase tracking-wider';
-                    }, 350);
-                }, 200);
+        // Direct Inline File Selection Handler
+        function handleDirectFileSelect(inputEl, type = 'payslip') {
+            if (!inputEl.files || !inputEl.files[0]) return;
+            const file = inputEl.files[0];
+            const row = inputEl.closest('.payslip-row');
+            if (row) {
+                uploadSingleFileDirect(file, row, type);
             }
+            inputEl.value = ''; // Reset for subsequent selections
         }
 
-        function clearFileSelection(inputId, dropzoneId, infoBoxId, progressBarId) {
-            const input = document.getElementById(inputId);
-            input.value = ''; // Reset input value
+        // Direct Upload Handler via AJAX
+        function uploadSingleFileDirect(file, row, type = 'auto') {
+            if (!file || !row) return;
+
+            const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
+            const isImage = /\.(png|jpe?g)$/i.test(file.name) || /^image\/(png|jpe?g)$/i.test(file.type);
+
+            // Auto-detect type if not explicitly passed
+            if (type === 'auto') {
+                if (isImage) {
+                    type = 'attachment';
+                } else if (isPdf) {
+                    type = 'payslip';
+                } else {
+                    if (typeof showSessionToast === 'function') {
+                        showSessionToast('Format Salah', 'Format file tidak didukung. Gunakan PDF untuk Slip Gaji, atau PDF/Gambar untuk Lampiran.', 'error');
+                    }
+                    return;
+                }
+            }
+
+            // Specific validations
+            if (type === 'payslip' && !isPdf) {
+                if (typeof showSessionToast === 'function') {
+                    showSessionToast('Format Salah', 'Slip gaji utama harus berupa dokumen PDF (.pdf)', 'error');
+                }
+                return;
+            }
+
+            if (type === 'attachment' && !isPdf && !isImage) {
+                if (typeof showSessionToast === 'function') {
+                    showSessionToast('Format Salah', 'Lampiran harus berupa dokumen PDF atau Gambar (.png, .jpg, .jpeg)', 'error');
+                }
+                return;
+            }
+
+            // Max 5MB
+            if (file.size > 5 * 1024 * 1024) {
+                if (typeof showSessionToast === 'function') {
+                    showSessionToast('File Terlalu Besar', 'Ukuran file maksimal adalah 5MB.', 'error');
+                }
+                return;
+            }
+
+            const employeeId = row.getAttribute('data-employee-id');
+            const unitId = row.getAttribute('data-unit-id');
+            const employeeName = row.getAttribute('data-employee-name') || 'Pegawai';
+            const period = row.getAttribute('data-period') || '{{ $month }}';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+            const targetCell = type === 'attachment' ? row.querySelector('.payslip-attachment-cell') : row.querySelector('.payslip-slip-cell');
+            const prevTargetHtml = targetCell ? targetCell.innerHTML : '';
+
+            // UI Loading indicator in target cell
+            if (targetCell) {
+                targetCell.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-200/50 dark:border-indigo-800/50 shadow-3xs animate-pulse">
+                            <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                            <span>Mengunggah...</span>
+                        </div>
+                    </div>
+                `;
+            }
+            row.style.pointerEvents = 'none';
+
+            const formData = new FormData();
+            formData.append('_token', csrfToken);
+            formData.append('employee_id', employeeId);
+            formData.append('school_unit_id', unitId);
+            formData.append('period', period);
+            if (type === 'attachment') {
+                formData.append('attachment_file', file);
+            } else {
+                formData.append('payslip_file', file);
+            }
+
+            fetch('{{ route('payslips.store') }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async response => {
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal mengunggah berkas.');
+                }
+                return data;
+            })
+            .then(data => {
+                const p = data.payslip;
+                if (!p) return;
+
+                // 1. Update Slip Gaji Cell if uploaded or exists
+                const slipCell = row.querySelector('.payslip-slip-cell');
+                if (slipCell && p.file_url) {
+                    const originalName = p.original_filename || 'slip_gaji.pdf';
+                    const destroyUrl = `/payslips/${p.id}`;
+                    slipCell.innerHTML = `
+                        <div class="inline-flex items-center gap-2 bg-emerald-50/60 dark:bg-emerald-950/20 px-2.5 py-1.5 rounded-lg border border-emerald-200/70 dark:border-emerald-900/50 shadow-3xs max-w-full">
+                            <div class="flex items-center gap-1.5 min-w-0 pr-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                                <a href="${p.file_url}" target="_blank"
+                                   class="text-xs font-semibold text-emerald-900 dark:text-emerald-200 hover:underline truncate max-w-[130px]"
+                                   title="${originalName} (Klik untuk membuka)">
+                                    ${originalName}
+                                </a>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <a href="${p.file_url}" target="_blank"
+                                   class="btn-view-payslip h-6 px-2 bg-white dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold rounded border border-emerald-200 dark:border-emerald-800/80 transition-all flex items-center gap-1 shadow-3xs" title="Buka Berkas Slip Gaji">
+                                    <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+                                    Buka
+                                </a>
+                                <label class="btn-replace-payslip h-6 px-1.5 bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-955/40 text-amber-600 dark:text-amber-400 text-[11px] font-bold rounded border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1 shadow-3xs cursor-pointer" title="Ganti Berkas Slip Gaji">
+                                    <i data-lucide="upload" class="w-2.5 h-2.5"></i>
+                                    <input type="file" accept=".pdf" class="hidden inline-payslip-file-input" onchange="handleDirectFileSelect(this, 'payslip')">
+                                </label>
+                                <button type="button"
+                                        onclick="handleDirectDelete(this, '${destroyUrl}', 'all')"
+                                        class="btn-delete-payslip h-6 px-1.5 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[11px] font-bold rounded border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1 shadow-3xs cursor-pointer" title="Hapus Slip Gaji">
+                                    <i data-lucide="trash-2" class="w-2.5 h-2.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 2. Update Lampiran Cell
+                const attachCell = row.querySelector('.payslip-attachment-cell');
+                if (attachCell) {
+                    if (p.attachment_url) {
+                        const originalAttachName = p.original_attachment_name || 'lampiran';
+                        const destroyAttachUrl = `/payslips/${p.id}/attachment`;
+                        attachCell.innerHTML = `
+                            <div class="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/80 shadow-3xs max-w-full">
+                                <i data-lucide="paperclip" class="w-3.5 h-3.5 text-indigo-500 shrink-0"></i>
+                                <a href="${p.attachment_url}" target="_blank"
+                                   class="text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 truncate max-w-[120px] transition-colors"
+                                   title="${originalAttachName} (Klik untuk melihat)">
+                                    ${originalAttachName}
+                                </a>
+                                <div class="flex items-center gap-0.5 ml-1 pl-1 border-l border-slate-200 dark:border-slate-700 shrink-0">
+                                    <label class="btn-replace-attachment p-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded transition-colors cursor-pointer" title="Ganti File Lampiran">
+                                        <i data-lucide="upload" class="w-3 h-3"></i>
+                                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden inline-attachment-file-input" onchange="handleDirectFileSelect(this, 'attachment')">
+                                    </label>
+                                    <button type="button"
+                                            onclick="handleDirectDelete(this, '${destroyAttachUrl}', 'attachment')"
+                                            class="btn-delete-attachment p-1 hover:bg-rose-100 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded transition-colors cursor-pointer" title="Hapus Lampiran">
+                                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else if (type === 'attachment') {
+                        // Reset to empty attachment dropzone
+                        attachCell.innerHTML = `
+                            <label class="attachment-dropzone-btn inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-xs font-medium transition-all hover:scale-[1.02] cursor-pointer shadow-3xs group" title="Unggah Berkas Pendukung (PDF/Gambar)">
+                                <i data-lucide="paperclip" class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+                                <span>+ Lampiran</span>
+                                <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden inline-attachment-file-input" onchange="handleDirectFileSelect(this, 'attachment')">
+                            </label>
+                        `;
+                    }
+                }
+
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+
+                // Visual flash highlight
+                row.classList.add('bg-emerald-50/80', 'dark:bg-emerald-950/40');
+                setTimeout(() => {
+                    row.classList.remove('bg-emerald-50/80', 'dark:bg-emerald-950/40');
+                }, 1800);
+
+                if (typeof showSessionToast === 'function') {
+                    const label = type === 'attachment' ? 'Lampiran' : 'Slip gaji';
+                    showSessionToast('Sukses!', `${label} ${employeeName} berhasil diunggah.`, 'success');
+                }
+            })
+            .catch(err => {
+                if (targetCell) {
+                    targetCell.innerHTML = prevTargetHtml;
+                }
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+                if (typeof showSessionToast === 'function') {
+                    showSessionToast('Gagal Mengunggah', err.message || 'Terjadi kesalahan jaringan.', 'error');
+                }
+            })
+            .finally(() => {
+                row.style.pointerEvents = 'auto';
+            });
+        }
+
+        // Direct Delete Handler (all payslip OR attachment only)
+        function handleDirectDelete(btnEl, deleteUrl, mode = 'all') {
+            const isAttachment = mode === 'attachment';
+            const confirmMsg = isAttachment ? 'Apakah Anda yakin ingin menghapus lampiran pegawai ini?' : 'Apakah Anda yakin ingin menghapus slip gaji pegawai ini?';
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            const row = btnEl.closest('.payslip-row');
+            if (!row) return;
+
+            const targetCell = isAttachment ? row.querySelector('.payslip-attachment-cell') : row.querySelector('.payslip-slip-cell');
+            const prevHtml = targetCell ? targetCell.innerHTML : '';
+
+            if (targetCell) {
+                targetCell.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-200/50 dark:border-rose-800/50 shadow-3xs animate-pulse">
+                            <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                            <span>Menghapus...</span>
+                        </div>
+                    </div>
+                `;
+            }
+            row.style.pointerEvents = 'none';
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+            fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async response => {
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal menghapus berkas.');
+                }
+                return data;
+            })
+            .then(data => {
+                if (isAttachment) {
+                    // Reset attachment cell
+                    const attachCell = row.querySelector('.payslip-attachment-cell');
+                    if (attachCell) {
+                        attachCell.innerHTML = `
+                            <label class="attachment-dropzone-btn inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-xs font-medium transition-all hover:scale-[1.02] cursor-pointer shadow-3xs group" title="Unggah Berkas Pendukung (PDF/Gambar)">
+                                <i data-lucide="paperclip" class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+                                <span>+ Lampiran</span>
+                                <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden inline-attachment-file-input" onchange="handleDirectFileSelect(this, 'attachment')">
+                            </label>
+                        `;
+                    }
+                } else {
+                    // Reset slip cell
+                    const slipCell = row.querySelector('.payslip-slip-cell');
+                    if (slipCell) {
+                        slipCell.innerHTML = `
+                            <label class="payslip-dropzone-btn inline-flex items-center gap-2 h-8 px-3 rounded-lg border-2 border-dashed border-indigo-200 hover:border-indigo-400 dark:border-indigo-900/60 dark:hover:border-indigo-700 bg-indigo-50/50 hover:bg-indigo-100/60 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 text-xs font-semibold transition-all hover:scale-[1.02] cursor-pointer shadow-3xs group" title="Seret file PDF atau klik untuk unggah slip gaji">
+                                <i data-lucide="file-up" class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:-translate-y-0.5 transition-transform"></i>
+                                <span>Upload PDF Slip Gaji</span>
+                                <input type="file" accept=".pdf" class="hidden inline-payslip-file-input" onchange="handleDirectFileSelect(this, 'payslip')">
+                            </label>
+                        `;
+                    }
+                    // Also reset attachment cell
+                    const attachCell = row.querySelector('.payslip-attachment-cell');
+                    if (attachCell) {
+                        attachCell.innerHTML = `
+                            <label class="attachment-dropzone-btn inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-xs font-medium transition-all hover:scale-[1.02] cursor-pointer shadow-3xs group" title="Unggah Berkas Pendukung (PDF/Gambar)">
+                                <i data-lucide="paperclip" class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+                                <span>+ Lampiran</span>
+                                <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden inline-attachment-file-input" onchange="handleDirectFileSelect(this, 'attachment')">
+                            </label>
+                        `;
+                    }
+                }
+
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+
+                if (typeof showSessionToast === 'function') {
+                    showSessionToast('Sukses!', isAttachment ? 'Lampiran berhasil dihapus.' : 'Slip gaji berhasil dihapus.', 'success');
+                }
+            })
+            .catch(err => {
+                if (targetCell) {
+                    targetCell.innerHTML = prevHtml;
+                }
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+                if (typeof showSessionToast === 'function') {
+                    showSessionToast('Gagal Menghapus', err.message || 'Terjadi kesalahan jaringan.', 'error');
+                }
+            })
+            .finally(() => {
+                row.style.pointerEvents = 'auto';
+            });
+        }
+
+        // Attach Drag-and-Drop Listeners (Direct per-row upload)
+        function setupRowDragAndDrop() {
+            const rows = document.querySelectorAll('.payslip-row');
             
-            document.getElementById(dropzoneId).classList.remove('hidden');
-            const infoBox = document.getElementById(infoBoxId);
-            infoBox.classList.add('hidden');
-            infoBox.classList.remove('flex');
-            
-            const progressBar = document.getElementById(progressBarId);
-            progressBar.style.width = '0%';
+            rows.forEach(row => {
+                let dragCounter = 0;
+
+                row.addEventListener('dragenter', function (e) {
+                    e.preventDefault();
+                    dragCounter++;
+                    row.classList.add('bg-indigo-50/70', 'dark:bg-indigo-950/50', 'ring-2', 'ring-indigo-500', 'ring-inset');
+                });
+
+                row.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    if (e.dataTransfer) {
+                        e.dataTransfer.dropEffect = 'copy';
+                    }
+                });
+
+                row.addEventListener('dragleave', function (e) {
+                    e.preventDefault();
+                    dragCounter--;
+                    if (dragCounter <= 0) {
+                        dragCounter = 0;
+                        row.classList.remove('bg-indigo-50/70', 'dark:bg-indigo-950/50', 'ring-2', 'ring-indigo-500', 'ring-inset');
+                    }
+                });
+
+                row.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    dragCounter = 0;
+                    row.classList.remove('bg-indigo-50/70', 'dark:bg-indigo-950/50', 'ring-2', 'ring-indigo-500', 'ring-inset');
+
+                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        const file = e.dataTransfer.files[0];
+                        
+                        // Check if dropped specifically inside attachment cell or dropzone
+                        const inAttachmentZone = e.target.closest('.payslip-attachment-cell') || e.target.closest('.attachment-dropzone-btn') || e.target.closest('.btn-replace-attachment');
+                        const inSlipZone = e.target.closest('.payslip-slip-cell') || e.target.closest('.payslip-dropzone-btn') || e.target.closest('.btn-replace-payslip');
+                        
+                        let type = 'auto';
+                        if (inAttachmentZone) {
+                            type = 'attachment';
+                        } else if (inSlipZone) {
+                            type = 'payslip';
+                        }
+
+                        uploadSingleFileDirect(file, row, type);
+                    }
+                });
+            });
         }
     </script>
 </x-admin-layout>
@@ -712,6 +748,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        setupRowDragAndDrop();
+
         const container = document.getElementById('payslip-report-container');
 
         function loadTableContent(url) {
@@ -744,6 +782,9 @@
                     if (typeof lucide !== 'undefined') {
                         lucide.createIcons();
                     }
+
+                    // Rebind Drag and Drop handlers on new rows
+                    setupRowDragAndDrop();
 
                     // Sync URL in address bar without reload
                     window.history.pushState({}, '', url);

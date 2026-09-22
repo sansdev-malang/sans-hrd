@@ -71,6 +71,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('payslips', [\App\Http\Controllers\PayslipController::class, 'index'])->name('payslips.index');
     Route::post('payslips', [\App\Http\Controllers\PayslipController::class, 'store'])->name('payslips.store');
     Route::delete('payslips/{payslip}', [\App\Http\Controllers\PayslipController::class, 'destroy'])->name('payslips.destroy');
+    Route::delete('payslips/{payslip}/attachment', [\App\Http\Controllers\PayslipController::class, 'destroyAttachment'])->name('payslips.destroyAttachment');
 
     // Cutoff Settings
     Route::get('cutoff-settings', [\App\Http\Controllers\CutoffSettingController::class, 'index'])->name('cutoff-settings.index');

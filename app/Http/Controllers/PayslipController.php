@@ -108,8 +108,8 @@ class PayslipController extends Controller
             'employee_id' => 'required|integer',
             'school_unit_id' => 'required|integer',
             'period' => 'required|string|size:7', // YYYY-MM
-            'payslip_file' => ($exists ? 'nullable' : 'required') . '|mimes:pdf|max:512', // 512 KB max
-            'attachment_file' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:2048', // 2MB max
+            'payslip_file' => ($exists ? 'nullable' : 'required') . '|mimes:pdf|max:5120', // 5MB max
+            'attachment_file' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:5120', // 5MB max
         ]);
 
         try {
@@ -135,6 +135,7 @@ class PayslipController extends Controller
                 }
 
                 $payslip->file_path = $path;
+                $payslip->original_filename = $file->getClientOriginalName();
             }
 
             // Handle optional attachment file
@@ -169,12 +170,27 @@ class PayslipController extends Controller
                 }
 
                 $payslip->attachment_path = $attachmentPath;
+                $payslip->original_attachment_name = $attachmentFile->getClientOriginalName();
             }
 
             $payslip->save();
 
             // Notify the unit application about the new payslip
             $this->notifyUnitAboutPayslip($payslip);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Berkas berhasil diunggah.',
+                    'payslip' => [
+                        'id' => $payslip->id,
+                        'file_url' => $payslip->file_path ? Storage::url($payslip->file_path) : null,
+                        'original_filename' => $payslip->original_filename ?? ($payslip->file_path ? basename($payslip->file_path) : null),
+                        'attachment_url' => $payslip->attachment_path ? Storage::url($payslip->attachment_path) : null,
+                        'original_attachment_name' => $payslip->original_attachment_name ?? ($payslip->attachment_path ? basename($payslip->attachment_path) : null),
+                    ]
+                ]);
+            }
 
             if ($request->filled('redirect_url')) {
                 return redirect($request->input('redirect_url'))->with('success', 'Slip gaji berhasil diunggah.');
@@ -183,6 +199,12 @@ class PayslipController extends Controller
             return back()->with('success', 'Slip gaji berhasil diunggah.');
         } catch (\Exception $e) {
             Log::error('Upload Payslip Error: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengunggah slip gaji: ' . $e->getMessage()
+                ], 422);
+            }
             return back()->with('error', 'Gagal mengunggah slip gaji: ' . $e->getMessage());
         }
     }
@@ -195,7 +217,7 @@ class PayslipController extends Controller
         $unit = SchoolUnit::find($payslip->school_unit_id);
         if (!$unit) return;
 
-        $fileUrl = asset('storage/' . $payslip->file_path);
+        $fileUrl = $payslip->file_path ? asset('storage/' . $payslip->file_path) : null;
         $attachmentUrl = $payslip->attachment_path ? asset('storage/' . $payslip->attachment_path) : null;
 
         try {
@@ -224,6 +246,13 @@ class PayslipController extends Controller
             }
             $payslip->delete();
             
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Slip gaji berhasil dihapus.'
+                ]);
+            }
+
             if (request()->filled('redirect_url')) {
                 return redirect(request()->input('redirect_url'))->with('success', 'Slip gaji berhasil dihapus.');
             }
@@ -231,7 +260,55 @@ class PayslipController extends Controller
             return back()->with('success', 'Slip gaji berhasil dihapus.');
         } catch (\Exception $e) {
             Log::error('Delete Payslip Error: ' . $e->getMessage());
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menghapus slip gaji: ' . $e->getMessage()
+                ], 422);
+            }
             return back()->with('error', 'Gagal menghapus slip gaji: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete only the attachment from a payslip.
+     */
+    public function destroyAttachment(Payslip $payslip)
+    {
+        try {
+            if ($payslip->attachment_path && Storage::disk('public')->exists($payslip->attachment_path)) {
+                Storage::disk('public')->delete($payslip->attachment_path);
+            }
+            $payslip->attachment_path = null;
+            $payslip->original_attachment_name = null;
+            $payslip->save();
+
+            $this->notifyUnitAboutPayslip($payslip);
+
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lampiran berhasil dihapus.',
+                    'payslip' => [
+                        'id' => $payslip->id,
+                        'file_url' => $payslip->file_path ? Storage::url($payslip->file_path) : null,
+                        'original_filename' => $payslip->original_filename ?? ($payslip->file_path ? basename($payslip->file_path) : null),
+                        'attachment_url' => null,
+                        'original_attachment_name' => null,
+                    ]
+                ]);
+            }
+
+            return back()->with('success', 'Lampiran berhasil dihapus.');
+        } catch (\Exception $e) {
+            Log::error('Delete Attachment Error: ' . $e->getMessage());
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menghapus lampiran: ' . $e->getMessage()
+                ], 422);
+            }
+            return back()->with('error', 'Gagal menghapus lampiran: ' . $e->getMessage());
         }
     }
 
