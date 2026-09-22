@@ -457,7 +457,8 @@ class EmployeeWorkingShiftController extends Controller
                     $lastDay = $firstDay->copy()->endOfMonth();
                     $empIds = collect($employees)->pluck('id')->toArray();
                     
-                    $rosters = EmployeeWorkingShift::whereIn('employee_id', $empIds)
+                    $rosters = EmployeeWorkingShift::where('school_unit_id', $unitId)
+                        ->whereIn('employee_id', $empIds)
                         ->whereNotNull('roster_name')
                         ->where(function($query) use ($firstDay, $lastDay) {
                             $query->whereBetween('start_date', [$firstDay, $lastDay])
@@ -664,16 +665,8 @@ class EmployeeWorkingShiftController extends Controller
             return redirect()->route('employee-working-shifts.index')->with('error', 'Parameter tidak lengkap.');
         }
 
-        $shifts = WorkingShift::where('is_active', true)->orderBy('name')->get();
-        
-        $colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-sky-100 text-sky-700', 'bg-purple-100 text-purple-700'];
-        $hexBg = ['#e0e7ff', '#d1fae5', '#fef3c7', '#e0f2fe', '#f3e8ff'];
-        $hexText = ['#4338ca', '#047857', '#b45309', '#0369a1', '#7e22ce'];
-        foreach ($shifts as $index => $shift) {
-            $shift->color = 'shift-color-' . $shift->id;
-            $shift->hex_bg = $hexBg[$index % count($hexBg)];
-            $shift->hex_text = $hexText[$index % count($hexText)];
-        }
+        $shifts = WorkingShift::where('is_shift', true)->where('is_active', true)->orderBy('name')->get();
+        $shifts = $this->assignShiftColors($shifts);
         $bonusSchemas = \App\Models\BonusSchema::orderBy('name')->get();
         $employees = [];
         $rosterData = [];
@@ -760,15 +753,8 @@ class EmployeeWorkingShiftController extends Controller
         $empIdsParam = $request->query('emp_ids', []);
         
         $selectedShiftIds = $request->query('shift_ids');
-        $allShifts = \App\Models\WorkingShift::orderBy('name')->get();
-        $colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-sky-100 text-sky-700', 'bg-purple-100 text-purple-700'];
-        $hexBg = ['#e0e7ff', '#d1fae5', '#fef3c7', '#e0f2fe', '#f3e8ff'];
-        $hexText = ['#4338ca', '#047857', '#b45309', '#0369a1', '#7e22ce'];
-        foreach ($allShifts as $index => $shift) {
-            $shift->color = 'shift-color-' . $shift->id;
-            $shift->hex_bg = $hexBg[$index % count($hexBg)] ?? '#e0e7ff';
-            $shift->hex_text = $hexText[$index % count($hexText)] ?? '#4338ca';
-        }
+        $allShifts = \App\Models\WorkingShift::where('is_shift', true)->where('is_active', true)->orderBy('name')->get();
+        $allShifts = $this->assignShiftColors($allShifts);
         
         $bonusSchemas = \App\Models\BonusSchema::where('is_active', true)->orderBy('name')->get();
         $allBonusSchemas = \App\Models\BonusSchema::orderBy('name')->get();
@@ -780,34 +766,32 @@ class EmployeeWorkingShiftController extends Controller
             $unit = \App\Models\SchoolUnit::find($selectedUnitId);
             if ($unit) {
                 try {
-                    $resp = \Illuminate\Support\Facades\Http::withHeaders([
-                        'X-API-TOKEN' => $unit->api_token,
-                        'Accept' => 'application/json',
-                    ])->timeout(5)->get(rtrim($unit->api_url, '/') . '/employees');
+                    $allEmployees = $this->unitService->getAllEmployees();
+                    $rawEmployees = array_values(array_filter($allEmployees, function($emp) use ($selectedUnitId) {
+                        return (int)($emp['unit_id'] ?? 0) === (int)$selectedUnitId;
+                    }));
                     
-                    if ($resp->successful()) {
-                        $rawEmployees = $resp->json('data') ?? [];
-                        
-                        // Get all employees who have a permanent schedule (end_date IS NULL)
-                        $permanentEmployees = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
-                            ->whereNull('end_date')
-                            ->pluck('employee_id')
-                            ->toArray();
+                    // Get all employees who have a permanent schedule (end_date IS NULL)
+                    $permanentEmployees = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
+                        ->whereNull('end_date')
+                        ->pluck('employee_id')
+                        ->toArray();
 
-                        // Filter out permanent employees
-                        $employees = array_filter($rawEmployees, function($emp) use ($permanentEmployees) {
-                            return !in_array($emp['id'], $permanentEmployees);
-                        });
-                        
-                        // Re-index array for blade
-                        $employees = array_values($employees);
+                    // Filter out permanent employees
+                    $employees = array_filter($rawEmployees, function($emp) use ($permanentEmployees) {
+                        return !in_array($emp['id'], $permanentEmployees);
+                    });
+                    
+                    // Re-index array for blade
+                    $employees = array_values($employees);
 
                         if (!empty($empIdsParam)) {
                             // Check for conflicts: employee is assigned to a DIFFERENT roster name in this month
                             $firstDay = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
                             $lastDay = $firstDay->copy()->endOfMonth();
                             
-                            $conflictingAssignments = \App\Models\EmployeeWorkingShift::whereIn('employee_id', $empIdsParam)
+                            $conflictingAssignments = \App\Models\EmployeeWorkingShift::where('school_unit_id', $selectedUnitId)
+                                ->whereIn('employee_id', $empIdsParam)
                                 ->whereNotNull('roster_name')
                                 ->where('roster_name', '!=', $rosterNameParam)
                                 ->where(function($query) use ($firstDay, $lastDay) {
@@ -839,7 +823,6 @@ class EmployeeWorkingShiftController extends Controller
                                     ->with('error', "Gagal membuat roster baru: {$conflictEmpName} sudah terdaftar pada Roster \"{$conflictRosterName}\" di bulan ini. Silakan edit roster tersebut atau keluarkan pegawai dari roster aktif tersebut terlebih dahulu.");
                             }
                         }
-                    }
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error("Failed to fetch employees for roster: " . $e->getMessage());
                 }
@@ -959,7 +942,8 @@ class EmployeeWorkingShiftController extends Controller
         // Check for conflicts: employee is assigned to a DIFFERENT roster name in this month
         $submittedEmpIds = array_keys($rosterInput);
         if (!empty($submittedEmpIds)) {
-            $conflictingQuery = \App\Models\EmployeeWorkingShift::whereIn('employee_id', $submittedEmpIds)
+            $conflictingQuery = \App\Models\EmployeeWorkingShift::where('school_unit_id', $unitId)
+                ->whereIn('employee_id', $submittedEmpIds)
                 ->whereNotNull('roster_name')
                 ->where('roster_name', '!=', $rosterName);
 
@@ -1179,16 +1163,8 @@ class EmployeeWorkingShiftController extends Controller
         }
         
         $unit = SchoolUnit::findOrFail($unitId);
-        $shifts = WorkingShift::with('details')->orderBy('name')->get();
-        
-        $colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-sky-100 text-sky-700', 'bg-purple-100 text-purple-700'];
-        $hexBg = ['#e0e7ff', '#d1fae5', '#fef3c7', '#e0f2fe', '#f3e8ff'];
-        $hexText = ['#4338ca', '#047857', '#b45309', '#0369a1', '#7e22ce'];
-        foreach ($shifts as $index => $shift) {
-            $shift->color = $colors[$index % count($colors)];
-            $shift->hex_bg = $hexBg[$index % count($hexBg)];
-            $shift->hex_text = $hexText[$index % count($hexText)];
-        }
+        $shifts = WorkingShift::with('details')->where('is_shift', true)->where('is_active', true)->orderBy('name')->get();
+        $shifts = $this->assignShiftColors($shifts);
         $daysInMonth = \Carbon\Carbon::create($year, $month)->daysInMonth;
         
         $allEmployees = $this->unitService->getAllEmployees();
@@ -1443,11 +1419,12 @@ class EmployeeWorkingShiftController extends Controller
             
             $sheet->setCellValue('C' . $legendRow, $shift->name);
             $sheet->mergeCells("C{$legendRow}:E{$legendRow}");
-            $sheet->getStyle("C{$legendRow}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("C{$legendRow}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
             
             $cIdx = 6;
             for ($i = 1; $i <= 7; $i++) {
-                $detail = $shift->details->firstWhere('day_of_week', $i);
+                $dayDb = ($i == 7) ? 0 : $i;
+                $detail = $shift->details ? $shift->details->firstWhere('day_of_week', $dayDb) : null;
                 $timeStr = $detail && !$detail->is_off ? substr($detail->start_time, 0, 5) . '-' . substr($detail->end_time, 0, 5) : 'Libur';
                 
                 $colL1 = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($cIdx);
@@ -1467,7 +1444,7 @@ class EmployeeWorkingShiftController extends Controller
         // HRD Signature
         // Calculate Signature position dynamically based on last date column or notes
         $sigRow = $legendRow + 2;
-        $sigStartColIdx = max((2 + $daysInMonth) - 4, $noteStartIdx);
+        $sigStartColIdx = max((2 + $daysInMonth) - 4, 10);
         $sigStartCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($sigStartColIdx);
         $sigEndCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($sigStartColIdx + 4);
         
@@ -1519,5 +1496,53 @@ class EmployeeWorkingShiftController extends Controller
         }
 
         return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Assign deterministic, high-contrast, beautiful colors to working shifts
+     */
+    private function assignShiftColors($shifts)
+    {
+        // Defined semantic color slots:
+        $colorPagi = ['bg' => '#d1fae5', 'text' => '#047857', 'class' => 'bg-emerald-100 text-emerald-700']; // Green
+        $colorSiang = ['bg' => '#ffedd5', 'text' => '#c2410c', 'class' => 'bg-orange-100 text-orange-700'];  // Orange / Amber
+        $colorMalam = ['bg' => '#e0e7ff', 'text' => '#4338ca', 'class' => 'bg-indigo-100 text-indigo-700'];  // Indigo / Blue
+        $colorBelakang = ['bg' => '#f3e8ff', 'text' => '#7e22ce', 'class' => 'bg-purple-100 text-purple-700']; // Purple / Violet
+
+        // General distinct fallback palette for other custom shifts (non-red, avoiding conflict with OFF/Libur)
+        $fallbackPalette = [
+            ['bg' => '#e0f2fe', 'text' => '#0369a1', 'class' => 'bg-sky-100 text-sky-700'],       // Sky Blue
+            ['bg' => '#ccfbf1', 'text' => '#0f766e', 'class' => 'bg-teal-100 text-teal-700'],     // Teal
+            ['bg' => '#fae8ff', 'text' => '#a21caf', 'class' => 'bg-fuchsia-100 text-fuchsia-700'], // Fuchsia / Lavender
+            ['bg' => '#cffafe', 'text' => '#0e7490', 'class' => 'bg-cyan-100 text-cyan-700'],     // Cyan
+            ['bg' => '#ecfccb', 'text' => '#4d7c0f', 'class' => 'bg-lime-100 text-lime-700'],     // Lime
+            ['bg' => '#ede9fe', 'text' => '#5b21b6', 'class' => 'bg-violet-100 text-violet-700'], // Violet
+        ];
+
+        $fallbackIndex = 0;
+
+        foreach ($shifts as $shift) {
+            $name = strtolower(($shift->name ?? '') . ' ' . ($shift->short_code ?? '') . ' ' . ($shift->code ?? ''));
+
+            if (preg_match('/\b(pagi|morning|sp1)\b|pagi/i', $name)) {
+                $chosen = $colorPagi;
+            } elseif (preg_match('/\b(siang|sore|afternoon|sp2)\b|siang|sore/i', $name)) {
+                $chosen = $colorSiang;
+            } elseif (preg_match('/\b(malam|night|sp3)\b|malam/i', $name)) {
+                $chosen = $colorMalam;
+            } elseif (preg_match('/\b(belakang|toko|gudang|pb|sp4)\b|belakang/i', $name)) {
+                $chosen = $colorBelakang;
+            } else {
+                $chosen = $fallbackPalette[$fallbackIndex % count($fallbackPalette)];
+                $fallbackIndex++;
+            }
+
+            $shift->color = 'shift-color-' . $shift->id;
+            $shift->hex_bg = $chosen['bg'];
+            $shift->hex_text = $chosen['text'];
+            $shift->tailwind_color = $chosen['class'];
+        }
+
+        return $shifts;
     }
 }

@@ -5,19 +5,21 @@
     <title>Export PDF - {{ $rosterName }} - {{ $month }}/{{ $year }}</title>
     <style>
         body { font-family: sans-serif; font-size: 10px; margin: 0; padding: 10px; }
-        h2 { text-align: center; margin-bottom: 5px; font-size: 16px; }
-        .info { margin-bottom: 15px; font-size: 11px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #333; padding: 4px; text-align: center; font-size: 9px; }
-        th { background-color: #f1f5f9; }
+        h2 { text-align: center; margin-bottom: 12px; font-size: 15px; }
+        .main-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        .main-table th, .main-table td { border: 1px solid #333; padding: 3px 2px; text-align: center; font-size: 8.5px; }
+        .main-table th { background-color: #f1f5f9; }
         .bg-weekend { background-color: #fee2e2; }
-        .text-left { text-align: left; }
-        .header-section { margin-bottom: 20px; }
-        .legend-title { font-weight: bold; margin-bottom: 5px; font-size: 11px; }
-        .legend-table { width: auto; min-width: 300px; }
-        .legend-table th, .legend-table td { padding: 4px 8px; font-size: 10px; }
-        .notes-section { margin-top: 20px; font-size: 11px; border: 1px solid #ccc; padding: 10px; background-color: #f9fafb; }
-        .day-name { font-size: 7px; font-weight: normal; display: block; margin-top: 2px; }
+        .text-left { text-align: left !important; }
+        .main-table th.text-left, .main-table td.text-left { text-align: left !important; }
+        .legend-table th.text-left, .legend-table td.text-left { text-align: left !important; }
+        .header-section { margin-bottom: 15px; }
+        .legend-title { font-weight: bold; margin-bottom: 4px; font-size: 9.5px; }
+        .day-name { font-size: 6.5px; font-weight: normal; display: block; margin-top: 1px; }
+
+        .legend-table { border-collapse: collapse; width: auto; }
+        .legend-table th, .legend-table td { border: 1px solid #333; padding: 2.5px 3px; font-size: 8px; text-align: center; }
+        .legend-table th { background-color: #f1f5f9; }
     </style>
 </head>
 <body>
@@ -48,11 +50,11 @@
         <h2>JADWAL {{ mb_strtoupper($rosterName) }}</h2>
     </div>
 
-    <table>
+    <table class="main-table">
         <thead>
             <tr>
-                <th rowspan="2" style="width: 20px;">No</th>
-                <th rowspan="2" class="text-left" style="width: 150px;">Nama Pegawai</th>
+                <th rowspan="2" style="width: 25px; text-align: center;">No</th>
+                <th rowspan="2" class="text-left" style="width: 140px; padding-left: 6px; text-align: left; white-space: nowrap;">Nama Pegawai</th>
                 <th colspan="{{ $daysInMonth }}">Tanggal & Hari</th>
             </tr>
             <tr>
@@ -77,8 +79,8 @@
                     $rowData = $rosterData[$empId] ?? null;
                 @endphp
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td class="text-left">{{ $emp['name'] }}</td>
+                    <td style="width: 25px; text-align: center;">{{ $index + 1 }}</td>
+                    <td class="text-left" style="width: 140px; padding-left: 6px; text-align: left; white-space: nowrap;">{{ $emp['name'] }}</td>
                     @for($d = 1; $d <= $daysInMonth; $d++)
                         @php
                             $shiftId = $rowData['days'][$d] ?? '';
@@ -111,71 +113,73 @@
         </tbody>
     </table>
 
-    <table style="width: 100%; border: none; margin-top: 15px;">
+    <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 5px;">
         <tr style="border: none;">
-            <td style="border: none; vertical-align: top; padding: 0; width: 65%; text-align: left;">
-                <div class="legend-title" style="text-align: left;">Keterangan Shift:</div>
-                <table class="legend-table" style="width: 100%; margin-top: 5px;">
+            <td style="border: none; vertical-align: top; padding: 0; text-align: left;">
+                <div class="legend-title">Keterangan Shift:</div>
+                <table class="legend-table">
                     <thead>
                         <tr>
-                            <th class="text-center">Kode</th>
-                            <th class="text-left">Nama Shift</th>
-                            <th>Sen</th>
-                            <th>Sel</th>
-                            <th>Rab</th>
-                            <th>Kam</th>
-                            <th>Jum</th>
-                            <th>Sab</th>
-                            <th>Min</th>
+                            <th style="width: 25px; text-align: center;">Kode</th>
+                            <th class="text-left" style="width: 140px; padding-left: 6px; text-align: left;">Nama Shift</th>
+                            <th style="width: 48px; text-align: center;">Sen</th>
+                            <th style="width: 48px; text-align: center;">Sel</th>
+                            <th style="width: 48px; text-align: center;">Rab</th>
+                            <th style="width: 48px; text-align: center;">Kam</th>
+                            <th style="width: 48px; text-align: center;">Jum</th>
+                            <th style="width: 48px; text-align: center;">Sab</th>
+                            <th style="width: 48px; text-align: center;">Min</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @php $hasShift = false; @endphp
-                        @foreach($shifts as $shift)
-                            @if(isset($usedShiftIds[$shift->id]))
-                                @php $hasShift = true; @endphp
+                        @php
+                            $activeShifts = collect($shifts)->filter(fn($s) => isset($usedShiftIds[$s->id]))->values();
+                        @endphp
+                        @if($activeShifts->count() > 0)
+                            @foreach($activeShifts as $shift)
                                 <tr>
-                                    <td class="text-center" style="background-color: {{ $shift->hex_bg }}; color: {{ $shift->hex_text }}; border: 1px solid #333;"><strong>{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</strong></td>
-                                    <td class="text-left">{{ $shift->name }}</td>
+                                    <td style="width: 25px; background-color: {{ $shift->hex_bg }}; color: {{ $shift->hex_text }}; text-align: center;"><strong>{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</strong></td>
+                                    <td class="text-left" style="width: 140px; padding-left: 6px; text-align: left;">{{ $shift->name }}</td>
                                     @for($i = 1; $i <= 7; $i++)
                                         @php
-                                            $detail = $shift->details->firstWhere('day_of_week', $i);
+                                            $dayDb = ($i == 7) ? 0 : $i;
+                                            $detail = $shift->details ? $shift->details->firstWhere('day_of_week', $dayDb) : null;
                                             $text = '-';
                                             if ($detail) {
                                                 if ($detail->is_off) {
-                                                    $text = '<span style="color: #ef4444;">Libur</span>';
+                                                    $text = '<span style="color: #64748b; font-size: 7.5px;">Libur</span>';
                                                 } else {
-                                                    $text = \Carbon\Carbon::parse($detail->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($detail->end_time)->format('H:i');
+                                                    $text = substr($detail->start_time, 0, 5) . '-' . substr($detail->end_time, 0, 5);
                                                 }
                                             }
                                         @endphp
-                                        <td>{!! $text !!}</td>
+                                        <td style="width: 48px; font-size: 7.5px; white-space: nowrap; text-align: center;">{!! $text !!}</td>
                                     @endfor
                                 </tr>
-                            @endif
-                        @endforeach
-                        @if(!$hasShift)
+                            @endforeach
+                        @else
                             <tr>
-                                <td colspan="8" class="text-left">Belum ada shift yang dijadwalkan pada roster ini.</td>
+                                <td colspan="9" style="padding: 4px; text-align: left; font-size: 8px;">Belum ada shift yang dijadwalkan pada roster ini.</td>
                             </tr>
                         @endif
                     </tbody>
                 </table>
             </td>
             
-            <td style="border: none; vertical-align: top; padding: 0 0 0 20px; width: 35%; text-align: left;">
+            <td style="border: none; vertical-align: top; text-align: right; width: 220px; padding-top: 5px;">
                 @if($notes)
-                <div class="legend-title" style="text-align: left;">Catatan Tambahan:</div>
-                <div class="notes-section" style="margin-top: 5px; line-height: 1.4; text-align: left;">
-                    {!! nl2br(e($notes)) !!}
+                <div style="text-align: left; margin-bottom: 10px;">
+                    <div style="font-weight: bold; font-size: 9px; margin-bottom: 2px;">Catatan:</div>
+                    <div style="line-height: 1.25; font-size: 8px; border: 1px solid #ccc; padding: 4px 6px; background-color: #f9fafb;">
+                        {!! nl2br(e($notes)) !!}
+                    </div>
                 </div>
-                <div style="margin-top: 40px; text-align: center;">
-                @else
-                <div style="margin-top: 120px; text-align: center;">
                 @endif
-                    <p style="margin: 0;">Mengetahui,</p>
-                    <p style="margin: 5px 0 60px 0; font-weight: bold;">HRD</p>
-                    <p style="margin: 0;">(_________________________)</p>
+                
+                <div style="display: inline-block; width: 170px; text-align: center; margin-top: {{ $notes ? '0px' : '15px' }};">
+                    <p style="margin: 0; font-size: 9.5px;">Mengetahui,</p>
+                    <p style="margin: 3px 0 45px 0; font-weight: bold; font-size: 9.5px;">HRD</p>
+                    <p style="margin: 0; font-size: 9px;">( ________________________ )</p>
                 </div>
             </td>
         </tr>

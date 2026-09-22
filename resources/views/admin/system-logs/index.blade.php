@@ -293,7 +293,7 @@
 
                         <!-- Collapsible Stack Trace -->
                         @if(!empty($entry['stack_trace']))
-                            <div x-show="open" x-collapse x-cloak class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                            <div x-show="open" x-transition.opacity.duration.150ms x-cloak class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                                 <div class="bg-slate-950 text-slate-200 rounded-lg p-3 text-[11px] font-mono overflow-x-auto max-h-96 border border-slate-800">
                                     <pre class="whitespace-pre-wrap leading-relaxed select-all">{{ $entry['stack_trace'] }}</pre>
                                 </div>

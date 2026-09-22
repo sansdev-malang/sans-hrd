@@ -55,7 +55,7 @@
                 <template x-if="activeTab === 'reward'">
                     <button @click="showAddRewardModal = true; rewardSelectedUnits = allUnitIds; rewardSelectedEmployees = []; rewardTargetType = 'all'; employeeSearch = ''; employeePositionFilter = '';" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-105 duration-150 flex items-center gap-1.5 border-0 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                        <span>+ Tambah Reward Libur</span>
+                        <span>Tambah Reward Libur</span>
                     </button>
                 </template>
                 <template x-if="activeTab === 'standard'">
@@ -66,7 +66,7 @@
                         </a>
                         <button @click="showAddModal = true" class="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-all hover:scale-105 duration-150 flex items-center gap-1.5 border-0 cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            <span>+ Tambah Libur Baru</span>
+                            <span>Tambah Libur Baru</span>
                         </button>
                     </div>
                 </template>
@@ -168,9 +168,6 @@
                                                     <span>🎯 {{ $empCount }} Pegawai Terpilih</span>
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
                                                 </button>
-                                                <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[160px]">
-                                                    {{ implode(', ', array_slice($reward->employee_names_list, 0, 2)) }}{{ $empCount > 2 ? ' +' . ($empCount - 2) . ' lainnya' : '' }}
-                                                </span>
                                             </div>
                                         @endif
                                     </td>
@@ -505,7 +502,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     <!-- Live Search -->
                                     <div class="relative">
-                                        <input type="text" x-model="employeeSearch" placeholder="Cari nama pegawai / NIK..." class="w-full text-xs pl-8 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="employeeSearch" placeholder="Cari nama pegawai..." class="w-full text-xs pl-8 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
                                     </div>
 
@@ -690,7 +687,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     <!-- Live Search -->
                                     <div class="relative">
-                                        <input type="text" x-model="editEmployeeSearch" placeholder="Cari nama pegawai / NIK..." class="w-full text-xs pl-8 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="editEmployeeSearch" placeholder="Cari nama pegawai..." class="w-full text-xs pl-8 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
                                     </div>
 

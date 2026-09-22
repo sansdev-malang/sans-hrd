@@ -19,3 +19,17 @@
     -webkit-backdrop-filter: blur(16px) !important;
     backdrop-filter: blur(16px) !important;
 }
+
+/* Eliminate native select popup blank / white delay on focus/click in Chromium */
+select {
+    transition: none !important;
+}
+select option, select optgroup {
+    background-color: #ffffff;
+    color: #0f172a;
+}
+.dark select option, .dark select optgroup {
+    background-color: #0f172a;
+    color: #f8fafc;
+}
+

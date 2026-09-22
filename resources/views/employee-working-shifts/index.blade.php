@@ -414,6 +414,7 @@
                 </a>
             </div>
 
+            <div id="neglected-warning-container">
             @if(count($neglectedEmployees) > 0)
                 <div @click="showNeglectedModal = true" class="w-full sm:w-auto max-w-md px-3 py-1.5 bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 rounded-xl flex items-center justify-between gap-3 text-left shadow-3xs hover:bg-rose-100/60 dark:hover:bg-rose-900/35 transition-all cursor-pointer">
                     <div class="flex items-center gap-2.5">
@@ -430,6 +431,7 @@
                     </span>
                 </div>
             @endif
+            </div>
         </div>
 
         <!-- FILTERS & SEARCH (MODERN COMMAND BAR STYLE) -->
@@ -478,7 +480,7 @@
 
                     <!-- Filter Per Page -->
                     <div class="w-full md:w-32 shrink-0">
-                        <select name="per_page" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                        <select name="per_page" onchange="triggerFilterForm(this)" class="w-full text-xs h-10 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                             <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 baris</option>
                             <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25 baris</option>
                             <option value="50" {{ request('per_page', '50') == '50' ? 'selected' : '' }}>50 baris</option>
@@ -706,30 +708,28 @@
         </div>
 
         <!-- MODAL DETAIL PEGAWAI (SLIDE-OVER / CENTERING WITH BLUR AND PROPER BACKDROP) -->
-        <template x-teleport="body">
-            <div x-cloak x-show="showModal" 
-                 class="fixed inset-0 z-[9999] overflow-hidden" style="display: none;">
-                
-                <!-- Backdrop overlay -->
-                <div x-show="showModal" 
-                     x-transition:enter="ease-out duration-150" 
-                     x-transition:enter-start="opacity-0" 
-                     x-transition:enter-end="opacity-100" 
-                     x-transition:leave="ease-in duration-100" 
-                     x-transition:leave-start="opacity-100" 
-                     x-transition:leave-end="opacity-0" 
-                     @click="showModal = false"
-                     class="fixed inset-0 transition-opacity" 
-                     style="background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);" 
-                     aria-hidden="true"></div>
+        <div x-cloak x-show="showModal" 
+             class="fixed inset-0 z-[9999] overflow-hidden" style="display: none;">
+            
+            <!-- Backdrop overlay -->
+            <div x-show="showModal" 
+                 x-transition:enter="ease-out duration-75" 
+                 x-transition:enter-start="opacity-0" 
+                 x-transition:enter-end="opacity-100" 
+                 x-transition:leave="ease-in duration-75" 
+                 x-transition:leave-start="opacity-100" 
+                 x-transition:leave-end="opacity-0" 
+                 @click="showModal = false"
+                 class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+                 aria-hidden="true"></div>
 
                 <!-- Content Panel -->
                 <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
                     <div x-show="showModal" 
-                         x-transition:enter="transform transition ease-out duration-150" 
+                         x-transition:enter="transform transition ease-out duration-75" 
                          x-transition:enter-start="translate-x-full" 
                          x-transition:enter-end="translate-x-0" 
-                         x-transition:leave="transform transition ease-in duration-100" 
+                         x-transition:leave="transform transition ease-in duration-75" 
                          x-transition:leave-start="translate-x-0" 
                          x-transition:leave-end="translate-x-full" 
                          class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between text-left">
@@ -807,31 +807,28 @@
                     </div>
                 </div>
             </div>
-        </template>
 
         <!-- MODAL TUGASKAN SHIFT BARU -->
-        <template x-teleport="body">
-            <div x-cloak x-show="showAssignmentModal" 
-                 x-transition:enter="transition ease-out duration-150"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-100"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 @keydown.escape.window="showAssignmentModal = false"
-                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
-                
-                <!-- Backdrop overlay -->
-                <div class="fixed inset-0 transition-opacity" 
-                     style="background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);" 
-                     @click="showAssignmentModal = false"></div>
+        <div x-cloak x-show="showAssignmentModal" 
+             x-transition:enter="transition ease-out duration-75"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="showAssignmentModal = false"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
+            
+            <!-- Backdrop overlay -->
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+                 @click="showAssignmentModal = false"></div>
                 
                 <!-- Content Box -->
                 <div x-show="showAssignmentModal"
-                     x-transition:enter="transition ease-out duration-150 transform"
+                     x-transition:enter="transition ease-out duration-75 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-100 transform"
+                     x-transition:leave="transition ease-in duration-75 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10"
@@ -958,7 +955,7 @@
                                     <div>
                                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Sekolah</label>
                                         <select x-model="selectedUnit" name="school_unit_id" @change="fetchEmployees()"
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Unit...</option>
                                             @foreach ($units as $unit)
                                                 <option value="{{ $unit->id }}">{{ $unit->name }}</option>
@@ -970,7 +967,7 @@
                                     <div>
                                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Jam Kerja Shift (Template)</label>
                                         <select x-model="workingShiftId" name="working_shift_id" required
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Shift...</option>
                                             @foreach ($shifts->where('is_shift', false) as $shift)
                                                 <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
@@ -982,7 +979,7 @@
                                     <div>
                                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Skema Bonus <span class="text-rose-500">*</span></label>
                                         <select x-model="bonusSchemaId" name="bonus_schema_id" required
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Skema Bonus...</option>
                                             @php
                                                 $earlySchemas = $bonusSchemas->where('calculation_mode', 'early_arrival');
@@ -1070,7 +1067,7 @@
                                                 
                                                 <!-- Position Filter -->
                                                 <select x-model="selectedPosition" :disabled="employees.length === 0"
-                                                    class="text-xs h-8 px-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                                                    class="text-xs h-8 px-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                                     <option value="">Semua Jabatan</option>
                                                     <template x-for="pos in uniquePositions" :key="pos">
                                                         <option :value="pos" x-text="pos"></option>
@@ -1119,31 +1116,28 @@
                     </form>
                 </div>
             </div>
-        </template>
 
         <!-- MODAL EDIT BATCH SHIFT -->
-        <template x-teleport="body">
-            <div x-cloak x-show="showEditModal" 
-                 x-transition:enter="transition ease-out duration-150"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-100"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 @keydown.escape.window="showEditModal = false"
-                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
-                
-                <!-- Backdrop overlay -->
-                <div class="fixed inset-0 transition-opacity" 
-                     style="background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);" 
-                     @click="showEditModal = false"></div>
+        <div x-cloak x-show="showEditModal" 
+             x-transition:enter="transition ease-out duration-75"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="showEditModal = false"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
+            
+            <!-- Backdrop overlay -->
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+                 @click="showEditModal = false"></div>
                 
                 <!-- Content Box -->
                 <div x-show="showEditModal"
-                     x-transition:enter="transition ease-out duration-150 transform"
+                     x-transition:enter="transition ease-out duration-75 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-100 transform"
+                     x-transition:leave="transition ease-in duration-75 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
@@ -1186,7 +1180,7 @@
                                     <div>
                                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Sekolah</label>
                                         <select name="school_unit_id" required x-model="editUnitId" @change="loadEditEmployeesForUnit()"
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Unit Sekolah</option>
                                             @foreach ($units as $unit)
                                                 <option value="{{ $unit->id }}">{{ $unit->name }}</option>
@@ -1198,7 +1192,7 @@
                                     <div>
                                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Template Shift Kerja</label>
                                         <select name="working_shift_id" required x-model="editWorkingShiftId"
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Template Shift</option>
                                             @foreach ($shifts->where('is_shift', false) as $shift)
                                                 <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
@@ -1210,7 +1204,7 @@
                                     <div>
                                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Skema Bonus <span class="text-rose-500">*</span></label>
                                         <select name="bonus_schema_id" x-model="editBonusSchemaId" required
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
+                                            class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Skema Bonus...</option>
                                             @php
                                                 $allEarly = ($allBonusSchemas ?? $bonusSchemas)->where('calculation_mode', 'early_arrival');
@@ -1298,7 +1292,7 @@
                                                 
                                                 <!-- Position Filter -->
                                                 <select x-model="editSelectedPosition" :disabled="editEmployees.length === 0"
-                                                    class="text-xs h-8 px-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                                                    class="text-xs h-8 px-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                                     <option value="">Semua Jabatan</option>
                                                     <template x-for="pos in uniqueEditPositions" :key="pos">
                                                         <option :value="pos" x-text="pos"></option>
@@ -1347,38 +1341,35 @@
                     </form>
                 </div>
             </div>
-        </template>
 
         <!-- MODAL BUAT ROSTER BARU -->
-        <template x-teleport="body">
-            <div x-cloak x-show="showCreateModal" 
-                 x-transition:enter="transition ease-out duration-150"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-100"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 @keydown.escape.window="showCreateModal = false"
-                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
-                
-                <!-- Backdrop overlay -->
-                <div class="fixed inset-0 transition-opacity" 
-                     style="background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);" 
-                     @click="showCreateModal = false"></div>
+        <div x-cloak x-show="showCreateModal" 
+             x-transition:enter="transition ease-out duration-75"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="showCreateModal = false"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
+            
+            <!-- Backdrop overlay -->
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+                 @click="showCreateModal = false"></div>
                 
                 <!-- Content Box -->
                 <div x-show="showCreateModal"
-                     x-transition:enter="transition ease-out duration-150 transform"
+                     x-transition:enter="transition ease-out duration-75 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-100 transform"
+                     x-transition:leave="transition ease-in duration-75 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
-                     class="relative w-full sm:max-w-4xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden text-left text-xs z-10">
+                     class="relative w-full sm:max-w-5xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 h-[88vh] max-h-[760px] min-h-[560px] flex flex-col overflow-hidden text-left text-xs z-10 shadow-2xl">
                     
                     <form action="{{ route('employee-working-shifts.roster') }}" method="GET" 
                           @submit.prevent="if (!createUnitId || !createBonusSchemaId || selectedEmps.length === 0 || selectedShifts.length === 0) { createShowError = true; } else { createShowError = false; $el.submit(); }"
-                          class="flex flex-col flex-1 overflow-hidden">
+                          class="flex flex-col flex-1 overflow-hidden min-h-0">
                         <input type="hidden" name="old_roster_name" x-model="createOldRosterName">
                         <!-- Header -->
                         <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
@@ -1394,103 +1385,111 @@
                             </button>
                         </div>
 
-                        <!-- Scrollable Body -->
-                        <div class="flex-1 overflow-y-auto p-5 space-y-5">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div class="space-y-4">
-                                    <!-- Unit Sekolah -->
-                                    <div>
-                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center">
-                                            <span>Unit Sekolah <span class="text-rose-500">*</span></span>
-                                            <span x-show="createShowError && !createUnitId" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Wajib pilih unit</span>
-                                        </label>
-                                        <select x-model="createUnitId" name="unit_id" @change="loadEmployeesForUnit()"
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
-                                            <option value="">Pilih Unit Sekolah...</option>
-                                            @foreach ($units as $unit)
-                                                <option value="{{ $unit->id }}">{{ $unit->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <!-- Nama Roster -->
-                                    <div>
-                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Roster <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="roster_name" x-model="createRosterName" required placeholder="Misal: Roster Satpam"
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all">
-                                    </div>
-
-                                    <!-- Skema Bonus -->
-                                    <div>
-                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center">
-                                            <span>Skema Bonus <span class="text-rose-500">*</span></span>
-                                            <span x-show="createShowError && !createBonusSchemaId" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Wajib pilih skema</span>
-                                        </label>
-                                        <select x-model="createBonusSchemaId" name="bonus_schema_id" required
-                                            class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
-                                            <option value="">Pilih Skema Bonus...</option>
-                                            @php
-                                                $earlySchemas = $bonusSchemas->where('calculation_mode', 'early_arrival');
-                                                $lateSchemas = $bonusSchemas->where('calculation_mode', 'late_tolerance');
-                                            @endphp
-                                            @if($earlySchemas->count() > 0)
-                                                <optgroup label="⚡ Ketepatan Waktu (Hadir Lebih Awal)">
-                                                    @foreach ($earlySchemas as $schema)
-                                                        <option value="{{ $schema->id }}">{{ $schema->name }}</option>
-                                                    @endforeach
-                                                </optgroup>
-                                            @endif
-                                            @if($lateSchemas->count() > 0)
-                                                <optgroup label="⏱️ Toleransi Keterlambatan">
-                                                    @foreach ($lateSchemas as $schema)
-                                                        <option value="{{ $schema->id }}">{{ $schema->name }}</option>
-                                                    @endforeach
-                                                </optgroup>
-                                            @endif
-                                        </select>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <!-- Bulan -->
+                        <!-- Modal Body (Two columns stretching equally) -->
+                        <div class="flex-1 overflow-y-auto md:overflow-hidden p-5 flex flex-col min-h-0">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch flex-1 min-h-0">
+                                <!-- Kolom Kiri -->
+                                <div class="space-y-3 flex flex-col h-full min-h-0">
+                                    <!-- Baris 1: Unit Sekolah & Nama Roster -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
+                                        <!-- Unit Sekolah -->
                                         <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Bulan</label>
-                                            <select name="month" x-model="createMonth" @change="loadEmployeesForUnit()"
-                                                class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all cursor-pointer">
-                                                @php
-                                                    $bulanIndo = [
-                                                        '',
-                                                        'Januari',
-                                                        'Februari',
-                                                        'Maret',
-                                                        'April',
-                                                        'Mei',
-                                                        'Juni',
-                                                        'Juli',
-                                                        'Agustus',
-                                                        'September',
-                                                        'Oktober',
-                                                        'November',
-                                                        'Desember',
-                                                    ];
-                                                @endphp
-                                                @for ($i = 1; $i <= 12; $i++)
-                                                    <option value="{{ $i }}">{{ $bulanIndo[$i] }}</option>
-                                                @endfor
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex justify-between items-center text-xs">
+                                                <span>Unit Sekolah <span class="text-rose-500">*</span></span>
+                                                <span x-show="createShowError && !createUnitId" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Wajib</span>
+                                            </label>
+                                            <select x-model="createUnitId" name="unit_id" @change="loadEmployeesForUnit()"
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                                <option value="">Pilih Unit...</option>
+                                                @foreach ($units as $unit)
+                                                    <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
 
-                                        <!-- Tahun -->
+                                        <!-- Nama Roster -->
                                         <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tahun</label>
-                                            <input type="number" name="year" x-model="createYear" @change="loadEmployeesForUnit()"
-                                                class="text-xs w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono">
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1 text-xs">Nama Roster <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="roster_name" x-model="createRosterName" required placeholder="Misal: Roster Satpam"
+                                                class="text-xs w-full h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
                                         </div>
                                     </div>
 
-                                    <!-- Pilih Shift yang Digunakan -->
-                                    <div class="mt-4 text-left">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <!-- Baris 2: Skema Bonus & Periode (Bulan/Tahun) -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
+                                        <!-- Skema Bonus -->
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex justify-between items-center text-xs">
+                                                <span>Skema Bonus <span class="text-rose-500">*</span></span>
+                                                <span x-show="createShowError && !createBonusSchemaId" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Wajib</span>
+                                            </label>
+                                            <select x-model="createBonusSchemaId" name="bonus_schema_id" required
+                                                class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                                <option value="">Pilih Skema...</option>
+                                                @php
+                                                    $earlySchemas = $bonusSchemas->where('calculation_mode', 'early_arrival');
+                                                    $lateSchemas = $bonusSchemas->where('calculation_mode', 'late_tolerance');
+                                                @endphp
+                                                @if($earlySchemas->count() > 0)
+                                                    <optgroup label="⚡ Hadir Lebih Awal">
+                                                        @foreach ($earlySchemas as $schema)
+                                                            <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                @endif
+                                                @if($lateSchemas->count() > 0)
+                                                    <optgroup label="⏱️ Toleransi Keterlambatan">
+                                                        @foreach ($lateSchemas as $schema)
+                                                            <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                @endif
+                                            </select>
+                                        </div>
+
+                                        <!-- Bulan & Tahun -->
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <!-- Bulan -->
+                                            <div>
+                                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1 text-xs">Bulan</label>
+                                                <select name="month" x-model="createMonth" @change="loadEmployeesForUnit()"
+                                                    class="w-full text-xs h-9 px-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                                    @php
+                                                        $bulanIndo = [
+                                                            '',
+                                                            'Jan',
+                                                            'Feb',
+                                                            'Mar',
+                                                            'Apr',
+                                                            'Mei',
+                                                            'Jun',
+                                                            'Jul',
+                                                            'Agu',
+                                                            'Sep',
+                                                            'Okt',
+                                                            'Nov',
+                                                            'Des',
+                                                        ];
+                                                    @endphp
+                                                    @for ($i = 1; $i <= 12; $i++)
+                                                        <option value="{{ $i }}">{{ $bulanIndo[$i] }}</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+
+                                            <!-- Tahun -->
+                                            <div>
+                                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1 text-xs">Tahun</label>
+                                                <input type="number" name="year" x-model="createYear" @change="loadEmployeesForUnit()"
+                                                    class="text-xs w-full px-2.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all font-mono">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pilih Shift yang Digunakan (Expanded height) -->
+                                    <div class="mt-1 text-left flex-1 flex flex-col min-h-0">
+                                        <div class="flex justify-between items-center mb-1.5 shrink-0">
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 text-xs">
                                                 <span>Pilih Shift yang Digunakan <span class="text-rose-500">*</span></span>
                                                 <span x-show="createShowError && selectedShifts.length === 0" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Pilih minimal 1 shift</span>
                                             </label>
@@ -1506,7 +1505,7 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl max-h-[170px] overflow-y-auto custom-scrollbar">
+                                        <div class="p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-y-auto custom-scrollbar flex-1 min-h-[160px]">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 @foreach($shifts->where('is_shift', true) as $s)
                                                     <label :class="selectedShifts.includes({{ $s->id }}) 
@@ -1516,14 +1515,14 @@
                                                         <div class="flex items-center gap-2.5 min-w-0">
                                                             <div class="flex items-center">
                                                                 <input type="checkbox" name="shift_ids[]" value="{{ $s->id }}" x-model="selectedShifts"
-                                                                    class="rounded border-slate-300 dark:border-slate-700 text-indigo-650 shadow-sm focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                                                                    class="rounded border-slate-300 dark:border-slate-700 text-indigo-650 shadow-sm focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer">
                                                             </div>
                                                             <div class="flex flex-col min-w-0">
                                                                 <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate leading-tight">{{ $s->name }}</span>
                                                                 @if($s->description)
-                                                                    <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate mt-1">{{ $s->description }}</span>
+                                                                    <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate mt-0.5">{{ $s->description }}</span>
                                                                 @else
-                                                                    <span class="text-[9px] text-slate-400 dark:text-slate-500 mt-1">Kode: {{ $s->short_code ?: $s->code }}</span>
+                                                                    <span class="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">Kode: {{ $s->short_code ?: $s->code }}</span>
                                                                 @endif
                                                             </div>
                                                         </div>
@@ -1536,27 +1535,11 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Informasi Jadwal Roster (Di bawah Bulan/Tahun) -->
-                                    <div class="p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/60 dark:border-indigo-900/40 rounded-xl space-y-2 mt-4 text-left">
-                                        <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-[11px]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                                            <span>Informasi Pembuatan Jadwal Roster</span>
-                                        </div>
-                                        <ul class="list-disc pl-4 space-y-2 text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                                            <li>
-                                                <span><strong>Periode Bulan & Tahun</strong>: Jadwal bergilir harian hanya akan berlaku spesifik pada bulan dan tahun yang telah ditentukan.</span>
-                                            </li>
-                                            <li>
-                                                <span><strong>Deteksi Otomatis Roster</strong>: Jika nama roster pada unit terpilih di bulan yang sama sudah terdaftar di database, sistem akan memuat data roster lama untuk dilanjutkan/diedit. Jika belum ada, lembar roster baru akan otomatis dibuat.</span>
-                                            </li>
-                                        </ul>
-                                    </div>
                                 </div>
 
-                                <!-- Pegawai List -->
-                                <div class="flex flex-col h-full">
-                                    <label class="font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between items-center shrink-0">
+                                <!-- Kolom Kanan (Pegawai List) -->
+                                <div class="flex flex-col h-full min-h-0">
+                                    <label class="font-semibold text-slate-700 dark:text-slate-300 mb-1 flex justify-between items-center shrink-0 text-xs">
                                         <span class="flex items-center gap-1.5">
                                             <span>Pilih Pegawai</span>
                                             <span x-show="loadingEmp" class="text-[10px] text-indigo-500 animate-pulse font-normal" x-cloak>Memuat data...</span>
@@ -1571,17 +1554,17 @@
 
                                     <!-- Alert Pegawai Bentrok -->
                                     <div x-show="selectedEmps.some(id => { const emp = empList.find(e => e.id === id); return emp && emp.active_roster_name; })"
-                                        class="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 rounded-xl flex items-start gap-2.5 text-left text-[10px] text-amber-700 dark:text-amber-400 shrink-0 font-medium mb-3"
+                                        class="p-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 rounded-xl flex items-start gap-2 text-left text-[10px] text-amber-700 dark:text-amber-400 shrink-0 font-medium mb-2"
                                         x-cloak>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                                         <div>
-                                            <span class="font-bold text-amber-800 dark:text-amber-300">Perhatian Roster Ganda:</span> Beberapa pegawai terpilih sudah terdaftar pada roster aktif lain di bulan ini. Silakan hapus centang nama tersebut terlebih dahulu, atau edit roster yang aktif.
+                                            <span class="font-bold text-amber-800 dark:text-amber-300">Perhatian:</span> Ada pegawai terpilih yang sudah ada di roster aktif lain bulan ini.
                                         </div>
                                     </div>
 
-                                    <div class="flex flex-col bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden flex-1 min-h-[280px]">
+                                    <div class="flex-1 flex flex-col min-h-0 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
                                         <!-- Search & Filter Bar -->
-                                        <div class="p-2 border-b border-slate-200/60 dark:border-slate-800/80 shrink-0 bg-white dark:bg-slate-900/40 space-y-2">
+                                        <div class="p-2 border-b border-slate-200/60 dark:border-slate-800/80 shrink-0 bg-white dark:bg-slate-900/40">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 <!-- Search Input -->
                                                 <div class="relative flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
@@ -1596,7 +1579,7 @@
                                                 
                                                 <!-- Position Filter -->
                                                 <select x-model="createSelectedPosition" :disabled="empList.length === 0"
-                                                    class="text-xs h-8 px-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+                                                    class="text-xs h-8 px-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                                     <option value="">Semua Jabatan</option>
                                                     <template x-for="pos in uniqueCreatePositions" :key="pos">
                                                         <option :value="pos" x-text="pos"></option>
@@ -1605,27 +1588,29 @@
                                             </div>
                                         </div>
 
-                                        <!-- List -->
-                                        <div class="p-3 space-y-2 custom-scrollbar overflow-y-auto max-h-[480px] flex-1">
-                                            <div x-show="empList.length === 0 && !loadingEmp" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-550 italic text-[11px] py-12">
-                                                Silakan pilih unit sekolah terlebih dahulu.
+                                        <!-- List / Empty State (Takes full remaining space) -->
+                                        <div class="p-2.5 space-y-2 custom-scrollbar overflow-y-auto flex-1 min-h-0 flex flex-col">
+                                            <div x-show="empList.length === 0 && !loadingEmp" class="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-550 italic text-[11px] p-6 text-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-slate-300 dark:text-slate-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                                <span>Silakan pilih unit sekolah terlebih dahulu.</span>
                                             </div>
 
-                                            <div x-show="empList.length > 0 && filteredCreateEmployees.length === 0" class="flex items-center justify-center h-full text-slate-400 dark:text-slate-555 italic text-[11px] py-12">
-                                                Pegawai tidak ditemukan.
+                                            <div x-show="empList.length > 0 && filteredCreateEmployees.length === 0" class="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-555 italic text-[11px] p-6 text-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-slate-300 dark:text-slate-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                                <span>Pegawai tidak ditemukan.</span>
                                             </div>
                                             
                                             <template x-for="emp in filteredCreateEmployees" :key="emp.id">
-                                                <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/80 border border-slate-200 dark:border-slate-900 rounded-xl transition-all shadow-2xs hover:border-slate-300 dark:hover:border-slate-800">
+                                                <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/80 border border-slate-200 dark:border-slate-900 rounded-xl transition-all shadow-2xs hover:border-slate-300 dark:hover:border-slate-800 shrink-0">
                                                     <input type="checkbox" name="emp_ids[]" :value="emp.id" x-model="selectedEmps"
-                                                        class="employee-checkbox w-4.5 h-4.5 rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 shrink-0 cursor-pointer">
+                                                        class="employee-checkbox w-4 h-4 rounded border-slate-300 text-indigo-650 shadow-sm focus:ring-indigo-500 shrink-0 cursor-pointer">
                                                     <div class="flex flex-col min-w-0 flex-1">
                                                         <span class="text-xs text-slate-900 dark:text-slate-100 font-bold leading-snug truncate" x-text="emp.name"></span>
                                                         <span class="text-[10px] text-slate-450 mt-0.5 truncate" x-text="emp.position || emp.subject_position || '-'"></span>
                                                         <template x-if="emp.active_roster_name">
-                                                            <span class="inline-flex items-center gap-1 mt-1.5 text-[9px] font-bold text-amber-650 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 px-1.5 py-0.5 rounded w-fit">
+                                                            <span class="inline-flex items-center gap-1 mt-1 text-[9px] font-bold text-amber-650 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 px-1.5 py-0.5 rounded w-fit max-w-full">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                                                <span x-text="'Roster: ' + emp.active_roster_name" class="truncate max-w-[120px]"></span>
+                                                                <span x-text="'Roster: ' + emp.active_roster_name"></span>
                                                             </span>
                                                         </template>
                                                     </div>
@@ -1652,31 +1637,28 @@
                     </form>
                 </div>
             </div>
-        </template>
 
         <!-- MODAL DAFTAR PEGAWAI TANPA JADWAL -->
-        <template x-teleport="body">
-            <div x-cloak x-show="showNeglectedModal" 
-                 x-transition:enter="transition ease-out duration-150"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-100"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 @keydown.escape.window="showNeglectedModal = false"
-                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
-                
-                <!-- Backdrop overlay -->
-                <div class="fixed inset-0 transition-opacity" 
-                     style="background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);" 
-                     @click="showNeglectedModal = false"></div>
+        <div x-cloak x-show="showNeglectedModal" 
+             x-transition:enter="transition ease-out duration-75"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="showNeglectedModal = false"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left" style="display: none;">
+            
+            <!-- Backdrop overlay -->
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+                 @click="showNeglectedModal = false"></div>
                 
                 <!-- Content Box -->
                 <div x-show="showNeglectedModal"
-                     x-transition:enter="transition ease-out duration-150 transform"
+                     x-transition:enter="transition ease-out duration-75 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-100 transform"
+                     x-transition:leave="transition ease-in duration-75 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative w-full sm:max-w-2xl rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 max-h-[80vh] flex flex-col overflow-hidden text-left text-xs z-10">
@@ -1707,7 +1689,7 @@
                                          <th class="px-4 py-3 text-right">Aksi</th>
                                      </tr>
                                  </thead>
-                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-850">
+                                 <tbody id="neglected-modal-tbody" class="divide-y divide-slate-100 dark:divide-slate-850">
                                      @forelse ($neglectedEmployees as $emp)
                                          <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 text-slate-750 dark:text-slate-350">
                                              <td class="px-4 py-3.5">
@@ -1754,24 +1736,22 @@
                      </div>
                 </div>
             </div>
-        </template>
 
         <!-- MODAL KONFIRMASI HAPUS PENJADWALAN (ROSTER / BATCH) -->
-        <template x-teleport="body">
-            <div x-cloak x-show="showDeleteBatchModal" 
-                 x-transition:enter="transition ease-out duration-150"
+        <div x-cloak x-show="showDeleteBatchModal" 
+                 x-transition:enter="transition ease-out duration-75"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-100"
+                 x-transition:leave="transition ease-in duration-75"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @keydown.escape.window="showDeleteBatchModal = false"
                  class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm text-left" style="display: none;">
                 <div @click.outside="showDeleteBatchModal = false"
-                     x-transition:enter="transition ease-out duration-150 transform"
+                     x-transition:enter="transition ease-out duration-75 transform"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-100 transform"
+                     x-transition:leave="transition ease-in duration-75 transform"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-sm w-full overflow-hidden text-xs">
@@ -1831,7 +1811,6 @@
                     </div>
                 </div>
             </div>
-        </template>
 
     </div>
 </x-admin-layout>
@@ -1879,6 +1858,18 @@
                 const newSyncBtn = doc.getElementById('roster-sync-btn-container');
                 const currentSyncBtn = document.getElementById('roster-sync-btn-container');
                 
+                const newWarning = doc.getElementById('neglected-warning-container');
+                const currentWarning = document.getElementById('neglected-warning-container');
+                if (newWarning && currentWarning) {
+                    currentWarning.innerHTML = newWarning.innerHTML;
+                }
+
+                const newTbody = doc.getElementById('neglected-modal-tbody');
+                const currentTbody = document.getElementById('neglected-modal-tbody');
+                if (newTbody && currentTbody) {
+                    currentTbody.innerHTML = newTbody.innerHTML;
+                }
+
                 if (newContent && container) {
                     container.innerHTML = newContent.innerHTML;
                     container.style.opacity = '1';

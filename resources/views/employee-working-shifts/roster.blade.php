@@ -47,10 +47,10 @@
                 <div class="flex items-center gap-3 text-left">
                     <div class="relative flex items-center">
                         <input type="text" name="roster_name" value="{{ $rosterName }}" required placeholder="Nama Roster..."
-                            class="text-xl font-bold text-slate-900 dark:text-slate-50 bg-white dark:bg-slate-900 border-2 border-indigo-300 dark:border-indigo-500 rounded-xl pl-9 pr-3 py-1.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-105 dark:focus:ring-indigo-900/30 transition-all font-sans tracking-wide w-72 shadow-3xs"
+                            class="text-sm font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-xl pl-8 pr-3 py-1.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all font-sans tracking-wide w-64 shadow-2xs"
                             title="Klik untuk mengubah nama roster ini">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-indigo-500 dark:text-indigo-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-indigo-500 dark:text-indigo-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0">Roster</span>
@@ -111,7 +111,7 @@
                     <span class="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
                     <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Jumlah:</span>
                     <span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/40 dark:border-slate-700/40 font-bold text-[10px]">
-                        <span x-text="activeEmployeeIds.length"></span>&nbsp;Orang
+                        <span x-text="activeEmployeeIds.length">{{ count(!empty($empIdsParam) ? $empIdsParam : ($assignedEmployeeIds ?? [])) }}</span>&nbsp;Orang
                     </span>
                 </div>
             </div>
@@ -133,16 +133,20 @@
                 Shift Kerja yang Digunakan dalam Roster ini:
             </span>
             <div class="flex flex-wrap gap-1.5 mt-2.5">
-                <template x-for="sh in getSelectedShiftsList()" :key="sh.id">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-bold border transition-colors shadow-3xs"
-                        :class="sh.colorClass">
-                        <span x-text="sh.code" class="px-1.5 py-0.5 rounded bg-white/40 dark:bg-black/20 font-black"></span>
-                        <span x-text="sh.name"></span>
+                @foreach($allShifts as $shift)
+                    @php
+                        $isShiftSelected = in_array($shift->id, array_map('intval', $shifts->pluck('id')->toArray()));
+                    @endphp
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-bold border transition-colors shadow-3xs {{ $shift->color }}"
+                        x-show="selectedShiftIds.map(Number).includes({{ $shift->id }})"
+                        {!! !$isShiftSelected ? 'x-cloak style="display: none;"' : '' !!}>
+                        <span class="px-1.5 py-0.5 rounded bg-white/40 dark:bg-black/20 font-black">{{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}</span>
+                        <span>{{ $shift->name }}</span>
                     </span>
-                </template>
-                <template x-if="selectedShiftIds.length === 0">
-                    <span class="text-xs text-slate-500 italic">Belum ada shift kerja yang diaktifkan. Klik tombol Kelola Shift Roster untuk menambahkan.</span>
-                </template>
+                @endforeach
+                <span x-cloak x-show="selectedShiftIds.length === 0" class="text-xs text-slate-500 italic" {!! count($shifts) > 0 ? 'style="display: none;"' : '' !!}>
+                    Belum ada shift kerja yang diaktifkan. Klik tombol Kelola Shift Roster untuk menambahkan.
+                </span>
             </div>
         </div>
     </div>
@@ -218,7 +222,6 @@
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-900/80">
                             <th class="p-3 text-xs font-bold text-slate-900 dark:text-slate-100 border-b border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-slate-50 dark:bg-slate-900/80 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)] min-w-[200px]">NAMA PEGAWAI</th>
-                            
                             @for($d = 1; $d <= $daysInMonth; $d++)
                                 @php
                                     $timestamp = mktime(0,0,0,$month,$d,$year);
@@ -227,9 +230,7 @@
                                     $dayName = $dayNamesId[$dayNameEng] ?? $dayNameEng;
                                     $isWeekend = ($dayNameEng == 'Sun');
                                 @endphp
-                                <th class="p-2 text-center border-b border-r border-slate-200 dark:border-slate-800 {{ $isWeekend ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400' }} transition-colors"
-                                    @mouseenter="hoveredCol = {{ $d }}" @mouseleave="hoveredCol = null"
-                                    :class="{ 'bg-slate-100 dark:bg-slate-800/50': hoveredCol === {{ $d }} }">
+                                <th class="p-2 text-center border-b border-r border-slate-200 dark:border-slate-800 {{ $isWeekend ? 'bg-rose-50/80 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400' }}">
                                     <div class="text-[9px] uppercase font-semibold">{{ $dayName }}</div>
                                     <div class="text-sm font-bold">{{ $d }}</div>
                                 </th>
@@ -237,18 +238,23 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        @php
+                            $activeEmpIdList = array_map('strval', !empty($empIdsParam) ? $empIdsParam : ($assignedEmployeeIds ?? []));
+                        @endphp
                         @forelse($employees as $emp)
                             @php
-                                $empId = $emp['id'];
+                                $empId = (string)$emp['id'];
+                                $isEmpActiveInitially = in_array($empId, $activeEmpIdList);
                                 $rowData = $rosterData[$empId] ?? null;
                                 $bonusSchemaId = $rowData['bonus_schema_id'] ?? '';
                             @endphp
-                             <tr x-cloak class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group" 
-                                x-show="activeEmployeeIds.includes(String('{{ $empId }}')) && '{{ addslashes(strtolower($emp['name'])) }}'.includes(searchQuery.toLowerCase())">
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group" 
+                                x-show="activeEmployeeIds.includes('{{ $empId }}') && '{{ addslashes(strtolower($emp['name'])) }}'.includes(searchQuery.toLowerCase())"
+                                {!! !$isEmpActiveInitially ? 'x-cloak style="display: none;"' : '' !!}>
                                 <td class="p-3 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-900 shadow-[1px_0_0_0_rgba(226,232,240,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)]">
                                     <div class="flex items-center justify-between gap-3">
                                         <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm whitespace-nowrap">{{ $emp['name'] }}</div>
-                                        <button type="button" @click="activeEmployeeIds = activeEmployeeIds.filter(id => id !== String('{{ $empId }}'))"
+                                        <button type="button" @click="activeEmployeeIds = activeEmployeeIds.filter(id => id !== '{{ $empId }}')"
                                             class="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors border-0 bg-transparent cursor-pointer shrink-0"
                                             title="Keluarkan Pegawai dari Roster">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2 2 0 0 1-1.995 1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
@@ -261,24 +267,24 @@
                                         $shiftId = $rowData['days'][$d] ?? '';
                                         $timestamp = mktime(0,0,0,$month,$d,$year);
                                         $isWeekend = (date('D', $timestamp) == 'Sun');
+                                        $initialColorClass = ($shiftId && $shiftId !== 'OFF') ? ('shift-color-' . $shiftId) : 'bg-slate-100/80 text-slate-500 border-slate-200/60 dark:bg-slate-800/40 dark:text-slate-400 dark:border-slate-700/60';
                                     @endphp
-                                    <td class="p-1 border-r border-slate-200 dark:border-slate-800 relative select-none transition-colors"
-                                        @mouseenter="hoveredCol = {{ $d }}" @mouseleave="hoveredCol = null"
-                                        :class="{ 
-                                            'bg-slate-50/50 dark:bg-slate-900/30': hoveredCol === {{ $d }},
-                                            'bg-rose-50/30 dark:bg-rose-950/10': {{ $isWeekend ? 'true' : 'false' }} && hoveredCol !== {{ $d }}
-                                        }">
+                                    <td class="p-1 border-r border-slate-200 dark:border-slate-800 relative select-none transition-colors {{ $isWeekend ? 'bg-rose-50/30 dark:bg-rose-950/10' : '' }}">
                                         <select id="sel_{{ $empId }}_{{ $d }}" 
                                             name="roster[{{ $empId }}][days][{{ $d }}]" 
-                                            :disabled="!activeEmployeeIds.includes(String('{{ $empId }}'))"
-                                            class="w-full h-8 min-w-[54px] text-center font-black text-[10.5px] rounded-lg border shadow-3xs focus:ring-2 focus:ring-indigo-500/40 cursor-pointer transition-all duration-150 p-0 text-slate-850 dark:text-slate-100 bg-transparent appearance-none hover:scale-[1.03] hover:shadow-2xs"
+                                            :disabled="!activeEmployeeIds.includes('{{ $empId }}')"
+                                            class="w-full h-8 min-w-[54px] text-center font-black text-[10.5px] rounded-lg border shadow-3xs focus:ring-2 focus:ring-indigo-500/40 cursor-pointer transition-all duration-150 p-0 text-slate-850 dark:text-slate-100 bg-transparent appearance-none hover:scale-[1.03] hover:shadow-2xs border-transparent {{ $initialColorClass }}"
                                             :class="getCellColor('{{ $empId }}', {{ $d }}, '{{ $shiftId }}')"
-                                            x-on:change="updateCellDisplay('{{ $empId }}', {{ $d }})">
+                                            x-on:change="updateCellDisplay($event, '{{ $empId }}', {{ $d }})">
                                             <option value="OFF" {{ !$shiftId || $shiftId == 'OFF' ? 'selected' : '' }}>OFF</option>
                                             @foreach($allShifts as $shift)
+                                                @php
+                                                    $isOptionShiftSelected = in_array($shift->id, array_map('intval', $shifts->pluck('id')->toArray()));
+                                                @endphp
                                                 <option value="{{ $shift->id }}" 
                                                     x-show="selectedShiftIds.map(Number).includes({{ $shift->id }})"
                                                     :disabled="!selectedShiftIds.map(Number).includes({{ $shift->id }})"
+                                                    {!! !$isOptionShiftSelected ? 'x-cloak style="display: none;" disabled' : '' !!}
                                                     {{ $shiftId == $shift->id ? 'selected' : '' }}>
                                                     {{ $shift->short_code ?: strtoupper(last(explode('_', $shift->code))) }}
                                                 </option>
@@ -307,10 +313,10 @@
                 </button>
             <!-- Modal Kelola Pegawai Roster -->
             <div x-show="showAddEmployeeModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-                <div x-show="showAddEmployeeModal" x-transition:enter="ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+                <div x-show="showAddEmployeeModal" x-transition:enter="ease-out duration-75" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
                 <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-4 text-center">
-                        <div x-show="showAddEmployeeModal" @click.away="showAddEmployeeModal = false" x-transition:enter="ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full max-w-md border border-slate-200 dark:border-slate-800 flex flex-col max-h-[80vh]">
+                        <div x-show="showAddEmployeeModal" @click.away="showAddEmployeeModal = false" x-transition:enter="ease-out duration-75" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full max-w-md border border-slate-200 dark:border-slate-800 flex flex-col max-h-[80vh]">
                             
                             <!-- Modal Header -->
                             <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
@@ -366,10 +372,10 @@
 
             <!-- Modal Kelola Shift Roster -->
             <div x-show="showAddShiftModal" class="relative z-50" style="display: none;" aria-labelledby="modal-title-shift" role="dialog" aria-modal="true" x-cloak>
-                <div x-show="showAddShiftModal" x-transition:enter="ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
+                <div x-show="showAddShiftModal" x-transition:enter="ease-out duration-75" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-opacity z-50"></div>
                 <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-4 text-center">
-                        <div x-show="showAddShiftModal" @click.away="showAddShiftModal = false" x-transition:enter="ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full max-w-md border border-slate-200 dark:border-slate-800 flex flex-col max-h-[80vh]">
+                        <div x-show="showAddShiftModal" @click.away="showAddShiftModal = false" x-transition:enter="ease-out duration-75" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full max-w-md border border-slate-200 dark:border-slate-800 flex flex-col max-h-[80vh]">
                             
                             <!-- Modal Header -->
                             <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
@@ -460,10 +466,18 @@
                 return (shiftsData[val]?.color || '') + ' border-transparent';
             },
 
-            updateCellDisplay(empId, day) {
-                const ref = this.getCellRef(empId, day);
-                if (ref) {
-                    this.cellsData[empId + '_' + day] = ref.value;
+            updateCellDisplay(e, empId, day) {
+                const el = (e && e.target) ? e.target : this.getCellRef(empId, day);
+                if (el) {
+                    const val = el.value;
+                    this.cellsData[empId + '_' + day] = val;
+
+                    // Clean all existing shift color and slate background classes
+                    el.className = el.className.replace(/\bshift-color-\S+|\bbg-slate-\S+|\btext-slate-\S+|\bborder-slate-\S+|\bdark:bg-slate-\S+|\bdark:text-slate-\S+|\bdark:border-slate-\S+/g, '').replace(/\s+/g, ' ').trim();
+                    const newClass = (!val || val === 'OFF') 
+                        ? 'bg-slate-100/80 text-slate-500 border-slate-200/60 dark:bg-slate-800/40 dark:text-slate-400 dark:border-slate-700/60'
+                        : (shiftsData[val]?.color || '');
+                    el.className = el.className + ' ' + newClass;
                 }
             }
         }))
