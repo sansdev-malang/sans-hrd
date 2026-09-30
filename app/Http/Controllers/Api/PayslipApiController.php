@@ -29,7 +29,13 @@ class PayslipApiController extends Controller
             return response()->json(['error' => 'Invalid unit_id: ' . $unitCode], 400);
         }
 
-        $month = $request->query('month', date('Y-m'));
+        $cutoffDate = (int) \App\Models\Setting::get('payroll_cutoff_date', 25);
+        $today = \Carbon\Carbon::now();
+        $defaultPeriod = $today->day > $cutoffDate
+            ? $today->format('Y-m')
+            : $today->copy()->subMonth()->format('Y-m');
+
+        $month = $request->query('month', $defaultPeriod);
 
         $payslips = Payslip::where('school_unit_id', $unit->id)
             ->where('period', $month)

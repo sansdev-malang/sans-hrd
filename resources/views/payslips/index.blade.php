@@ -77,7 +77,7 @@
                             @endforeach
                         </select>
 
-                        @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m')) || request()->filled('per_page') && request('per_page') != 50)
+                        @if(request()->anyFilled(['search', 'unit_id', 'position']) || request()->filled('month') && request('month') != ($latestPeriod ?? ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m'))) || request()->filled('per_page') && request('per_page') != 50)
                             <a href="{{ route('payslips.index') }}" class="h-9 px-2.5 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn border border-slate-200 dark:border-slate-800" data-no-loader="true" title="Reset Filter">
                                 <i data-lucide="x" class="w-4 h-4"></i>
                             </a>
@@ -141,11 +141,11 @@
                             <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 font-nasalization tracking-wide">
                                 {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
                             </h3>
-                            @if($month === ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m')))
+                            @if($month === ($latestPeriod ?? ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m'))))
                                 <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-900/40 flex items-center gap-1">
                                     <i data-lucide="check-circle-2" class="w-3 h-3 text-emerald-600"></i> Periode Penggajian Terakhir
                                 </span>
-                            @elseif($month === ($currentMonth ?? \Carbon\Carbon::now()->format('Y-m')))
+                            @elseif($month > ($latestPeriod ?? ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m'))))
                                 <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/40 flex items-center gap-1">
                                     <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i> Bulan Berjalan (Masa Kerja Belum Selesai)
                                 </span>

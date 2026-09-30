@@ -25,9 +25,15 @@ class PayslipController extends Controller
 
     public function index(Request $request)
     {
+        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 25);
+        $today = Carbon::now();
+        $latestPeriod = $today->day > $cutoffDate
+            ? $today->format('Y-m')
+            : $today->copy()->subMonth()->format('Y-m');
+
         $lastMonth = Carbon::now()->subMonth()->format('Y-m');
         $currentMonth = Carbon::now()->format('Y-m');
-        $month = $request->query('month', $lastMonth);
+        $month = $request->query('month', $latestPeriod);
         $unitId = $request->query('unit_id');
         $position = $request->query('position');
         $search = $request->query('search');
@@ -97,7 +103,7 @@ class PayslipController extends Controller
         $globalNote = Setting::get('payslip_global_note', '');
         $periodNote = Setting::get("payslip_note_{$month}", '');
 
-        return view('payslips.index', compact('paginatedEmployees', 'units', 'month', 'unitId', 'positions', 'position', 'lastMonth', 'currentMonth', 'globalNote', 'periodNote'));
+        return view('payslips.index', compact('paginatedEmployees', 'units', 'month', 'unitId', 'positions', 'position', 'lastMonth', 'currentMonth', 'latestPeriod', 'cutoffDate', 'globalNote', 'periodNote'));
     }
 
     public function store(Request $request)
