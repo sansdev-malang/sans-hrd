@@ -1,7 +1,7 @@
 /**
  * SANS Malang School Information System
- * Dashboard Animations & Interactivity
- * Using Anime.js
+ * Dashboard Interactivity & Performance Optimizations
+ * (Instant, blazing-fast rendering)
  */
 
 document.addEventListener('DOMContentLoaded', () => {

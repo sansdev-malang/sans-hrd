@@ -280,22 +280,22 @@
         </div>
 
         <!-- TOAST NOTIFICATION CONTAINER -->
-        <div id="toast-notification" class="fixed top-5 right-5 z-[9999] hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 px-4 py-3 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 flex items-center gap-3 max-w-sm">
-            <div id="toast-icon-bg" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+        <div id="toast-notification" class="fixed top-5 right-5 z-[9999] hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 px-4 py-3 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex items-center gap-3 max-w-sm transition-all duration-200 transform -translate-y-4 opacity-0 pointer-events-auto">
+            <div id="toast-icon-bg" class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0">
                 <svg id="toast-icon-success" class="w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 <svg id="toast-icon-error" class="w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
-            <div class="text-left">
-                <h5 id="toast-title" class="text-xs font-bold">Notifikasi</h5>
-                <p id="toast-message" class="text-xs text-slate-500 dark:text-slate-400"></p>
+            <div class="text-left flex-1 min-w-0 pr-1">
+                <h5 id="toast-title" class="text-xs font-bold leading-tight truncate">Notifikasi</h5>
+                <p id="toast-message" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug break-words"></p>
             </div>
+            <button type="button" onclick="hideSessionToast()" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
         </div>
 
         <!-- Tailwind CSS Safelist helper for dynamic classes in showSessionToast -->
         <div class="hidden bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 bg-rose-100 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400"></div>
-
-        <!-- Anime.js CDN -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js" referrerpolicy="no-referrer"></script>
 
         <!-- Lucide Icons CDN -->
         <script src="https://unpkg.com/lucide@latest"></script>
@@ -303,6 +303,20 @@
             // Initialize Lucide Icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
+            }
+
+            let _hrdToastTimeout = null;
+
+            function hideSessionToast() {
+                const toast = document.getElementById('toast-notification');
+                if (!toast) return;
+                if (_hrdToastTimeout) clearTimeout(_hrdToastTimeout);
+
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-4', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 200);
             }
 
             // Global Session Toast helper function
@@ -314,49 +328,36 @@
                 const successIcon = document.getElementById('toast-icon-success');
                 const errorIcon = document.getElementById('toast-icon-error');
                 
-                if (!toast) return;
+                if (!toast || !titleEl || !messageEl || !iconBg) return;
 
-                titleEl.textContent = title;
-                messageEl.textContent = message;
+                titleEl.textContent = title || (type === 'error' ? 'Perhatian!' : 'Sukses!');
+                messageEl.textContent = message || '';
 
                 if (type === 'success') {
-                    iconBg.className = 'w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0';
-                    successIcon.classList.remove('hidden');
-                    errorIcon.classList.add('hidden');
+                    iconBg.className = 'w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60 flex items-center justify-center shrink-0';
+                    if (successIcon) successIcon.classList.remove('hidden');
+                    if (errorIcon) errorIcon.classList.add('hidden');
                 } else {
-                    iconBg.className = 'w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0';
-                    errorIcon.classList.remove('hidden');
-                    successIcon.classList.add('hidden');
+                    iconBg.className = 'w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/60 flex items-center justify-center shrink-0';
+                    if (errorIcon) errorIcon.classList.remove('hidden');
+                    if (successIcon) successIcon.classList.add('hidden');
                 }
+
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+
+                if (_hrdToastTimeout) clearTimeout(_hrdToastTimeout);
 
                 toast.classList.remove('hidden');
-                
-                if (window.anime) {
-                    window.anime({
-                        targets: toast,
-                        translateX: [300, 0],
-                        opacity: [0, 1],
-                        duration: 400,
-                        easing: 'easeOutExpo'
-                    });
+                requestAnimationFrame(() => {
+                    toast.classList.remove('-translate-y-4', 'opacity-0');
+                    toast.classList.add('translate-y-0', 'opacity-100');
+                });
 
-                    setTimeout(() => {
-                        window.anime({
-                            targets: toast,
-                            translateX: [0, 300],
-                            opacity: [1, 0],
-                            duration: 400,
-                            easing: 'easeInExpo',
-                            complete: () => {
-                                toast.classList.add('hidden');
-                            }
-                        });
-                    }, 4000);
-                } else {
-                    setTimeout(() => {
-                        toast.classList.add('hidden');
-                    }, 4000);
-                }
+                _hrdToastTimeout = setTimeout(() => {
+                    hideSessionToast();
+                }, 4000);
             }
         </script>
 
