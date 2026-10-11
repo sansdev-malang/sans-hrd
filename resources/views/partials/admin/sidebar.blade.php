@@ -6,7 +6,7 @@
         class="workspace-selector flex items-center justify-between p-2 mb-4 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg cursor-pointer transition-colors relative group">
         <div class="flex items-center gap-2.5">
             @if (setting('app_logo'))
-                <img src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo" class="w-8 h-8 rounded-lg logo-bg p-1.5 object-contain shrink-0 shadow-sm">
+                <img src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo" class="w-8 h-8 rounded-lg object-cover shrink-0 shadow-sm">
             @else
                 <div class="w-8 h-8 rounded-lg logo-bg flex items-center justify-center shrink-0 shadow-sm">
                     <span class="text-white text-lg font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">

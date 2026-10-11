@@ -98,14 +98,14 @@
                                 <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Logo Aplikasi</label>
                                 <div class="flex items-center gap-4">
                                     <!-- Logo Preview Box -->
-                                    <div class="relative w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-800 logo-bg flex items-center justify-center overflow-hidden shrink-0 p-1">
+                                    <div class="relative w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-center overflow-hidden shrink-0">
                                         @if (setting('app_logo'))
-                                            <img id="logo-preview" src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo Preview" class="w-full h-full object-contain">
+                                            <img id="logo-preview" src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo Preview" class="w-full h-full object-cover">
                                         @else
-                                            <div id="logo-placeholder" class="w-full h-full flex items-center justify-center">
+                                            <div id="logo-placeholder" class="w-full h-full flex items-center justify-center logo-bg">
                                                 <span class="text-white text-base font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">{{ substr(setting('app_name', 'SANS'), 0, 1) }}</span>
                                             </div>
-                                            <img id="logo-preview" src="" alt="Logo Preview" class="w-full h-full object-contain hidden">
+                                            <img id="logo-preview" src="" alt="Logo Preview" class="w-full h-full object-cover hidden">
                                         @endif
                                     </div>
                                     <div class="flex-1 space-y-1">
@@ -124,14 +124,14 @@
                                 <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Ikon Favicon</label>
                                 <div class="flex items-center gap-4">
                                     <!-- Favicon Preview Box -->
-                                    <div class="relative w-12 h-12 rounded-lg border border-slate-200 dark:border-slate-800 logo-bg flex items-center justify-center overflow-hidden shrink-0 p-1">
+                                    <div class="relative w-12 h-12 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-center overflow-hidden shrink-0">
                                         @if (setting('app_favicon'))
-                                            <img id="favicon-preview" src="{{ asset('storage/' . setting('app_favicon')) }}" alt="Favicon Preview" class="w-full h-full object-contain">
+                                            <img id="favicon-preview" src="{{ asset('storage/' . setting('app_favicon')) }}" alt="Favicon Preview" class="w-full h-full object-cover">
                                         @else
-                                            <div id="favicon-placeholder" class="w-full h-full flex items-center justify-center shrink-0">
+                                            <div id="favicon-placeholder" class="w-full h-full flex items-center justify-center shrink-0 logo-bg">
                                                 <span class="text-white text-xs font-bold" style="font-family: 'Nasalization Rg', sans-serif; font-weight: 400;">{{ substr(setting('app_name', 'SANS'), 0, 1) }}</span>
                                             </div>
-                                            <img id="favicon-preview" src="" alt="Favicon Preview" class="w-full h-full object-contain hidden">
+                                            <img id="favicon-preview" src="" alt="Favicon Preview" class="w-full h-full object-cover hidden">
                                         @endif
                                     </div>
                                     <div class="flex-1 space-y-1">
