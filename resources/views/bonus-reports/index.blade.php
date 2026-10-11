@@ -244,11 +244,17 @@
                                                 $nominal = $detail['bonus_nominal'];
                                                 $shortNominal = ($nominal >= 1000) ? ($nominal / 1000) . 'k' : $nominal;
                                                 $tierStr = !empty($detail['tier_level']) ? "Tier {$detail['tier_level']}" : 'Bonus';
+                                                $statusName = $detail['status'] ?? '';
+                                                $isKedinasanStatus = $statusName === 'Dinas' || 
+                                                    str_contains(strtolower($statusName), 'dinas') || 
+                                                    str_contains(strtolower($statusName), 'kedinasan');
+
                                                 if (isset($detail['status']) && $detail['status'] === 'Reward Libur') {
                                                     $rName = $detail['reward_name'] ?? 'Reward Libur';
                                                     $titleText = "🎁 Reward Libur ({$rName}): Rp " . number_format($nominal, 0, ',', '.');
-                                                } elseif (isset($detail['status']) && $detail['status'] === 'Dinas') {
-                                                    $titleText = $picketPrefix . "Dinas: Rp " . number_format($nominal, 0, ',', '.');
+                                                } elseif ($isKedinasanStatus) {
+                                                    $shortStatus = str_contains($statusName, '(') ? trim(explode('(', $statusName)[0]) : $statusName;
+                                                    $titleText = $picketPrefix . "{$tierStr} ({$shortStatus}): Rp " . number_format($nominal, 0, ',', '.');
                                                 } else {
                                                     $earlyStr = !empty($detail['early_minutes']) ? " (Hadir {$detail['early_minutes']} mnt sblm masuk)" : " (Tepat Waktu)";
                                                     $titleText = $picketPrefix . "{$tierStr}: Rp " . number_format($nominal, 0, ',', '.') . $earlyStr;
@@ -268,8 +274,14 @@
                                                 <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px] {{ $isPicket ? 'text-amber-500 font-bold' : '' }}" title="{{ $isPicket ? $picketPrefix . 'Jadwal Piket' : '' }}">-</div>
                                             @else
                                                 @php
-                                                    if (isset($detail['status']) && $detail['status'] === 'Dinas') {
-                                                        $titleText = $picketPrefix . 'Dinas (Tidak ada bonus)';
+                                                    $statusName = $detail['status'] ?? '';
+                                                    $isKedinasanStatus = $statusName === 'Dinas' || 
+                                                        str_contains(strtolower($statusName), 'dinas') || 
+                                                        str_contains(strtolower($statusName), 'kedinasan');
+
+                                                    if ($isKedinasanStatus) {
+                                                        $shortStatus = str_contains($statusName, '(') ? trim(explode('(', $statusName)[0]) : $statusName;
+                                                        $titleText = $picketPrefix . "{$shortStatus} (Tidak ada bonus)";
                                                     } elseif (!empty($detail['late_minutes'])) {
                                                         $titleText = $picketPrefix . "Terlambat {$detail['late_minutes']} menit (Bonus Rp 0)";
                                                     } else {

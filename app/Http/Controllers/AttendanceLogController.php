@@ -426,13 +426,16 @@ class AttendanceLogController extends Controller
                     $isRestDay = $isOffShift || ($dayOfWeek == 0 && !$hasShiftToday);
 
                     if (!$isRestDay && ($activeLeave->status === 'Approved' || $activeLeave->status === 'Pending')) {
+                        $isKedinasanLeave = str_contains(strtolower($originalType), 'dinas') || str_contains(strtolower($originalType), 'kedinasan');
                         $isLateForLeave = false;
-                        if ($activeLeave->status === 'Approved') {
-                            if ($hasRequiresAttendanceLeave && ($activeLeave->gets_presence_bonus || $activeLeave->status_code === 'H')) {
+                        if (!$isKedinasanLeave) {
+                            if ($activeLeave->status === 'Approved') {
+                                if ($hasRequiresAttendanceLeave && ($activeLeave->gets_presence_bonus || $activeLeave->status_code === 'H')) {
+                                    $isLateForLeave = $isLate ?? false;
+                                }
+                            } else {
                                 $isLateForLeave = $isLate ?? false;
                             }
-                        } else {
-                            $isLateForLeave = $isLate ?? false;
                         }
 
                         $dailyDetails[$dateStr] = [

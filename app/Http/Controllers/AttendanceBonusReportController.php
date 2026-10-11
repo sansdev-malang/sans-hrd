@@ -359,26 +359,43 @@ class AttendanceBonusReportController extends Controller
 
                     // Check Attendance, Dinas/getsBonus, or Reward Holiday
                     $logKey = $uid . '_' . $dateStr;
-                    $isDinas = ($isOnLeave && $getsBonus && !$hasRequiresAttendanceLeave);
+                    $isKedinasan = false;
+                    if ($isOnLeave && $activeLeave) {
+                        $ltLower = strtolower($leaveType ?? $activeLeave->type ?? $activeLeave->type_name ?? '');
+                        if (str_contains($ltLower, 'dinas') || str_contains($ltLower, 'kedinasan')) {
+                            $isKedinasan = true;
+                        }
+                    }
+                    $isDinas = ($isOnLeave && $getsBonus && (!$hasRequiresAttendanceLeave || $isKedinasan));
 
                     if (isset($attendanceLogs[$logKey]) || $isDinas || $isRewardHoliday) {
                         if ($isRewardHoliday) {
                             $dailyStatus = 'Reward Libur';
                             $dailyCheckIn = 'REWARD';
                             $dailyLateMinutes = 0;
-                            $earlyMinutes = 999;
+                            $earlyMinutes = 0;
+                        } elseif ($isKedinasan) {
+                            $dailyStatus = ($leaveType ?: 'Dinas');
+                            if (isset($attendanceLogs[$logKey])) {
+                                $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                                $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
+                            } else {
+                                $dailyCheckIn = 'DINAS';
+                            }
+                            $dailyLateMinutes = 0;
+                            $earlyMinutes = 0;
                         } elseif ($isDinas) {
                             $dailyStatus = ($leaveType ?: 'Dinas');
                             $dailyCheckIn = 'DINAS';
                             $dailyLateMinutes = 0;
-                            $earlyMinutes = 999;
+                            $earlyMinutes = 0;
                         } else {
                             $dailyStatus = 'Present';
                         }
                         $totalPresent++;
                         
                         // Calculate Early / Late
-                        if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday) {
+                        if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday && !$isKedinasan) {
                             $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
                             $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
@@ -403,18 +420,20 @@ class AttendanceBonusReportController extends Controller
                                     $dailyLateMinutes = 0;
                                 }
                             }
-                        } elseif (!$isRewardHoliday && $isDinas) {
+                        } elseif (!$isRewardHoliday && ($isDinas || $isKedinasan)) {
                             $dailyLateMinutes = 0;
-                            $earlyMinutes = 999;
-                            $dailyCheckIn = 'DINAS';
+                            $earlyMinutes = 0;
+                            if (!$dailyCheckIn) {
+                                $dailyCheckIn = 'DINAS';
+                            }
                         }
 
                         // Calculate Daily Bonus
                         $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
 
                         if ($currentSchema && $currentSchema->tiers->count() > 0) {
-                            if ($isRewardHoliday || $isDinas) {
-                                // Full bonus for Reward Holiday or Dinas
+                            if ($isRewardHoliday || $isDinas || $isKedinasan) {
+                                // Full bonus for Reward Holiday or Dinas / Kedinasan (otomatis mendapat bonus kehadiran tertinggi tanpa terpengaruh menit keterlambatan)
                                 $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
                                 if ($bestTier) {
                                     $dailyBonus = $bestTier->nominal;
@@ -842,25 +861,42 @@ class AttendanceBonusReportController extends Controller
                     $dailyCheckIn = null;
                     
                     $logKey = $uid . '_' . $dateStr;
-                    $isDinas = ($isOnLeave && $getsBonus && !$hasRequiresAttendanceLeave);
+                    $isKedinasan = false;
+                    if ($isOnLeave && $activeLeave) {
+                        $ltLower = strtolower($leaveType ?? $activeLeave->type ?? $activeLeave->type_name ?? '');
+                        if (str_contains($ltLower, 'dinas') || str_contains($ltLower, 'kedinasan')) {
+                            $isKedinasan = true;
+                        }
+                    }
+                    $isDinas = ($isOnLeave && $getsBonus && (!$hasRequiresAttendanceLeave || $isKedinasan));
 
                     if (isset($attendanceLogs[$logKey]) || $isDinas || $isRewardHoliday) {
                         if ($isRewardHoliday) {
                             $dailyStatus = 'Reward Libur';
                             $dailyCheckIn = 'REWARD';
                             $dailyLateMinutes = 0;
-                            $earlyMinutes = 999;
+                            $earlyMinutes = 0;
+                        } elseif ($isKedinasan) {
+                            $dailyStatus = ($leaveType ?: 'Dinas');
+                            if (isset($attendanceLogs[$logKey])) {
+                                $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                                $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
+                            } else {
+                                $dailyCheckIn = 'DINAS';
+                            }
+                            $dailyLateMinutes = 0;
+                            $earlyMinutes = 0;
                         } elseif ($isDinas) {
                             $dailyStatus = ($leaveType ?: 'Dinas');
                             $dailyCheckIn = 'DINAS';
                             $dailyLateMinutes = 0;
-                            $earlyMinutes = 999;
+                            $earlyMinutes = 0;
                         } else {
                             $dailyStatus = 'Present';
                         }
                         $totalPresent++;
                         
-                        if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday) {
+                        if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday && !$isKedinasan) {
                             $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
                             $checkInCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
                             $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
@@ -885,16 +921,18 @@ class AttendanceBonusReportController extends Controller
                                     $dailyLateMinutes = 0;
                                 }
                             }
-                        } elseif (!$isRewardHoliday && $isDinas) {
+                        } elseif (!$isRewardHoliday && ($isDinas || $isKedinasan)) {
                             $dailyLateMinutes = 0;
-                            $earlyMinutes = 999;
-                            $dailyCheckIn = 'DINAS';
+                            $earlyMinutes = 0;
+                            if (!$dailyCheckIn) {
+                                $dailyCheckIn = 'DINAS';
+                            }
                         }
 
                         $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
 
                         if ($currentSchema && $currentSchema->tiers->count() > 0) {
-                            if ($isRewardHoliday || $isDinas) {
+                            if ($isRewardHoliday || $isDinas || $isKedinasan) {
                                 $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
                                 if ($bestTier) {
                                     $dailyBonus = $bestTier->nominal;

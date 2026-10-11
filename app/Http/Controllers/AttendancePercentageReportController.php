@@ -326,35 +326,42 @@ class AttendancePercentageReportController extends Controller
                         if ($shiftStartTime) {
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
                             if ($firstLogCarbon->copy()->second(0) > $expectedStart->copy()->second(0)) {
-                                $dailyLateMinutes = (int) $expectedStart->diffInMinutes($firstLogCarbon);
-                                $totalLateMinutes += $dailyLateMinutes;
-                                $lateCount++;
-                                $lateDates[] = $currentDate->translatedFormat('d M');
+                                $isKedinasanLeave = $activeLeave && $activeLeave->status === 'Approved' && (
+                                    str_contains(strtolower($activeLeave->type_name ?? $activeLeave->type ?? ''), 'dinas') || 
+                                    str_contains(strtolower($activeLeave->type_name ?? $activeLeave->type ?? ''), 'kedinasan')
+                                );
 
-                                $empPosition = strtolower($emp['position'] ?? $emp['subject_position'] ?? '');
-                                $isShiftExempt = $isShiftWorker 
-                                    || str_contains($empPosition, 'keamanan') 
-                                    || str_contains($empPosition, 'satpam') 
-                                    || str_contains($empPosition, 'security') 
-                                    || str_contains($empPosition, 'mart') 
-                                    || str_contains($empPosition, 'toko') 
-                                    || str_contains($empPosition, 'salehmart');
+                                if (!$isKedinasanLeave) {
+                                    $dailyLateMinutes = (int) $expectedStart->diffInMinutes($firstLogCarbon);
+                                    $totalLateMinutes += $dailyLateMinutes;
+                                    $lateCount++;
+                                    $lateDates[] = $currentDate->translatedFormat('d M');
 
-                                $isRedLate = false;
-                                if (!$isShiftExempt && $firstLogCarbon > Carbon::parse($dateStr . ' 07:25:00')->second(0)) {
-                                    if (!($activeLeave && $activeLeave->status === 'Approved')) {
-                                        $isRedLate = true;
+                                    $empPosition = strtolower($emp['position'] ?? $emp['subject_position'] ?? '');
+                                    $isShiftExempt = $isShiftWorker 
+                                        || str_contains($empPosition, 'keamanan') 
+                                        || str_contains($empPosition, 'satpam') 
+                                        || str_contains($empPosition, 'security') 
+                                        || str_contains($empPosition, 'mart') 
+                                        || str_contains($empPosition, 'toko') 
+                                        || str_contains($empPosition, 'salehmart');
+
+                                    $isRedLate = false;
+                                    if (!$isShiftExempt && $firstLogCarbon > Carbon::parse($dateStr . ' 07:25:00')->second(0)) {
+                                        if (!($activeLeave && $activeLeave->status === 'Approved')) {
+                                            $isRedLate = true;
+                                        }
                                     }
-                                }
 
-                                if ($isRedLate) {
-                                    $dailyLateCategory = 'kritis';
-                                    $kritisLateCount++;
-                                    $kritisDates[] = $currentDate->translatedFormat('d M');
-                                } else {
-                                    $dailyLateCategory = 'waspada';
-                                    $waspadaLateCount++;
-                                    $waspadaDates[] = $currentDate->translatedFormat('d M');
+                                    if ($isRedLate) {
+                                        $dailyLateCategory = 'kritis';
+                                        $kritisLateCount++;
+                                        $kritisDates[] = $currentDate->translatedFormat('d M');
+                                    } else {
+                                        $dailyLateCategory = 'waspada';
+                                        $waspadaLateCount++;
+                                        $waspadaDates[] = $currentDate->translatedFormat('d M');
+                                    }
                                 }
                             }
                         }

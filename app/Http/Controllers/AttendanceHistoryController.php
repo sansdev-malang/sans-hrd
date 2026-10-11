@@ -515,6 +515,16 @@ class AttendanceHistoryController extends Controller
                                         $isRedLate = true;
                                     }
                                 }
+                                $isKedinasanLeave = $isOnLeave && $leaveApprovalStatus === 'Approved' && (
+                                    $statusCode === 'H' ||
+                                    str_contains(strtolower($leaveReason ?? ''), 'dinas') || 
+                                    str_contains(strtolower($leaveReason ?? ''), 'kedinasan')
+                                );
+                                if ($isKedinasanLeave) {
+                                    $isLate = false;
+                                    $isRedLate = false;
+                                    $lateMinutes = 0;
+                                }
                             }
                             $record['late_minutes'] = $lateMinutes;
                             if ($isRedLate) {
@@ -1168,6 +1178,16 @@ class AttendanceHistoryController extends Controller
                                     if (!($isOnLeave && $leaveApprovalStatus === 'Approved')) {
                                         $isRedLate = true;
                                     }
+                                }
+                                $isKedinasanLeave = $isOnLeave && $leaveApprovalStatus === 'Approved' && (
+                                    $statusCode === 'H' ||
+                                    str_contains(strtolower($leaveReason ?? ''), 'dinas') || 
+                                    str_contains(strtolower($leaveReason ?? ''), 'kedinasan')
+                                );
+                                if ($isKedinasanLeave) {
+                                    $isLate = false;
+                                    $isRedLate = false;
+                                    $lateMinutes = 0;
                                 }
                             }
                             $record['late_minutes'] = $lateMinutes;
