@@ -1,13 +1,13 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6 w-full">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 w-full text-left">
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <a href="{{ route('announcements.index') }}" class="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 mb-2">
+                <a href="{{ route('announcements.index') }}" class="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 mb-1">
                     <i data-lucide="arrow-left" class="w-3.5 h-3.5 mr-1"></i> Kembali ke Daftar
                 </a>
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-500">Tulis Pengumuman Baru</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Terbitkan pengumuman baru untuk internal HRD atau distribusikan ke unit-unit sekolah.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Tulis Pengumuman Baru</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Terbitkan pengumuman baru untuk internal HRD atau distribusikan ke unit-unit sekolah.</p>
             </div>
         </header>
 

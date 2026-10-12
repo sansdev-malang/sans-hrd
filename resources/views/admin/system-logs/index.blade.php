@@ -1,16 +1,11 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="{ showClearModal: false }">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="{ showClearModal: false }">
 
         <!-- HEADER / PAGE TITLE -->
-        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <div class="flex items-center gap-2">
-                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Log Sistem</h2>
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                        {{ $selectedFileName }}
-                    </span>
-                </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Log Sistem</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                     Pantau rekaman error, peringatan, dan status runtime sistem HRD Laravel secara real-time.
                 </p>
             </div>
@@ -45,88 +40,50 @@
             </div>
         </section>
 
-        <!-- STAT CARDS GRID -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- ULTRA-COMPACT KPI SUMMARY STRIP -->
+        @php
+            $errorCount = $levelStats['error'] + $levelStats['critical'] + $levelStats['emergency'] + $levelStats['alert'];
+            $infoCount = $levelStats['info'] + $levelStats['debug'] + $levelStats['notice'];
+        @endphp
+        <section class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full text-xs">
             <!-- Total Logs -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Entri Log</p>
-                        <h3 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 mt-1">
-                            {{ number_format($levelStats['total'], 0, ',', '.') }}
-                        </h3>
-                    </div>
-                    <div class="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400">
-                        <i data-lucide="file-text" class="w-5 h-5"></i>
-                    </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div class="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
                 </div>
-                <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                    Ukuran Berkas: <span class="font-bold text-slate-700 dark:text-slate-300">{{ $selectedFile['size'] ?? '0 B' }}</span>
-                </div>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Total Log:</span>
+                <span class="font-bold text-xs font-mono text-slate-900 dark:text-slate-50">{{ number_format($levelStats['total'], 0, ',', '.') }}</span>
+                <span class="text-[10px] text-slate-400 font-mono">({{ $selectedFile['size'] ?? '0 B' }})</span>
             </div>
 
             <!-- Error / Critical -->
-            @php
-                $errorCount = $levelStats['error'] + $levelStats['critical'] + $levelStats['emergency'] + $levelStats['alert'];
-            @endphp
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Error &amp; Kritis</p>
-                        <h3 class="text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400 mt-1">
-                            {{ number_format($errorCount, 0, ',', '.') }}
-                        </h3>
-                    </div>
-                    <div class="p-2.5 bg-rose-50 dark:bg-rose-950/40 rounded-lg text-rose-600 dark:text-rose-400">
-                        <i data-lucide="alert-octagon" class="w-5 h-5"></i>
-                    </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div class="w-5 h-5 rounded-md bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i>
                 </div>
-                <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                    @if($errorCount > 0)
-                        <span class="text-rose-600 dark:text-rose-400 font-bold">Perlu perhatian</span> segera
-                    @else
-                        <span class="text-emerald-600 dark:text-emerald-400 font-bold">Tidak ada error</span> kritis
-                    @endif
-                </div>
+                <span class="font-medium text-[11px] text-rose-600 dark:text-rose-400">Error &amp; Kritis:</span>
+                <span class="font-bold text-xs font-mono text-rose-600 dark:text-rose-400">{{ number_format($errorCount, 0, ',', '.') }}</span>
+                @if($errorCount > 0)
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                @endif
             </div>
 
             <!-- Warnings -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Peringatan (Warning)</p>
-                        <h3 class="text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-400 mt-1">
-                            {{ number_format($levelStats['warning'], 0, ',', '.') }}
-                        </h3>
-                    </div>
-                    <div class="p-2.5 bg-amber-50 dark:bg-amber-950/40 rounded-lg text-amber-600 dark:text-amber-400">
-                        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-                    </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div class="w-5 h-5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
                 </div>
-                <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                    Potensi kendala sistem
-                </div>
+                <span class="font-medium text-[11px] text-amber-600 dark:text-amber-400">Peringatan:</span>
+                <span class="font-bold text-xs font-mono text-amber-600 dark:text-amber-400">{{ number_format($levelStats['warning'], 0, ',', '.') }}</span>
             </div>
 
             <!-- Info & Debug -->
-            @php
-                $infoCount = $levelStats['info'] + $levelStats['debug'] + $levelStats['notice'];
-            @endphp
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider">Informasi &amp; Debug</p>
-                        <h3 class="text-2xl font-bold tracking-tight text-sky-600 dark:text-sky-400 mt-1">
-                            {{ number_format($infoCount, 0, ',', '.') }}
-                        </h3>
-                    </div>
-                    <div class="p-2.5 bg-sky-50 dark:bg-sky-950/40 rounded-lg text-sky-600 dark:text-sky-400">
-                        <i data-lucide="info" class="w-5 h-5"></i>
-                    </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div class="w-5 h-5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="info" class="w-3.5 h-3.5"></i>
                 </div>
-                <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                    Pembaruan: <span class="text-slate-700 dark:text-slate-300">{{ $selectedFile['modified_at'] ?? '-' }}</span>
-                </div>
+                <span class="font-medium text-[11px] text-sky-600 dark:text-sky-400">Info &amp; Debug:</span>
+                <span class="font-bold text-xs font-mono text-sky-600 dark:text-sky-400">{{ number_format($infoCount, 0, ',', '.') }}</span>
             </div>
         </section>
 

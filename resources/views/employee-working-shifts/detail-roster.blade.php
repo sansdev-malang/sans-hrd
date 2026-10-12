@@ -19,7 +19,7 @@
         display: none !important;
     }
 </style>
-<div class="p-6 space-y-6" x-data="{ 
+<div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="{ 
         openExportModal: false, 
         exportType: 'pdf',
         notes: '',
@@ -50,19 +50,15 @@
     }">
     
     <!-- Header & Back Button -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 w-full text-left">
         <div class="flex items-center gap-3 text-left">
-            <a href="{{ route('employee-working-shifts.index', ['tab' => 'roster', 'unit_id' => $selectedUnitId]) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-3xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+            <a href="{{ route('employee-working-shifts.index', ['tab' => 'roster', 'unit_id' => $selectedUnitId]) }}" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 shadow-xs">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
             </a>
             <div>
-                <h2 class="text-base sm:text-lg font-bold text-slate-855 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
-                    <span>{{ $rosterName }}</span>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider">Detail Roster</span>
-                </h2>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">{{ $rosterName }}</h2>
                 <!-- Context Badges -->
                 <div class="flex flex-wrap items-center gap-2 mt-1">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">Unit:</span>
                     <span class="inline-flex items-center px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 font-bold text-[10px]">{{ $units->firstWhere('id', $selectedUnitId)->name ?? '' }}</span>
                     <span class="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">Periode:</span>

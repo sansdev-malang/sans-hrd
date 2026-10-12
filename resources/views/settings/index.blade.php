@@ -1,15 +1,12 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6 text-left">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left">
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2.5">
-                    <span>Pengaturan Cut-off</span>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0 font-sans">Settings</span>
-                </h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Konfigurasi tanggal cut-off untuk siklus penggajian dan laporan bulanan.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Pengaturan Cut-off</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Konfigurasi tanggal cut-off untuk siklus penggajian dan laporan bulanan.</p>
             </div>
-        </header>
+        </section>
 
 
         <form action="{{ route('cutoff-settings.update') }}" method="POST" class="space-y-6">
@@ -48,34 +45,60 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Tanggal Mulai Berlaku Piket Per Unit -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full hover:shadow-md transition-all duration-200">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
-                            <i data-lucide="shield-check" class="w-4 h-4"></i>
-                        </span>
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tanggal Mulai Berlaku Piket per Unit</h3>
+                <!-- Card 2: Konfigurasi Piket & Skema Bonus Khusus -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 w-full hover:shadow-md transition-all duration-200 space-y-5">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                            </span>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Skema Bonus Khusus Jadwal Piket</h3>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+                            Pilih skema bonus yang khusus diberlakukan saat pegawai sedang bertugas piket (evaluasi berdasarkan jam masuk piket <strong>06:30</strong> dengan metode <em>Hadir Lebih Awal</em>).
+                        </p>
+                        
+                        <div class="space-y-1.5 pt-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 text-xs">Skema Bonus Piket Aktif</label>
+                            <select name="picket_bonus_schema_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 font-semibold cursor-pointer">
+                                <option value="">-- Gunakan Skema Shift Reguler (Default) --</option>
+                                @foreach($bonusSchemas as $schema)
+                                    <option value="{{ $schema->id }}" @selected($picketBonusSchemaId == $schema->id)>
+                                        {{ $schema->name }} ({{ $schema->calculation_mode === 'early_arrival' ? 'Hadir Lebih Awal' : 'Toleransi Keterlambatan' }}) - {{ $schema->tiers->count() }} Tier
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                                Rekomendasi: Gunakan skema dengan mode <strong>Hadir Lebih Awal</strong> agar insentif kedatangan pagi (06:30) terhitung maksimal.
+                            </p>
+                        </div>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                        Jadwal piket & batas hadir 06:30 hanya akan memengaruhi perhitungan mulai dari tanggal yang ditentukan untuk masing-masing unit. Tanggal sebelum ini akan tetap dihitung menggunakan jam shift normal sehingga <strong>history periode-periode sebelumnya tidak berubah</strong>.
-                    </p>
 
-                    <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                        @forelse($schoolUnits as $unit)
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800/80">
-                                <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                                        {{ $unit->name }}
-                                    </span>
-                                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">Mulai Berlaku:</span>
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500"></i>
+                            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Tanggal Mulai Berlaku Piket per Unit</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+                            Jadwal piket & batas hadir 06:30 hanya memengaruhi perhitungan mulai tanggal ini per unit sekolah.
+                        </p>
+                        <div class="space-y-2.5">
+                            @forelse($schoolUnits as $unit)
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800/80">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                                            {{ $unit->name }}
+                                        </span>
+                                        <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">Mulai:</span>
+                                    </div>
+                                    <div class="w-full sm:w-auto">
+                                        <input type="date" name="unit_picket_effective_dates[{{ $unit->id }}]" value="{{ old('unit_picket_effective_dates.' . $unit->id, $unit->picket_effective_date) }}" class="text-xs w-full sm:w-44 h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-mono">
+                                    </div>
                                 </div>
-                                <div class="w-full sm:w-auto">
-                                    <input type="date" name="unit_picket_effective_dates[{{ $unit->id }}]" value="{{ old('unit_picket_effective_dates.' . $unit->id, $unit->picket_effective_date) }}" class="text-xs w-full sm:w-44 h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-mono">
-                                </div>
-                            </div>
-                        @empty
-                            <p class="text-xs text-slate-400 italic">Belum ada data unit sekolah aktif.</p>
-                        @endforelse
+                            @empty
+                                <p class="text-xs text-slate-400 italic">Belum ada data unit sekolah aktif.</p>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>

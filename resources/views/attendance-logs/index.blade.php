@@ -15,19 +15,13 @@
 @endphp
 
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="attendanceLogs">
-        <div id="attendance-table-container" class="space-y-6">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="attendanceLogs">
+        <div id="attendance-table-container" class="space-y-3.5 sm:space-y-5 lg:space-y-6">
             <!-- HEADER -->
-            <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div class="flex flex-col gap-1">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Kehadiran</h2>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-150/30 dark:border-indigo-900/30">
-                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                            <span>Siklus: {{ \Carbon\Carbon::parse($startDateReq)->translatedFormat('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->translatedFormat('d M Y') }}</span>
-                        </span>
-                    </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Memantau waktu kedatangan dan kepulangan pegawai secara komprehensif.</p>
+            <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
+                <div class="flex flex-col gap-0.5">
+                    <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Kehadiran</h2>
+                    <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Memantau waktu kedatangan dan kepulangan pegawai secara komprehensif.</p>
                 </div>
                 
                 <div class="flex items-center gap-2 w-full md:w-auto">
@@ -122,17 +116,14 @@
                         </div>
 
                         <!-- Bulan -->
-                        <div class="flex items-center gap-1.5 flex-1 sm:flex-initial">
-                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Siklus Gaji:</span>
-                            <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
-                                class="h-9 px-2.5 w-full sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700">
-                        </div>
+                        <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
+                            class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer">
 
                         <!-- Filter Unit -->
                         @if(isset($schoolUnits) && count($schoolUnits) > 0)
                             <select name="unit_id" onchange="triggerFilterForm(this)"
                             class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 shadow-inner focus:outline-none focus:ring-0 focus:ring-transparent focus:border-slate-300 dark:focus:border-slate-700 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
-                            <option value="">Semua Unit Sekolah</option>
+                            <option value="">Semua</option>
                             @foreach($schoolUnits as $unit)
                                 <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
                                     {{ $unit->name }}

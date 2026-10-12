@@ -1,23 +1,23 @@
 <x-admin-layout>
-    <div class="p-6" x-data="rawLogsData">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="rawLogsData">
         <!-- HEADER SECTION -->
-        <section class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Log Absensi</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Data absensi murni yang ditarik/dipush dari mesin ZKTeco.</p>
+        <section class="flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3 w-full text-left">
+            <div class="flex flex-col gap-0.5">
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Log Absensi</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Data absensi murni yang ditarik/dipush dari mesin ZKTeco.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('raw-attendance-logs.export', request()->query()) }}" data-no-loader class="h-9 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
-                    <i data-lucide="file-down" class="w-4 h-4"></i>
-                    Ekspor Excel
+                <a href="{{ route('raw-attendance-logs.export', request()->query()) }}" data-no-loader class="px-3 sm:px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-[11px] sm:text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-sm">
+                    <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+                    <span>Ekspor Excel</span>
                 </a>
-                <button @click="showImportModal = true" class="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
-                    <i data-lucide="file-up" class="w-4 h-4"></i>
-                    Import Excel
+                <button @click="showImportModal = true" class="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] sm:text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-sm">
+                    <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
+                    <span>Import Excel</span>
                 </button>
-                <button @click="openCreateModal" class="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Tambah Log Manual
+                <button @click="openCreateModal" class="px-3 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] sm:text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-sm">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Tambah Log Manual</span>
                 </button>
             </div>
         </section>

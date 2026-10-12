@@ -5,20 +5,17 @@
         }
     </style>
 
-    <div class="p-6 space-y-6" x-data="holidayManager()">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="holidayManager()">
 
         <!-- ========================================================================= -->
         <!-- PAGE HEADER -->
         <!-- ========================================================================= -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2.5">
-                    <span>Manajemen Hari Libur</span>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0">HRD & Operasional</span>
-                </h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Kelola reward hari libur unit/pegawai (bonus penuh) serta kalender hari libur resmi & pengalihan libur kerja.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Manajemen Hari Libur</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Kelola reward hari libur unit/pegawai (bonus penuh) serta kalender hari libur resmi & pengalihan libur kerja.</p>
             </div>
-        </header>
+        </section>
 
         <!-- ========================================================================= -->
         <!-- TABS NAVIGATION -->

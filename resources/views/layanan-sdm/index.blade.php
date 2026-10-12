@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="{
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="{
         activeTab: 'all',
         showDrawer: false,
         selectedTicket: null,
@@ -149,57 +149,41 @@
         </div>
 
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-200 font-nasalization">Layanan Kepegawaian SDM</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Himpunan aduan, kritik, saran, dan pertanyaan pegawai yang diajukan melalui portal unit sekolah.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Layanan Kepegawaian SDM</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">Himpunan aduan, kritik, saran, dan pertanyaan pegawai yang diajukan melalui portal unit sekolah.</p>
             </div>
         </header>
 
-        <!-- STATS CARDS -->
-        <section class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <!-- ULTRA-COMPACT KPI SUMMARY STRIP -->
+        <section class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full text-xs">
             <!-- Total Masuk -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Total Aduan & Layanan</span>
-                    <span class="text-2xl font-bold text-slate-950 dark:text-slate-50 mt-1 block" x-text="tickets.length">0</span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0 border border-slate-200/40 dark:border-slate-800/40">
-                    <i data-lucide="help-circle" class="w-5 h-5"></i>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 shadow-2xs">
+                <i data-lucide="help-circle" class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0"></i>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Total Aduan:</span>
+                <span class="font-bold text-xs font-mono" x-text="tickets.length">0</span>
             </div>
 
             <!-- Tiket Baru -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Aduan Baru</span>
-                    <span class="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1 block" x-text="tickets.filter(t => t.status === 'Baru').length">0</span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-455 flex items-center justify-center shrink-0">
-                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-50/70 dark:bg-rose-955/30 border border-rose-200/60 dark:border-rose-900/40 text-rose-800 dark:text-rose-300 shadow-2xs">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0"></i>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Aduan Baru:</span>
+                <span class="font-bold text-xs font-mono text-rose-700 dark:text-rose-300" x-text="tickets.filter(t => t.status === 'Baru').length">0</span>
             </div>
 
             <!-- Sedang Diproses -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Sedang Diproses</span>
-                    <span class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1 block" x-text="tickets.filter(t => t.status === 'Diproses').length">0</span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-455 flex items-center justify-center shrink-0">
-                    <i data-lucide="clock" class="w-5 h-5"></i>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-amber-800 dark:text-amber-300 shadow-2xs">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0"></i>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Sedang Diproses:</span>
+                <span class="font-bold text-xs font-mono text-amber-700 dark:text-amber-300" x-text="tickets.filter(t => t.status === 'Diproses').length">0</span>
             </div>
 
             <!-- Selesai -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Terselesaikan</span>
-                    <span class="text-2xl font-bold text-emerald-600 dark:text-emerald-455 mt-1 block" x-text="tickets.filter(t => t.status === 'Selesai').length">0</span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-455 flex items-center justify-center shrink-0">
-                    <i data-lucide="check-circle" class="w-5 h-5"></i>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-300 shadow-2xs">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Terselesaikan:</span>
+                <span class="font-bold text-xs font-mono text-emerald-700 dark:text-emerald-300" x-text="tickets.filter(t => t.status === 'Selesai').length">0</span>
             </div>
         </section>
 

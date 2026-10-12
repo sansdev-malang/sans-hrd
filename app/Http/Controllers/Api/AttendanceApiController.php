@@ -468,7 +468,8 @@ class AttendanceApiController extends Controller
 
         // 2. Fetch All Bonus Schemas for dynamic assignment
         $allSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
-        $defaultSchema = $allSchemas->where('is_active', true)->first();
+        $defaultSchema = $allSchemas->where('is_active', true)->where('calculation_mode', 'late_tolerance')->first()
+            ?: $allSchemas->where('is_active', true)->first();
 
         // 3. Fetch Employees (Filter by unit if needed)
         $rawEmployees = $this->service->getSdEmployees();
@@ -801,12 +802,12 @@ class AttendanceApiController extends Controller
                                 $expectedMin = $expectedStart->copy()->second(0);
 
                                 if ($checkInMin->gt($expectedMin)) {
-                                    $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
+                                    $diff = (int) $expectedMin->diffInMinutes($checkInMin);
                                     $dailyLateMinutes = $diff;
                                     $totalLateMinutes += $diff;
                                     $earlyMinutes = 0;
                                 } else {
-                                    $earlyMinutes = (int) $checkInCarbon->diffInMinutes($expectedStart);
+                                    $earlyMinutes = (int) $checkInMin->diffInMinutes($expectedMin);
                                     $dailyLateMinutes = 0;
                                 }
                             }
@@ -833,8 +834,16 @@ class AttendanceApiController extends Controller
                                 }
                             } elseif ($schemaMode === 'early_arrival') {
                                 if ($dailyLateMinutes > 0) {
-                                    $dailyBonus = 0;
-                                    $dailyTierLevel = null;
+                                    $baseTier = $currentSchema->tiers->first(function($t) {
+                                        return ($t->min_early_minutes ?? 0) == 0;
+                                    });
+                                    if ($baseTier && $baseTier->nominal > 0) {
+                                        $dailyBonus = $baseTier->nominal;
+                                        $dailyTierLevel = $baseTier->tier_level;
+                                    } else {
+                                        $dailyBonus = 0;
+                                        $dailyTierLevel = null;
+                                    }
                                 } else {
                                     $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
                                         return ($tier->min_early_minutes ?? 0) <= $earlyMinutes;
@@ -1153,7 +1162,7 @@ class AttendanceApiController extends Controller
             if ($leave->type_name === 'Dinas' || $leave->status_code === 'H' || $leave->gets_presence_bonus || $isKedinasan) {
                 $currentSchemaId = ($activeShiftAssigned && $activeShiftAssigned->bonus_schema_id) 
                                     ? $activeShiftAssigned->bonus_schema_id 
-                                    : (BonusSchema::where('is_active', true)->first()->id ?? null);
+                                    : (BonusSchema::where('is_active', true)->where('calculation_mode', 'late_tolerance')->first()->id ?? BonusSchema::where('is_active', true)->first()->id ?? null);
                 
                 if ($currentSchemaId) {
                     $maxTier = BonusTier::where('bonus_schema_id', $currentSchemaId)
@@ -1171,7 +1180,7 @@ class AttendanceApiController extends Controller
                 $status = 'Present';
                 $currentSchemaId = ($activeShiftAssigned && $activeShiftAssigned->bonus_schema_id) 
                                     ? $activeShiftAssigned->bonus_schema_id 
-                                    : (BonusSchema::where('is_active', true)->first()->id ?? null);
+                                    : (BonusSchema::where('is_active', true)->where('calculation_mode', 'late_tolerance')->first()->id ?? BonusSchema::where('is_active', true)->first()->id ?? null);
                 
                 if ($currentSchemaId) {
                     $maxTier = BonusTier::where('bonus_schema_id', $currentSchemaId)
@@ -1207,7 +1216,7 @@ class AttendanceApiController extends Controller
 
                 $activeSchemaId = ($activeShiftAssigned && $activeShiftAssigned->bonus_schema_id)
                                     ? $activeShiftAssigned->bonus_schema_id
-                                    : (BonusSchema::where('is_active', true)->first()->id ?? null);
+                                    : (BonusSchema::where('is_active', true)->where('calculation_mode', 'late_tolerance')->first()->id ?? BonusSchema::where('is_active', true)->first()->id ?? null);
                 
                 if ($activeSchemaId) {
                     if ($isKedinasan) {

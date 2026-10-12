@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="{ 
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="{ 
         showAddModal: false, 
         showEditModal: false,
         editId: null,
@@ -31,15 +31,15 @@
         @endif
 
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Integrasi API Unit</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Kelola koneksi REST API dan token otentikasi dari masing-masing unit sekolah untuk aggregator pusat.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Integrasi API Unit</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Kelola koneksi REST API dan token otentikasi dari masing-masing unit sekolah untuk aggregator pusat.</p>
             </div>
             <div>
-                <button @click="showAddModal = true" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Tambah Unit Baru
+                <button @click="showAddModal = true" class="px-3 sm:px-4 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-[11px] sm:text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Tambah Unit Baru</span>
                 </button>
             </div>
         </header>

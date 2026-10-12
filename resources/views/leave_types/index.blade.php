@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="{ 
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="{ 
         showAddModal: false, 
         showEditModal: false,
         editId: null,
@@ -32,87 +32,63 @@
     }">
 
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization">Tipe Izin</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Pusat pengaturan jenis izin, aturan absensi fisik, hak bonus ketepatan waktu, dan distribusi ke unit sekolah.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Tipe Izin</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Pusat pengaturan jenis izin, aturan absensi fisik, hak bonus ketepatan waktu, dan distribusi ke unit sekolah.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <form action="{{ route('leave-types.pull') }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="h-9 px-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 border border-slate-200 dark:border-slate-700" title="Tarik seluruh tipe izin dari database SD, SMP, PAUD ke HRD">
-                        <i data-lucide="download-cloud" class="w-4 h-4 text-slate-500"></i>
+                    <button type="submit" class="px-3 sm:px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] sm:text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 shadow-xs" title="Tarik seluruh tipe izin dari database SD, SMP, PAUD ke HRD">
+                        <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-slate-500"></i>
                         <span>Tarik dari Unit</span>
                     </button>
                 </form>
 
                 <form action="{{ route('leave-types.push-all') }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="h-9 px-3.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 border border-indigo-200 dark:border-indigo-800" title="Sinkronkan seluruh tipe izin dari HRD ke semua unit sekolah">
-                        <i data-lucide="refresh-cw" class="w-4 h-4 text-indigo-500"></i>
+                    <button type="submit" class="px-3 sm:px-4 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-[11px] sm:text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 shadow-xs" title="Sinkronkan seluruh tipe izin dari HRD ke semua unit sekolah">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-indigo-500"></i>
                         <span>Dorong ke Unit</span>
                     </button>
                 </form>
 
-                <button @click="resetAdd()" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
+                <button @click="resetAdd()" class="px-3 sm:px-4 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-[11px] sm:text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                     <span>Tambah Tipe Izin</span>
                 </button>
             </div>
         </header>
 
-        <!-- STATS SECTION -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- ULTRA-COMPACT KPI SUMMARY STRIP -->
+        <section class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full text-xs">
             <!-- Total Types -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Total Tipe Izin</span>
-                    <span class="text-2xl font-bold text-slate-900 dark:text-slate-50 mt-1 block">
-                        <span>{{ $totalCount }}</span> <span class="text-xs font-medium text-slate-400">Jenis</span>
-                    </span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="file-text" class="w-5 h-5"></i>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-900/40 text-indigo-800 dark:text-indigo-300 shadow-2xs">
+                <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0"></i>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Total Tipe Izin:</span>
+                <span class="font-bold text-xs font-mono text-indigo-700 dark:text-indigo-300">{{ $totalCount }}</span>
             </div>
 
             <!-- Global Types -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Berlaku Semua Unit</span>
-                    <span class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
-                        <span>{{ $globalCount }}</span> <span class="text-xs font-medium text-slate-400">Global</span>
-                    </span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="globe" class="w-5 h-5"></i>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-300 shadow-2xs">
+                <i data-lucide="globe" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Berlaku Semua Unit:</span>
+                <span class="font-bold text-xs font-mono text-emerald-700 dark:text-emerald-300">{{ $globalCount }}</span>
             </div>
 
             <!-- Bonus Eligible -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Dapat Bonus Ketepatan Waktu</span>
-                    <span class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1 block">
-                        <span>{{ $bonusCount }}</span> <span class="text-xs font-medium text-slate-400">Tipe</span>
-                    </span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="award" class="w-5 h-5"></i>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-amber-800 dark:text-amber-300 shadow-2xs">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0"></i>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Dapat Bonus Kehadiran:</span>
+                <span class="font-bold text-xs font-mono text-amber-700 dark:text-amber-300">{{ $bonusCount }}</span>
             </div>
 
             <!-- Auto Approved -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm text-left flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Otomatis Disetujui</span>
-                    <span class="text-2xl font-bold text-sky-600 dark:text-sky-400 mt-1 block">
-                        <span>{{ $autoApproveCount }}</span> <span class="text-xs font-medium text-slate-400">By Instruksi</span>
-                    </span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="zap" class="w-5 h-5"></i>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-900/40 text-sky-800 dark:text-sky-300 shadow-2xs">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0"></i>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Otomatis Disetujui:</span>
+                <span class="font-bold text-xs font-mono text-sky-700 dark:text-sky-300">{{ $autoApproveCount }}</span>
             </div>
         </section>
 

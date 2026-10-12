@@ -1,9 +1,9 @@
 <aside id="sidebar"
-    class="fixed inset-y-0 left-0 z-[60] md:z-20 flex flex-col w-64 bg-white dark:bg-[#09090b] border-r border-slate-200 dark:border-slate-800 p-3 shrink-0 transition-transform duration-300 -translate-x-full md:translate-x-0 md:relative shadow-sm md:shadow-none">
+    class="fixed inset-y-0 left-0 z-[60] md:z-20 flex flex-col w-64 h-full md:h-screen max-h-screen bg-white dark:bg-[#09090b] border-r border-slate-200 dark:border-slate-800 p-3 shrink-0 transition-transform duration-300 -translate-x-full md:translate-x-0 md:relative shadow-sm md:shadow-none overflow-hidden">
 
     <!-- App Brand / Dashboard Link -->
     <a href="{{ route('dashboard') }}"
-        class="workspace-selector flex items-center justify-between p-2 mb-4 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg cursor-pointer transition-colors relative group">
+        class="workspace-selector flex items-center justify-between p-2 mb-4 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg cursor-pointer transition-colors relative group shrink-0">
         <div class="flex items-center gap-2.5">
             @if (setting('app_logo'))
                 <img src="{{ asset('storage/' . setting('app_logo')) }}" alt="Logo" class="w-8 h-8 rounded-lg object-cover shrink-0 shadow-sm">
@@ -29,7 +29,7 @@
     </a>
 
     <!-- Navigation Links -->
-    <div id="sidebar-nav-container" class="flex-1 space-y-4 overflow-y-auto px-1 py-2 no-scrollbar">
+    <div id="sidebar-nav-container" class="flex-1 min-h-0 space-y-4 overflow-y-auto px-1 py-2 custom-sidebar-scroll">
         <div>
             <nav class="space-y-1 mb-4">
                 <a href="{{ route('dashboard') }}" class="menu-item flex items-center gap-3 px-3 py-2 rounded-lg
@@ -85,7 +85,7 @@
                             Kehadiran Pegawai
                         </span>
                     </button>
-                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 1.5rem;">
                         <a href="{{ route('attendance-logs.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
                             <div class="flex items-center gap-2.5">
                                 <span class="w-1 h-1 rounded-full {{ Request::routeIs('attendance-logs.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
@@ -114,7 +114,7 @@
                             Izin Pegawai
                         </span>
                     </button>
-                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 1.5rem;">
                         <a href="{{ route('leave-approvals.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
                             <div class="flex items-center gap-2.5">
                                 <span class="w-1 h-1 rounded-full {{ Request::routeIs('leave-approvals.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
@@ -143,7 +143,7 @@
                             Bonus Ketepatan Waktu
                         </span>
                     </button>
-                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 1.5rem;">
                         <a href="{{ route('bonus-schemas.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
                             <div class="flex items-center gap-2.5">
                                 <span class="w-1 h-1 rounded-full {{ Request::routeIs('bonus-schemas.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>
@@ -172,7 +172,7 @@
                             Setting Kehadiran
                         </span>
                     </button>
-                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 2.25rem;">
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="submenu-list space-y-1 mt-1" style="display: none; padding-left: 1.5rem;">
                         <a href="{{ route('working-shifts.index') }}" class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs {{ Request::routeIs('working-shifts.*') ? 'bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-100' }}">
                             <div class="flex items-center gap-2.5">
                                 <span class="w-1 h-1 rounded-full {{ Request::routeIs('working-shifts.*') ? 'bg-slate-900 dark:bg-slate-50' : 'bg-slate-300 dark:bg-slate-700' }} shrink-0"></span>

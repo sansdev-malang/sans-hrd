@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BonusSchema;
 use App\Models\SchoolUnit;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,26 @@ class BonusSchemaController extends Controller
     public function index()
     {
         $schemas = BonusSchema::with('tiers')->orderBy('name')->get();
-        return view('bonus-schemas.index', compact('schemas'));
+        $picketBonusSchemaId = (int) Setting::get('picket_bonus_schema_id');
+        return view('bonus-schemas.index', compact('schemas', 'picketBonusSchemaId'));
+    }
+
+    /**
+     * Set a schema specifically as the Picket Bonus Schema.
+     */
+    public function setAsPicketSchema(BonusSchema $bonusSchema)
+    {
+        Setting::set('picket_bonus_schema_id', $bonusSchema->id);
+        return redirect()->back()->with('success', 'Skema "' . $bonusSchema->name . '" berhasil ditetapkan sebagai Skema Khusus Piket!');
+    }
+
+    /**
+     * Unset the Picket Bonus Schema.
+     */
+    public function unsetPicketSchema()
+    {
+        Setting::set('picket_bonus_schema_id', null);
+        return redirect()->back()->with('success', 'Skema khusus piket dinonaktifkan (kalkulasi piket kembali menggunakan skema reguler).');
     }
 
     /**
@@ -75,6 +95,11 @@ class BonusSchemaController extends Controller
      */
     public function update(Request $request, BonusSchema $bonusSchema)
     {
+        if (in_array($bonusSchema->id, [1, 2])) {
+            return redirect()->route('bonus-schemas.index', ['tab' => 'late_tolerance'])
+                ->with('error', 'Skema riwayat "' . $bonusSchema->name . '" terkunci demi menjaga integritas data riwayat absensi masa lalu.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'is_active' => 'sometimes|boolean',
@@ -128,6 +153,11 @@ class BonusSchemaController extends Controller
      */
     public function destroy(Request $request, BonusSchema $bonusSchema)
     {
+        if (in_array($bonusSchema->id, [1, 2])) {
+            return redirect()->route('bonus-schemas.index', ['tab' => 'late_tolerance'])
+                ->with('error', 'Skema riwayat "' . $bonusSchema->name . '" terkunci demi menjaga integritas data riwayat absensi masa lalu.');
+        }
+
         $mode = $bonusSchema->calculation_mode ?? $request->query('tab', 'early_arrival');
         $bonusSchema->delete();
 

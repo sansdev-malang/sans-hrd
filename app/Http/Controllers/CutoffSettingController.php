@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BonusSchema;
 use App\Models\SchoolUnit;
 use App\Models\Setting;
 use Carbon\Carbon;
@@ -25,7 +26,10 @@ class CutoffSettingController extends Controller
             return $unit;
         });
 
-        return view('settings.index', compact('cutoffDate', 'defaultPicketEffectiveDate', 'schoolUnits'));
+        $picketBonusSchemaId = Setting::get('picket_bonus_schema_id');
+        $bonusSchemas = BonusSchema::where('is_active', true)->with('tiers')->orderBy('name')->get();
+
+        return view('settings.index', compact('cutoffDate', 'defaultPicketEffectiveDate', 'schoolUnits', 'bonusSchemas', 'picketBonusSchemaId'));
     }
 
     /**
@@ -35,11 +39,16 @@ class CutoffSettingController extends Controller
     {
         $request->validate([
             'payroll_cutoff_date' => 'required|integer|min:1|max:31',
+            'picket_bonus_schema_id' => 'nullable|exists:bonus_schemas,id',
             'unit_picket_effective_dates' => 'nullable|array',
             'unit_picket_effective_dates.*' => 'nullable|date',
         ]);
 
         Setting::set('payroll_cutoff_date', $request->input('payroll_cutoff_date'));
+
+        if ($request->has('picket_bonus_schema_id')) {
+            Setting::set('picket_bonus_schema_id', $request->input('picket_bonus_schema_id'));
+        }
 
         if ($request->has('unit_picket_effective_dates')) {
             foreach ($request->input('unit_picket_effective_dates') as $unitId => $effectiveDate) {
@@ -49,6 +58,6 @@ class CutoffSettingController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Pengaturan cut-off & tanggal mulai piket per unit berhasil diperbarui!');
+        return redirect()->back()->with('success', 'Pengaturan cut-off & konfigurasi piket berhasil diperbarui!');
     }
 }

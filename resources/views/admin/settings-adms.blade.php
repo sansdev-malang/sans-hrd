@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left">
 
         <!-- SUCCESS ALERT -->
         @if(session('success'))
@@ -15,10 +15,10 @@
         @endif
 
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Sinkronisasi ZKTeco ADMS</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Pengaturan untuk menerima data absen langsung dari mesin fisik ZKTeco via protokol ADMS secara real-time.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Sinkronisasi ZKTeco ADMS</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Pengaturan untuk menerima data absen langsung dari mesin fisik ZKTeco via protokol ADMS secara real-time.</p>
             </div>
         </header>
 

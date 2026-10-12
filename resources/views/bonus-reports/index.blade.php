@@ -1,21 +1,15 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="bonusReports">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="bonusReports">
         <!-- BONUS REPORT MAIN CONTAINER -->
-        <div id="bonus-table-container" class="space-y-6">
+        <div id="bonus-table-container" class="space-y-3.5 sm:space-y-5 lg:space-y-6">
         <!-- HEADER -->
-        <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div class="flex flex-col gap-1">
-                <div class="flex flex-wrap items-center gap-3">
-                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Bonus Ketepatan Waktu</h2>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-150/30 dark:border-indigo-900/30">
-                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                        <span>Siklus: {{ \Carbon\Carbon::parse($startDateReq)->translatedFormat('d M') }} - {{ \Carbon\Carbon::parse($endDateReq)->translatedFormat('d M Y') }}</span>
-                    </span>
-                </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Evaluasi ketepatan waktu kedatangan pegawai berdasarkan skema bonus aktif.</p>
+        <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 w-full text-left">
+            <div class="flex flex-col gap-0.5">
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Bonus Ketepatan Waktu</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Evaluasi ketepatan waktu kedatangan pegawai berdasarkan skema bonus aktif.</p>
             </div>
             
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
                 @if($activeSchema)
                     <div class="px-3 h-9 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg flex items-center gap-2">
                         <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
@@ -75,17 +69,14 @@
                     </div>
 
                     <!-- Bulan -->
-                    <div class="flex items-center gap-1.5 flex-1 sm:flex-initial">
-                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Siklus Gaji:</span>
-                        <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
-                            class="h-9 px-2.5 w-full sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer shadow-inner">
-                    </div>
+                    <input type="month" name="month" value="{{ request('month', $month) }}" onchange="triggerFilterForm(this)"
+                        class="h-9 px-2.5 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer shadow-inner">
 
                     <!-- Filter Unit -->
                     @if(isset($schoolUnits) && count($schoolUnits) > 0)
                         <select name="unit_id" onchange="triggerFilterForm(this)"
                             class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
-                            <option value="">Semua Unit Sekolah</option>
+                            <option value="">Semua</option>
                             @foreach($schoolUnits as $unit)
                                 <option value="{{ $unit->id }}" {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
                                     {{ $unit->name }}
@@ -249,15 +240,17 @@
                                                     str_contains(strtolower($statusName), 'dinas') || 
                                                     str_contains(strtolower($statusName), 'kedinasan');
 
+                                                $schemaNameStr = !empty($detail['schema_name']) ? " • [{$detail['schema_name']}]" : '';
+
                                                 if (isset($detail['status']) && $detail['status'] === 'Reward Libur') {
                                                     $rName = $detail['reward_name'] ?? 'Reward Libur';
-                                                    $titleText = "🎁 Reward Libur ({$rName}): Rp " . number_format($nominal, 0, ',', '.');
+                                                    $titleText = "🎁 Reward Libur ({$rName}): Rp " . number_format($nominal, 0, ',', '.') . $schemaNameStr;
                                                 } elseif ($isKedinasanStatus) {
                                                     $shortStatus = str_contains($statusName, '(') ? trim(explode('(', $statusName)[0]) : $statusName;
-                                                    $titleText = $picketPrefix . "{$tierStr} ({$shortStatus}): Rp " . number_format($nominal, 0, ',', '.');
+                                                    $titleText = $picketPrefix . "{$tierStr} ({$shortStatus}): Rp " . number_format($nominal, 0, ',', '.') . $schemaNameStr;
                                                 } else {
                                                     $earlyStr = !empty($detail['early_minutes']) ? " (Hadir {$detail['early_minutes']} mnt sblm masuk)" : " (Tepat Waktu)";
-                                                    $titleText = $picketPrefix . "{$tierStr}: Rp " . number_format($nominal, 0, ',', '.') . $earlyStr;
+                                                    $titleText = $picketPrefix . "{$tierStr}: Rp " . number_format($nominal, 0, ',', '.') . $earlyStr . $schemaNameStr;
                                                 }
                                             @endphp
                                             <div class="relative mx-auto w-7 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] rounded border {{ $isPicket ? 'border-amber-400 dark:border-amber-500 shadow-sm' : 'border-emerald-200 dark:border-emerald-800/50' }}" title="{{ $titleText }}">
@@ -271,21 +264,22 @@
                                             </div>
                                         @else
                                             @if($dateStr > date('Y-m-d'))
-                                                <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px] {{ $isPicket ? 'text-amber-500 font-bold' : '' }}" title="{{ $isPicket ? $picketPrefix . 'Jadwal Piket' : '' }}">-</div>
+                                                <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px] {{ $isPicket ? 'text-amber-500 font-bold' : '' }}" title="{{ $isPicket ? $picketPrefix . 'Jadwal Piket' . (!empty($detail['schema_name']) ? ' • [' . $detail['schema_name'] . ']' : '') : '' }}">-</div>
                                             @else
                                                 @php
                                                     $statusName = $detail['status'] ?? '';
                                                     $isKedinasanStatus = $statusName === 'Dinas' || 
                                                         str_contains(strtolower($statusName), 'dinas') || 
                                                         str_contains(strtolower($statusName), 'kedinasan');
+                                                    $schemaNameStr = !empty($detail['schema_name']) ? " • [{$detail['schema_name']}]" : '';
 
                                                     if ($isKedinasanStatus) {
                                                         $shortStatus = str_contains($statusName, '(') ? trim(explode('(', $statusName)[0]) : $statusName;
-                                                        $titleText = $picketPrefix . "{$shortStatus} (Tidak ada bonus)";
+                                                        $titleText = $picketPrefix . "{$shortStatus} (Tidak ada bonus)" . $schemaNameStr;
                                                     } elseif (!empty($detail['late_minutes'])) {
-                                                        $titleText = $picketPrefix . "Terlambat {$detail['late_minutes']} menit (Bonus Rp 0)";
+                                                        $titleText = $picketPrefix . "Terlambat {$detail['late_minutes']} menit (Bonus Rp 0)" . $schemaNameStr;
                                                     } else {
-                                                        $titleText = $picketPrefix . 'Tidak ada bonus';
+                                                        $titleText = $picketPrefix . 'Tidak ada bonus' . $schemaNameStr;
                                                     }
                                                 @endphp
                                                 <div class="relative mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border {{ $isPicket ? 'border-amber-400 dark:border-amber-500' : 'border-red-200 dark:border-red-800/50' }}" title="{{ $titleText }}">
@@ -434,7 +428,8 @@
                                 <!-- Grid Tanggal -->
                             <div class="grid grid-cols-7 gap-1">
                                 <template x-for="day in calendarDays" :key="day.dateStr">
-                                    <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between relative"
+                                    <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between relative cursor-default"
+                                         :title="selectedReport && selectedReport.daily_details[day.dateStr] ? ((selectedReport.daily_details[day.dateStr].is_picket ? '⚡ PIKET: 06:30 (' + (selectedReport.daily_details[day.dateStr].picket_area || 'Area Piket') + ') | ' : '') + 'Status: ' + (selectedReport.daily_details[day.dateStr].status || '-') + ' | Check-in: ' + (selectedReport.daily_details[day.dateStr].check_in || '-') + ' | Bonus: ' + formatRupiah(selectedReport.daily_details[day.dateStr].bonus_nominal || 0) + (selectedReport.daily_details[day.dateStr].schema_name ? ' | Skema: ' + selectedReport.daily_details[day.dateStr].schema_name : '')) : ''"
                                          :class="[
                                              day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40',
                                              (selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket) ? 'border-amber-400 dark:border-amber-500/80 ring-1 ring-amber-400/30' : ''
@@ -453,7 +448,7 @@
                                                     <span class="text-[8px] leading-none text-emerald-500 font-bold" :title="'Reward: ' + (selectedReport.daily_details[day.dateStr].reward_name || 'Reward Libur')">🎁</span>
                                                 </template>
                                                 <template x-if="selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket">
-                                                    <span class="text-[8px] leading-none text-amber-500 dark:text-amber-400 font-bold" :title="'Piket: 06:30 (' + (selectedReport.daily_details[day.dateStr].picket_area || 'Area Piket') + ')'">⚡</span>
+                                                    <span class="text-[8px] leading-none text-amber-500 dark:text-amber-400 font-bold" :title="'Piket: 06:30 (' + (selectedReport.daily_details[day.dateStr].picket_area || 'Area Piket') + ')' + (selectedReport.daily_details[day.dateStr].schema_name ? ' • [' + selectedReport.daily_details[day.dateStr].schema_name + ']' : '')">⚡</span>
                                                 </template>
                                             </div>
                                         </div>

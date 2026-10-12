@@ -1,25 +1,25 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="{ 
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="{ 
         showDetailModal: false, 
         selectedAnnouncement: {} 
     }">
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Pengumuman Pusat</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Kelola dan sebar luaskan pengumuman ke seluruh atau unit sekolah tertentu (SD, PAUD, SMP) secara instan.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Pengumuman Pusat</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Kelola dan sebar luaskan pengumuman ke seluruh atau unit sekolah tertentu (SD, PAUD, SMP) secara instan.</p>
             </div>
             <div class="flex items-center gap-2">
                 <form action="{{ route('announcements.sync') }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
                     @csrf
-                    <button type="submit" class="h-9 px-4 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2 inline-flex items-center justify-center border-0 shadow-3xs">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        Sync Ulang ke Unit
+                    <button type="submit" class="px-3 sm:px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-[11px] sm:text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-1.5 inline-flex items-center justify-center shadow-xs">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        <span>Sync Ulang ke Unit</span>
                     </button>
                 </form>
-                <a href="{{ route('announcements.create') }}" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Buat Pengumuman Baru
+                <a href="{{ route('announcements.create') }}" class="px-3 sm:px-4 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-[11px] sm:text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Buat Pengumuman Baru</span>
                 </a>
             </div>
         </header>

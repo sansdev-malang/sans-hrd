@@ -37,10 +37,15 @@ class AttendanceBonusReportController extends Controller
         $startDateReq = $startDate->format('Y-m-d');
         $endDateReq = $endDate->format('Y-m-d');
 
-        // 2. Fetch Active Global Bonus Schema
+        // 2. Fetch Active Global Bonus Schema (prefer active regular/late_tolerance schema as fallback for non-picket shifts)
         $activeSchema = BonusSchema::with('tiers')
             ->where('is_active', true)
-            ->first();
+            ->where(function($q) {
+                $q->where('calculation_mode', 'late_tolerance')
+                  ->orWhereNull('calculation_mode');
+            })
+            ->first()
+            ?: BonusSchema::with('tiers')->where('is_active', true)->first();
 
         $allBonusSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
 
@@ -198,6 +203,14 @@ class AttendanceBonusReportController extends Controller
             $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
         }
 
+        $picketBonusSchemaId = Setting::get('picket_bonus_schema_id');
+        $picketBonusSchema = $picketBonusSchemaId ? $allBonusSchemas->get($picketBonusSchemaId) : null;
+        if (!$picketBonusSchema) {
+            $picketBonusSchema = $allBonusSchemas->first(function($s) {
+                return $s->is_active && ($s->calculation_mode === 'early_arrival' || str_contains(strtolower($s->name), 'piket'));
+            });
+        }
+
         // 5. Calculate Attendance Report
         $reports = [];
 
@@ -343,11 +356,24 @@ class AttendanceBonusReportController extends Controller
                     }
 
                     $currentSchema = null;
-                    if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
-                        $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
-                    }
-                    if (!$currentSchema) {
-                        $currentSchema = $activeSchema;
+                    if ($isPicketToday && $picketBonusSchema) {
+                        // KELAS PIKET: Menggunakan Skema Khusus Piket (Mode Hadir Lebih Awal / early_arrival)
+                        $currentSchema = $picketBonusSchema;
+                    } else {
+                        // KELAS REGULER: Menggunakan Skema Shift Kerja (Mode Toleransi Keterlambatan / late_tolerance)
+                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
+                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
+                        }
+                        if (!$currentSchema && !empty($emp['unit_name'])) {
+                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
+                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
+                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
+                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
+                            });
+                        }
+                        if (!$currentSchema) {
+                            $currentSchema = $activeSchema;
+                        }
                     }
 
                     $dailyLateMinutes = 0;
@@ -411,12 +437,12 @@ class AttendanceBonusReportController extends Controller
                                 $expectedMin = $expectedStart->copy()->second(0);
 
                                 if ($checkInMin->gt($expectedMin)) {
-                                    $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
+                                    $diff = (int) $expectedMin->diffInMinutes($checkInMin);
                                     $dailyLateMinutes = $diff;
                                     $totalLateMinutes += $diff;
                                     $earlyMinutes = 0;
                                 } else {
-                                    $earlyMinutes = (int) $checkInCarbon->diffInMinutes($expectedStart);
+                                    $earlyMinutes = (int) $checkInMin->diffInMinutes($expectedMin);
                                     $dailyLateMinutes = 0;
                                 }
                             }
@@ -441,9 +467,17 @@ class AttendanceBonusReportController extends Controller
                                 }
                             } elseif ($schemaMode === 'early_arrival') {
                                 if ($dailyLateMinutes > 0) {
-                                    // Late arrival gets Rp 0 in early arrival policy
-                                    $dailyBonus = 0;
-                                    $dailyTierLevel = null;
+                                    // Pegawai hadir tetapi scan setelah jam mulai: berikan tier dasar terendah jika ada (min_early_minutes == 0)
+                                    $baseTier = $currentSchema->tiers->first(function($t) {
+                                        return ($t->min_early_minutes ?? 0) == 0;
+                                    });
+                                    if ($baseTier && $baseTier->nominal > 0) {
+                                        $dailyBonus = $baseTier->nominal;
+                                        $dailyTierLevel = $baseTier->tier_level;
+                                    } else {
+                                        $dailyBonus = 0;
+                                        $dailyTierLevel = null;
+                                    }
                                 } else {
                                     // Early arrival: find tiers where min_early_minutes <= earlyMinutes
                                     $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
@@ -492,6 +526,7 @@ class AttendanceBonusReportController extends Controller
                         'bonus_nominal' => $dailyBonus,
                         'tier_level' => $dailyTierLevel,
                         'calculation_mode' => $currentSchema ? ($currentSchema->calculation_mode ?? 'early_arrival') : 'early_arrival',
+                        'schema_name' => $currentSchema ? $currentSchema->name : null,
                         'is_picket' => $isPicketToday,
                         'picket_area' => $picketAreaName,
                         'picket_start' => $isPicketToday ? $picketStartTime : null,
@@ -551,7 +586,12 @@ class AttendanceBonusReportController extends Controller
 
         $activeSchema = BonusSchema::with('tiers')
             ->where('is_active', true)
-            ->first();
+            ->where(function($q) {
+                $q->where('calculation_mode', 'late_tolerance')
+                  ->orWhereNull('calculation_mode');
+            })
+            ->first()
+            ?: BonusSchema::with('tiers')->where('is_active', true)->first();
 
         $allBonusSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
 
@@ -697,6 +737,14 @@ class AttendanceBonusReportController extends Controller
             $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
         }
 
+        $picketBonusSchemaId = Setting::get('picket_bonus_schema_id');
+        $picketBonusSchema = $picketBonusSchemaId ? $allBonusSchemas->get($picketBonusSchemaId) : null;
+        if (!$picketBonusSchema) {
+            $picketBonusSchema = $allBonusSchemas->first(function($s) {
+                return $s->is_active && ($s->calculation_mode === 'early_arrival' || str_contains(strtolower($s->name), 'piket'));
+            });
+        }
+
         $reports = [];
         $totalSemuaBonus = 0;
 
@@ -840,18 +888,24 @@ class AttendanceBonusReportController extends Controller
                     }
 
                     $currentSchema = null;
-                    if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
-                        $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
-                    }
-                    if (!$currentSchema && !empty($emp['unit_name'])) {
-                        $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
-                            return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
-                                || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
-                                || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
-                        });
-                    }
-                    if (!$currentSchema) {
-                        $currentSchema = $activeSchema;
+                    if ($isPicketToday && $picketBonusSchema) {
+                        // KELAS PIKET: Menggunakan Skema Khusus Piket (Mode Hadir Lebih Awal / early_arrival)
+                        $currentSchema = $picketBonusSchema;
+                    } else {
+                        // KELAS REGULER: Menggunakan Skema Shift Kerja (Mode Toleransi Keterlambatan / late_tolerance)
+                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
+                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
+                        }
+                        if (!$currentSchema && !empty($emp['unit_name'])) {
+                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
+                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
+                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
+                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
+                            });
+                        }
+                        if (!$currentSchema) {
+                            $currentSchema = $activeSchema;
+                        }
                     }
 
                     $dailyLateMinutes = 0;
@@ -912,12 +966,12 @@ class AttendanceBonusReportController extends Controller
                                 $expectedMin = $expectedStart->copy()->second(0);
 
                                 if ($checkInMin->gt($expectedMin)) {
-                                    $diff = (int) $expectedStart->diffInMinutes($checkInCarbon);
+                                    $diff = (int) $expectedMin->diffInMinutes($checkInMin);
                                     $dailyLateMinutes = $diff;
                                     $totalLateMinutes += $diff;
                                     $earlyMinutes = 0;
                                 } else {
-                                    $earlyMinutes = (int) $checkInCarbon->diffInMinutes($expectedStart);
+                                    $earlyMinutes = (int) $checkInMin->diffInMinutes($expectedMin);
                                     $dailyLateMinutes = 0;
                                 }
                             }
@@ -939,7 +993,14 @@ class AttendanceBonusReportController extends Controller
                                 }
                             } elseif ($schemaMode === 'early_arrival') {
                                 if ($dailyLateMinutes > 0) {
-                                    $dailyBonus = 0;
+                                    $baseTier = $currentSchema->tiers->first(function($t) {
+                                        return ($t->min_early_minutes ?? 0) == 0;
+                                    });
+                                    if ($baseTier && $baseTier->nominal > 0) {
+                                        $dailyBonus = $baseTier->nominal;
+                                    } else {
+                                        $dailyBonus = 0;
+                                    }
                                 } else {
                                     $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
                                         return ($tier->min_early_minutes ?? 0) <= $earlyMinutes;

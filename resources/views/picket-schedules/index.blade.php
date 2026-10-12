@@ -1,35 +1,30 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6 text-left" x-data="{
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="{
         searchQuery: '{{ request('search', '') }}',
         activeTab: '{{ $activeTab }}',
         selectedUnit: '{{ $unitId ?? '' }}'
     }">
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
-            <div class="flex flex-col gap-1">
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization">
-                        Jadwal Piket Unit
-                    </h2>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0 font-sans">
-                        Read-Only (Unit Sync)
-                    </span>
-                </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">
+        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
+            <div class="flex flex-col gap-0.5">
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                    Jadwal Piket Unit
+                </h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                     Monitoring matriks penugasan jadwal piket guru dan riwayat tukar piket yang dikelola oleh masing-masing unit sekolah.
                 </p>
             </div>
 
-            <div class="flex items-center gap-2.5">
-                <form action="{{ route('picket-schedules.sync') }}" method="POST">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0">
+                <form action="{{ route('picket-schedules.sync') }}" method="POST" class="m-0 p-0 w-full sm:w-auto">
                     @csrf
-                    <button type="submit" class="h-9 px-3.5 inline-flex items-center gap-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-xl shadow-2xs transition-all hover:scale-[1.02] cursor-pointer">
+                    <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-[11px] sm:text-xs rounded-lg shadow-sm transition-all cursor-pointer">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400"></i>
                         <span>Sinkronkan Data Unit</span>
                     </button>
                 </form>
             </div>
-        </header>
+        </section>
 
         <!-- INFO BANNER -->
         <div class="p-3.5 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 flex items-start gap-3 text-xs text-indigo-900 dark:text-indigo-200 leading-relaxed">
@@ -39,56 +34,44 @@
             </div>
         </div>
 
-        <!-- STATS CARDS -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Penugasan</p>
-                        <h4 class="text-xl font-bold text-slate-900 dark:text-slate-50 mt-1 font-mono">{{ $stats['total_assignments'] }}</h4>
-                    </div>
-                    <div class="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
-                        <i data-lucide="calendar-check" class="w-5 h-5"></i>
-                    </div>
+        <!-- ULTRA-COMPACT KPI SUMMARY STRIP -->
+        <section class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full text-xs">
+            <!-- Total Penugasan -->
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div class="w-5 h-5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
                 </div>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Total Penugasan:</span>
+                <span class="font-bold text-xs font-mono text-slate-900 dark:text-slate-50">{{ $stats['total_assignments'] }}</span>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Guru Bertugas</p>
-                        <h4 class="text-xl font-bold text-slate-900 dark:text-slate-50 mt-1 font-mono">{{ $stats['total_teachers'] }}</h4>
-                    </div>
-                    <div class="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
-                        <i data-lucide="users" class="w-5 h-5"></i>
-                    </div>
+            <!-- Guru Bertugas -->
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div class="w-5 h-5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i>
                 </div>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Guru Bertugas:</span>
+                <span class="font-bold text-xs font-mono text-emerald-600 dark:text-emerald-400">{{ $stats['total_teachers'] }}</span>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Area Piket</p>
-                        <h4 class="text-xl font-bold text-slate-900 dark:text-slate-50 mt-1 font-mono">{{ $stats['total_areas'] }}</h4>
-                    </div>
-                    <div class="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
-                        <i data-lucide="map-pin" class="w-5 h-5"></i>
-                    </div>
+            <!-- Area Piket -->
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div class="w-5 h-5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
                 </div>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Area Piket:</span>
+                <span class="font-bold text-xs font-mono text-amber-600 dark:text-amber-400">{{ $stats['total_areas'] }}</span>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tukar Piket Aktif</p>
-                        <h4 class="text-xl font-bold text-slate-900 dark:text-slate-50 mt-1 font-mono">{{ $stats['total_swaps'] }}</h4>
-                    </div>
-                    <div class="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400">
-                        <i data-lucide="repeat" class="w-5 h-5"></i>
-                    </div>
+            <!-- Tukar Piket Aktif -->
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div class="w-5 h-5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
                 </div>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Tukar Piket:</span>
+                <span class="font-bold text-xs font-mono text-sky-600 dark:text-sky-400">{{ $stats['total_swaps'] }}</span>
             </div>
-        </div>
+        </section>
 
         <!-- CONTROLS & FILTER SECTION -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-4">

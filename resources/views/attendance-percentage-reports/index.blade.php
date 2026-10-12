@@ -9,7 +9,7 @@
         $countRed = collect($reports)->filter(fn($r) => $r['percentage'] < 90)->count();
     @endphp
 
-    <div class="p-6 space-y-6 relative" x-data="{
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 relative text-left" x-data="{
         activeCategoryFilter: 'all',
         selectedReport: null,
         isDrawerOpen: false,
@@ -23,10 +23,10 @@
     }" x-ref="container">
         
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Laporan Persentase Kehadiran</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Analisis kehadiran pegawai dan pantau perbaikan performa kedisiplinan kerja secara komprehensif.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Laporan Persentase Kehadiran</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Analisis kehadiran pegawai dan pantau perbaikan performa kedisiplinan kerja secara komprehensif.</p>
             </div>
         </header>
 
@@ -133,68 +133,42 @@
             @endif
         </div>
 
-        <!-- ZONA KATEGORI FILTER CARDS -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full text-left">
-            <!-- Card 1: Semua Pegawai -->
-            <button @click="activeCategoryFilter = 'all'" 
-                :class="activeCategoryFilter === 'all' ? 'border-slate-900 dark:border-slate-100 ring-2 ring-slate-900/10 dark:ring-slate-100/10' : 'border-slate-200 dark:border-slate-850 hover:border-slate-400 dark:hover:border-slate-700'"
-                class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Pegawai</span>
-                    <h4 class="text-2xl font-black font-mono text-slate-900 dark:text-slate-50 leading-none">{{ $countTotal }}</h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Seluruh unit terfilter</p>
-                </div>
-                <div class="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                    <i data-lucide="users" class="w-5 h-5"></i>
-                </div>
+        <!-- ULTRA-COMPACT KPI / KATEGORI FILTER STRIP -->
+        <section class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full text-xs">
+            <!-- Semua Pegawai -->
+            <button type="button" @click="activeCategoryFilter = 'all'" 
+                :class="activeCategoryFilter === 'all' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60'"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                <i data-lucide="users" class="w-3.5 h-3.5 opacity-80 shrink-0"></i>
+                <span class="text-[11px] font-medium">Semua Pegawai:</span>
+                <span class="font-bold font-mono">{{ $countTotal }}</span>
             </button>
 
-            <!-- Card 2: Zona Hijau (Aman) -->
-            <button @click="activeCategoryFilter = 'green'" 
-                :class="activeCategoryFilter === 'green' ? 'border-emerald-600 dark:border-emerald-450 ring-2 ring-emerald-500/10' : 'border-slate-200 dark:border-slate-850 hover:border-emerald-500 dark:hover:border-emerald-600'"
-                class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider block">Zona Aman (>= 95%)</span>
-                    <h4 class="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">
-                        {{ $countGreen }} <span class="text-xs font-bold text-emerald-500/80 dark:text-emerald-500 font-sans tracking-normal lowercase ml-1">pegawai</span>
-                    </h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Performa sangat baik</p>
-                </div>
-                <div class="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <i data-lucide="check-circle" class="w-5 h-5"></i>
-                </div>
+            <!-- Zona Hijau (Aman) -->
+            <button type="button" @click="activeCategoryFilter = 'green'" 
+                :class="activeCategoryFilter === 'green' ? 'bg-emerald-600 text-white ring-2 ring-emerald-500/20' : 'bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/40 hover:bg-emerald-100/70'"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 shrink-0" :class="activeCategoryFilter === 'green' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'"></i>
+                <span class="text-[11px] font-medium">Zona Aman (≥95%):</span>
+                <span class="font-bold font-mono">{{ $countGreen }}</span>
             </button>
 
-            <!-- Card 3: Zona Kuning (Waspada) -->
-            <button @click="activeCategoryFilter = 'yellow'" 
-                :class="activeCategoryFilter === 'yellow' ? 'border-amber-500 ring-2 ring-amber-500/10' : 'border-slate-200 dark:border-slate-850 hover:border-amber-550 dark:hover:border-amber-500'"
-                class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-amber-500 uppercase tracking-wider block">Zona Waspada (90% - 94.9%)</span>
-                    <h4 class="text-2xl font-black font-mono text-amber-500 leading-none">
-                        {{ $countYellow }} <span class="text-xs font-bold text-amber-550/80 dark:text-amber-500 font-sans tracking-normal lowercase ml-1">pegawai</span>
-                    </h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Perlu perhatian ringan</p>
-                </div>
-                <div class="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-555">
-                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                </div>
+            <!-- Zona Kuning (Waspada) -->
+            <button type="button" @click="activeCategoryFilter = 'yellow'" 
+                :class="activeCategoryFilter === 'yellow' ? 'bg-amber-500 text-white ring-2 ring-amber-500/20' : 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/40 hover:bg-amber-100/70'"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0" :class="activeCategoryFilter === 'yellow' ? 'text-white' : 'text-amber-600 dark:text-amber-400'"></i>
+                <span class="text-[11px] font-medium">Zona Waspada (90-94%):</span>
+                <span class="font-bold font-mono">{{ $countYellow }}</span>
             </button>
 
-            <!-- Card 4: Zona Merah (Evaluasi - Kritis) -->
-            <button @click="activeCategoryFilter = 'red'" 
-                :class="activeCategoryFilter === 'red' ? 'border-rose-600 dark:border-rose-455 ring-2 ring-rose-500/10' : 'border-slate-200 dark:border-slate-850 hover:border-rose-500 dark:hover:border-rose-600'"
-                class="bg-white dark:bg-slate-900 border rounded-xl p-5 shadow-sm flex items-center justify-between text-left cursor-pointer w-full hover:-translate-y-0.5 hover:shadow-md active:scale-98 transition-all duration-250">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-bold text-rose-600 dark:text-rose-455 uppercase tracking-wider block">Zona Kritis (< 90%)</span>
-                    <h4 class="text-2xl font-black font-mono text-rose-600 dark:text-rose-455 leading-none">
-                        {{ $countRed }} <span class="text-xs font-bold text-rose-500/80 dark:text-rose-500/80 font-sans tracking-normal lowercase ml-1">pegawai</span>
-                    </h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Memerlukan evaluasi kehadiran</p>
-                </div>
-                <div class="h-10 w-10 rounded-lg bg-rose-50 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
-                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-                </div>
+            <!-- Zona Merah (Kritis) -->
+            <button type="button" @click="activeCategoryFilter = 'red'" 
+                :class="activeCategoryFilter === 'red' ? 'bg-rose-600 text-white ring-2 ring-rose-500/20' : 'bg-rose-50/70 dark:bg-rose-955/30 text-rose-800 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/40 hover:bg-rose-100/70'"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0" :class="activeCategoryFilter === 'red' ? 'text-white' : 'text-rose-600 dark:text-rose-400'"></i>
+                <span class="text-[11px] font-medium">Zona Kritis (&lt;90%):</span>
+                <span class="font-bold font-mono">{{ $countRed }}</span>
             </button>
         </section>
 

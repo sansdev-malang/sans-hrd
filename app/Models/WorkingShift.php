@@ -10,6 +10,7 @@ class WorkingShift extends Model
     use HasFactory;
 
     protected $fillable = [
+        'school_unit_id',
         'name',
         'code',
         'short_code',
@@ -29,6 +30,11 @@ class WorkingShift extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function schoolUnit()
+    {
+        return $this->belongsTo(SchoolUnit::class, 'school_unit_id');
     }
 
     public function details()

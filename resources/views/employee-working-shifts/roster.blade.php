@@ -29,7 +29,7 @@
         }
     </style>
 
-<div class="p-6 space-y-6" x-data="rosterGrid()">
+<div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="rosterGrid()">
     <form method="POST" action="{{ route('employee-working-shifts.update-roster') }}" class="space-y-6">
         @csrf
         <input type="hidden" name="school_unit_id" value="{{ $selectedUnitId }}">
@@ -38,26 +38,24 @@
         <input type="hidden" name="old_roster_name" value="{{ $oldRosterName ?? '' }}">
     
     <!-- Header & Back Button -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 w-full text-left">
         <div class="flex items-center gap-3 text-left">
-            <a href="{{ route('employee-working-shifts.index', ['tab' => 'roster', 'unit_id' => $selectedUnitId]) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-3xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+            <a href="{{ route('employee-working-shifts.index', ['tab' => 'roster', 'unit_id' => $selectedUnitId]) }}" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 shadow-xs">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
             </a>
             <div>
                 <div class="flex items-center gap-3 text-left">
                     <div class="relative flex items-center">
                         <input type="text" name="roster_name" value="{{ $rosterName }}" required placeholder="Nama Roster..."
-                            class="text-sm font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-xl pl-8 pr-3 py-1.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all font-sans tracking-wide w-64 shadow-2xs"
+                            class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-lg pl-8 pr-3 py-1.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all font-sans tracking-wide w-56 sm:w-64 shadow-xs"
                             title="Klik untuk mengubah nama roster ini">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-indigo-500 dark:text-indigo-400">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                         </div>
                     </div>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0">Roster</span>
                 </div>
                 <!-- Context Badges -->
                 <div class="flex flex-wrap items-center gap-2 mt-1.5">
-                    <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Unit:</span>
                     <select id="filter_unit_id"
                         class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-750 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500/30"
                         @change="window.location.href = '/employee-working-shifts/roster?unit_id=' + $event.target.value + '&month={{ $month }}&year={{ $year }}&roster_name=' + encodeURIComponent(document.querySelector('input[name=roster_name]').value)">

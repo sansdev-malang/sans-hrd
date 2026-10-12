@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6" x-data="{ 
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-data="{ 
         showAddModal: false, 
         showEditModal: false, 
         showDetailModal: false,
@@ -21,15 +21,15 @@
     }">
 
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization">Manajemen Pengguna</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Kelola akun akses sistem dan hak role internal untuk aplikasi pusat HRD.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Manajemen Pengguna</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">Kelola akun akses sistem dan hak role internal untuk aplikasi pusat HRD.</p>
             </div>
             <div>
-                <button @click="showAddModal = true" class="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Tambah User Baru
+                <button @click="showAddModal = true" class="px-3 sm:px-4 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-[11px] sm:text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Tambah User Baru</span>
                 </button>
             </div>
         </header>
@@ -171,7 +171,7 @@
             <div x-show="showAddModal" @click.self="showAddModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
             <div @click.outside="showAddModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                         Tambah Akun User Baru
                     </h3>
                     <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
@@ -226,7 +226,7 @@
             <div x-show="showEditModal" @click.self="showEditModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
             <div @click.outside="showEditModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                         Edit Akun Pengguna
                     </h3>
                     <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
@@ -281,7 +281,7 @@
             <div x-show="showDetailModal" @click.self="showDetailModal = false" class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs text-left" style="display: none; z-index: 9999;">
             <div @click.outside="showDetailModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-md w-full overflow-hidden text-xs">
                 <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                         <i data-lucide="user-check" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
                         Profil Pengguna
                     </h3>
@@ -297,7 +297,7 @@
                             <span x-text="selectedUser ? selectedUser.name.substring(0,2) : ''"></span>
                         </div>
                         <div class="space-y-1">
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50 font-nasalization" x-text="selectedUser ? selectedUser.name : ''"></h4>
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50" x-text="selectedUser ? selectedUser.name : ''"></h4>
                             <p class="text-slate-400 dark:text-slate-500 font-mono" x-text="selectedUser ? selectedUser.email : ''"></p>
                             <span class="inline-flex px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 uppercase" x-text="selectedUser ? (selectedUser.role === 'super_admin' ? 'Super Admin' : 'Staf HRD') : ''"></span>
                         </div>

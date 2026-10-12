@@ -59,7 +59,7 @@
         }
     </style>
 
-    <div class="p-6 space-y-6 relative" x-data="{
+    <div class="p-4 sm:p-5 space-y-4 relative" x-data="{
         showModal: false,
         selectedBatch: null,
         searchModal: '',
@@ -361,39 +361,37 @@
     }">
 
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization">Jadwal Kerja Pegawai</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Atur penugasan dan rotasi shift kerja secara kolektif per unit sekolah.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Jadwal Kerja Pegawai</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Atur penugasan dan rotasi shift kerja secara kolektif per unit sekolah.</p>
             </div>
 
-
-
-            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0 justify-end">
                 @php
                     $selectedUnit = $units->firstWhere('id', $selectedUnitId);
                 @endphp
                 <div id="roster-sync-btn-container">
-                    <form action="{{ route('employee-working-shifts.sync-trigger', ['unit_id' => $selectedUnitId]) }}" method="POST" class="inline" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
+                    <form action="{{ route('employee-working-shifts.sync-trigger', ['unit_id' => $selectedUnitId]) }}" method="POST" class="inline m-0 p-0" data-no-loader="true" onsubmit="this.querySelector('button').style.pointerEvents = 'none'; let icon = this.querySelector('i, svg'); if(icon) icon.classList.add('animate-spin');">
                         @csrf
-                        <button type="submit" class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2 border-0 shadow-3xs" title="{{ empty($selectedUnitId) ? 'Sinkronisasi jadwal seluruh unit' : 'Sinkronisasi jadwal unit ini' }}">
-                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                            {{ empty($selectedUnitId) ? 'Sync Semua Jadwal' : 'Sync Jadwal ' . ($selectedUnit->name ?? '') }}
+                        <button type="submit" class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] sm:text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm transition-all cursor-pointer" title="{{ empty($selectedUnitId) ? 'Sinkronisasi jadwal seluruh unit' : 'Sinkronisasi jadwal unit ini' }}">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-500"></i>
+                            <span>{{ empty($selectedUnitId) ? 'Sync Semua' : 'Sync ' . ($selectedUnit->name ?? '') }}</span>
                         </button>
                     </form>
                 </div>
                 <button type="button" @click="showCreateModal = true"
-                    class="h-9 px-4 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer gap-2">
-                    <i data-lucide="calendar-range" class="w-4.5 h-4.5"></i>
-                    Atur Jadwal Bergilir (Roster)
+                    class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 text-[11px] sm:text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer">
+                    <i data-lucide="calendar-range" class="w-3.5 h-3.5"></i>
+                    <span>Atur Roster</span>
                 </button>
                 <button type="button" @click="showAssignmentModal = true"
-                    class="h-9 px-4 inline-flex items-center justify-center bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer gap-2">
-                    <i data-lucide="calendar-check" class="w-4.5 h-4.5"></i>
-                    Tugaskan Jadwal Tetap (Batch)
+                    class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-[11px] sm:text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer">
+                    <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
+                    <span>Tugaskan Jadwal</span>
                 </button>
             </div>
-        </header>
+        </section>
 
 
 
@@ -442,16 +440,11 @@
 
                 <!-- Unit Pills Filter -->
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 border-b border-slate-150 dark:border-slate-800/60 w-full mb-4">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1.5 flex items-center gap-1">
-                        <i data-lucide="school" class="w-3.5 h-3.5"></i>
-                        Unit:
-                    </span>
-                    
-                    <!-- Semua Unit Pill -->
+                    <!-- Semua Pill -->
                     <button type="button" 
                             onclick="selectUnitFilter('', this)"
                             class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ empty($selectedUnitId) ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
-                        Semua Unit
+                        Semua
                     </button>
                     
                     @foreach($units as $unit)
@@ -527,49 +520,51 @@
                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10">
                         <tr>
                             @if ($activeTab === 'roster')
-                                <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[32%] whitespace-nowrap">Grup Penugasan</th>
+                                <th class="bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-left w-[32%] whitespace-nowrap">Grup Penugasan</th>
                             @else
-                                <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[32%] whitespace-nowrap">Template Shift (Jam Kerja)</th>
+                                <th class="bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-left w-[32%] whitespace-nowrap">Template Shift (Jam Kerja)</th>
                             @endif
-                            <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-left w-[18%] whitespace-nowrap">Unit Sekolah</th>
-                            <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-center w-[25%] whitespace-nowrap">Periode Jadwal</th>
-                            <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-center w-[13%] whitespace-nowrap">Jumlah Pegawai</th>
-                            <th class="bg-slate-50 dark:bg-slate-900 px-6 py-4 text-right w-[12%] whitespace-nowrap">Aksi</th>
+                            <th class="bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-left w-[18%] whitespace-nowrap">Unit Sekolah</th>
+                            <th class="bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-center w-[25%] whitespace-nowrap">Periode Jadwal</th>
+                            <th class="bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-center w-[13%] whitespace-nowrap">Jumlah Pegawai</th>
+                            <th class="bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-right w-[12%] whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300 font-medium">
                         @forelse($batches as $batch)
                             @if ($activeTab === 'roster')
                                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                    <td class="px-6 py-4 text-left">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100/20 dark:border-indigo-900/10">
-                                                <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                                    <td class="px-4 py-2.5 text-left">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100/20 dark:border-indigo-900/10">
+                                                <i data-lucide="calendar-range" class="w-3.5 h-3.5"></i>
                                             </div>
                                             <div class="flex flex-col gap-0.5">
                                                 <span @click="openModal({{ json_encode($batch) }})" class="font-semibold text-slate-800 dark:text-slate-200 text-xs cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors duration-150" title="Klik untuk melihat rincian daftar pegawai">{{ !empty($batch['roster_name']) ? $batch['roster_name'] : 'Roster Shift Bulanan' }}</span>
-                                                <span class="inline-flex w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wide">Roster Bulanan</span>
-                                                <span class="inline-flex items-center gap-1 w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-3 h-3"></i> {{ (($batch['bonus_schema_mode'] ?? '') === 'early_arrival' ? '⚡ ' : '⏱️ ') . ($batch['bonus_schema_name'] ?? 'Default') }}</span>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="inline-flex w-max px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wide">Roster</span>
+                                                    <span class="inline-flex items-center gap-1 w-max px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-2.5 h-2.5"></i> {{ (($batch['bonus_schema_mode'] ?? '') === 'early_arrival' ? '⚡ ' : '⏱️ ') . ($batch['bonus_schema_name'] ?? 'Default') }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-left whitespace-nowrap">
+                                    <td class="px-4 py-2.5 text-left whitespace-nowrap">
                                         <span class="font-semibold text-slate-700 dark:text-slate-350 text-xs">{{ $batch['unit_name'] }}</span>
                                     </td>
-                                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                                        <div class="flex items-center justify-center gap-2">
+                                    <td class="px-4 py-2.5 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center gap-1.5">
                                             <span class="text-xs font-semibold text-slate-900 dark:text-slate-200">{{ \Carbon\Carbon::create($batch['year'], $batch['month'], 1)->translatedFormat('F Y') }}</span>
-                                            <span class="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider border border-blue-100/30 dark:border-blue-900/30">Roster</span>
+                                            <span class="px-1.5 py-0.2 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider border border-blue-100/30 dark:border-blue-900/30">Roster</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                                        <div @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-100/30 dark:border-indigo-900/30 cursor-pointer shadow-2xs font-bold text-xs whitespace-nowrap transition-colors" title="Klik untuk melihat rincian daftar pegawai">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <td class="px-4 py-2.5 text-center whitespace-nowrap">
+                                        <div @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-100/30 dark:border-indigo-900/30 cursor-pointer shadow-2xs font-bold text-xs whitespace-nowrap transition-colors" title="Klik untuk melihat rincian daftar pegawai">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
                                             <span>{{ count($batch['employees']) }} Orang</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center justify-end gap-1.5">
+                                    <td class="px-4 py-2.5">
+                                        <div class="flex items-center justify-end gap-1">
                                             <a href="{{ route('employee-working-shifts.detail-roster', [
                                                 'unit_id' => $batch['school_unit_id'],
                                                 'month' => $batch['month'],
@@ -577,9 +572,9 @@
                                                 'roster_name' => $batch['roster_name'] ?? '',
                                                 'bonus_schema_id' => $batch['bonus_schema_id'] ?? '',
                                             ]) }}"
-                                                class="h-8 w-8 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-600 dark:hover:bg-indigo-650 hover:text-white text-indigo-700 dark:text-indigo-400 rounded-lg border border-indigo-200/30 dark:border-indigo-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
+                                                class="h-7 w-7 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-600 dark:hover:bg-indigo-650 hover:text-white text-indigo-700 dark:text-indigo-400 rounded-lg border border-indigo-200/30 dark:border-indigo-900/30 transition-all hover:shadow-xs cursor-pointer"
                                                 title="Lihat Detail Roster">
-                                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                             </a>
                                             <a href="{{ route('employee-working-shifts.roster', [
                                                 'unit_id' => $batch['school_unit_id'],
@@ -588,66 +583,68 @@
                                                 'roster_name' => $batch['roster_name'] ?? '',
                                                 'bonus_schema_id' => $batch['bonus_schema_id'] ?? '',
                                             ]) }}"
-                                                class="h-8 w-8 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
+                                                class="h-7 w-7 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:shadow-xs"
                                                 title="Edit Roster">
-                                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                                             </a>
                                             <button type="button"
                                                 @click="confirmDeleteBatch({{ json_encode($batch) }})"
-                                                class="h-8 w-8 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
+                                                class="h-7 w-7 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:shadow-xs cursor-pointer"
                                                 title="Hapus Roster">
-                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
                             @else
                                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                    <td class="px-6 py-4 text-left">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-100/20 dark:border-emerald-900/10">
-                                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                    <td class="px-4 py-2.5 text-left">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-100/20 dark:border-emerald-900/10">
+                                                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
                                             </div>
                                             <div class="flex flex-col gap-0.5">
                                                 <span @click="openModal({{ json_encode($batch) }})" class="font-semibold text-slate-800 dark:text-slate-200 text-xs cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors duration-150" title="Klik untuk melihat rincian daftar pegawai">{{ $batch['shift_name'] }}</span>
-                                                <span class="inline-flex w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-955/30 text-emerald-700 dark:text-emerald-455 border border-emerald-100/30 dark:border-emerald-900/30 uppercase tracking-wide">Kode: {{ $batch['shift_code'] }}</span>
-                                                <span class="inline-flex items-center gap-1 w-max px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-955/30 text-amber-750 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-3 h-3"></i> {{ (($batch['bonus_schema_mode'] ?? '') === 'early_arrival' ? '⚡ ' : '⏱️ ') . ($batch['bonus_schema_name'] ?? 'Default') }}</span>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="inline-flex w-max px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-955/30 text-emerald-700 dark:text-emerald-455 border border-emerald-100/30 dark:border-emerald-900/30 uppercase tracking-wide">Kode: {{ $batch['shift_code'] }}</span>
+                                                    <span class="inline-flex items-center gap-1 w-max px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-955/30 text-amber-750 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-2.5 h-2.5"></i> {{ (($batch['bonus_schema_mode'] ?? '') === 'early_arrival' ? '⚡ ' : '⏱️ ') . ($batch['bonus_schema_name'] ?? 'Default') }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-left whitespace-nowrap">
+                                    <td class="px-4 py-2.5 text-left whitespace-nowrap">
                                         <span class="font-semibold text-slate-700 dark:text-slate-350 text-xs">{{ $batch['unit_name'] }}</span>
                                     </td>
-                                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                                        <div class="flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-900 dark:text-slate-200">
+                                    <td class="px-4 py-2.5 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center gap-1 text-xs font-semibold text-slate-900 dark:text-slate-200">
                                             <span>{{ \Carbon\Carbon::parse($batch['start_date'])->translatedFormat('d M Y') }}</span>
-                                            <span class="text-slate-455 dark:text-slate-500 font-normal text-[10px]">s/d</span>
+                                            <span class="text-slate-400 dark:text-slate-500 font-normal text-[10px]">s/d</span>
                                             @if ($batch['end_date'])
                                                 <span>{{ \Carbon\Carbon::parse($batch['end_date'])->translatedFormat('d M Y') }}</span>
                                             @else
-                                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-[9px] font-bold uppercase tracking-wider border border-emerald-100/30 dark:border-emerald-900/30 whitespace-nowrap">Seterusnya</span>
+                                                <span class="px-2 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-[9px] font-bold uppercase tracking-wider border border-emerald-100/30 dark:border-emerald-900/30 whitespace-nowrap">Seterusnya</span>
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                                        <div @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-100/30 dark:border-indigo-900/30 cursor-pointer shadow-2xs font-bold text-xs whitespace-nowrap transition-colors" title="Klik untuk melihat rincian daftar pegawai">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <td class="px-4 py-2.5 text-center whitespace-nowrap">
+                                        <div @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-100/30 dark:border-indigo-900/30 cursor-pointer shadow-2xs font-bold text-xs whitespace-nowrap transition-colors" title="Klik untuk melihat rincian daftar pegawai">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
                                             <span>{{ count($batch['employees']) }} Orang</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center justify-end gap-1.5">
+                                    <td class="px-4 py-2.5">
+                                        <div class="flex items-center justify-end gap-1">
                                             <button type="button" @click="openEditModal({{ json_encode($batch) }})"
-                                                class="h-8 w-8 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
+                                                class="h-7 w-7 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:shadow-xs cursor-pointer"
                                                 title="Edit Penugasan">
-                                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                                             </button>
 
                                             <button type="button"
                                                 @click="confirmDeleteBatch({{ json_encode($batch) }})"
-                                                class="h-8 w-8 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer"
+                                                class="h-7 w-7 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:shadow-xs cursor-pointer"
                                                 title="Hapus Penugasan">
-                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -927,7 +924,7 @@
                     <!-- Header -->
                     <div class="p-5 border-b border-slate-100 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
                         <div>
-                             <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
+                             <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
                                  <span>Tugaskan Jadwal Tetap (Batch) Baru</span>
                              </h3>
@@ -970,7 +967,11 @@
                                             class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Shift...</option>
                                             @foreach ($shifts->where('is_shift', false) as $shift)
-                                                <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
+                                                <option value="{{ $shift->id }}"
+                                                    x-show="!{{ $shift->school_unit_id ?: 'null' }} || {{ $shift->school_unit_id ?: 'null' }} == selectedUnit"
+                                                    :disabled="Boolean({{ $shift->school_unit_id ?: 'null' }} && {{ $shift->school_unit_id ?: 'null' }} != selectedUnit)">
+                                                    {{ $shift->name }} ({{ $shift->code }}){{ $shift->schoolUnit ? ' [' . $shift->schoolUnit->name . ']' : '' }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -1145,7 +1146,7 @@
                     <!-- Header -->
                     <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
                         <div>
-                             <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
+                             <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                                  <span>Edit Batch Penugasan Shift</span>
                              </h3>
@@ -1195,7 +1196,11 @@
                                             class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Template Shift</option>
                                             @foreach ($shifts->where('is_shift', false) as $shift)
-                                                <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->code }})</option>
+                                                <option value="{{ $shift->id }}"
+                                                    x-show="!{{ $shift->school_unit_id ?: 'null' }} || {{ $shift->school_unit_id ?: 'null' }} == editUnitId"
+                                                    :disabled="Boolean({{ $shift->school_unit_id ?: 'null' }} && {{ $shift->school_unit_id ?: 'null' }} != editUnitId)">
+                                                    {{ $shift->name }} ({{ $shift->code }}){{ $shift->schoolUnit ? ' [' . $shift->schoolUnit->name . ']' : '' }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -1374,7 +1379,7 @@
                         <!-- Header -->
                         <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
                              <div>
-                                 <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
+                                 <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                                      <span>Buat Jadwal Bergilir (Roster) Baru</span>
                                  </h3>
@@ -1508,7 +1513,8 @@
                                         <div class="p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-y-auto custom-scrollbar flex-1 min-h-[160px]">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 @foreach($shifts->where('is_shift', true) as $s)
-                                                    <label :class="selectedShifts.includes({{ $s->id }}) 
+                                                    <label x-show="!{{ $s->school_unit_id ?: 'null' }} || {{ $s->school_unit_id ?: 'null' }} == createUnitId"
+                                                        :class="selectedShifts.includes({{ $s->id }}) 
                                                         ? 'border-indigo-500/80 bg-indigo-50/50 dark:bg-indigo-950/20 ring-1 ring-indigo-500/20' 
                                                         : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'"
                                                         class="flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all duration-200 select-none group">
@@ -1666,7 +1672,7 @@
                      <!-- Header -->
                      <div class="p-5 border-b border-slate-100 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40 shrink-0">
                          <div>
-                              <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 font-nasalization flex items-center gap-2">
+                              <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                   <span>Pegawai Tanpa Jadwal Kerja Aktif</span>
                               </h3>

@@ -1,15 +1,12 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left">
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full text-left">
+        <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization flex items-center gap-2.5">
-                    <span>Data Slip Gaji</span>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wider shrink-0 font-sans">Payslip</span>
-                </h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Unggah dan kelola slip gaji (PDF) per pegawai.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Slip Gaji</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Unggah dan kelola slip gaji (PDF) per pegawai.</p>
             </div>
-        </header>
+        </section>
 
         <div id="payslip-report-container" class="space-y-6">
 
@@ -20,16 +17,11 @@
 
                 <!-- Unit Pills Filter -->
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 border-b border-slate-150 dark:border-slate-800/60 w-full">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1.5 flex items-center gap-1">
-                        <i data-lucide="school" class="w-3.5 h-3.5"></i>
-                        Unit:
-                    </span>
-                    
-                    <!-- Semua Unit Pill -->
+                    <!-- Semua Pill -->
                     <button type="button" 
                             onclick="selectUnitFilter('', this)"
                             class="h-7 px-3.5 inline-flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer {{ empty(request('unit_id', $unitId)) ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900' }}">
-                        Semua Unit
+                        Semua
                     </button>
                     
                     @foreach($units as $u)
@@ -138,7 +130,7 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 font-nasalization tracking-wide">
+                            <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                                 {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
                             </h3>
                             @if($month === ($latestPeriod ?? ($lastMonth ?? \Carbon\Carbon::now()->subMonth()->format('Y-m'))))

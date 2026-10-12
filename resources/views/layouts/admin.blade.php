@@ -184,6 +184,32 @@
         </script>
 
         <style>
+            /* Responsive Root Typography & UI Density System */
+            html {
+                font-size: 15px;
+                -webkit-text-size-adjust: 100%;
+            }
+            @media (min-width: 1024px) and (max-width: 1366px) {
+                html {
+                    font-size: 14.5px;
+                }
+            }
+            @media (min-width: 1367px) and (max-width: 1599px) {
+                html {
+                    font-size: 15px;
+                }
+            }
+            @media (min-width: 1600px) and (max-width: 1920px) {
+                html {
+                    font-size: 16px;
+                }
+            }
+            @media (min-width: 1921px) {
+                html {
+                    font-size: 16.5px;
+                }
+            }
+
             body {
                 font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
             }
@@ -202,6 +228,35 @@
             ::-webkit-scrollbar-thumb:hover {
                 background: rgba(100, 116, 139, 0.45);
             }
+            /* Ultra-subtle, auto-hiding sidebar scrollbar (minimalist & clean) */
+            .custom-sidebar-scroll {
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: transparent transparent;
+                overscroll-behavior: contain;
+                transition: scrollbar-color 0.2s ease;
+            }
+            .custom-sidebar-scroll::-webkit-scrollbar {
+                width: 3.5px;
+            }
+            .custom-sidebar-scroll::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .custom-sidebar-scroll::-webkit-scrollbar-thumb {
+                background-color: transparent;
+                border-radius: 9999px;
+                transition: background-color 0.2s ease;
+            }
+            #sidebar:hover .custom-sidebar-scroll {
+                scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+            }
+            #sidebar:hover .custom-sidebar-scroll::-webkit-scrollbar-thumb {
+                background-color: rgba(148, 163, 184, 0.18);
+            }
+            .custom-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(148, 163, 184, 0.35) !important;
+            }
+
             /* Smooth Desktop Sidebar Transitions (Mini-Sidebar / Collapsed view) */
             @media (min-width: 768px) {
                 #sidebar {
@@ -235,7 +290,14 @@
                     padding-right: 0 !important;
                 }
                 .sidebar-collapsed #sidebar .flex-1 {
-                    overflow: visible !important;
+                    overflow-y: auto !important;
+                }
+                .sidebar-collapsed .custom-sidebar-scroll::-webkit-scrollbar {
+                    display: none;
+                }
+                .sidebar-collapsed .custom-sidebar-scroll {
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
                 }
                 .sidebar-collapsed .sidebar-tooltip {
                     display: block;

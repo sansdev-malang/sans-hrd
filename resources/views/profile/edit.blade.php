@@ -1,10 +1,10 @@
 <x-admin-layout>
-    <div class="p-6 space-y-6 w-full text-left">
+    <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 w-full text-left">
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-nasalization">Profil &amp; Keamanan Akun</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Kelola informasi kredensial administrator, kata sandi, dan parameter keamanan sistem Anda.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Profil &amp; Keamanan Akun</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">Kelola informasi kredensial administrator, kata sandi, dan parameter keamanan sistem Anda.</p>
             </div>
         </header>
 
