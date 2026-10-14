@@ -594,6 +594,14 @@ class AttendanceApiController extends Controller
             $unitPicketEffectiveDates[$su->id] = \App\Models\Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
         }
 
+        $picketBonusSchemaId = \App\Models\Setting::get('picket_bonus_schema_id');
+        $picketBonusSchema = $picketBonusSchemaId ? $allSchemas->get($picketBonusSchemaId) : null;
+        if (!$picketBonusSchema) {
+            $picketBonusSchema = $allSchemas->first(function($s) {
+                return $s->is_active && ($s->calculation_mode === 'early_arrival' || str_contains(strtolower($s->name), 'piket'));
+            });
+        }
+
         // 5. Calculate Attendance Report
         $reports = [];
 
@@ -819,9 +827,26 @@ class AttendanceApiController extends Controller
                             }
                         }
 
-                        $currentSchema = ($currentAssignment && $currentAssignment->bonus_schema_id) 
-                                         ? ($allSchemas->get($currentAssignment->bonus_schema_id) ?? $defaultSchema)
-                                         : $defaultSchema;
+                        $currentSchema = null;
+                        if ($isPicketToday && $picketBonusSchema) {
+                            // KELAS PIKET: Menggunakan Skema Khusus Piket (Mode Hadir Lebih Awal / early_arrival)
+                            $currentSchema = $picketBonusSchema;
+                        } else {
+                            // KELAS REGULER: Menggunakan Skema Shift Kerja (Mode Toleransi Keterlambatan / late_tolerance)
+                            if ($currentAssignment && $currentAssignment->bonus_schema_id) {
+                                $currentSchema = $allSchemas->get($currentAssignment->bonus_schema_id);
+                            }
+                            if (!$currentSchema && !empty($emp['unit_name'])) {
+                                $currentSchema = $allSchemas->first(function($s) use ($emp) {
+                                    return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
+                                        || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
+                                        || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
+                                });
+                            }
+                            if (!$currentSchema) {
+                                $currentSchema = $defaultSchema;
+                            }
+                        }
 
                         $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
 
@@ -894,6 +919,7 @@ class AttendanceApiController extends Controller
                         'bonus_nominal' => $dailyBonus,
                         'tier_level' => $dailyTierLevel,
                         'calculation_mode' => $currentSchema ? ($currentSchema->calculation_mode ?? 'early_arrival') : 'early_arrival',
+                        'schema_name' => $currentSchema ? $currentSchema->name : null,
                         'is_picket' => $isPicketToday,
                         'picket_area' => $picketAreaName,
                         'picket_start' => $isPicketToday ? $picketStartTime : null,
