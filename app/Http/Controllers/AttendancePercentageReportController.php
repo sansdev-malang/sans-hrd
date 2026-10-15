@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AttendanceLog;
 use App\Models\EmployeeWorkingShift;
+use App\Models\HolidayReward;
 use App\Models\Setting;
 use App\Models\SchoolUnit;
 use App\Services\SchoolUnitService;
@@ -108,9 +109,12 @@ class AttendancePercentageReportController extends Controller
                 });
             });
 
-        // Pre-fetch Holidays and Adjustments
+        // Pre-fetch Holidays, Adjustments, and Holiday Rewards
         $holidays = \App\Models\Holiday::all();
         $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+        $holidayRewards = HolidayReward::where('end_date', '>=', $startDate->format('Y-m-d'))
+            ->where('start_date', '<=', $endDate->format('Y-m-d'))
+            ->get();
 
         $schoolUnitsList = SchoolUnit::all();
         $unitHolidays = [];
@@ -197,9 +201,10 @@ class AttendancePercentageReportController extends Controller
             }
 
             $totalWorkDays = 0;
-            $totalPresent = 0; // Physical scan OR gets_presence_bonus leaves
+            $totalPresent = 0; // Physical scan OR gets_presence_bonus leaves OR holiday rewards
             $actualScanCount = 0; // Physical scan tap
             $dinasCount = 0; // Dinas/Tugas/Excused presence
+            $rewardCount = 0; // Holiday Reward
             $totalSakit = 0;
             $totalIzin = 0;
             $totalCuti = 0;
@@ -215,6 +220,7 @@ class AttendancePercentageReportController extends Controller
             $absentDates = [];
             $scanDates = [];
             $dinasDates = [];
+            $rewardDates = [];
             $lateDates = [];
             $waspadaDates = [];
             $kritisDates = [];
@@ -228,10 +234,21 @@ class AttendancePercentageReportController extends Controller
                 $formattedDate = $currentDate->translatedFormat('l, d M Y'); // e.g. Senin, 10 Agt 2026
                 $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
 
-                // Skip Holidays based on employee's unit
+                // Check Reward Holiday for this employee on this date
+                $isRewardHoliday = false;
+                $rewardHolidayName = null;
+                foreach ($holidayRewards as $hr) {
+                    if ($hr->appliesToDate($dateStr) && $hr->appliesToEmployee($unit, $empId)) {
+                        $isRewardHoliday = true;
+                        $rewardHolidayName = $hr->name;
+                        break;
+                    }
+                }
+
+                // Skip Holidays based on employee's unit (unless it is a Reward Holiday)
                 $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
                 $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false) && !$isShiftWorker;
-                if ($isHoliday) {
+                if ($isHoliday && !$isRewardHoliday) {
                     $dayDetails[] = [
                         'date' => $formattedDate,
                         'status' => 'Libur',
@@ -286,7 +303,7 @@ class AttendancePercentageReportController extends Controller
                 }
 
                 // If not shift worker and it is holiday -> day off
-                if (!$isShiftWorker && $isHoliday) {
+                if (!$isShiftWorker && $isHoliday && !$isRewardHoliday) {
                     $isDayOff = true;
                 }
 
@@ -294,6 +311,49 @@ class AttendancePercentageReportController extends Controller
 
                 $logKey = $uid . '_' . $dateStr;
                 $hasScan = isset($attendanceLogs[$logKey]);
+
+                // If this day is a designated Reward Holiday for this employee
+                if ($isRewardHoliday) {
+                    $totalWorkDays++;
+                    $totalPresent++;
+                    $rewardCount++;
+                    $rewardDates[] = $currentDate->translatedFormat('d M');
+
+                    $inTime = 'REWARD';
+                    $outTime = '-';
+                    $scanDetail = $rewardHolidayName ? "Reward Libur: {$rewardHolidayName}" : 'Reward Hari Libur';
+
+                    if ($hasScan) {
+                        $actualScanCount++;
+                        $scanDates[] = $currentDate->translatedFormat('d M');
+                        $dayLogs = $attendanceLogs[$logKey]->sortBy('timestamp')->values();
+                        $firstLog = $dayLogs->first();
+                        $lastLog = $dayLogs->last();
+                        $inTime = Carbon::parse($firstLog->timestamp)->format('H:i');
+                        if ($dayLogs->count() > 1 && $firstLog->timestamp !== $lastLog->timestamp) {
+                            $outTime = Carbon::parse($lastLog->timestamp)->format('H:i');
+                        }
+                        $scanDetail .= " (Scan: {$inTime}" . ($outTime !== '-' ? " - {$outTime}" : "") . ")";
+                    }
+
+                    $dayDetails[] = [
+                        'date' => $formattedDate,
+                        'status' => 'Reward Libur',
+                        'label' => 'Reward Libur',
+                        'detail' => $scanDetail,
+                        'shift_name' => $shiftName,
+                        'shift_schedule' => $shiftScheduleText,
+                        'in_time' => $inTime,
+                        'out_time' => $outTime,
+                        'late_minutes' => 0,
+                        'late_category' => null,
+                        'notes' => $rewardHolidayName ? "Reward Libur: {$rewardHolidayName}" : 'Hak Reward Hari Libur (Hadir Penuh)',
+                        'color' => 'indigo'
+                    ];
+
+                    $currentDate->addDay();
+                    continue;
+                }
 
                 // Check approved leaves for this date
                 $activeLeave = null;
@@ -529,6 +589,8 @@ class AttendancePercentageReportController extends Controller
                 'scan_dates' => $scanDates,
                 'dinas_count' => $dinasCount,
                 'dinas_dates' => $dinasDates,
+                'reward_count' => $rewardCount,
+                'reward_dates' => $rewardDates,
                 'total_sakit' => $totalSakit,
                 'sakit_dates' => $sakitDates,
                 'total_izin' => $totalIzin,

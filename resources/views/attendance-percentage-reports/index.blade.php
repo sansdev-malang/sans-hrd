@@ -419,6 +419,11 @@
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                                 🟢 Hadir Penuh ({{ $rep['total_present'] }} Hari)
                                             </span>
+                                            @if(($rep['reward_count'] ?? 0) > 0)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30" title="Reward Libur: {{ implode(', ', $rep['reward_dates']) }}">
+                                                    Reward: {{ $rep['reward_count'] }}
+                                                </span>
+                                            @endif
                                             @if(($rep['waspada_late_count'] ?? 0) > 0)
                                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30">
                                                     Terlambat: {{ $rep['waspada_late_count'] }}x
@@ -433,6 +438,11 @@
                                             @if($rep['total_present'] > 0)
                                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 dark:border-emerald-900/30">
                                                     Hadir: {{ $rep['total_present'] }}
+                                                </span>
+                                            @endif
+                                            @if(($rep['reward_count'] ?? 0) > 0)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/30 dark:border-indigo-900/30" title="Reward Libur: {{ implode(', ', $rep['reward_dates']) }}">
+                                                    Reward: {{ $rep['reward_count'] }}
                                                 </span>
                                             @endif
                                             @if(($rep['waspada_late_count'] ?? 0) > 0)
@@ -640,8 +650,8 @@
                                                         <span class="text-slate-800 dark:text-slate-200 font-semibold" x-text="(day.shift_name && day.shift_name !== 'Non-Shift') ? day.shift_name + (day.shift_schedule ? ' (' + day.shift_schedule + ')' : '') : (day.status === 'Libur' ? 'Libur' : 'Non-Shift')"></span>
                                                     </div>
 
-                                                    <!-- Baris 3: Masuk & Pulang (Saat Hadir) -->
-                                                    <template x-if="day.status === 'Hadir'">
+                                                    <!-- Baris 3: Masuk & Pulang (Saat Hadir / Reward Libur) -->
+                                                    <template x-if="day.status === 'Hadir' || day.status === 'Reward Libur'">
                                                         <div class="flex items-start gap-1">
                                                             <span class="text-slate-400 dark:text-slate-500 shrink-0 w-20">Masuk</span>
                                                             <span class="text-slate-400 dark:text-slate-500">:</span>
