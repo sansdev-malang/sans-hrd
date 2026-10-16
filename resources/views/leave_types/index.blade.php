@@ -80,7 +80,7 @@
             <!-- Bonus Eligible -->
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-amber-800 dark:text-amber-300 shadow-2xs">
                 <i data-lucide="award" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0"></i>
-                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Dapat Bonus Kehadiran:</span>
+                <span class="font-medium text-[11px] text-slate-600 dark:text-slate-400">Dapat Uang Kehadiran:</span>
                 <span class="font-bold text-xs font-mono text-amber-700 dark:text-amber-300">{{ $bonusCount }}</span>
             </div>
 
@@ -141,7 +141,7 @@
                             <th class="px-6 py-3.5 text-center">Berlaku Di Unit</th>
                             <th class="px-6 py-3.5 text-center">Absensi Fisik</th>
                             <th class="px-6 py-3.5 text-center">Persetujuan</th>
-                            <th class="px-6 py-3.5 text-center">Bonus Ketepatan Waktu</th>
+                            <th class="px-6 py-3.5 text-center">Uang Kehadiran</th>
                             <th class="px-6 py-3.5 text-right">Aksi</th>
                         </tr>
                     </thead>

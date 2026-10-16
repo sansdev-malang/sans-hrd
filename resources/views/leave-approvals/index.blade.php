@@ -529,11 +529,11 @@
                                 <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800/60">
                                     <div x-show="selectedEmp.gets_presence_bonus" class="flex items-center gap-1.5 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-900/30 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
                                         <i data-lucide="check-circle" class="w-3.5 h-3.5 shrink-0"></i>
-                                        <span>Mendapat Bonus Kehadiran</span>
+                                        <span>Mendapat Uang Kehadiran</span>
                                     </div>
                                     <div x-show="!selectedEmp.gets_presence_bonus" class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-100/70 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-800 text-[10px] font-medium text-slate-500 dark:text-slate-400">
                                         <i data-lucide="info" class="w-3.5 h-3.5 shrink-0 text-slate-400"></i>
-                                        <span>Tidak Mendapat Bonus Kehadiran</span>
+                                        <span>Tidak Mendapat Uang Kehadiran</span>
                                     </div>
                                 </div>
                             </template>

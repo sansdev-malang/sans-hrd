@@ -5,8 +5,8 @@
         <!-- HEADER -->
         <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Bonus Ketepatan Waktu</h2>
-                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Evaluasi ketepatan waktu kedatangan pegawai berdasarkan skema bonus aktif.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Data Uang Kehadiran</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Evaluasi ketepatan waktu kedatangan pegawai berdasarkan skema uang kehadiran aktif.</p>
             </div>
             
             <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
@@ -18,7 +18,7 @@
                 @else
                     <div class="px-3 h-9 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
                         <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600 dark:text-red-400"></i>
-                        <span class="text-[11px] font-semibold text-red-800 dark:text-red-300">Tidak ada skema bonus aktif!</span>
+                        <span class="text-[11px] font-semibold text-red-800 dark:text-red-300">Tidak ada skema uang kehadiran aktif!</span>
                     </div>
                 @endif
 
@@ -161,7 +161,7 @@
                                 </div>
                             </th>
                             <th class="px-4 py-3 bg-slate-50 dark:bg-slate-900 text-center sticky top-0 z-30 border-r border-slate-200 dark:border-slate-800 min-w-[120px]">
-                                <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bonus</span>
+                                <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Uang Kehadiran</span>
                             </th>
                             @foreach($dates as $date)
                             @php
@@ -228,30 +228,88 @@
                                 <td class="py-1 px-1 text-center border-r border-slate-50 dark:border-slate-800/30 {{ $date->isSunday() ? 'bg-red-50/30 dark:bg-red-950/10' : '' }}">
                                     @if($detail)
                                         @php
-                                            $picketPrefix = $isPicket ? "⚡ [PIKET: 06:30 ({$picketArea})] " : "";
+                                            $lines = [];
+                                            $statusName = $detail['status'] ?? '';
+                                            $isReward = $statusName === 'Reward Libur' || !empty($detail['is_reward_holiday']);
+                                            $isFuture = $dateStr > date('Y-m-d');
+                                            $isKedinasanStatus = $statusName === 'Dinas' || 
+                                                str_contains(strtolower($statusName), 'dinas') || 
+                                                str_contains(strtolower($statusName), 'kedinasan');
+
+                                            // 1. Info Shift / Piket / Reward
+                                            if ($isReward) {
+                                                $rName = $detail['reward_name'] ?? 'Libur Reward';
+                                                $lines[] = "🎁 REWARD LIBUR: {$rName}";
+                                            } elseif ($isPicket) {
+                                                $lines[] = "⚡ PIKET: {$picketArea}";
+                                            } elseif ($isKedinasanStatus) {
+                                                $shortStatus = str_contains($statusName, '(') ? trim(explode('(', $statusName)[0]) : $statusName;
+                                                $lines[] = "💼 TUGAS DINAS: {$shortStatus}";
+                                            } elseif (!empty($detail['shift_name'])) {
+                                                $lines[] = "🏢 SHIFT: {$detail['shift_name']}";
+                                            } else {
+                                                $lines[] = "🏢 SHIFT: Reguler";
+                                            }
+
+                                            // 2. Info Jam Kerja / Piket
+                                            if (!$isReward) {
+                                                $startJam = !empty($detail['shift_start']) ? substr($detail['shift_start'], 0, 5) : ($isPicket ? '06:30' : '-');
+                                                $endJam = !empty($detail['shift_end']) ? substr($detail['shift_end'], 0, 5) : '';
+                                                $jadwalStr = $endJam ? "{$startJam} - {$endJam}" : $startJam;
+                                                $lines[] = "⏰ Jadwal  : {$jadwalStr}";
+                                            }
+
+                                            // 3. Jam Masuk & Jam Pulang
+                                            if ($isFuture) {
+                                                $lines[] = "📥 Masuk   : -";
+                                                $lines[] = "📤 Pulang  : -";
+                                            } else {
+                                                $inStr = !empty($detail['check_in']) ? $detail['check_in'] : 'Tidak Hadir';
+                                                $outStr = !empty($detail['check_out']) ? $detail['check_out'] : '-';
+                                                $lines[] = "📥 Masuk   : {$inStr}";
+                                                $lines[] = "📤 Pulang  : {$outStr}";
+                                            }
+
+                                            // 4. Keterlambatan / Status
+                                            if ($isFuture) {
+                                                $lines[] = "⏱️ Status  : Belum Terlaksana";
+                                            } elseif ($isReward) {
+                                                $lines[] = "⏱️ Status  : Bebas Keterlambatan (Reward)";
+                                            } elseif ($isKedinasanStatus) {
+                                                $lines[] = "⏱️ Status  : Dispensasi Tugas Dinas";
+                                            } elseif (!empty($detail['late_minutes']) && $detail['late_minutes'] > 0) {
+                                                $lines[] = "⏱️ Terlambat: {$detail['late_minutes']} menit";
+                                            } elseif (!empty($detail['check_in']) && $detail['check_in'] !== 'Tidak Hadir') {
+                                                if (!empty($detail['early_minutes']) && $detail['early_minutes'] > 0) {
+                                                    $lines[] = "⏱️ Terlambat: 0 menit (Lebih awal {$detail['early_minutes']} mnt)";
+                                                } else {
+                                                    $lines[] = "⏱️ Terlambat: 0 menit (Tepat Waktu)";
+                                                }
+                                            } else {
+                                                $lines[] = "⏱️ Status  : Tidak Hadir / Alfa";
+                                            }
+
+                                            // 5. Uang Kehadiran & Tier
+                                            $nominal = $detail['bonus_nominal'] ?? 0;
+                                            $tierStr = !empty($detail['tier_level']) ? " (Tier {$detail['tier_level']})" : '';
+                                            if ($nominal > 0) {
+                                                $lines[] = "💰 Uang Kehadiran : Rp " . number_format($nominal, 0, ',', '.') . $tierStr;
+                                            } else {
+                                                $lines[] = "💰 Uang Kehadiran : Rp 0" . ($isFuture ? '' : ' (Tidak Dapat)');
+                                            }
+
+                                            // 6. Skema
+                                            if (!empty($detail['schema_name'])) {
+                                                $lines[] = "📋 Skema   : {$detail['schema_name']}";
+                                            }
+
+                                            $titleText = implode("\n", $lines);
                                         @endphp
-                                        @if($detail['bonus_nominal'] > 0)
+
+                                        @if(($detail['bonus_nominal'] ?? 0) > 0)
                                             @php 
                                                 $nominal = $detail['bonus_nominal'];
                                                 $shortNominal = ($nominal >= 1000) ? ($nominal / 1000) . 'k' : $nominal;
-                                                $tierStr = !empty($detail['tier_level']) ? "Tier {$detail['tier_level']}" : 'Bonus';
-                                                $statusName = $detail['status'] ?? '';
-                                                $isKedinasanStatus = $statusName === 'Dinas' || 
-                                                    str_contains(strtolower($statusName), 'dinas') || 
-                                                    str_contains(strtolower($statusName), 'kedinasan');
-
-                                                $schemaNameStr = !empty($detail['schema_name']) ? " • [{$detail['schema_name']}]" : '';
-
-                                                if (isset($detail['status']) && $detail['status'] === 'Reward Libur') {
-                                                    $rName = $detail['reward_name'] ?? 'Reward Libur';
-                                                    $titleText = "🎁 Reward Libur ({$rName}): Rp " . number_format($nominal, 0, ',', '.') . $schemaNameStr;
-                                                } elseif ($isKedinasanStatus) {
-                                                    $shortStatus = str_contains($statusName, '(') ? trim(explode('(', $statusName)[0]) : $statusName;
-                                                    $titleText = $picketPrefix . "{$tierStr} ({$shortStatus}): Rp " . number_format($nominal, 0, ',', '.') . $schemaNameStr;
-                                                } else {
-                                                    $earlyStr = !empty($detail['early_minutes']) ? " (Hadir {$detail['early_minutes']} mnt sblm masuk)" : " (Tepat Waktu)";
-                                                    $titleText = $picketPrefix . "{$tierStr}: Rp " . number_format($nominal, 0, ',', '.') . $earlyStr . $schemaNameStr;
-                                                }
                                             @endphp
                                             <div class="relative mx-auto w-7 h-5 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] rounded border {{ $isPicket ? 'border-amber-400 dark:border-amber-500 shadow-sm' : 'border-emerald-200 dark:border-emerald-800/50' }}" title="{{ $titleText }}">
                                                 {{ $shortNominal }}
@@ -264,24 +322,8 @@
                                             </div>
                                         @else
                                             @if($dateStr > date('Y-m-d'))
-                                                <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px] {{ $isPicket ? 'text-amber-500 font-bold' : '' }}" title="{{ $isPicket ? $picketPrefix . 'Jadwal Piket' . (!empty($detail['schema_name']) ? ' • [' . $detail['schema_name'] . ']' : '') : '' }}">-</div>
+                                                <div class="mx-auto flex items-center justify-center text-slate-300 dark:text-slate-700 font-medium text-[9px] {{ $isPicket ? 'text-amber-500 font-bold' : '' }}" title="{{ $titleText }}">-</div>
                                             @else
-                                                @php
-                                                    $statusName = $detail['status'] ?? '';
-                                                    $isKedinasanStatus = $statusName === 'Dinas' || 
-                                                        str_contains(strtolower($statusName), 'dinas') || 
-                                                        str_contains(strtolower($statusName), 'kedinasan');
-                                                    $schemaNameStr = !empty($detail['schema_name']) ? " • [{$detail['schema_name']}]" : '';
-
-                                                    if ($isKedinasanStatus) {
-                                                        $shortStatus = str_contains($statusName, '(') ? trim(explode('(', $statusName)[0]) : $statusName;
-                                                        $titleText = $picketPrefix . "{$shortStatus} (Tidak ada bonus)" . $schemaNameStr;
-                                                    } elseif (!empty($detail['late_minutes'])) {
-                                                        $titleText = $picketPrefix . "Terlambat {$detail['late_minutes']} menit (Bonus Rp 0)" . $schemaNameStr;
-                                                    } else {
-                                                        $titleText = $picketPrefix . 'Tidak ada bonus' . $schemaNameStr;
-                                                    }
-                                                @endphp
                                                 <div class="relative mx-auto w-7 h-5 flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-[9px] rounded border {{ $isPicket ? 'border-amber-400 dark:border-amber-500' : 'border-red-200 dark:border-red-800/50' }}" title="{{ $titleText }}">
                                                     0k
                                                     @if($isPicket)
@@ -294,9 +336,9 @@
                                         @endif
                                     @else
                                         @if($date->isSunday())
-                                            <div class="mx-auto flex items-center justify-center text-red-400/80 dark:text-red-900/50 font-bold text-[9px]" title="Akhir Pekan (OFF)">OFF</div>
+                                            <div class="mx-auto flex items-center justify-center text-red-400/80 dark:text-red-900/50 font-bold text-[9px]" title="🏖️ HARI LIBUR: Akhir Pekan (OFF)">OFF</div>
                                         @else
-                                            <div class="mx-auto flex items-center justify-center text-slate-400 dark:text-slate-500 font-bold text-[9px]" title="Jadwal Off/Libur">OFF</div>
+                                            <div class="mx-auto flex items-center justify-center text-slate-400 dark:text-slate-500 font-bold text-[9px]" title="🏖️ JADWAL OFF: Libur Rutin">OFF</div>
                                         @endif
                                     @endif
                                 </td>
@@ -393,7 +435,7 @@
                     <!-- Modal Header -->
                     <div class="border-b border-slate-100 dark:border-slate-800/60 px-5 py-4 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
                         <div class="flex flex-col">
-                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rincian Bonus Harian</span>
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rincian Uang Kehadiran Harian</span>
                             <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5" x-text="selectedReport ? selectedReport.employee.name : ''"></h3>
                         </div>
                         <button type="button" @click="showCalendarModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-355 cursor-pointer">
@@ -429,7 +471,7 @@
                             <div class="grid grid-cols-7 gap-1">
                                 <template x-for="day in calendarDays" :key="day.dateStr">
                                     <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between relative cursor-default"
-                                         :title="selectedReport && selectedReport.daily_details[day.dateStr] ? ((selectedReport.daily_details[day.dateStr].is_picket ? '⚡ PIKET: 06:30 (' + (selectedReport.daily_details[day.dateStr].picket_area || 'Area Piket') + ') | ' : '') + 'Status: ' + (selectedReport.daily_details[day.dateStr].status || '-') + ' | Check-in: ' + (selectedReport.daily_details[day.dateStr].check_in || '-') + ' | Bonus: ' + formatRupiah(selectedReport.daily_details[day.dateStr].bonus_nominal || 0) + (selectedReport.daily_details[day.dateStr].schema_name ? ' | Skema: ' + selectedReport.daily_details[day.dateStr].schema_name : '')) : ''"
+                                         :title="selectedReport && selectedReport.daily_details[day.dateStr] ? buildTooltip(selectedReport.daily_details[day.dateStr], day.dateStr) : (day.dateStr && new Date(day.dateStr).getDay() === 0 ? '🏖️ HARI LIBUR: Akhir Pekan (OFF)' : '🏖️ JADWAL OFF: Libur Kerja')"
                                          :class="[
                                              day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40',
                                              (selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket) ? 'border-amber-400 dark:border-amber-500/80 ring-1 ring-amber-400/30' : ''
@@ -488,7 +530,7 @@
                         <div class="flex flex-wrap gap-2.5 text-[9px] md:text-xs">
                             <span class="font-bold text-slate-700 dark:text-slate-300">Ringkasan:</span>
                             <span class="text-slate-600 dark:text-slate-400">Total: <strong class="text-emerald-650 dark:text-emerald-400" x-text="formatRupiah(stats.totalBonus)"></strong></span>
-                            <span class="text-slate-600 dark:text-slate-400">Dapat Bonus: <strong class="text-indigo-650 dark:text-indigo-400 font-bold" x-text="stats.bonusDays + ' Hari'"></strong></span>
+                            <span class="text-slate-600 dark:text-slate-400">Dapat Uang Kehadiran: <strong class="text-indigo-650 dark:text-indigo-400 font-bold" x-text="stats.bonusDays + ' Hari'"></strong></span>
                         </div>
                         <button type="button" @click="showCalendarModal = false" class="w-full sm:w-auto h-7 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg transition-colors cursor-pointer">
                             Tutup
@@ -565,6 +607,80 @@
             },
             formatRupiah(amount) {
                 return 'Rp ' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(amount);
+            },
+            buildTooltip(detail, dateStr) {
+                if (!detail) return '';
+                const isFuture = dateStr > new Date().toLocaleDateString('en-CA');
+                const isReward = (detail.status === 'Reward Libur' || !!detail.is_reward_holiday);
+                const isPicket = !!detail.is_picket;
+                const isKedinasan = (detail.status && (detail.status === 'Dinas' || detail.status.toLowerCase().includes('dinas')));
+
+                let lines = [];
+
+                // 1. Shift / Piket / Reward info
+                if (isReward) {
+                    lines.push('🎁 REWARD LIBUR: ' + (detail.reward_name || 'Libur Reward'));
+                } else if (isPicket) {
+                    lines.push('⚡ PIKET: ' + (detail.picket_area || 'Area Piket'));
+                } else if (isKedinasan) {
+                    lines.push('💼 TUGAS DINAS: ' + detail.status);
+                } else if (detail.shift_name) {
+                    lines.push('🏢 SHIFT: ' + detail.shift_name);
+                } else {
+                    lines.push('🏢 SHIFT: Reguler');
+                }
+
+                // 2. Jadwal
+                if (!isReward) {
+                    let startJam = detail.shift_start ? detail.shift_start.substring(0, 5) : (isPicket ? '06:30' : '-');
+                    let endJam = detail.shift_end ? detail.shift_end.substring(0, 5) : '';
+                    let jadwal = endJam ? `${startJam} - ${endJam}` : startJam;
+                    lines.push('⏰ Jadwal  : ' + jadwal);
+                }
+
+                // 3. Masuk & Pulang
+                if (isFuture) {
+                    lines.push('📥 Masuk   : -');
+                    lines.push('📤 Pulang  : -');
+                } else {
+                    lines.push('📥 Masuk   : ' + (detail.check_in || 'Tidak Hadir'));
+                    lines.push('📤 Pulang  : ' + (detail.check_out || '-'));
+                }
+
+                // 4. Keterlambatan
+                if (isFuture) {
+                    lines.push('⏱️ Status  : Belum Terlaksana');
+                } else if (isReward) {
+                    lines.push('⏱️ Status  : Bebas Keterlambatan (Reward)');
+                } else if (isKedinasan) {
+                    lines.push('⏱️ Status  : Dispensasi Tugas Dinas');
+                } else if (detail.late_minutes && detail.late_minutes > 0) {
+                    lines.push(`⏱️ Terlambat: ${detail.late_minutes} menit`);
+                } else if (detail.check_in && detail.check_in !== 'Tidak Hadir') {
+                    if (detail.early_minutes && detail.early_minutes > 0) {
+                        lines.push(`⏱️ Terlambat: 0 menit (Lebih awal ${detail.early_minutes} mnt)`);
+                    } else {
+                        lines.push('⏱️ Terlambat: 0 menit (Tepat Waktu)');
+                    }
+                } else {
+                    lines.push('⏱️ Status  : Tidak Hadir / Alfa');
+                }
+
+                // 5. Uang Kehadiran
+                const nominal = detail.bonus_nominal || 0;
+                const tierStr = detail.tier_level ? ` (Tier ${detail.tier_level})` : '';
+                if (nominal > 0) {
+                    lines.push('💰 Uang Kehadiran : Rp ' + Number(nominal).toLocaleString('id-ID') + tierStr);
+                } else {
+                    lines.push('💰 Uang Kehadiran : Rp 0' + (isFuture ? '' : ' (Tidak Dapat)'));
+                }
+
+                // 6. Skema
+                if (detail.schema_name) {
+                    lines.push('📋 Skema   : ' + detail.schema_name);
+                }
+
+                return lines.join('\n');
             }
         }));
     });

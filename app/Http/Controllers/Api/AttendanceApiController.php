@@ -745,6 +745,8 @@ class AttendanceApiController extends Controller
 
                 if ($hasShiftToday || $isRewardHoliday) {
                     $shiftStartTime = $shiftStartTime ?: '07:00:00';
+                    $shiftEndTime = $shiftEndTime ?: '15:00:00';
+                    $shiftName = $shiftName ?: 'Shift Reguler';
                     // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
                     if ($isPicketToday) {
                         $shiftStartTime = $picketStartTime;
@@ -754,6 +756,7 @@ class AttendanceApiController extends Controller
                     $earlyMinutes = 0;
                     $dailyStatus = 'Absent';
                     $dailyCheckIn = null;
+                    $dailyCheckOut = null;
                     $dailyBonus = 0;
                     $dailyTierLevel = null;
 
@@ -771,21 +774,45 @@ class AttendanceApiController extends Controller
                         if ($isRewardHoliday) {
                             $dailyStatus = 'Reward Libur';
                             $dailyCheckIn = 'REWARD';
+                            $dailyCheckOut = 'REWARD';
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 0;
                         } elseif ($isKedinasan) {
                             $dailyStatus = ($leaveType ?: 'Dinas');
                             if (isset($attendanceLogs[$logKey])) {
-                                $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                                $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
+                                $firstCheckIn = $sortedLogs->first();
                                 $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
+                                if ($sortedLogs->count() > 1) {
+                                    $lastLog = $sortedLogs->last();
+                                    $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes(Carbon::parse($firstCheckIn->timestamp));
+                                    $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
+                                } else {
+                                    $dailyCheckOut = '-';
+                                }
                             } else {
                                 $dailyCheckIn = 'DINAS';
+                                $dailyCheckOut = 'DINAS';
                             }
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 0;
                         } elseif ($isDinas) {
                             $dailyStatus = ($leaveType ?: 'Dinas');
-                            $dailyCheckIn = 'DINAS';
+                            if (isset($attendanceLogs[$logKey])) {
+                                $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
+                                $firstCheckIn = $sortedLogs->first();
+                                $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
+                                if ($sortedLogs->count() > 1) {
+                                    $lastLog = $sortedLogs->last();
+                                    $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes(Carbon::parse($firstCheckIn->timestamp));
+                                    $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
+                                } else {
+                                    $dailyCheckOut = '-';
+                                }
+                            } else {
+                                $dailyCheckIn = 'DINAS';
+                                $dailyCheckOut = 'DINAS';
+                            }
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 0;
                         } else {
@@ -795,10 +822,19 @@ class AttendanceApiController extends Controller
                         
                         // Calculate Early / Late
                         if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday && !$isKedinasan) {
-                            $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                            $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
+                            $firstCheckIn = $sortedLogs->first();
                             $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
                             $dailyCheckIn = $checkInCarbon->format('H:i:s');
+
+                            if ($sortedLogs->count() > 1) {
+                                $lastLog = $sortedLogs->last();
+                                $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes($checkInCarbon);
+                                $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
+                            } else {
+                                $dailyCheckOut = '-';
+                            }
     
                             $isForgiven = $hasRequiresAttendanceLeave && $activeLeave && (!$activeLeave->gets_presence_bonus && $activeLeave->status_code !== 'H');
 
@@ -824,6 +860,7 @@ class AttendanceApiController extends Controller
                             $earlyMinutes = 0;
                             if (!$dailyCheckIn) {
                                 $dailyCheckIn = 'DINAS';
+                                $dailyCheckOut = 'DINAS';
                             }
                         }
 
@@ -913,6 +950,7 @@ class AttendanceApiController extends Controller
                         'shift_start' => $shiftStartTime,
                         'shift_end' => $shiftEndTime,
                         'check_in' => $dailyCheckIn,
+                        'check_out' => $dailyCheckOut,
                         'late_minutes' => $dailyLateMinutes,
                         'early_minutes' => $earlyMinutes,
                         'status' => $dailyStatus,
@@ -935,12 +973,19 @@ class AttendanceApiController extends Controller
                         'shift_start' => null,
                         'shift_end' => null,
                         'check_in' => null,
+                        'check_out' => null,
                         'late_minutes' => 0,
+                        'early_minutes' => 0,
                         'status' => 'Off',
                         'bonus_nominal' => 0,
+                        'tier_level' => null,
+                        'calculation_mode' => null,
+                        'schema_name' => null,
                         'is_picket' => false,
                         'picket_area' => null,
                         'picket_start' => null,
+                        'is_reward_holiday' => false,
+                        'reward_name' => null,
                     ];
                 }
 

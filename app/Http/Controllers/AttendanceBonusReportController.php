@@ -298,6 +298,8 @@ class AttendanceBonusReportController extends Controller
                 // Check Shift Assignment
                 $hasShiftToday = false;
                 $shiftStartTime = null;
+                $shiftEndTime = null;
+                $shiftName = null;
                 $shiftKey = $unit . '_' . $empId;
                 $activeAssignmentOnDate = null;
 
@@ -312,6 +314,8 @@ class AttendanceBonusReportController extends Controller
                             if ($detail && !$detail->is_off) {
                                 $hasShiftToday = true;
                                 $shiftStartTime = $detail->start_time;
+                                $shiftEndTime = $detail->end_time;
+                                $shiftName = $assignment->workingShift->name;
                             }
                             break;
                         }
@@ -350,6 +354,8 @@ class AttendanceBonusReportController extends Controller
 
                 if ($hasShiftToday || $isRewardHoliday) {
                     $shiftStartTime = $shiftStartTime ?: '07:00:00';
+                    $shiftEndTime = $shiftEndTime ?: '15:00:00';
+                    $shiftName = $shiftName ?: 'Shift Reguler';
                     // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
                     if ($isPicketToday) {
                         $shiftStartTime = $picketStartTime;
@@ -380,6 +386,7 @@ class AttendanceBonusReportController extends Controller
                     $earlyMinutes = 0;
                     $dailyStatus = 'Absent';
                     $dailyCheckIn = null;
+                    $dailyCheckOut = null;
                     $dailyBonus = 0;
                     $dailyTierLevel = null;
 
@@ -398,21 +405,45 @@ class AttendanceBonusReportController extends Controller
                         if ($isRewardHoliday) {
                             $dailyStatus = 'Reward Libur';
                             $dailyCheckIn = 'REWARD';
+                            $dailyCheckOut = 'REWARD';
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 0;
                         } elseif ($isKedinasan) {
                             $dailyStatus = ($leaveType ?: 'Dinas');
                             if (isset($attendanceLogs[$logKey])) {
-                                $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                                $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
+                                $firstCheckIn = $sortedLogs->first();
                                 $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
+                                if ($sortedLogs->count() > 1) {
+                                    $lastLog = $sortedLogs->last();
+                                    $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes(Carbon::parse($firstCheckIn->timestamp));
+                                    $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
+                                } else {
+                                    $dailyCheckOut = '-';
+                                }
                             } else {
                                 $dailyCheckIn = 'DINAS';
+                                $dailyCheckOut = 'DINAS';
                             }
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 0;
                         } elseif ($isDinas) {
                             $dailyStatus = ($leaveType ?: 'Dinas');
-                            $dailyCheckIn = 'DINAS';
+                            if (isset($attendanceLogs[$logKey])) {
+                                $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
+                                $firstCheckIn = $sortedLogs->first();
+                                $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
+                                if ($sortedLogs->count() > 1) {
+                                    $lastLog = $sortedLogs->last();
+                                    $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes(Carbon::parse($firstCheckIn->timestamp));
+                                    $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
+                                } else {
+                                    $dailyCheckOut = '-';
+                                }
+                            } else {
+                                $dailyCheckIn = 'DINAS';
+                                $dailyCheckOut = 'DINAS';
+                            }
                             $dailyLateMinutes = 0;
                             $earlyMinutes = 0;
                         } else {
@@ -422,10 +453,19 @@ class AttendanceBonusReportController extends Controller
                         
                         // Calculate Early / Late
                         if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday && !$isKedinasan) {
-                            $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
+                            $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
+                            $firstCheckIn = $sortedLogs->first();
                             $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
                             $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
                             $dailyCheckIn = $checkInCarbon->format('H:i:s');
+
+                            if ($sortedLogs->count() > 1) {
+                                $lastLog = $sortedLogs->last();
+                                $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes($checkInCarbon);
+                                $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
+                            } else {
+                                $dailyCheckOut = '-';
+                            }
 
                             $isForgiven = $hasRequiresAttendanceLeave && $activeLeave && (!$activeLeave->gets_presence_bonus && $activeLeave->status_code !== 'H');
 
@@ -451,6 +491,7 @@ class AttendanceBonusReportController extends Controller
                             $earlyMinutes = 0;
                             if (!$dailyCheckIn) {
                                 $dailyCheckIn = 'DINAS';
+                                $dailyCheckOut = 'DINAS';
                             }
                         }
 
@@ -518,8 +559,11 @@ class AttendanceBonusReportController extends Controller
 
                     $dailyDetails[$dateStr] = [
                         'date' => $dateStr,
+                        'shift_name' => $shiftName,
                         'shift_start' => $shiftStartTime,
+                        'shift_end' => $shiftEndTime,
                         'check_in' => $dailyCheckIn,
+                        'check_out' => $dailyCheckOut,
                         'late_minutes' => $dailyLateMinutes,
                         'early_minutes' => $earlyMinutes,
                         'status' => $dailyStatus,
@@ -532,6 +576,27 @@ class AttendanceBonusReportController extends Controller
                         'picket_start' => $isPicketToday ? $picketStartTime : null,
                         'is_reward_holiday' => $isRewardHoliday,
                         'reward_name' => $rewardHolidayName,
+                    ];
+                } else {
+                    $dailyDetails[$dateStr] = [
+                        'date' => $dateStr,
+                        'shift_name' => $shiftName,
+                        'shift_start' => null,
+                        'shift_end' => null,
+                        'check_in' => null,
+                        'check_out' => null,
+                        'late_minutes' => 0,
+                        'early_minutes' => 0,
+                        'status' => 'Off',
+                        'bonus_nominal' => 0,
+                        'tier_level' => null,
+                        'calculation_mode' => null,
+                        'schema_name' => null,
+                        'is_picket' => false,
+                        'picket_area' => null,
+                        'picket_start' => null,
+                        'is_reward_holiday' => false,
+                        'reward_name' => null,
                     ];
                 }
 
@@ -1084,7 +1149,7 @@ class AttendanceBonusReportController extends Controller
             $searchStr = '_Pencarian_' . preg_replace('/[^a-zA-Z0-9]+/', '_', $searchQuery);
         }
         
-        $baseFileName = "Rekap_Bonus_{$unitName}_{$month}{$searchStr}";
+        $baseFileName = "Rekap_Uang_Kehadiran_{$unitName}_{$month}{$searchStr}";
 
         if ($format === 'pdf') {
             ini_set('memory_limit', '512M');
@@ -1101,7 +1166,7 @@ class AttendanceBonusReportController extends Controller
         $sheet->setCellValue('A1', 'No');
         $sheet->setCellValue('B1', 'Nama Pegawai');
         $sheet->setCellValue('C1', 'Unit');
-        $sheet->setCellValue('D1', 'Total Bonus (Rp)');
+        $sheet->setCellValue('D1', 'Total Uang Kehadiran (Rp)');
 
         // Build dynamic date headers starting from column E (Index 5)
         $colIndex = 5;

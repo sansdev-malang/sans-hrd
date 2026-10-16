@@ -52,14 +52,14 @@
                             <span class="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
                                 <i data-lucide="shield-check" class="w-4 h-4"></i>
                             </span>
-                            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Skema Bonus Khusus Jadwal Piket</h3>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Skema Uang Kehadiran Khusus Jadwal Piket</h3>
                         </div>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
-                            Pilih skema bonus yang khusus diberlakukan saat pegawai sedang bertugas piket (evaluasi berdasarkan jam masuk piket <strong>06:30</strong> dengan metode <em>Hadir Lebih Awal</em>).
+                            Pilih skema uang kehadiran yang khusus diberlakukan saat pegawai sedang bertugas piket (evaluasi berdasarkan jam masuk piket <strong>06:30</strong> dengan metode <em>Toleransi Keterlambatan</em>).
                         </p>
                         
                         <div class="space-y-1.5 pt-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 text-xs">Skema Bonus Piket Aktif</label>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 text-xs">Skema Uang Kehadiran Piket Aktif</label>
                             <select name="picket_bonus_schema_id" class="w-full text-xs h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 font-semibold cursor-pointer">
                                 <option value="">-- Gunakan Skema Shift Reguler (Default) --</option>
                                 @foreach($bonusSchemas as $schema)
@@ -69,7 +69,7 @@
                                 @endforeach
                             </select>
                             <p class="text-[10px] text-slate-400 dark:text-slate-500">
-                                Rekomendasi: Gunakan skema dengan mode <strong>Hadir Lebih Awal</strong> agar insentif kedatangan pagi (06:30) terhitung maksimal.
+                                Rekomendasi: Gunakan skema dengan mode <strong>Toleransi Keterlambatan</strong> agar kedatangan jam 06:30 dievaluasi secara presisi.
                             </p>
                         </div>
                     </div>

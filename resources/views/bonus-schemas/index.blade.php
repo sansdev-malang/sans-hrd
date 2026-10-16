@@ -4,10 +4,10 @@
     </style>
 
     <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-cloak x-data="{ 
-        activeTab: (new URLSearchParams(window.location.search).get('tab')) || localStorage.getItem('bonus_schema_active_tab') || '{{ request('tab', 'early_arrival') }}',
+        activeTab: (new URLSearchParams(window.location.search).get('tab')) || localStorage.getItem('bonus_schema_active_tab') || '{{ request('tab', 'late_tolerance') }}',
         showAddModal: false, 
         showEditModal: false,
-        modalMode: 'early_arrival',
+        modalMode: 'late_tolerance',
         editId: null,
         editName: '',
         editIsActive: true,
@@ -105,7 +105,7 @@
             this.showEditModal = true;
         },
 
-        resetAdd(mode = 'early_arrival') {
+        resetAdd(mode = 'late_tolerance') {
             this.editName = '';
             this.modalMode = mode;
             this.loadDefaultTiers(mode);
@@ -116,8 +116,8 @@
         <!-- HEADER -->
         <section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-3 w-full text-left">
             <div class="flex flex-col gap-0.5">
-                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Skema Bonus Ketepatan Waktu</h2>
-                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Kelola jenjang nominal bonus ketepatan waktu harian pegawai berdasarkan waktu kedatangan dan toleransi absensi.</p>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">Skema Uang Kehadiran</h2>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Kelola jenjang nominal uang kehadiran harian pegawai berdasarkan waktu kedatangan dan toleransi absensi.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0">
                 <a :href="'{{ route('bonus-schemas.sync') }}?tab=' + activeTab" data-no-loader="true" onclick="this.style.pointerEvents = 'none'; let icon = this.querySelector('svg'); if(icon) icon.classList.add('animate-spin');" class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] sm:text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm transition-all cursor-pointer w-full sm:w-auto">
@@ -139,17 +139,6 @@
 
         <div class="flex border-b border-slate-200 dark:border-slate-800 gap-2">
             <button type="button" 
-                @click="setTab('early_arrival')" 
-                :class="activeTab === 'early_arrival' 
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
-                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'" 
-                class="px-4 py-2.5 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-2.5 transition-all cursor-pointer">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>Hadir Lebih Awal</span>
-                <span class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">{{ $earlySchemas->count() }}</span>
-            </button>
-
-            <button type="button" 
                 @click="setTab('late_tolerance')" 
                 :class="activeTab === 'late_tolerance' 
                     ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
@@ -158,6 +147,17 @@
                 <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                 <span>Toleransi Keterlambatan</span>
                 <span class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">{{ $lateSchemas->count() }}</span>
+            </button>
+
+            <button type="button" 
+                @click="setTab('early_arrival')" 
+                :class="activeTab === 'early_arrival' 
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
+                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'" 
+                class="px-4 py-2.5 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-2.5 transition-all cursor-pointer">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Hadir Lebih Awal</span>
+                <span class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">{{ $earlySchemas->count() }}</span>
             </button>
         </div>
 

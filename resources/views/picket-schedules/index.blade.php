@@ -30,7 +30,7 @@
         <div class="p-3.5 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 flex items-start gap-3 text-xs text-indigo-900 dark:text-indigo-200 leading-relaxed">
             <i data-lucide="info" class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5"></i>
             <div>
-                <strong>Informasi Manajemen Piket:</strong> Jadwal piket dibuat dan dikelola langsung oleh admin/kepala sekolah pada masing-masing unit sekolah (SD, SMP, PAUD). Panel HRD Pusat menampilkan matriks jadwal ini untuk memantau penugasan dan evaluasi batas jam kehadiran <strong>06:30</strong> serta bonus kedisiplinan.
+                <strong>Informasi Manajemen Piket:</strong> Jadwal piket dibuat dan dikelola langsung oleh admin/kepala sekolah pada masing-masing unit sekolah (SD, SMP, PAUD). Panel HRD Pusat menampilkan matriks jadwal ini untuk memantau penugasan dan evaluasi batas jam kehadiran <strong>06:30</strong> serta uang kehadiran kedisiplinan.
             </div>
         </div>
 
