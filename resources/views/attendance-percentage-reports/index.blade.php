@@ -710,6 +710,10 @@
         const input = document.getElementById('filter-unit-id');
         if (input) {
             input.value = unitId;
+            const form = document.getElementById('attendance-filter-form');
+            if (form) {
+                form.querySelectorAll('input[name="positions[]"], input[name="positions"], select[name="position"]').forEach(el => el.remove());
+            }
             triggerFilterForm(btnEl);
         }
     }

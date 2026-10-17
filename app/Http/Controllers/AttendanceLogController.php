@@ -267,6 +267,7 @@ class AttendanceLogController extends Controller
                 $isOffShift = false;
                 $shiftStartTime = null;
                 $shiftEndTime = null;
+                $shiftName = null;
                 $shiftKey = $unit . '_' . $empId;
                 
                 $isShiftWorker = false;
@@ -282,6 +283,7 @@ class AttendanceLogController extends Controller
                         $assignStartDate = substr($assignment->start_date, 0, 10);
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                            $shiftName = $assignment->workingShift->name ?? null;
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
                             if ($detail) {
                                 if ($detail->is_off) {
@@ -334,6 +336,8 @@ class AttendanceLogController extends Controller
                     if ($checkInLog || $checkOutLog) {
                         $isLate = false;
                         $isRedLate = false;
+                        $lateMinutes = 0;
+                        $earlyMinutes = 0;
 
                         if ($checkInLog) {
                             $empPosition = strtolower($emp['position'] ?? $emp['subject_position'] ?? '');
@@ -349,6 +353,9 @@ class AttendanceLogController extends Controller
 
                             if ($checkInCarbon->second(0) > $expectedIn->second(0)) {
                                 $isLate = true;
+                                $lateMinutes = (int) $checkInCarbon->diffInMinutes($expectedIn);
+                            } else {
+                                $earlyMinutes = (int) $expectedIn->diffInMinutes($checkInCarbon);
                             }
 
                             // Only non-roster/non-shift staff who arrive after 07:25 get is_red_late
@@ -385,6 +392,11 @@ class AttendanceLogController extends Controller
                             'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
                             'is_late' => $isLate,
                             'is_red_late' => $isRedLate,
+                            'late_minutes' => $lateMinutes,
+                            'early_minutes' => $earlyMinutes,
+                            'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
+                            'shift_start' => $shiftStartTime,
+                            'shift_end' => $shiftEndTime,
                             'is_reward' => $isRewardHoliday,
                             'reward_name' => $rewardHolidayName,
                         ];
@@ -394,6 +406,9 @@ class AttendanceLogController extends Controller
                                 'status' => 'Reward Libur',
                                 'reward_name' => $rewardHolidayName,
                                 'is_reward' => true,
+                                'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
+                                'shift_start' => $shiftStartTime,
+                                'shift_end' => $shiftEndTime,
                             ];
                         } else {
                             // Determine if it is actually Alfa or if the shift hasn't started yet
@@ -401,9 +416,19 @@ class AttendanceLogController extends Controller
                             $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
                             
                             if ($now->lessThan($shiftStartDateTime)) {
-                                $dailyDetails[$dateStr] = ['status' => 'Pending'];
+                                $dailyDetails[$dateStr] = [
+                                    'status' => 'Pending',
+                                    'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
+                                    'shift_start' => $shiftStartTime,
+                                    'shift_end' => $shiftEndTime,
+                                ];
                             } else {
-                                $dailyDetails[$dateStr] = ['status' => 'Alfa'];
+                                $dailyDetails[$dateStr] = [
+                                    'status' => 'Alfa',
+                                    'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
+                                    'shift_start' => $shiftStartTime,
+                                    'shift_end' => $shiftEndTime,
+                                ];
                             }
                         }
                     }
@@ -412,12 +437,21 @@ class AttendanceLogController extends Controller
                         'status' => 'Reward Libur',
                         'reward_name' => $rewardHolidayName,
                         'is_reward' => true,
+                        'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
+                        'shift_start' => $shiftStartTime,
+                        'shift_end' => $shiftEndTime,
                     ];
                 } elseif ($isOffShift) {
-                    $dailyDetails[$dateStr] = ['status' => 'Off'];
+                    $dailyDetails[$dateStr] = [
+                        'status' => 'Off',
+                        'shift_name' => $shiftName ?? 'Shift Kerja',
+                    ];
                 } else {
                     if ($dayOfWeek == 0) { // Sunday
-                        $dailyDetails[$dateStr] = ['status' => 'Libur'];
+                        $dailyDetails[$dateStr] = [
+                            'status' => 'Libur',
+                            'shift_name' => 'Akhir Pekan',
+                        ];
                     }
                 }
 
@@ -446,7 +480,12 @@ class AttendanceLogController extends Controller
                             'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
                             'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
                             'is_late' => $isLateForLeave,
-                            'is_red_late' => ($isLateForLeave && $isRedLate),
+                            'is_red_late' => ($isLateForLeave && ($isRedLate ?? false)),
+                            'late_minutes' => $lateMinutes ?? 0,
+                            'early_minutes' => $earlyMinutes ?? 0,
+                            'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
+                            'shift_start' => $shiftStartTime,
+                            'shift_end' => $shiftEndTime,
                         ];
                     } elseif ($activeLeave->status === 'Rejected') {
                         $dailyDetails[$dateStr]['rejected_leave'] = [
@@ -515,10 +554,14 @@ class AttendanceLogController extends Controller
             });
         }
         if (!empty($position)) {
-            $rawEmployees = $rawEmployees->filter(function($e) use ($position) {
-                $empPos = $e['position'] ?? $e['subject_position'] ?? '';
-                return $empPos == $position;
-            });
+            if (!$positions->contains($position)) {
+                $position = null;
+            } else {
+                $rawEmployees = $rawEmployees->filter(function($e) use ($position) {
+                    $empPos = $e['position'] ?? $e['subject_position'] ?? '';
+                    return $empPos == $position;
+                });
+            }
         }
         $employeesCollection = $rawEmployees->sort(function ($a, $b) {
             $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
@@ -551,7 +594,7 @@ class AttendanceLogController extends Controller
         $startDateReq = $startDate->format('Y-m-d');
         $endDateReq = $endDate->format('Y-m-d');
 
-        return view('attendance-logs.index', compact('paginatedReports', 'schoolUnits', 'month', 'startDateReq', 'endDateReq', 'positions'));
+        return view('attendance-logs.index', compact('paginatedReports', 'schoolUnits', 'month', 'startDateReq', 'endDateReq', 'positions', 'position'));
     }
 
     public function export(Request $request)

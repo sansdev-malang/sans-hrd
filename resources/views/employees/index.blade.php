@@ -119,7 +119,7 @@
                     </div>
 
                     <!-- Unit -->
-                    <select name="unit" onchange="triggerFilterForm(this)"
+                    <select name="unit" onchange="const pos = this.form.querySelector('select[name=position]'); if(pos) pos.value = ''; triggerFilterForm(this)"
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Unit Sekolah</option>
                         @foreach($schoolUnits as $su)
@@ -132,7 +132,7 @@
                         class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-44 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
                         <option value="">Semua Jabatan</option>
                         @foreach($positions as $pos)
-                            <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
+                            <option value="{{ $pos }}" {{ ($position ?? request('position')) == $pos ? 'selected' : '' }}>{{ $pos }}</option>
                         @endforeach
                     </select>
 

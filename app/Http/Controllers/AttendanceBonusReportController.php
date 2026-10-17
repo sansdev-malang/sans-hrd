@@ -52,8 +52,13 @@ class AttendanceBonusReportController extends Controller
         // 3. Fetch Employees (Filter by unit if needed)
         $rawEmployees = $this->service->getAllEmployees();
         
-        // Extract unique positions (jabatan) from raw employee data
-        $positions = collect($rawEmployees)
+        // Extract unique positions (jabatan) from raw employee data, filtered by unit if specified
+        $filteredEmployeesForPos = collect($rawEmployees);
+        if (!empty($unitId)) {
+            $filteredEmployeesForPos = $filteredEmployeesForPos->filter(fn($emp) => ($emp['unit_id'] ?? '') == $unitId);
+        }
+
+        $positions = $filteredEmployeesForPos
             ->map(function ($emp) {
                 return $emp['position'] ?? $emp['subject_position'] ?? null;
             })
@@ -79,9 +84,13 @@ class AttendanceBonusReportController extends Controller
         // Apply position filter
         $position = $request->query('position');
         if (!empty($position)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
-                return ($emp['position'] ?? $emp['subject_position'] ?? '') === $position;
-            });
+            if (!$positions->contains($position)) {
+                $position = null;
+            } else {
+                $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                    return ($emp['position'] ?? $emp['subject_position'] ?? '') === $position;
+                });
+            }
         }
 
         // Apply search filter
@@ -631,7 +640,7 @@ class AttendanceBonusReportController extends Controller
         $totalSemuaBonus = collect($reports)->sum('bonus_nominal');
         $schoolUnits = SchoolUnit::where('is_active', true)->get();
 
-        return view('bonus-reports.index', compact('paginatedReports', 'schoolUnits', 'activeSchema', 'month', 'startDateReq', 'endDateReq', 'cutoffDate', 'totalSemuaBonus', 'positions'));
+        return view('bonus-reports.index', compact('paginatedReports', 'schoolUnits', 'activeSchema', 'month', 'startDateReq', 'endDateReq', 'cutoffDate', 'totalSemuaBonus', 'positions', 'position'));
     }
 
         public function export(Request $request)

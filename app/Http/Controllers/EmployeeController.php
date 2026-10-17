@@ -73,10 +73,14 @@ class EmployeeController extends Controller
         // Apply position filter
         $position = $request->query('position');
         if (!empty($position)) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
-                $empPos = $emp['position'] ?? $emp['subject_position'] ?? '';
-                return $empPos == $position;
-            });
+            if (!$positions->contains($position)) {
+                $position = null;
+            } else {
+                $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                    $empPos = $emp['position'] ?? $emp['subject_position'] ?? '';
+                    return $empPos == $position;
+                });
+            }
         }
 
         // Sort by unit name, then alphabetically by employee name (A-Z)
@@ -118,6 +122,7 @@ class EmployeeController extends Controller
             'schoolUnits' => $schoolUnits,
             'devices' => $devices,
             'positions' => $positions,
+            'position' => $position,
             'unitCounts' => $unitCounts,
             'rawEmployees' => $rawEmployees,
         ]);

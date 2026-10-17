@@ -73,10 +73,14 @@ class AttendanceHistoryController extends Controller
             $rawEmployees = $rawEmployees->filter(fn($emp) => ($emp['unit_id'] ?? '') == $unitId);
         }
         if (!empty($position)) {
-            $rawEmployees = $rawEmployees->filter(function ($emp) use ($position) {
-                $pos = $emp['position'] ?? $emp['subject_position'] ?? 'Staf';
-                return $pos === $position;
-            });
+            if (!in_array($position, $positions)) {
+                $position = null;
+            } else {
+                $rawEmployees = $rawEmployees->filter(function ($emp) use ($position) {
+                    $pos = $emp['position'] ?? $emp['subject_position'] ?? 'Staf';
+                    return $pos === $position;
+                });
+            }
         }
         if (!empty($search)) {
             $rawEmployees = $rawEmployees->filter(function ($emp) use ($search) {

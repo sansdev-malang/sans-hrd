@@ -60,9 +60,13 @@ class PayslipController extends Controller
             ->values();
 
         if ($position) {
-            $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
-                return ($emp['position'] ?? $emp['subject_position'] ?? '') === $position;
-            });
+            if (!$positions->contains($position)) {
+                $position = null;
+            } else {
+                $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
+                    return ($emp['position'] ?? $emp['subject_position'] ?? '') === $position;
+                });
+            }
         }
 
         if (!empty($search)) {

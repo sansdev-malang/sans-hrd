@@ -169,6 +169,13 @@
         @endif
 
         <script>
+            // Suppress benign cancelled transition promises from Alpine.js rapid toggles
+            window.addEventListener('unhandledrejection', (event) => {
+                if (event.reason && (event.reason.isFromCancelledTransition || (typeof event.reason === 'object' && event.reason.isFromCancelledTransition))) {
+                    event.preventDefault();
+                }
+            });
+
             // Support tailwind CDN dark mode class configuration
             if (typeof tailwind !== 'undefined') {
                 tailwind.config = {

@@ -65,7 +65,7 @@
                             class="h-9 pl-3 pr-8 flex-1 sm:flex-initial sm:w-40 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer focus:ring-1 focus:ring-indigo-500 text-ellipsis overflow-hidden whitespace-nowrap">
                             <option value="">Semua Jabatan</option>
                             @foreach($positions as $pos)
-                                <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
+                                <option value="{{ $pos }}" {{ ($position ?? request('position')) == $pos ? 'selected' : '' }}>{{ $pos }}</option>
                             @endforeach
                         </select>
 
@@ -915,6 +915,9 @@
         const input = document.getElementById('filter-unit-id');
         if (input) {
             input.value = unitId;
+            const form = document.getElementById('payslip-filter-form');
+            const pos = form ? form.querySelector('select[name="position"]') : null;
+            if (pos) pos.value = '';
             triggerFilterForm(btnEl);
         }
     }

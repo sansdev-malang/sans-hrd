@@ -793,6 +793,9 @@ class AttendancePercentageReportController extends Controller
             $selectedPositions = explode(',', $selectedPositions);
         }
         $selectedPositions = array_values(array_filter((array) $selectedPositions));
+        if (!empty($selectedPositions) && !empty($positions)) {
+            $selectedPositions = array_values(array_intersect($selectedPositions, $positions));
+        }
 
         if (!empty($selectedPositions)) {
             $filteredCollection = $filteredCollection->filter(function ($r) use ($selectedPositions) {
