@@ -174,6 +174,27 @@ class BonusSchemaController extends Controller
     }
 
     /**
+     * Toggle active status of a bonus schema.
+     */
+    public function toggleActive(BonusSchema $bonusSchema)
+    {
+        $newStatus = !$bonusSchema->is_active;
+        $bonusSchema->update(['is_active' => $newStatus]);
+
+        // Auto sync to units
+        $failed = $this->syncBonusSchemasToUnits();
+
+        $statusMsg = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
+        if (!empty($failed)) {
+            return redirect()->back()
+                ->with('error', 'Skema bonus berhasil ' . $statusMsg . ' lokal, namun gagal disinkronkan ke unit: ' . implode(', ', $failed) . '. Silakan klik tombol Sync Ulang.');
+        }
+
+        return redirect()->back()
+            ->with('success', 'Skema bonus "' . $bonusSchema->name . '" berhasil ' . $statusMsg . ' dan disinkronkan ke semua unit.');
+    }
+
+    /**
      * Trigger manual synchronization of all bonus schemas.
      */
     public function triggerSync(Request $request)

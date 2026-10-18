@@ -3,8 +3,20 @@
         [x-cloak] { display: none !important; }
     </style>
 
+    @php
+        $earlySchemas = $schemas->filter(fn($s) => ($s->calculation_mode ?? 'early_arrival') === 'early_arrival');
+        $lateSchemas = $schemas->filter(fn($s) => ($s->calculation_mode ?? 'early_arrival') === 'late_tolerance');
+
+        $earlyActiveSchemas = $earlySchemas->filter(fn($s) => $s->is_active);
+        $earlyInactiveSchemas = $earlySchemas->filter(fn($s) => !$s->is_active);
+
+        $lateActiveSchemas = $lateSchemas->filter(fn($s) => $s->is_active);
+        $lateInactiveSchemas = $lateSchemas->filter(fn($s) => !$s->is_active);
+    @endphp
+
     <div class="p-3.5 sm:p-5 lg:p-6 space-y-3.5 sm:space-y-5 lg:space-y-6 text-left" x-cloak x-data="{ 
         activeTab: (new URLSearchParams(window.location.search).get('tab')) || localStorage.getItem('bonus_schema_active_tab') || '{{ request('tab', 'late_tolerance') }}',
+        statusFilter: (new URLSearchParams(window.location.search).get('status')) || 'active',
         showAddModal: false, 
         showEditModal: false,
         modalMode: 'late_tolerance',
@@ -12,6 +24,21 @@
         editName: '',
         editIsActive: true,
         tiers: [],
+
+        get currentCounts() {
+            if (this.activeTab === 'early_arrival') {
+                return {
+                    active: {{ $earlyActiveSchemas->count() }},
+                    inactive: {{ $earlyInactiveSchemas->count() }},
+                    total: {{ $earlySchemas->count() }}
+                };
+            }
+            return {
+                active: {{ $lateActiveSchemas->count() }},
+                inactive: {{ $lateInactiveSchemas->count() }},
+                total: {{ $lateSchemas->count() }}
+            };
+        },
 
         init() {
             let paramTab = new URLSearchParams(window.location.search).get('tab');
@@ -131,34 +158,70 @@
             </div>
         </section>
 
-        <!-- TABS NAVIGATION -->
-        @php
-            $earlySchemas = $schemas->filter(fn($s) => ($s->calculation_mode ?? 'early_arrival') === 'early_arrival');
-            $lateSchemas = $schemas->filter(fn($s) => ($s->calculation_mode ?? 'early_arrival') === 'late_tolerance');
-        @endphp
+        <!-- TABS & STATUS FILTER NAVIGATION -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 gap-2.5 pb-2 sm:pb-0">
+            <!-- Mode Tabs (Left) -->
+            <div class="flex gap-1.5 sm:gap-2">
+                <button type="button" 
+                    @click="setTab('late_tolerance')" 
+                    :class="activeTab === 'late_tolerance' 
+                        ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
+                        : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'" 
+                    class="px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-2 transition-all cursor-pointer">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span>Toleransi Keterlambatan</span>
+                    <span class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-mono" title="Total Skema">{{ $lateSchemas->count() }}</span>
+                </button>
 
-        <div class="flex border-b border-slate-200 dark:border-slate-800 gap-2">
-            <button type="button" 
-                @click="setTab('late_tolerance')" 
-                :class="activeTab === 'late_tolerance' 
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
-                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'" 
-                class="px-4 py-2.5 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-2.5 transition-all cursor-pointer">
-                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                <span>Toleransi Keterlambatan</span>
-                <span class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">{{ $lateSchemas->count() }}</span>
-            </button>
+                <button type="button" 
+                    @click="setTab('early_arrival')" 
+                    :class="activeTab === 'early_arrival' 
+                        ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
+                        : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'" 
+                    class="px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-2 transition-all cursor-pointer">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Hadir Lebih Awal</span>
+                    <span class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-mono" title="Total Skema">{{ $earlySchemas->count() }}</span>
+                </button>
+            </div>
 
-            <button type="button" 
-                @click="setTab('early_arrival')" 
-                :class="activeTab === 'early_arrival' 
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
-                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'" 
-                class="px-4 py-2.5 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-2.5 transition-all cursor-pointer">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>Hadir Lebih Awal</span>
-                <span class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">{{ $earlySchemas->count() }}</span>
-            </button>
+            <!-- Status Filter Segmented Control (Right) -->
+            <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/70 rounded-xl border border-slate-200/80 dark:border-slate-800 self-start sm:self-end mb-1 sm:mb-1.5">
+                <button type="button" 
+                    @click="statusFilter = 'active'" 
+                    :class="statusFilter === 'active' 
+                        ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 font-bold shadow-2xs' 
+                        : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium'"
+                    class="px-2.5 py-1 text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Hanya tampilkan skema yang sedang aktif digunakan">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Skema Aktif</span>
+                    <span class="px-1.5 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-[10px] font-mono text-emerald-700 dark:text-emerald-300 font-bold" x-text="currentCounts.active"></span>
+                </button>
+
+                <button type="button" 
+                    @click="statusFilter = 'inactive'" 
+                    :class="statusFilter === 'inactive' 
+                        ? 'bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-400 font-bold shadow-2xs' 
+                        : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium'"
+                    class="px-2.5 py-1 text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Tampilkan skema yang berstatus nonaktif / arsip lampau">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                    <span>Nonaktif</span>
+                    <span class="px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-mono text-slate-700 dark:text-slate-300 font-bold" x-text="currentCounts.inactive"></span>
+                </button>
+
+                <button type="button" 
+                    @click="statusFilter = 'all'" 
+                    :class="statusFilter === 'all' 
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-bold shadow-2xs' 
+                        : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium'"
+                    class="px-2.5 py-1 text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Tampilkan semua skema baik aktif maupun nonaktif">
+                    <span>Semua</span>
+                    <span class="px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-mono text-slate-700 dark:text-slate-300 font-semibold" x-text="currentCounts.total"></span>
+                </button>
+            </div>
         </div>
 
         <!-- TAB 1: HADIR LEBIH AWAL (SEBELUM JAM MASUK / MULAI TUGAS) -->
@@ -186,56 +249,71 @@
                 </div>
             </div>
 
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-left">
+            <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 text-left">
+                <!-- Banner Notification when Viewing Inactive Schemas -->
+                <div x-show="statusFilter === 'inactive' && currentCounts.inactive > 0" class="col-span-full py-2.5 px-4 rounded-xl border border-amber-200/80 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/20 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+                    <div class="flex items-center gap-2 text-amber-900 dark:text-amber-300">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Sedang menampilkan skema berstatus <strong>Nonaktif / Riwayat Lampau</strong> (<span x-text="currentCounts.inactive"></span> skema).</span>
+                    </div>
+                    <button type="button" @click="statusFilter = 'active'" class="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-900 hover:bg-amber-100 dark:hover:bg-slate-800 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 transition-all cursor-pointer shrink-0 shadow-3xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"/></svg>
+                        <span>Kembali ke Skema Aktif</span>
+                    </button>
+                </div>
+
                 @forelse($earlySchemas as $schema)
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200 {{ ($picketBonusSchemaId ?? 0) == $schema->id ? 'ring-2 ring-amber-400/50 dark:ring-amber-500/40 border-amber-300 dark:border-amber-700/60' : '' }}">
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">{{ $schema->name }}</h4>
+                    <div x-show="statusFilter === 'all' || (statusFilter === 'active' && {{ $schema->is_active ? 'true' : 'false' }}) || (statusFilter === 'inactive' && {{ !$schema->is_active ? 'true' : 'false' }})"
+                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200 {{ ($picketBonusSchemaId ?? 0) == $schema->id ? 'ring-2 ring-amber-400/50 dark:ring-amber-500/40 border-amber-300 dark:border-amber-700/60' : '' }} {{ !$schema->is_active ? 'opacity-90 bg-slate-50/40 dark:bg-slate-900/50' : '' }}">
+                        <div class="space-y-3.5">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                        <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-50 truncate" title="{{ $schema->name }}">{{ $schema->name }}</h4>
                                         @if(($picketBonusSchemaId ?? 0) == $schema->id)
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs">
-                                                <span>⚡ Skema Khusus Piket Aktif</span>
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs whitespace-nowrap">
+                                                <span>⚡ Piket Aktif</span>
                                             </span>
                                         @endif
                                     </div>
                                     <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {{ $schema->id }}</span>
                                 </div>
-                                @if($schema->is_active)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-450 border border-emerald-100/30 dark:border-emerald-900/30 uppercase">Aktif</span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-650 dark:text-rose-455 border border-rose-100/30 dark:border-rose-900/30 uppercase">Non-Aktif</span>
-                                @endif
+                                <div class="shrink-0">
+                                    @if($schema->is_active)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-450 border border-emerald-100/30 dark:border-emerald-900/30 uppercase">Aktif</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-650 dark:text-rose-455 border border-rose-100/30 dark:border-rose-900/30 uppercase">Non-Aktif</span>
+                                    @endif
+                                </div>
                             </div>
 
                             <!-- Tiers Table -->
-                            <div class="border border-slate-100 dark:border-slate-800 rounded-lg overflow-hidden mt-3">
+                            <div class="border border-slate-100 dark:border-slate-800 rounded-lg overflow-hidden mt-2.5">
                                 <table class="w-full text-xs">
                                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                                         <tr>
-                                            <th class="px-4 py-2 text-left">Tingkat (Tier)</th>
-                                            <th class="px-4 py-2 text-center">Minimal Hadir Lebih Awal</th>
-                                            <th class="px-4 py-2 text-right">Nominal Bonus</th>
+                                            <th class="px-2.5 sm:px-3 py-2 text-left">Tier</th>
+                                            <th class="px-2 sm:px-3 py-2 text-center">Minimal Hadir Awal</th>
+                                            <th class="px-2.5 sm:px-3 py-2 text-right">Nominal</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
                                         @foreach($schema->tiers->sortBy('tier_level') as $tier)
                                             <tr>
-                                                <td class="px-4 py-2.5 text-left flex items-center gap-1.5">
-                                                    <span class="w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold flex items-center justify-center">
+                                                <td class="px-2.5 sm:px-3 py-2 text-left flex items-center gap-1.5 whitespace-nowrap">
+                                                    <span class="w-4.5 h-4.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold flex items-center justify-center shrink-0">
                                                         {{ $tier->tier_level }}
                                                     </span>
-                                                    Tier {{ $tier->tier_level }}
+                                                    <span>Tier {{ $tier->tier_level }}</span>
                                                 </td>
-                                                <td class="px-4 py-2.5 text-center font-mono text-slate-800 dark:text-slate-200">
+                                                <td class="px-2 sm:px-3 py-2 text-center font-mono text-[11px] text-slate-800 dark:text-slate-200">
                                                     @if(($tier->min_early_minutes ?? 0) == 0)
-                                                        <span class="text-slate-600 dark:text-slate-400">0 menit (Tepat Waktu / Hadir)</span>
+                                                        <span class="text-slate-600 dark:text-slate-400">0m (Tepat Waktu)</span>
                                                     @else
-                                                        <span class="font-bold text-emerald-600 dark:text-emerald-400">&ge; {{ $tier->min_early_minutes }} menit</span> awal
+                                                        <span class="font-bold text-emerald-600 dark:text-emerald-400">&ge; {{ $tier->min_early_minutes }}m</span> awal
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-2.5 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                                                <td class="px-2.5 sm:px-3 py-2 text-right font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap font-mono">
                                                     Rp {{ number_format($tier->nominal, 0, ',', '.') }}
                                                 </td>
                                             </tr>
@@ -249,17 +327,37 @@
                             @if(($picketBonusSchemaId ?? 0) == $schema->id)
                                 <form action="{{ route('bonus-schemas.unset-picket') }}" method="POST" class="inline">
                                     @csrf
-                                    <button type="submit" class="h-8 px-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 transition-all flex items-center gap-1.5 cursor-pointer" title="Lepaskan status skema piket aktif">
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 transition-all flex items-center gap-1.5 cursor-pointer" title="Lepaskan status skema piket aktif">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                         <span>Lepas Piket</span>
                                     </button>
                                 </form>
-                            @else
+                            @elseif($schema->is_active)
                                 <form action="{{ route('bonus-schemas.set-picket', $schema->id) }}" method="POST" class="inline">
                                     @csrf
-                                    <button type="submit" class="h-8 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all flex items-center gap-1.5 cursor-pointer" title="Jadikan skema ini sebagai acuan perhitungan bonus hari piket">
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all flex items-center gap-1.5 cursor-pointer" title="Jadikan skema ini sebagai acuan perhitungan bonus hari piket">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                                        <span>Pilih untuk Piket</span>
+                                        <span>Pilih Piket</span>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($schema->is_active)
+                                <form action="{{ route('bonus-schemas.toggle-active', $schema->id) }}" method="POST" class="inline" onsubmit="return confirm('Nonaktifkan skema ini? Skema tidak akan digunakan untuk kalkulasi kehadiran yang akan datang.')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-1 cursor-pointer" title="Nonaktifkan skema ini">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                        <span>Nonaktifkan</span>
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('bonus-schemas.toggle-active', $schema->id) }}" method="POST" class="inline" onsubmit="return confirm('Aktifkan skema ini agar dapat digunakan kembali?')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer" title="Aktifkan skema ini agar dapat digunakan">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                        <span>Aktifkan</span>
                                     </button>
                                 </form>
                             @endif
@@ -285,6 +383,35 @@
                         <button @click="resetAdd('early_arrival')" class="mt-3 px-3.5 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-indigo-700">Buat Skema Hadir Lebih Awal</button>
                     </div>
                 @endforelse
+
+                <!-- Notification at bottom of active list if inactive schemas exist -->
+                <div x-show="statusFilter === 'active' && currentCounts.inactive > 0" class="col-span-full py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-slate-600 dark:text-slate-400">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                        <span>Terdapat <strong class="text-slate-800 dark:text-slate-200" x-text="currentCounts.inactive"></strong> skema berstatus <strong>Nonaktif / Riwayat Lampau</strong> yang disembunyikan agar tampilan tetap rapi.</span>
+                    </div>
+                    <button type="button" @click="statusFilter = 'inactive'" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 shadow-3xs transition-all cursor-pointer shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                        <span>Buka Skema Nonaktif</span>
+                    </button>
+                </div>
+
+                <!-- Empty state when active filter has 0 items but collection is not empty -->
+                <div x-show="currentCounts.active === 0 && statusFilter === 'active' && currentCounts.total > 0" class="col-span-full py-12 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Tidak ada skema aktif saat ini pada kategori ini.</p>
+                    <div class="flex items-center justify-center gap-2 mt-3">
+                        <button @click="resetAdd('early_arrival')" class="px-3.5 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-indigo-700">Buat Skema Baru</button>
+                        <button @click="statusFilter = 'inactive'" class="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold cursor-pointer">Lihat Skema Nonaktif</button>
+                    </div>
+                </div>
+
+                <!-- Empty state when inactive filter has 0 items but collection is not empty -->
+                <div x-show="currentCounts.inactive === 0 && statusFilter === 'inactive' && currentCounts.total > 0" class="col-span-full py-12 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Tidak ada skema berstatus nonaktif pada kategori ini.</p>
+                    <button @click="statusFilter = 'active'" class="mt-3 px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold cursor-pointer">Kembali ke Skema Aktif</button>
+                </div>
             </section>
         </div>
 
@@ -307,64 +434,79 @@
                 </div>
             </div>
 
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-left">
+            <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 text-left">
+                <!-- Banner Notification when Viewing Inactive Schemas -->
+                <div x-show="statusFilter === 'inactive' && currentCounts.inactive > 0" class="col-span-full py-2.5 px-4 rounded-xl border border-amber-200/80 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/20 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+                    <div class="flex items-center gap-2 text-amber-900 dark:text-amber-300">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Sedang menampilkan skema berstatus <strong>Nonaktif / Riwayat Lampau</strong> (<span x-text="currentCounts.inactive"></span> skema).</span>
+                    </div>
+                    <button type="button" @click="statusFilter = 'active'" class="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-900 hover:bg-amber-100 dark:hover:bg-slate-800 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 transition-all cursor-pointer shrink-0 shadow-3xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"/></svg>
+                        <span>Kembali ke Skema Aktif</span>
+                    </button>
+                </div>
+
                 @forelse($lateSchemas as $schema)
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200 {{ in_array($schema->id, [1, 2]) ? 'opacity-90 bg-slate-50/40 dark:bg-slate-900/50' : '' }} {{ ($picketBonusSchemaId ?? 0) == $schema->id ? 'ring-2 ring-amber-400/50 dark:ring-amber-500/40 border-amber-300 dark:border-amber-700/60' : '' }}">
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-50">{{ $schema->name }}</h4>
+                    <div x-show="statusFilter === 'all' || (statusFilter === 'active' && {{ $schema->is_active ? 'true' : 'false' }}) || (statusFilter === 'inactive' && {{ !$schema->is_active ? 'true' : 'false' }})"
+                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200 {{ in_array($schema->id, [1, 2]) ? 'opacity-90 bg-slate-50/40 dark:bg-slate-900/50' : '' }} {{ ($picketBonusSchemaId ?? 0) == $schema->id ? 'ring-2 ring-amber-400/50 dark:ring-amber-500/40 border-amber-300 dark:border-amber-700/60' : '' }}">
+                        <div class="space-y-3.5">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                        <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-50 truncate" title="{{ $schema->name }}">{{ $schema->name }}</h4>
                                         @if(in_array($schema->id, [1, 2]))
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 whitespace-nowrap">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
-                                                <span>Terkunci (Arsip)</span>
+                                                <span>Terkunci</span>
                                             </span>
                                         @endif
                                         @if(($picketBonusSchemaId ?? 0) == $schema->id)
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs">
-                                                <span>⚡ Skema Khusus Piket Aktif</span>
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs whitespace-nowrap">
+                                                <span>⚡ Piket Aktif</span>
                                             </span>
                                         @endif
                                     </div>
                                     <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {{ $schema->id }}</span>
                                 </div>
-                                @if($schema->is_active)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-450 border border-emerald-100/30 dark:border-emerald-900/30 uppercase">Aktif</span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 uppercase">Nonaktif</span>
-                                @endif
+                                <div class="shrink-0">
+                                    @if($schema->is_active)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-450 border border-emerald-100/30 dark:border-emerald-900/30 uppercase">Aktif</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 uppercase">Nonaktif</span>
+                                    @endif
+                                </div>
                             </div>
 
                             <!-- Tiers Table -->
-                            <div class="border border-slate-100 dark:border-slate-800 rounded-lg overflow-hidden mt-3">
+                            <div class="border border-slate-100 dark:border-slate-800 rounded-lg overflow-hidden mt-2.5">
                                 <table class="w-full text-xs">
                                     <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                                         <tr>
-                                            <th class="px-4 py-2 text-left">Tingkat (Tier)</th>
-                                            <th class="px-4 py-2 text-center">Batas Keterlambatan</th>
-                                            <th class="px-4 py-2 text-right">Nominal Bonus</th>
+                                            <th class="px-2.5 sm:px-3 py-2 text-left">Tier</th>
+                                            <th class="px-2 sm:px-3 py-2 text-center">Batas Keterlambatan</th>
+                                            <th class="px-2.5 sm:px-3 py-2 text-right">Nominal</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900 text-slate-700 dark:text-slate-300 font-medium">
                                         @foreach($schema->tiers->sortBy('tier_level') as $tier)
                                             <tr>
-                                                <td class="px-4 py-2.5 text-left flex items-center gap-1.5">
-                                                    <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold flex items-center justify-center">
+                                                <td class="px-2.5 sm:px-3 py-2 text-left flex items-center gap-1.5 whitespace-nowrap">
+                                                    <span class="w-4.5 h-4.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0">
                                                         {{ $tier->tier_level }}
                                                     </span>
-                                                    Tier {{ $tier->tier_level }}
+                                                    <span>Tier {{ $tier->tier_level }}</span>
                                                 </td>
-                                                <td class="px-4 py-2.5 text-center font-mono text-slate-800 dark:text-slate-200">
+                                                <td class="px-2 sm:px-3 py-2 text-center font-mono text-[11px] text-slate-800 dark:text-slate-200">
                                                     @if($tier->max_late_minutes == 0)
-                                                        Tepat Waktu (0 menit)
+                                                        Tepat Waktu (0m)
                                                     @elseif($tier->max_late_minutes >= 720)
-                                                        &gt; 14 menit (Intinya Hadir)
+                                                        &gt; 14m (Intinya Hadir)
                                                     @else
                                                         &le; {{ $tier->max_late_minutes }} menit
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-2.5 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                                                <td class="px-2.5 sm:px-3 py-2 text-right font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap font-mono">
                                                     Rp {{ number_format($tier->nominal, 0, ',', '.') }}
                                                 </td>
                                             </tr>
@@ -374,48 +516,67 @@
                             </div>
                         </div>
 
-                        @if(in_array($schema->id, [1, 2]))
-                            <div class="w-full flex items-center justify-between gap-2 mt-5 border-t border-slate-100 dark:border-slate-900 pt-3">
-                                <div class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px] font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
-                                    <span>Skema diarsipkan & terkunci agar riwayat absensi lampau tetap terjaga</span>
-                                </div>
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">Arsip Lampau</span>
-                            </div>
-                        @else
-                            <div class="flex flex-wrap items-center gap-2 mt-5 border-t border-slate-100 dark:border-slate-900 pt-4 justify-end">
-                                @if(($picketBonusSchemaId ?? 0) == $schema->id)
-                                    <form action="{{ route('bonus-schemas.unset-picket') }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="h-8 px-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 transition-all flex items-center gap-1.5 cursor-pointer" title="Lepaskan status skema piket aktif">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                                            <span>Lepas Piket</span>
-                                        </button>
-                                    </form>
-                                @else
-                                    <form action="{{ route('bonus-schemas.set-picket', $schema->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="h-8 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all flex items-center gap-1.5 cursor-pointer" title="Jadikan skema ini sebagai acuan perhitungan bonus hari piket">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                                            <span>Pilih untuk Piket</span>
-                                        </button>
-                                    </form>
-                                @endif
+                        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-4 sm:mt-5 border-t border-slate-100 dark:border-slate-900 pt-3 sm:pt-4 justify-end">
+                            @if(in_array($schema->id, [1, 2]))
+                                <span class="mr-auto inline-flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-medium" title="Struktur tier skema lampau terkunci demi integritas data absensi masa lalu">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                                    <span>Arsip Terkunci</span>
+                                </span>
+                            @endif
 
-                                <button @click="openEdit({{ json_encode($schema) }})" class="h-8 px-3.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
+                            @if(($picketBonusSchemaId ?? 0) == $schema->id)
+                                <form action="{{ route('bonus-schemas.unset-picket') }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 transition-all flex items-center gap-1.5 cursor-pointer" title="Lepaskan status skema piket aktif">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                        <span>Lepas Piket</span>
+                                    </button>
+                                </form>
+                            @elseif($schema->is_active)
+                                <form action="{{ route('bonus-schemas.set-picket', $schema->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all flex items-center gap-1.5 cursor-pointer" title="Jadikan skema ini sebagai acuan perhitungan bonus hari piket">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                        <span>Pilih Piket</span>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($schema->is_active)
+                                <form action="{{ route('bonus-schemas.toggle-active', $schema->id) }}" method="POST" class="inline" onsubmit="return confirm('Nonaktifkan skema ini? Skema tidak akan digunakan untuk kalkulasi kehadiran yang akan datang.')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-1 cursor-pointer" title="Nonaktifkan skema ini">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                        <span>Nonaktifkan</span>
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('bonus-schemas.toggle-active', $schema->id) }}" method="POST" class="inline" onsubmit="return confirm('Aktifkan skema ini agar dapat digunakan kembali?')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer" title="Aktifkan skema ini agar dapat digunakan">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                        <span>Aktifkan</span>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if(!in_array($schema->id, [1, 2]))
+                                <button @click="openEdit({{ json_encode($schema) }})" class="h-8 px-2.5 sm:px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                                     <span>Edit Skema</span>
                                 </button>
                                 <form :action="`{{ url('bonus-schemas') }}/${{ $schema->id }}?tab=late_tolerance`" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus skema bonus ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="h-8 px-3.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-650 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 flex items-center gap-1.5 cursor-pointer">
+                                    <button type="submit" class="h-8 px-2.5 sm:px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-650 dark:text-rose-400 text-xs font-bold rounded-lg border border-rose-100/30 dark:border-rose-900/30 transition-all hover:scale-105 duration-150 flex items-center gap-1 cursor-pointer">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.34 9m-4.78 0L9 9m12 6a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                                         <span>Hapus</span>
                                     </button>
                                 </form>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
                 @empty
                     <div class="col-span-full py-12 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
@@ -423,6 +584,35 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400">Belum ada skema bonus Toleransi Keterlambatan yang terdaftar.</p>
                     </div>
                 @endforelse
+
+                <!-- Notification at bottom of active list if inactive schemas exist -->
+                <div x-show="statusFilter === 'active' && currentCounts.inactive > 0" class="col-span-full py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-slate-600 dark:text-slate-400">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                        <span>Terdapat <strong class="text-slate-800 dark:text-slate-200" x-text="currentCounts.inactive"></strong> skema berstatus <strong>Nonaktif / Riwayat Lampau</strong> yang disembunyikan agar tampilan tetap rapi.</span>
+                    </div>
+                    <button type="button" @click="statusFilter = 'inactive'" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 shadow-3xs transition-all cursor-pointer shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                        <span>Buka Skema Nonaktif</span>
+                    </button>
+                </div>
+
+                <!-- Empty state when active filter has 0 items but collection is not empty -->
+                <div x-show="currentCounts.active === 0 && statusFilter === 'active' && currentCounts.total > 0" class="col-span-full py-12 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Tidak ada skema aktif saat ini pada kategori ini.</p>
+                    <div class="flex items-center justify-center gap-2 mt-3">
+                        <button @click="resetAdd('late_tolerance')" class="px-3.5 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-indigo-700">Buat Skema Baru</button>
+                        <button @click="statusFilter = 'inactive'" class="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold cursor-pointer">Lihat Skema Nonaktif</button>
+                    </div>
+                </div>
+
+                <!-- Empty state when inactive filter has 0 items but collection is not empty -->
+                <div x-show="currentCounts.inactive === 0 && statusFilter === 'inactive' && currentCounts.total > 0" class="col-span-full py-12 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mx-auto text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Tidak ada skema berstatus nonaktif pada kategori ini.</p>
+                    <button @click="statusFilter = 'active'" class="mt-3 px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold cursor-pointer">Kembali ke Skema Aktif</button>
+                </div>
             </section>
         </div>
 

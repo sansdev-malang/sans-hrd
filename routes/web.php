@@ -59,6 +59,7 @@ Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::get('bonus-schemas/sync', [\App\Http\Controllers\BonusSchemaController::class, 'triggerSync'])->name('bonus-schemas.sync');
     Route::post('bonus-schemas/unset-picket', [\App\Http\Controllers\BonusSchemaController::class, 'unsetPicketSchema'])->name('bonus-schemas.unset-picket');
     Route::post('bonus-schemas/{bonusSchema}/set-picket', [\App\Http\Controllers\BonusSchemaController::class, 'setAsPicketSchema'])->name('bonus-schemas.set-picket');
+    Route::patch('bonus-schemas/{bonusSchema}/toggle-active', [\App\Http\Controllers\BonusSchemaController::class, 'toggleActive'])->name('bonus-schemas.toggle-active');
     Route::resource('bonus-schemas', \App\Http\Controllers\BonusSchemaController::class);
 
     // Bonus Reports
