@@ -502,7 +502,7 @@
         </section>
 
         <!-- TABLE SECTION -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left w-full">
+        <div id="roster-table-container" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden text-left w-full">
             <div class="px-6 py-3.5 border-b border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 <span class="text-[11px] font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                     <i data-lucide="table-properties" class="w-4 h-4 text-slate-500"></i>
@@ -530,141 +530,90 @@
                             <th class="bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-right w-[12%] whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300 font-medium">
-                        @forelse($batches as $batch)
-                            @if ($activeTab === 'roster')
-                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                    <td class="px-4 py-2.5 text-left">
-                                        <div class="flex items-center gap-2.5">
-                                            <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100/20 dark:border-indigo-900/10">
-                                                <i data-lucide="calendar-range" class="w-3.5 h-3.5"></i>
+                    @php
+                        $batchCollection = collect($batches->items());
+                        $activeBatches = $batchCollection->where('is_expired', false);
+                        $expiredBatches = $batchCollection->where('is_expired', true);
+                    @endphp
+                    <tbody x-data="{ showExpired: false }" class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300 font-medium">
+                        {{-- Jadwal Aktif & Mendatang --}}
+                        @forelse($activeBatches as $batch)
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                @include('employee-working-shifts.partials.schedule-row-cells', ['batch' => $batch, 'activeTab' => $activeTab])
+                            </tr>
+                        @empty
+                            @if($expiredBatches->isEmpty())
+                                <tr>
+                                    <td colspan="5" class="px-6 py-16 text-center">
+                                        <div class="flex flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
+                                            <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400">
+                                                <i data-lucide="calendar-x" class="w-6 h-6"></i>
                                             </div>
-                                            <div class="flex flex-col gap-0.5">
-                                                <span @click="openModal({{ json_encode($batch) }})" class="font-semibold text-slate-800 dark:text-slate-200 text-xs cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors duration-150" title="Klik untuk melihat rincian daftar pegawai">{{ !empty($batch['roster_name']) ? $batch['roster_name'] : 'Roster Shift Bulanan' }}</span>
-                                                <div class="flex items-center gap-1.5 flex-wrap">
-                                                    <span class="inline-flex w-max px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 uppercase tracking-wide">Roster</span>
-                                                    <span class="inline-flex items-center gap-1 w-max px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-2.5 h-2.5"></i> {{ (($batch['bonus_schema_mode'] ?? '') === 'early_arrival' ? '⚡ ' : '⏱️ ') . ($batch['bonus_schema_name'] ?? 'Default') }}</span>
-                                                </div>
+                                            <div>
+                                                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">Belum ada jadwal shift</h4>
+                                                <p class="text-xs mt-1">Silakan tugaskan shift baru untuk pegawai Anda.</p>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-2.5 text-left whitespace-nowrap">
-                                        <span class="font-semibold text-slate-700 dark:text-slate-350 text-xs">{{ $batch['unit_name'] }}</span>
-                                    </td>
-                                    <td class="px-4 py-2.5 text-center whitespace-nowrap">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="text-xs font-semibold text-slate-900 dark:text-slate-200">{{ \Carbon\Carbon::create($batch['year'], $batch['month'], 1)->translatedFormat('F Y') }}</span>
-                                            <span class="px-1.5 py-0.2 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider border border-blue-100/30 dark:border-blue-900/30">Roster</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-2.5 text-center whitespace-nowrap">
-                                        <div @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-100/30 dark:border-indigo-900/30 cursor-pointer shadow-2xs font-bold text-xs whitespace-nowrap transition-colors" title="Klik untuk melihat rincian daftar pegawai">
-                                            <i data-lucide="users" class="w-3 h-3"></i>
-                                            <span>{{ count($batch['employees']) }} Orang</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-2.5">
-                                        <div class="flex items-center justify-end gap-1">
-                                            <a href="{{ route('employee-working-shifts.detail-roster', [
-                                                'unit_id' => $batch['school_unit_id'],
-                                                'month' => $batch['month'],
-                                                'year' => $batch['year'],
-                                                'roster_name' => $batch['roster_name'] ?? '',
-                                                'bonus_schema_id' => $batch['bonus_schema_id'] ?? '',
-                                            ]) }}"
-                                                class="h-7 w-7 inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-600 dark:hover:bg-indigo-650 hover:text-white text-indigo-700 dark:text-indigo-400 rounded-lg border border-indigo-200/30 dark:border-indigo-900/30 transition-all hover:shadow-xs cursor-pointer"
-                                                title="Lihat Detail Roster">
-                                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                                            </a>
-                                            <a href="{{ route('employee-working-shifts.roster', [
-                                                'unit_id' => $batch['school_unit_id'],
-                                                'month' => $batch['month'],
-                                                'year' => $batch['year'],
-                                                'roster_name' => $batch['roster_name'] ?? '',
-                                                'bonus_schema_id' => $batch['bonus_schema_id'] ?? '',
-                                            ]) }}"
-                                                class="h-7 w-7 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:shadow-xs"
-                                                title="Edit Roster">
-                                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                                            </a>
-                                            <button type="button"
-                                                @click="confirmDeleteBatch({{ json_encode($batch) }})"
-                                                class="h-7 w-7 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:shadow-xs cursor-pointer"
-                                                title="Hapus Roster">
-                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             @else
-                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                    <td class="px-4 py-2.5 text-left">
-                                        <div class="flex items-center gap-2.5">
-                                            <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-100/20 dark:border-emerald-900/10">
-                                                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center bg-slate-50/40 dark:bg-slate-900/40">
+                                        <div class="flex flex-col items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+                                            <div class="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                                                <i data-lucide="calendar-check" class="w-4.5 h-4.5"></i>
                                             </div>
-                                            <div class="flex flex-col gap-0.5">
-                                                <span @click="openModal({{ json_encode($batch) }})" class="font-semibold text-slate-800 dark:text-slate-200 text-xs cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors duration-150" title="Klik untuk melihat rincian daftar pegawai">{{ $batch['shift_name'] }}</span>
-                                                <div class="flex items-center gap-1.5 flex-wrap">
-                                                    <span class="inline-flex w-max px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-955/30 text-emerald-700 dark:text-emerald-455 border border-emerald-100/30 dark:border-emerald-900/30 uppercase tracking-wide">Kode: {{ $batch['shift_code'] }}</span>
-                                                    <span class="inline-flex items-center gap-1 w-max px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-50 dark:bg-amber-955/30 text-amber-750 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30" title="Skema Bonus Terpasang"><i data-lucide="award" class="w-2.5 h-2.5"></i> {{ (($batch['bonus_schema_mode'] ?? '') === 'early_arrival' ? '⚡ ' : '⏱️ ') . ($batch['bonus_schema_name'] ?? 'Default') }}</span>
-                                                </div>
+                                            <div>
+                                                <h4 class="text-xs font-bold text-slate-700 dark:text-slate-350">Tidak ada jadwal yang sedang aktif atau akan datang</h4>
+                                                <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Semua jadwal pada tampilan ini merupakan jadwal periode terlewat. Klik accordion di bawah untuk melihat rincian riwayat.</p>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-2.5 text-left whitespace-nowrap">
-                                        <span class="font-semibold text-slate-700 dark:text-slate-350 text-xs">{{ $batch['unit_name'] }}</span>
-                                    </td>
-                                    <td class="px-4 py-2.5 text-center whitespace-nowrap">
-                                        <div class="flex items-center justify-center gap-1 text-xs font-semibold text-slate-900 dark:text-slate-200">
-                                            <span>{{ \Carbon\Carbon::parse($batch['start_date'])->translatedFormat('d M Y') }}</span>
-                                            <span class="text-slate-400 dark:text-slate-500 font-normal text-[10px]">s/d</span>
-                                            @if ($batch['end_date'])
-                                                <span>{{ \Carbon\Carbon::parse($batch['end_date'])->translatedFormat('d M Y') }}</span>
-                                            @else
-                                                <span class="px-2 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-[9px] font-bold uppercase tracking-wider border border-emerald-100/30 dark:border-emerald-900/30 whitespace-nowrap">Seterusnya</span>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-2.5 text-center whitespace-nowrap">
-                                        <div @click="openModal({{ json_encode($batch) }})" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-100/30 dark:border-indigo-900/30 cursor-pointer shadow-2xs font-bold text-xs whitespace-nowrap transition-colors" title="Klik untuk melihat rincian daftar pegawai">
-                                            <i data-lucide="users" class="w-3 h-3"></i>
-                                            <span>{{ count($batch['employees']) }} Orang</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-2.5">
-                                        <div class="flex items-center justify-end gap-1">
-                                            <button type="button" @click="openEditModal({{ json_encode($batch) }})"
-                                                class="h-7 w-7 inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg shadow-2xs transition-all hover:shadow-xs cursor-pointer"
-                                                title="Edit Penugasan">
-                                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                @click="confirmDeleteBatch({{ json_encode($batch) }})"
-                                                class="h-7 w-7 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-450 hover:text-white rounded-lg border border-rose-200/30 dark:border-rose-900/30 transition-all hover:shadow-xs cursor-pointer"
-                                                title="Hapus Penugasan">
-                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             @endif
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-6 py-16 text-center">
-                                    <div class="flex flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
-                                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-455">
-                                            <i data-lucide="calendar-x" class="w-6 h-6"></i>
+                        @endforelse
+
+                        {{-- Accordion Baris untuk Jadwal yang Sudah Terlewat --}}
+                        @if($expiredBatches->isNotEmpty())
+                            <!-- ACCORDION TRIGGER FOR EXPIRED SCHEDULES -->
+                            <tr class="bg-gradient-to-r from-slate-50 via-slate-100/70 to-slate-50 dark:from-slate-900/80 dark:via-slate-850 dark:to-slate-900/80 hover:from-slate-100 hover:to-slate-100/90 dark:hover:from-slate-800 dark:hover:to-slate-800 transition-all cursor-pointer border-y-2 border-slate-200/80 dark:border-slate-700/80 select-none group"
+                                @click="showExpired = !showExpired">
+                                <td colspan="5" class="px-4 py-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 shadow-2xs border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-350 transition-all duration-200 group-hover:scale-105"
+                                                 :class="showExpired ? 'rotate-90 !text-indigo-600 dark:!text-indigo-400 !border-indigo-200 dark:!border-indigo-800 bg-indigo-50 dark:bg-indigo-950/50' : ''">
+                                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                            </div>
+                                            <div class="flex items-center gap-2.5 flex-wrap">
+                                                <span class="text-xs font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    Riwayat Jadwal Periode Terlewat
+                                                </span>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/70 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                                    {{ $expiredBatches->count() }} Jadwal
+                                                </span>
+                                                <span class="hidden sm:inline-block text-[11px] text-slate-400 dark:text-slate-500">
+                                                    — Jadwal yang masa berlakunya telah selesai atau bulan lampau
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">Belum ada jadwal shift</h4>
-                                            <p class="text-xs mt-1">Silakan tugaskan shift baru untuk pegawai Anda.</p>
+                                        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 shrink-0">
+                                            <span x-text="showExpired ? 'Tutup Riwayat' : 'Buka Riwayat'"></span>
+                                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform duration-200" :class="showExpired ? 'rotate-180' : ''"></i>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
-                        @endforelse
+
+                            <!-- EXPIRED SCHEDULE ROWS -->
+                            @foreach($expiredBatches as $batch)
+                                <tr x-show="showExpired" 
+                                    x-cloak
+                                    class="bg-slate-50/40 dark:bg-slate-900/30 hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors opacity-80 hover:opacity-100 border-b border-slate-100 dark:border-slate-800/50">
+                                    @include('employee-working-shifts.partials.schedule-row-cells', ['batch' => $batch, 'activeTab' => $activeTab])
+                                </tr>
+                            @endforeach
+                        @endif
                     </tbody>
                 </table>
 
@@ -740,7 +689,7 @@
                                  <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5 leading-relaxed">
                                      Jadwal: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.type === 'roster' ? (selectedBatch?.roster_name || 'Roster Shift Bulanan') : (selectedBatch?.shift_name || '-')"></span><br>
                                      Unit: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.unit_name"></span><br>
-                                     Skema Bonus: <span class="font-bold text-amber-600 dark:text-amber-400" x-text="((selectedBatch?.bonus_schema_mode === 'early_arrival' ? '⚡ ' : '⏱️ ') + (selectedBatch?.bonus_schema_name || 'Default'))"></span><br>
+                                     Skema Uang Kehadiran: <span class="font-bold text-amber-600 dark:text-amber-400" x-text="((selectedBatch?.bonus_schema_mode === 'early_arrival' ? '⚡ ' : '⏱️ ') + (selectedBatch?.bonus_schema_name || 'Default'))"></span><br>
                                      Periode: <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selectedBatch?.type === 'roster' ? formatRosterPeriod(selectedBatch?.month, selectedBatch?.year) : (formatDate(selectedBatch?.start_date) + ' s/d ' + (selectedBatch?.end_date ? formatDate(selectedBatch?.end_date) : 'Seterusnya'))"></span>
                                  </p>
                             </div>
@@ -970,18 +919,18 @@
                                                 <option value="{{ $shift->id }}"
                                                     x-show="!{{ $shift->school_unit_id ?: 'null' }} || {{ $shift->school_unit_id ?: 'null' }} == selectedUnit"
                                                     :disabled="Boolean({{ $shift->school_unit_id ?: 'null' }} && {{ $shift->school_unit_id ?: 'null' }} != selectedUnit)">
-                                                    {{ $shift->name }} ({{ $shift->code }}){{ $shift->schoolUnit ? ' [' . $shift->schoolUnit->name . ']' : '' }}
+                                                    {{ $shift->name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
 
-                                    <!-- Skema Bonus -->
+                                    <!-- Skema Uang Kehadiran -->
                                     <div>
-                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Skema Bonus <span class="text-rose-500">*</span></label>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Skema Uang Kehadiran <span class="text-rose-500">*</span></label>
                                         <select x-model="bonusSchemaId" name="bonus_schema_id" required
                                             class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
-                                            <option value="">Pilih Skema Bonus...</option>
+                                            <option value="">Pilih Skema Uang Kehadiran...</option>
                                             @php
                                                 $earlySchemas = $bonusSchemas->where('calculation_mode', 'early_arrival');
                                                 $lateSchemas = $bonusSchemas->where('calculation_mode', 'late_tolerance');
@@ -1195,22 +1144,30 @@
                                         <select name="working_shift_id" required x-model="editWorkingShiftId"
                                             class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                             <option value="">Pilih Template Shift</option>
-                                            @foreach ($shifts->where('is_shift', false) as $shift)
-                                                <option value="{{ $shift->id }}"
-                                                    x-show="!{{ $shift->school_unit_id ?: 'null' }} || {{ $shift->school_unit_id ?: 'null' }} == editUnitId"
-                                                    :disabled="Boolean({{ $shift->school_unit_id ?: 'null' }} && {{ $shift->school_unit_id ?: 'null' }} != editUnitId)">
-                                                    {{ $shift->name }} ({{ $shift->code }}){{ $shift->schoolUnit ? ' [' . $shift->schoolUnit->name . ']' : '' }}
-                                                </option>
+                                            @foreach (($allShifts ?? $shifts)->where('is_shift', false) as $shift)
+                                                @if($shift->is_active)
+                                                    <option value="{{ $shift->id }}"
+                                                        x-show="!{{ $shift->school_unit_id ?: 'null' }} || {{ $shift->school_unit_id ?: 'null' }} == editUnitId"
+                                                        :disabled="Boolean({{ $shift->school_unit_id ?: 'null' }} && {{ $shift->school_unit_id ?: 'null' }} != editUnitId)">
+                                                        {{ $shift->name }}
+                                                    </option>
+                                                @else
+                                                    <option value="{{ $shift->id }}"
+                                                        x-show="editWorkingShiftId == {{ $shift->id }}"
+                                                        :disabled="editWorkingShiftId != {{ $shift->id }}">
+                                                        {{ $shift->name }} (Arsip Terpasang)
+                                                    </option>
+                                                @endif
                                             @endforeach
                                         </select>
                                     </div>
 
-                                    <!-- Bonus Schema -->
+                                    <!-- Skema Uang Kehadiran -->
                                     <div>
-                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Skema Bonus <span class="text-rose-500">*</span></label>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Skema Uang Kehadiran <span class="text-rose-500">*</span></label>
                                         <select name="bonus_schema_id" x-model="editBonusSchemaId" required
                                             class="w-full text-xs h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
-                                            <option value="">Pilih Skema Bonus...</option>
+                                            <option value="">Pilih Skema Uang Kehadiran...</option>
                                             @php
                                                 $allEarly = ($allBonusSchemas ?? $bonusSchemas)->where('calculation_mode', 'early_arrival');
                                                 $allLate = ($allBonusSchemas ?? $bonusSchemas)->where('calculation_mode', 'late_tolerance');
@@ -1218,14 +1175,30 @@
                                             @if($allEarly->count() > 0)
                                                 <optgroup label="⚡ Ketepatan Waktu (Hadir Lebih Awal)">
                                                     @foreach ($allEarly as $schema)
-                                                        <option value="{{ $schema->id }}">{{ $schema->name }}{{ !$schema->is_active ? ' (Non-aktif)' : '' }}</option>
+                                                        @if($schema->is_active)
+                                                            <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                                        @else
+                                                            <option value="{{ $schema->id }}"
+                                                                x-show="editBonusSchemaId == {{ $schema->id }}"
+                                                                :disabled="editBonusSchemaId != {{ $schema->id }}">
+                                                                {{ $schema->name }} (Arsip Terpasang)
+                                                            </option>
+                                                        @endif
                                                     @endforeach
                                                 </optgroup>
                                             @endif
                                             @if($allLate->count() > 0)
                                                 <optgroup label="⏱️ Toleransi Keterlambatan">
                                                     @foreach ($allLate as $schema)
-                                                        <option value="{{ $schema->id }}">{{ $schema->name }}{{ !$schema->is_active ? ' (Non-aktif)' : '' }}</option>
+                                                        @if($schema->is_active)
+                                                            <option value="{{ $schema->id }}">{{ $schema->name }}</option>
+                                                        @else
+                                                            <option value="{{ $schema->id }}"
+                                                                x-show="editBonusSchemaId == {{ $schema->id }}"
+                                                                :disabled="editBonusSchemaId != {{ $schema->id }}">
+                                                                {{ $schema->name }} (Arsip Terpasang)
+                                                            </option>
+                                                        @endif
                                                     @endforeach
                                                 </optgroup>
                                             @endif
@@ -1420,12 +1393,12 @@
                                         </div>
                                     </div>
 
-                                    <!-- Baris 2: Skema Bonus & Periode (Bulan/Tahun) -->
+                                    <!-- Baris 2: Skema Uang Kehadiran & Periode (Bulan/Tahun) -->
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
-                                        <!-- Skema Bonus -->
+                                        <!-- Skema Uang Kehadiran -->
                                         <div>
                                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex justify-between items-center text-xs">
-                                                <span>Skema Bonus <span class="text-rose-500">*</span></span>
+                                                <span>Skema Uang Kehadiran <span class="text-rose-500">*</span></span>
                                                 <span x-show="createShowError && !createBonusSchemaId" class="text-[10px] text-rose-500 font-bold animate-pulse" x-cloak>* Wajib</span>
                                             </label>
                                             <select x-model="createBonusSchemaId" name="bonus_schema_id" required

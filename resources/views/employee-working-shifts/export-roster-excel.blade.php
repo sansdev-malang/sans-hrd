@@ -20,7 +20,7 @@
             <tr>
                 <th rowspan="2" style="background-color: #f2f2f2;">No</th>
                 <th rowspan="2" style="background-color: #f2f2f2;" class="text-left">Nama Pegawai</th>
-                <th rowspan="2" style="background-color: #f2f2f2;">Skema Bonus</th>
+                <th rowspan="2" style="background-color: #f2f2f2;">Skema Uang Kehadiran</th>
                 <th colspan="{{ $daysInMonth }}" style="background-color: #f2f2f2;">Tanggal</th>
             </tr>
             <tr>

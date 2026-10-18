@@ -82,10 +82,10 @@
                         @change="window.location.href = '/employee-working-shifts/roster?unit_id={{ $selectedUnitId }}&month={{ $month }}&year=' + $event.target.value + '&roster_name=' + encodeURIComponent(document.querySelector('input[name=roster_name]').value)">
 
                     <span class="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
-                    <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Skema Bonus:</span>
+                    <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">Skema Uang Kehadiran:</span>
                     <select name="bonus_schema_id" required
                         class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50/60 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border border-amber-200/50 dark:border-amber-900/30 cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-500/30">
-                        <option value="">Pilih Skema Bonus...</option>
+                        <option value="">Pilih Skema Uang Kehadiran...</option>
                         @php
                             $allEarly = ($allBonusSchemas ?? $bonusSchemas)->where('calculation_mode', 'early_arrival');
                             $allLate = ($allBonusSchemas ?? $bonusSchemas)->where('calculation_mode', 'late_tolerance');
@@ -93,14 +93,22 @@
                         @if($allEarly->count() > 0)
                             <optgroup label="⚡ Ketepatan Waktu (Hadir Lebih Awal)" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-bold">
                                 @foreach($allEarly as $schema)
-                                    <option value="{{ $schema->id }}" {{ ($selectedBonusSchemaId == $schema->id) ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-normal">{{ $schema->name }}{{ !$schema->is_active ? ' (Non-aktif)' : '' }}</option>
+                                    @if($schema->is_active || $selectedBonusSchemaId == $schema->id)
+                                        <option value="{{ $schema->id }}" {{ ($selectedBonusSchemaId == $schema->id) ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-normal">
+                                            {{ $schema->name }}{{ !$schema->is_active ? ' (Arsip Terpasang)' : '' }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </optgroup>
                         @endif
                         @if($allLate->count() > 0)
                             <optgroup label="⏱️ Toleransi Keterlambatan" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-bold">
                                 @foreach($allLate as $schema)
-                                    <option value="{{ $schema->id }}" {{ ($selectedBonusSchemaId == $schema->id) ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-normal">{{ $schema->name }}{{ !$schema->is_active ? ' (Non-aktif)' : '' }}</option>
+                                    @if($schema->is_active || $selectedBonusSchemaId == $schema->id)
+                                        <option value="{{ $schema->id }}" {{ ($selectedBonusSchemaId == $schema->id) ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-normal">
+                                            {{ $schema->name }}{{ !$schema->is_active ? ' (Arsip Terpasang)' : '' }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </optgroup>
                         @endif

@@ -56,6 +56,8 @@ class EmployeeWorkingShiftController extends Controller
                 $key = 'perm|' . $assignment->school_unit_id . '|' . $assignment->working_shift_id . '|' . $bonusKey . '|' . $assignment->start_date->format('Y-m-d') . '|' . ($assignment->end_date ? $assignment->end_date->format('Y-m-d') : 'null');
                 
                 if (!isset($batches[$key])) {
+                    $isExpired = (!empty($assignment->end_date) && $assignment->end_date->startOfDay()->lt(now()->startOfDay()));
+
                     $batches[$key] = [
                         'type' => 'permanent',
                         'school_unit_id' => $assignment->school_unit_id,
@@ -65,6 +67,7 @@ class EmployeeWorkingShiftController extends Controller
                         'bonus_schema_mode' => $assignment->bonusSchema->calculation_mode ?? 'late_tolerance',
                         'start_date' => $assignment->start_date,
                         'end_date' => $assignment->end_date,
+                        'is_expired' => $isExpired,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'shift_name' => $assignment->workingShift->name ?? 'Unknown',
                         'shift_code' => ($assignment->workingShift->short_code ?: ($assignment->workingShift->code ?? '-')),
@@ -92,12 +95,15 @@ class EmployeeWorkingShiftController extends Controller
                 $key = 'roster|' . $assignment->school_unit_id . '|' . $year . '|' . $month . '|' . $rosterNameKey . '|' . $bonusKey;
 
                 if (!isset($rosterBatches[$key])) {
+                    $isExpired = (\Carbon\Carbon::create($year, $month, 1)->endOfMonth()->startOfDay()->lt(now()->startOfDay()));
+
                     $rosterBatches[$key] = [
                         'type' => 'roster',
                         'school_unit_id' => $assignment->school_unit_id,
                         'bonus_schema_id' => $assignment->bonus_schema_id,
                         'month' => $month,
                         'year' => $year,
+                        'is_expired' => $isExpired,
                         'unit_name' => $assignment->schoolUnit->name ?? 'Unknown',
                         'roster_name' => $assignment->roster_name,
                         'bonus_schema_name' => $assignment->bonusSchema->name ?? 'Default',
@@ -173,8 +179,14 @@ class EmployeeWorkingShiftController extends Controller
             });
         }
         
-        // Sort by Unit Name ASC, then Type (roster > permanent), then sort_date DESC
+        // Sort by is_expired ASC (ongoing/upcoming first, expired at the bottom), then Unit Name ASC, then Type (roster > permanent), then sort_date DESC
         usort($allBatches, function($a, $b) {
+            $expiredA = !empty($a['is_expired']) ? 1 : 0;
+            $expiredB = !empty($b['is_expired']) ? 1 : 0;
+            if ($expiredA !== $expiredB) {
+                return $expiredA - $expiredB;
+            }
+
             $unitCompare = strcmp($a['unit_name'], $b['unit_name']);
             if ($unitCompare !== 0) {
                 return $unitCompare;
@@ -263,6 +275,7 @@ class EmployeeWorkingShiftController extends Controller
             'batches' => $paginatedBatches,
             'units' => $units,
             'shifts' => $shifts,
+            'allShifts' => $allShifts,
             'bonusSchemas' => $bonusSchemas,
             'allBonusSchemas' => $allBonusSchemas,
             'selectedUnitId' => $selectedUnitId,
