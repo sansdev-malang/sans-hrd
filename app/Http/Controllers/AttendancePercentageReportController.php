@@ -392,7 +392,7 @@ class AttendancePercentageReportController extends Controller
                                 );
 
                                 if (!$isKedinasanLeave) {
-                                    $dailyLateMinutes = (int) $expectedStart->diffInMinutes($firstLogCarbon);
+                                    $dailyLateMinutes = (int) abs($expectedStart->diffInMinutes($firstLogCarbon));
                                     $totalLateMinutes += $dailyLateMinutes;
                                     $lateCount++;
                                     $lateDates[] = $currentDate->translatedFormat('d M');

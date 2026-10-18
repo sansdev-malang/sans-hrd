@@ -233,10 +233,11 @@
                                         </div>
                                         <div class="flex flex-col min-w-0 text-left">
                                             <span @click='openCalendarModal(@json($report))' class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ $empName }}</span>
-                                            <div class="flex flex-col gap-0.5 mt-0.5">
-                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
+                                            <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 shrink-0">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
                                                 <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate" title="{{ $report['employee']['position'] ?? '-' }}">{{ $report['employee']['position'] ?? '-' }}</span>
                                             </div>
+                                            <span class="text-[9.5px] font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5" title="Total Uang Kehadiran">Rp {{ number_format($report['total_bonus_nominal'] ?? 0, 0, ',', '.') }}</span>
                                         </div>
                                     </div>
                                 </td>
@@ -254,10 +255,13 @@
                                     if ($detail) {
                                         $statusName = $detail['status'] ?? '';
                                         $isReward = ($statusName === 'Reward Libur' || !empty($detail['is_reward']));
-                                        $isLate = !empty($detail['is_late']);
-                                        $isRedLate = !empty($detail['is_red_late']);
-                                        $lateMnt = (int)($detail['late_minutes'] ?? 0);
-                                        $earlyMnt = (int)($detail['early_minutes'] ?? 0);
+                                        $isPicket = !empty($detail['is_picket']);
+                                        $picketArea = $detail['picket_area'] ?? 'Area Piket';
+                                        $hasCheckIn = !empty($detail['check_in']) && $detail['check_in'] !== '-';
+                                        $isLate = $hasCheckIn && !empty($detail['is_late']);
+                                        $isRedLate = $hasCheckIn && !empty($detail['is_red_late']);
+                                        $lateMnt = $hasCheckIn ? (int) abs($detail['late_minutes'] ?? 0) : 0;
+                                        $earlyMnt = $hasCheckIn ? (int) abs($detail['early_minutes'] ?? 0) : 0;
 
                                         if ($isFuture && empty($detail['check_in'])) {
                                             if ($statusName === 'Cuti/Izin') {
@@ -368,6 +372,11 @@
                                             'leave_code' => $detail['leave_code'] ?? null,
                                             'is_pending' => !empty($detail['is_pending']),
                                             'rejected_leave' => $detail['rejected_leave'] ?? null,
+                                            'is_picket' => $isPicket,
+                                            'picket_area' => $picketArea,
+                                            'bonus_nominal' => $detail['bonus_nominal'] ?? 0,
+                                            'tier_level' => $detail['tier_level'] ?? null,
+                                            'schema_name' => $detail['schema_name'] ?? null,
                                             'note' => $noteText,
                                         ];
                                     } else {
@@ -399,6 +408,11 @@
                                             'leave_code' => null,
                                             'is_pending' => false,
                                             'rejected_leave' => null,
+                                            'is_picket' => false,
+                                            'picket_area' => null,
+                                            'bonus_nominal' => 0,
+                                            'tier_level' => null,
+                                            'schema_name' => null,
                                             'note' => $isSunday ? 'Hari libur akhir pekan.' : 'Hari libur rutin pegawai.',
                                         ];
                                     }
@@ -408,6 +422,13 @@
                                     @mouseleave="hideMatrixTooltip()"
                                     @click.stop="toggleMatrixTooltip($event, @js($cellData))">
                                     @if($detail)
+                                        <div class="relative w-full h-full flex flex-col items-center justify-center {{ $isPicket ? 'border border-amber-400 dark:border-amber-500 bg-amber-50/35 dark:bg-amber-950/20 rounded py-0.5 px-0.5 shadow-2xs' : '' }}">
+                                            @if($isPicket)
+                                                <span class="absolute -top-1 -right-1 flex h-2 w-2 z-10 pointer-events-none" title="Piket: {{ $picketArea }}">
+                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                                </span>
+                                            @endif
                                         @if($detail['status'] === 'Hadir')
                                             @php
                                                 $isRedLate = !empty($detail['is_red_late']);
@@ -447,9 +468,9 @@
                                                 </div>
                                             </div>
                                         @elseif($detail['status'] === 'Alfa')
-                                            <div class="flex flex-col gap-0.5 items-center justify-center">
-                                                <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded font-bold text-[10px]">A</div>
-                                                @if(!empty($detail['pending_leave']))
+                                            @if(!empty($detail['pending_leave']))
+                                                <div class="w-full flex flex-col gap-0.5 items-center justify-center">
+                                                    <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded font-bold text-[10px]">A</div>
                                                     @php
                                                         $pCode = $detail['pending_leave']['leave_code'];
                                                         $colorMap = [
@@ -463,8 +484,10 @@
                                                     <div class="w-full flex justify-center scale-75 opacity-60">
                                                         <span class="px-1.5 py-0.5 rounded font-extrabold text-[8px] leading-none uppercase {{ $pColorClass }}">{{ $pCode }}</span>
                                                     </div>
-                                                @endif
-                                            </div>
+                                                </div>
+                                            @else
+                                                <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded font-bold text-[10px]">A</div>
+                                            @endif
                                         @elseif($detail['status'] === 'Libur' || $detail['status'] === 'Off')
                                             <div class="mx-auto w-full h-full min-h-[28px] flex items-center justify-center bg-slate-50 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[9px]">OFF</div>
                                         @elseif($detail['status'] === 'Cuti/Izin')
@@ -539,6 +562,7 @@
                                         @else
                                             <div class="text-xs text-slate-300">-</div>
                                         @endif
+                                        </div>
                                     @else
                                         @if($date->isSunday())
                                             <div class="mx-auto flex items-center justify-center text-red-200 dark:text-red-900/30 font-bold text-xs">-</div>
@@ -635,6 +659,17 @@
                 </div>
                 <span>Reward Hari Libur (Bonus Full)</span>
             </div>
+            <!-- Piket -->
+            <div class="flex items-center gap-1.5">
+                <div class="relative w-8 h-5 flex items-center justify-center bg-amber-50/70 dark:bg-amber-950/30 border border-amber-400 dark:border-amber-500 rounded text-[9px] font-bold text-amber-600 dark:text-amber-400">
+                    <span class="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    <span>06:30</span>
+                </div>
+                <span>Tugas Piket (Shift Masuk 06:30)</span>
+            </div>
             <!-- Off -->
             <div class="flex items-center gap-1.5">
                 <div class="w-7 h-5 flex items-center justify-center bg-slate-100 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/40 rounded font-bold text-[8px]">OFF</div>
@@ -693,11 +728,18 @@
                                 </p>
                             </div>
                         </div>
-                        <button type="button" @click="showCalendarModal = false" class="rounded-lg p-1 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 transition-colors">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="text-right px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs">
+                                <span class="text-[8px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block leading-none">Total Uang Kehadiran</span>
+                                <span class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight leading-tight block mt-0.5" 
+                                      x-text="selectedReport ? 'Rp ' + Number(selectedReport.total_bonus_nominal || stats.totalBonus || 0).toLocaleString('id-ID') : 'Rp 0'"></span>
+                            </div>
+                            <button type="button" @click="showCalendarModal = false" class="rounded-lg p-1 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 transition-colors">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Modal Body -->
@@ -723,21 +765,29 @@
                         <!-- Calendar Grid -->
                         <div class="grid grid-cols-7 gap-1">
                             <template x-for="day in calendarDays" :key="day.dateStr">
-                                <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-1 sm:p-1.5 flex flex-col justify-between cursor-pointer transition-colors hover:ring-1 hover:ring-indigo-400/50"
+                                <div class="aspect-square border rounded-lg p-1 sm:p-1.5 flex flex-col justify-between cursor-pointer transition-colors hover:ring-1 hover:ring-indigo-400/50 relative"
                                      @mouseenter="showMatrixTooltipFromModal($event, day)"
                                      @mouseleave="hideMatrixTooltip()"
                                      @click.stop="toggleMatrixTooltipFromModal($event, day)"
                                      :class="[
+                                         (selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket) 
+                                             ? 'border-amber-400 dark:border-amber-500/80 ring-1 ring-amber-400/30 bg-amber-50/20 dark:bg-amber-950/15' 
+                                             : 'border-slate-100 dark:border-slate-800/40',
                                          day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40'
                                      ]">
                                      
-                                    <!-- Day Number -->
-                                    <span class="text-[10px] font-bold"
-                                          :class="[
-                                              day.isCurrentMonth ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400',
-                                              (new Date(day.dateStr).getDay() === 0) ? 'text-red-500 font-bold' : ''
-                                          ]"
-                                          x-text="day.day"></span>
+                                    <!-- Day Number Header -->
+                                    <div class="flex items-center justify-between w-full">
+                                        <span class="text-[10px] font-bold"
+                                              :class="[
+                                                  day.isCurrentMonth ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400',
+                                                  (new Date(day.dateStr).getDay() === 0) ? 'text-red-500 font-bold' : ''
+                                              ]"
+                                              x-text="day.day"></span>
+                                        <template x-if="selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket">
+                                            <span class="text-[8px] leading-none text-amber-500 dark:text-amber-400 font-bold" :title="'Piket: ' + (selectedReport.daily_details[day.dateStr].picket_area || 'Area Piket')">⚡</span>
+                                        </template>
+                                    </div>
                                           
                                     <!-- Status Indicator inside day -->
                                     <div class="mt-auto w-full">
@@ -839,6 +889,24 @@
                                                 <template x-if="selectedReport.daily_details[day.dateStr].status === 'Libur' || selectedReport.daily_details[day.dateStr].status === 'Off'">
                                                     <div class="text-center text-slate-400 dark:text-slate-500 text-[10px] font-bold">OFF</div>
                                                 </template>
+
+                                                <!-- Bonus Nominal Badge -->
+                                                <div class="mt-1 w-full pt-0.5 border-t border-slate-100 dark:border-slate-800/60">
+                                                    <template x-if="selectedReport.daily_details[day.dateStr].bonus_nominal > 0">
+                                                        <div class="w-full py-0.5 text-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded text-[7.5px] font-extrabold tracking-tight"
+                                                             x-text="'Rp ' + (selectedReport.daily_details[day.dateStr].bonus_nominal >= 1000 ? (selectedReport.daily_details[day.dateStr].bonus_nominal / 1000) + 'k' : selectedReport.daily_details[day.dateStr].bonus_nominal)"></div>
+                                                    </template>
+                                                    <template x-if="!selectedReport.daily_details[day.dateStr].bonus_nominal || selectedReport.daily_details[day.dateStr].bonus_nominal <= 0">
+                                                        <div class="w-full py-0.5 text-center">
+                                                            <template x-if="day.dateStr > new Date().toLocaleDateString('en-CA')">
+                                                                <div class="text-slate-300 dark:text-slate-700 text-[7.5px] font-medium">-</div>
+                                                            </template>
+                                                            <template x-if="day.dateStr <= new Date().toLocaleDateString('en-CA')">
+                                                                <div class="bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 rounded text-[7.5px] font-semibold">Rp 0</div>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
                                             </div>
                                         </template>
                                     </div>
@@ -852,6 +920,7 @@
                         <!-- Stats Grid -->
                         <div class="flex flex-wrap gap-2.5 text-[9px] md:text-xs">
                             <span class="font-bold text-slate-700 dark:text-slate-350">Ringkasan:</span>
+                            <span class="text-slate-600 dark:text-slate-400">Total Uang: <strong class="text-emerald-600 dark:text-emerald-400 font-mono font-bold" x-text="'Rp ' + Number(selectedReport.total_bonus_nominal || stats.totalBonus || 0).toLocaleString('id-ID')"></strong></span>
                             <span class="text-slate-600 dark:text-slate-400">Hadir: <strong class="text-emerald-650 dark:text-emerald-405" x-text="stats.hadir"></strong></span>
                             <template x-if="stats.reward > 0">
                                 <span class="text-slate-600 dark:text-slate-400">Reward: <strong class="text-emerald-600 dark:text-emerald-400" x-text="stats.reward"></strong></span>
@@ -859,6 +928,9 @@
                             <span class="text-slate-600 dark:text-slate-400">Telat: <strong class="text-amber-500" x-text="stats.telat"></strong></span>
                             <span class="text-slate-600 dark:text-slate-400">Alfa: <strong class="text-rose-500" x-text="stats.alfa"></strong></span>
                             <span class="text-slate-600 dark:text-slate-400">Izin/Cuti: <strong class="text-purple-600 dark:text-purple-400" x-text="stats.izin"></strong></span>
+                            <template x-if="stats.piket > 0">
+                                <span class="text-slate-600 dark:text-slate-400">Piket: <strong class="text-amber-500" x-text="stats.piket"></strong></span>
+                            </template>
                         </div>
                         <button type="button" @click="showCalendarModal = false" class="w-full sm:w-auto h-7 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg transition-colors cursor-pointer">
                             Tutup
@@ -920,12 +992,16 @@
             </div>
 
             <!-- Shift & Jadwal Info -->
-            <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 mb-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-[10px]">
+            <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 mb-2.5 rounded-xl border text-[10px]"
+                 :class="matrixTooltip.data?.is_picket ? 'border-amber-200 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/20' : 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800'">
                 <div class="flex items-center gap-1.5 truncate text-slate-600 dark:text-slate-400">
-                    <template x-if="matrixTooltip.data?.is_reward">
+                    <template x-if="matrixTooltip.data?.is_picket">
+                        <span class="text-amber-500 font-bold shrink-0">⚡ Piket</span>
+                    </template>
+                    <template x-if="!matrixTooltip.data?.is_picket && matrixTooltip.data?.is_reward">
                         <span class="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">🎁 Reward</span>
                     </template>
-                    <template x-if="!matrixTooltip.data?.is_reward">
+                    <template x-if="!matrixTooltip.data?.is_picket && !matrixTooltip.data?.is_reward">
                         <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -947,25 +1023,25 @@
                     <div class="flex flex-col bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2 border border-slate-100 dark:border-slate-800 text-center">
                         <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Masuk</span>
                         <span class="font-extrabold text-[13px] tracking-tight"
-                              :class="matrixTooltip.data?.is_red_late ? 'text-rose-600 dark:text-rose-400' : (matrixTooltip.data?.is_late ? 'text-amber-600 dark:text-amber-400' : 'text-slate-800 dark:text-slate-100')"
+                              :class="(matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-') ? (matrixTooltip.data?.is_red_late ? 'text-rose-600 dark:text-rose-400' : (matrixTooltip.data?.is_late ? 'text-amber-600 dark:text-amber-400' : 'text-slate-800 dark:text-slate-100')) : 'text-slate-800 dark:text-slate-100'"
                               x-text="matrixTooltip.data?.check_in || '-'">
                         </span>
-                        <template x-if="matrixTooltip.data?.is_red_late">
+                        <template x-if="matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && matrixTooltip.data?.is_red_late">
                             <span class="text-[8px] font-bold text-rose-700 bg-rose-100 dark:bg-rose-950/60 dark:text-rose-300 px-1.5 py-0.5 rounded-md mt-1 mx-auto leading-none"
                                   x-text="'Telat ' + (matrixTooltip.data?.late_minutes || '') + ' mnt'">
                             </span>
                         </template>
-                        <template x-if="!matrixTooltip.data?.is_red_late && matrixTooltip.data?.is_late">
+                        <template x-if="matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && !matrixTooltip.data?.is_red_late && matrixTooltip.data?.is_late && matrixTooltip.data?.late_minutes > 0">
                             <span class="text-[8px] font-bold text-amber-700 bg-amber-100 dark:bg-amber-950/60 dark:text-amber-300 px-1.5 py-0.5 rounded-md mt-1 mx-auto leading-none"
                                   x-text="'Telat ' + (matrixTooltip.data?.late_minutes || '') + ' mnt'">
                             </span>
                         </template>
-                        <template x-if="!matrixTooltip.data?.is_late && matrixTooltip.data?.early_minutes > 0">
+                        <template x-if="matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && !matrixTooltip.data?.is_late && matrixTooltip.data?.early_minutes > 0">
                             <span class="text-[8px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-1.5 py-0.5 rounded-md mt-1 mx-auto leading-none"
                                   x-text="'Awal ' + matrixTooltip.data?.early_minutes + ' mnt'">
                             </span>
                         </template>
-                        <template x-if="!matrixTooltip.data?.is_late && (!matrixTooltip.data?.early_minutes || matrixTooltip.data?.early_minutes <= 0) && matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && matrixTooltip.data?.check_in !== 'Tidak Hadir'">
+                        <template x-if="matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && matrixTooltip.data?.check_in !== 'Tidak Hadir' && !matrixTooltip.data?.is_late && (!matrixTooltip.data?.early_minutes || matrixTooltip.data?.early_minutes <= 0)">
                             <span class="text-[8px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-1.5 py-0.5 rounded-md mt-1 mx-auto leading-none">
                                 Tepat Waktu
                             </span>
@@ -986,6 +1062,25 @@
                     </div>
                 </div>
             </template>
+
+            <!-- Nominal Uang Kehadiran Card in Tooltip -->
+            <div class="px-2.5 py-1.5 mb-2.5 rounded-xl border flex items-center justify-between"
+                 :class="(matrixTooltip.data?.bonus_nominal > 0) 
+                    ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-800/60' 
+                    : 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800'">
+                <div class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 shrink-0" :class="(matrixTooltip.data?.bonus_nominal > 0) ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-[10px] font-bold" :class="(matrixTooltip.data?.bonus_nominal > 0) ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'">Uang Kehadiran</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="text-[12px] font-extrabold font-mono tracking-tight"
+                          :class="(matrixTooltip.data?.bonus_nominal > 0) ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'"
+                          x-text="'Rp ' + Number(matrixTooltip.data?.bonus_nominal || 0).toLocaleString('id-ID')">
+                    </span>
+                </div>
+            </div>
 
             <!-- Keterangan & Catatan Presensi Block -->
             <div class="rounded-xl p-2.5 border"
@@ -1136,10 +1231,11 @@
                 if (detail) {
                     const statusName = detail.status || '';
                     const isReward = statusName === 'Reward Libur' || !!detail.is_reward;
-                    const isLate = !!detail.is_late;
-                    const isRedLate = !!detail.is_red_late;
-                    const lateMnt = Number(detail.late_minutes || 0);
-                    const earlyMnt = Number(detail.early_minutes || 0);
+                    const hasCheckIn = !!detail.check_in && detail.check_in !== '-';
+                    const isLate = hasCheckIn && !!detail.is_late;
+                    const isRedLate = hasCheckIn && !!detail.is_red_late;
+                    const lateMnt = hasCheckIn ? Math.abs(Number(detail.late_minutes || 0)) : 0;
+                    const earlyMnt = hasCheckIn ? Math.abs(Number(detail.early_minutes || 0)) : 0;
 
                     let statusBadge = 'Tepat Waktu';
                     let statusColor = 'emerald';
@@ -1236,6 +1332,11 @@
                         leave_code: detail.leave_code,
                         is_pending: detail.is_pending,
                         rejected_leave: detail.rejected_leave,
+                        is_picket: !!detail.is_picket,
+                        picket_area: detail.picket_area || 'Area Piket',
+                        bonus_nominal: detail.bonus_nominal || 0,
+                        tier_level: detail.tier_level || null,
+                        schema_name: detail.schema_name || null,
                         note: noteText,
                     };
                 } else {
@@ -1263,6 +1364,11 @@
                         leave_code: null,
                         is_pending: false,
                         rejected_leave: null,
+                        is_picket: false,
+                        picket_area: null,
+                        bonus_nominal: 0,
+                        tier_level: null,
+                        schema_name: null,
                         note: isSunday ? 'Hari libur akhir pekan.' : 'Hari libur rutin pegawai.',
                     };
                 }
@@ -1290,7 +1396,7 @@
                 return day.leave_code === 'S' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30' :
                        day.leave_code === 'I' ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30' :
                        day.leave_code === 'C' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30' :
-                       day.leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' : '';
+                       day.leave_code === 'H' ? 'bg-emerald-50 dark:bg-emerald-955/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' : '';
             },
             openCalendarModal(report) {
                 this.selectedReport = report;
@@ -1304,10 +1410,20 @@
                 });
             },
             calculateStats(report) {
-                let stats = { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0, reward: 0 };
+                let stats = { hadir: 0, telat: 0, alfa: 0, izin: 0, off: 0, reward: 0, piket: 0, totalBonus: 0 };
                 if (!report || !report.daily_details) return stats;
+
+                if (report.total_bonus_nominal !== undefined) {
+                    stats.totalBonus = report.total_bonus_nominal;
+                }
                 
                 Object.values(report.daily_details).forEach(function(day) {
+                    if (day.bonus_nominal) {
+                        stats.totalBonus = (stats.totalBonus || 0) + Number(day.bonus_nominal);
+                    }
+                    if (day.is_picket) {
+                        stats.piket = (stats.piket || 0) + 1;
+                    }
                     if (day.status === 'Hadir') {
                         stats.hadir++;
                         if (day.is_late) {

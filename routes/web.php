@@ -142,6 +142,7 @@ Route::middleware(['throttle:60,1', 'verify_school_unit_token'])->prefix('api')-
     Route::get('attendance-matrix', [\App\Http\Controllers\Api\AttendanceApiController::class, 'matrixReport']);
     Route::get('attendances', [\App\Http\Controllers\Api\AttendanceApiController::class, 'index']);
     Route::get('bonus-reports', [\App\Http\Controllers\Api\AttendanceApiController::class, 'bonusReport']);
+    Route::get('attendance-percentage-reports', [\App\Http\Controllers\Api\AttendanceApiController::class, 'percentageReport']);
     Route::get('payslips', [\App\Http\Controllers\Api\PayslipApiController::class, 'index']);
 
     // Leave Request Sync Endpoints (from units)

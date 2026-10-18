@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceLog;
+use App\Models\BonusSchema;
+use App\Models\SchoolUnit;
+use App\Models\Setting;
 use App\Models\ZktecoDevice;
 use App\Services\SchoolUnitService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AttendanceLogController extends Controller
@@ -168,6 +172,41 @@ class AttendanceLogController extends Controller
             ->where('start_date', '<=', $endDate->format('Y-m-d'))
             ->get();
 
+        // Pre-fetch Picket Schedules & Swaps
+        $startDateReq = $startDate->format('Y-m-d');
+        $endDateReq = $endDate->format('Y-m-d');
+        $picketData = $this->getPicketDataIndexed($startDateReq, $endDateReq);
+        $picketSchedulesMap = $picketData['schedulesMap'];
+        $picketSwapOverrides = $picketData['swapOverrides'];
+
+        $cutoffDate = (int) Setting::get('payroll_cutoff_date', 25);
+        $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
+        $globalPicketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+
+        $unitPicketEffectiveDates = [];
+        foreach ($schoolUnitsList as $su) {
+            $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
+        }
+
+        // Pre-fetch Bonus Schemas
+        $allBonusSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
+        $activeSchema = BonusSchema::with('tiers')
+            ->where('is_active', true)
+            ->where(function($q) {
+                $q->where('calculation_mode', 'late_tolerance')
+                  ->orWhereNull('calculation_mode');
+            })
+            ->first()
+            ?: BonusSchema::with('tiers')->where('is_active', true)->first();
+
+        $picketBonusSchemaId = Setting::get('picket_bonus_schema_id');
+        $picketBonusSchema = $picketBonusSchemaId ? $allBonusSchemas->get($picketBonusSchemaId) : null;
+        if (!$picketBonusSchema) {
+            $picketBonusSchema = $allBonusSchemas->first(function($s) {
+                return $s->is_active && ($s->calculation_mode === 'early_arrival' || str_contains(strtolower($s->name), 'piket'));
+            });
+        }
+
         // Fetch logs up to next day noon to catch night shift clock outs
         $logsData = \App\Models\AttendanceLog::whereIn('uid', $uids)
             ->whereBetween('timestamp', [
@@ -183,10 +222,42 @@ class AttendanceLogController extends Controller
             sort($ulogs);
         }
 
-        return $this->processAttendanceReport($startDate, $endDate, $employeesCollection, $unitHolidays, $leaves, $assignedShifts, $attendanceLogs, $holidayRewards);
+        return $this->processAttendanceReport(
+            $startDate,
+            $endDate,
+            $employeesCollection,
+            $unitHolidays,
+            $leaves,
+            $assignedShifts,
+            $attendanceLogs,
+            $holidayRewards,
+            $picketSchedulesMap,
+            $picketSwapOverrides,
+            $unitPicketEffectiveDates,
+            $globalPicketEffectiveDate,
+            $allBonusSchemas,
+            $activeSchema,
+            $picketBonusSchema
+        );
     }
 
-    private function processAttendanceReport($startDate, $endDate, $employeesCollection, $unitHolidays, $leaves, $assignedShifts, $attendanceLogs, $holidayRewards = [])
+    private function processAttendanceReport(
+        $startDate,
+        $endDate,
+        $employeesCollection,
+        $unitHolidays,
+        $leaves,
+        $assignedShifts,
+        $attendanceLogs,
+        $holidayRewards = [],
+        $picketSchedulesMap = [],
+        $picketSwapOverrides = [],
+        $unitPicketEffectiveDates = [],
+        $globalPicketEffectiveDate = '2026-10-01',
+        $allBonusSchemas = null,
+        $activeSchema = null,
+        $picketBonusSchema = null
+    )
     {
         $reports = [];
         $lastDay = clone $endDate;
@@ -199,12 +270,49 @@ class AttendanceLogController extends Controller
             if (!$uid || !$empId) continue;
             $userLogs = $attendanceLogs[(string)$uid] ?? [];
 
+            $totalBonusNominal = 0;
             $dailyDetails = [];
             $currentDate = $startDate->copy();
             
             while ($currentDate <= $lastDay) {
                 $dateStr = $currentDate->format('Y-m-d');
                 $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) to 6 (Sat)
+
+                // Reset daily calculation variables
+                $isLate = false;
+                $isRedLate = false;
+                $lateMinutes = 0;
+                $earlyMinutes = 0;
+
+                // Check Picket Duty for this employee on this date
+                $isPicketToday = false;
+                $picketAreaName = null;
+                $picketStartTime = '06:30:00';
+
+                // Picket integration takes effect starting from unit-specific effective date
+                $unitEffectiveDate = $unitPicketEffectiveDates[$unit] ?? $globalPicketEffectiveDate;
+                if ($dateStr >= $unitEffectiveDate) {
+                    $swapKey = $unit . '_' . $empId . '_' . $dateStr;
+                    if (isset($picketSwapOverrides[$swapKey])) {
+                        if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
+                            $isPicketToday = true;
+                            $picketAreaName = $picketSwapOverrides[$swapKey]['picket_area_name'] ?? 'Tukar Piket';
+                            $picketStartTime = $picketSwapOverrides[$swapKey]['start_time'] ?? '06:30:00';
+                        }
+                    } else {
+                        $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
+                        if (isset($picketSchedulesMap[$routineKey])) {
+                            $sched = $picketSchedulesMap[$routineKey];
+                            $schedStart = $sched['start_date'] ?? '2026-07-01';
+                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
+                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
+                                $isPicketToday = true;
+                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
+                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                            }
+                        }
+                    }
+                }
 
                 // Check Reward Holiday for this employee on this date
                 $isRewardHoliday = false;
@@ -237,8 +345,16 @@ class AttendanceLogController extends Controller
 
                 $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
                 $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false);
-                if ($isHoliday && !$isShiftWorkerOnDate && !$isRewardHoliday) {
-                    $dailyDetails[$dateStr] = ['status' => 'Libur'];
+                if ($isHoliday && !$isShiftWorkerOnDate && !$isRewardHoliday && !$isPicketToday) {
+                    $dailyDetails[$dateStr] = [
+                        'status' => 'Libur',
+                        'is_picket' => false,
+                        'picket_area' => null,
+                        'picket_start' => null,
+                        'bonus_nominal' => 0,
+                        'tier_level' => null,
+                        'schema_name' => null,
+                    ];
                     $currentDate->addDay();
                     continue;
                 }
@@ -269,6 +385,7 @@ class AttendanceLogController extends Controller
                 $shiftEndTime = null;
                 $shiftName = null;
                 $shiftKey = $unit . '_' . $empId;
+                $activeAssignmentOnDate = null;
                 
                 $isShiftWorker = false;
                 $checkInLog = null;
@@ -283,6 +400,7 @@ class AttendanceLogController extends Controller
                         $assignStartDate = substr($assignment->start_date, 0, 10);
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                            $activeAssignmentOnDate = $assignment;
                             $shiftName = $assignment->workingShift->name ?? null;
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
                             if ($detail) {
@@ -301,6 +419,15 @@ class AttendanceLogController extends Controller
                 
                 if ($isShiftWorker && !$hasShiftToday && !$isOffShift) {
                     $isOffShift = true;
+                }
+
+                // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
+                if ($isPicketToday) {
+                    $hasShiftToday = true;
+                    $isOffShift = false;
+                    $shiftStartTime = $picketStartTime;
+                    $shiftEndTime = $shiftEndTime ?: '15:00:00';
+                    $shiftName = 'Piket: ' . ($picketAreaName ?: 'Area Piket');
                 }
 
                 if ($hasShiftToday) {
@@ -353,20 +480,21 @@ class AttendanceLogController extends Controller
 
                             if ($checkInCarbon->second(0) > $expectedIn->second(0)) {
                                 $isLate = true;
-                                $lateMinutes = (int) $checkInCarbon->diffInMinutes($expectedIn);
+                                $lateMinutes = (int) abs($checkInCarbon->diffInMinutes($expectedIn));
                             } else {
-                                $earlyMinutes = (int) $expectedIn->diffInMinutes($checkInCarbon);
+                                $earlyMinutes = (int) abs($expectedIn->diffInMinutes($checkInCarbon));
                             }
 
-                            // Only non-roster/non-shift staff who arrive after 07:25 get is_red_late
-                            if (!$isShiftExempt && $checkInCarbon->second(0) > \Carbon\Carbon::parse($dateStr . ' 07:25:00')->second(0)) {
+                            // Only non-roster/non-shift staff who arrive after 07:25 (or 25 mins after picket start) get is_red_late
+                            $redLateThreshold = $isPicketToday ? $expectedIn->copy()->addMinutes(25) : \Carbon\Carbon::parse($dateStr . ' 07:25:00');
+                            if (!$isShiftExempt && $checkInCarbon->second(0) > $redLateThreshold->second(0)) {
                                 $isRedLate = true;
                             }
                         }
 
                         if ($checkInLog && $checkOutLog && $checkInLog === $checkOutLog) {
-                            $diffIn = \Carbon\Carbon::parse($checkInLog)->diffInMinutes($expectedIn);
-                            $diffOut = \Carbon\Carbon::parse($checkOutLog)->diffInMinutes($expectedOut);
+                            $diffIn = abs(\Carbon\Carbon::parse($checkInLog)->diffInMinutes($expectedIn));
+                            $diffOut = abs(\Carbon\Carbon::parse($checkOutLog)->diffInMinutes($expectedOut));
                             if ($diffIn < $diffOut) {
                                 $checkOutLog = null;
                             } else {
@@ -376,8 +504,8 @@ class AttendanceLogController extends Controller
 
                         if ($checkInLog && $checkOutLog && $checkInLog !== $checkOutLog) {
                             if (\Carbon\Carbon::parse($checkInLog)->diffInHours(\Carbon\Carbon::parse($checkOutLog)) < 2) {
-                                $diffIn = \Carbon\Carbon::parse($checkInLog)->diffInMinutes($expectedIn);
-                                $diffOut = \Carbon\Carbon::parse($checkOutLog)->diffInMinutes($expectedOut);
+                                $diffIn = abs(\Carbon\Carbon::parse($checkInLog)->diffInMinutes($expectedIn));
+                                $diffOut = abs(\Carbon\Carbon::parse($checkOutLog)->diffInMinutes($expectedOut));
                                 if ($diffIn < $diffOut) {
                                     $checkOutLog = null;
                                 } else {
@@ -462,13 +590,13 @@ class AttendanceLogController extends Controller
                     if (!$isRestDay && ($activeLeave->status === 'Approved' || $activeLeave->status === 'Pending')) {
                         $isKedinasanLeave = str_contains(strtolower($originalType), 'dinas') || str_contains(strtolower($originalType), 'kedinasan');
                         $isLateForLeave = false;
-                        if (!$isKedinasanLeave) {
+                        if (!$isKedinasanLeave && !empty($checkInLog)) {
                             if ($activeLeave->status === 'Approved') {
                                 if ($hasRequiresAttendanceLeave && ($activeLeave->gets_presence_bonus || $activeLeave->status_code === 'H')) {
-                                    $isLateForLeave = $isLate ?? false;
+                                    $isLateForLeave = $isLate;
                                 }
                             } else {
-                                $isLateForLeave = $isLate ?? false;
+                                $isLateForLeave = $isLate;
                             }
                         }
 
@@ -480,9 +608,9 @@ class AttendanceLogController extends Controller
                             'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
                             'check_out' => $checkOutLog ? substr($checkOutLog, 11, 5) : null,
                             'is_late' => $isLateForLeave,
-                            'is_red_late' => ($isLateForLeave && ($isRedLate ?? false)),
-                            'late_minutes' => $lateMinutes ?? 0,
-                            'early_minutes' => $earlyMinutes ?? 0,
+                            'is_red_late' => ($isLateForLeave && $isRedLate),
+                            'late_minutes' => $isLateForLeave ? $lateMinutes : 0,
+                            'early_minutes' => !empty($checkInLog) ? $earlyMinutes : 0,
                             'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
                             'shift_start' => $shiftStartTime,
                             'shift_end' => $shiftEndTime,
@@ -495,12 +623,103 @@ class AttendanceLogController extends Controller
                     }
                 }
 
+                // Resolve Active Bonus Schema
+                $currentSchema = null;
+                if ($isPicketToday && $picketBonusSchema) {
+                    $currentSchema = $picketBonusSchema;
+                } else {
+                    if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id && $allBonusSchemas) {
+                        $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
+                    }
+                    if (!$currentSchema && !empty($emp['unit_name']) && $allBonusSchemas) {
+                        $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
+                            return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
+                                || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
+                                || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
+                        });
+                    }
+                    if (!$currentSchema) {
+                        $currentSchema = $activeSchema;
+                    }
+                }
+
+                $dailyBonus = 0;
+                $dailyTierLevel = null;
+                $dailySchemaName = $currentSchema ? $currentSchema->name : null;
+
+                $isKedinasan = false;
+                if ($isOnLeave && $activeLeave) {
+                    $ltLower = strtolower($originalType ?? '');
+                    if (str_contains($ltLower, 'dinas') || str_contains($ltLower, 'kedinasan')) {
+                        $isKedinasan = true;
+                    }
+                }
+                $getsBonus = $activeLeave ? ($activeLeave->gets_presence_bonus || ($originalType === 'Dinas') || ($activeLeave->status_code === 'H')) : false;
+                $isDinas = ($isOnLeave && $getsBonus && (!$hasRequiresAttendanceLeave || $isKedinasan));
+
+                $isEligibleForBonus = (!empty($checkInLog) || !empty($checkOutLog)) || $isDinas || $isRewardHoliday;
+
+                if ($isEligibleForBonus && $currentSchema && $currentSchema->tiers && $currentSchema->tiers->count() > 0) {
+                    if ($isRewardHoliday || $isDinas || $isKedinasan) {
+                        $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
+                        if ($bestTier) {
+                            $dailyBonus = $bestTier->nominal;
+                            $dailyTierLevel = $bestTier->tier_level;
+                        }
+                    } elseif (($currentSchema->calculation_mode ?? 'early_arrival') === 'early_arrival') {
+                        if ($lateMinutes > 0) {
+                            $baseTier = $currentSchema->tiers->first(function($t) {
+                                return ($t->min_early_minutes ?? 0) == 0;
+                            });
+                            if ($baseTier && $baseTier->nominal > 0) {
+                                $dailyBonus = $baseTier->nominal;
+                                $dailyTierLevel = $baseTier->tier_level;
+                            } else {
+                                $dailyBonus = 0;
+                                $dailyTierLevel = null;
+                            }
+                        } else {
+                            $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
+                                return ($tier->min_early_minutes ?? 0) <= $earlyMinutes;
+                            })->sortByDesc('nominal');
+
+                            if ($qualifyingTiers->count() > 0) {
+                                $bestTier = $qualifyingTiers->first();
+                                $dailyBonus = $bestTier->nominal;
+                                $dailyTierLevel = $bestTier->tier_level;
+                            }
+                        }
+                    } else {
+                        // late_tolerance
+                        $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($lateMinutes) {
+                            return $lateMinutes <= $tier->max_late_minutes;
+                        })->sortByDesc('nominal');
+
+                        if ($qualifyingTiers->count() > 0) {
+                            $bestTier = $qualifyingTiers->first();
+                            $dailyBonus = $bestTier->nominal;
+                            $dailyTierLevel = $bestTier->tier_level;
+                        }
+                    }
+                }
+
+                if (isset($dailyDetails[$dateStr])) {
+                    $dailyDetails[$dateStr]['is_picket'] = $isPicketToday;
+                    $dailyDetails[$dateStr]['picket_area'] = $picketAreaName;
+                    $dailyDetails[$dateStr]['picket_start'] = $isPicketToday ? $picketStartTime : null;
+                    $dailyDetails[$dateStr]['bonus_nominal'] = (int) $dailyBonus;
+                    $dailyDetails[$dateStr]['tier_level'] = $dailyTierLevel;
+                    $dailyDetails[$dateStr]['schema_name'] = $dailySchemaName;
+                    $totalBonusNominal += (int) $dailyBonus;
+                }
+
                 $currentDate->addDay();
             }
 
             $reports[] = [
                 'employee' => $emp,
                 'daily_details' => $dailyDetails,
+                'total_bonus_nominal' => $totalBonusNominal,
             ];
         }
 
@@ -824,5 +1043,61 @@ class AttendanceLogController extends Controller
     {
         AttendanceLog::truncate();
         return redirect()->route('attendance-logs.index')->with('success', 'Semua log absensi berhasil dikosongkan.');
+    }
+
+    /**
+     * Fetch and index picket schedules and swaps across all school units.
+     */
+    private function getPicketDataIndexed(string $startDateReq, string $endDateReq): array
+    {
+        $picketData = $this->service->getAllPicketAssignments($startDateReq, $endDateReq);
+        $schedules = $picketData['schedules'] ?? [];
+        $swaps = $picketData['swaps'] ?? [];
+
+        $schedulesMap = [];
+        foreach ($schedules as $ps) {
+            $pKey = ($ps['school_unit_id'] ?? '') . '_' . ($ps['employee_id'] ?? '') . '_' . ($ps['day_of_week'] ?? '');
+            $schedulesMap[$pKey] = $ps;
+        }
+
+        $swapOverrides = [];
+        foreach ($swaps as $sw) {
+            $swUnit = $sw['school_unit_id'] ?? '';
+            $reqId = $sw['requester_id'] ?? null;
+            $targetId = $sw['target_employee_id'] ?? null;
+            $reqDate = $sw['requested_date'] ?? null;
+            $targetDate = $sw['target_date'] ?? null;
+
+            if ($reqDate) {
+                if ($reqId) {
+                    $swapOverrides[$swUnit . '_' . $reqId . '_' . $reqDate] = ['action' => 'released'];
+                }
+                if ($targetId) {
+                    $swapOverrides[$swUnit . '_' . $targetId . '_' . $reqDate] = [
+                        'action' => 'assigned',
+                        'start_time' => '06:30:00',
+                        'picket_area_name' => 'Tukar Piket',
+                    ];
+                }
+            }
+
+            if ($targetDate) {
+                if ($targetId) {
+                    $swapOverrides[$swUnit . '_' . $targetId . '_' . $targetDate] = ['action' => 'released'];
+                }
+                if ($reqId) {
+                    $swapOverrides[$swUnit . '_' . $reqId . '_' . $targetDate] = [
+                        'action' => 'assigned',
+                        'start_time' => '06:30:00',
+                        'picket_area_name' => 'Tukar Piket',
+                    ];
+                }
+            }
+        }
+
+        return [
+            'schedulesMap' => $schedulesMap,
+            'swapOverrides' => $swapOverrides,
+        ];
     }
 }

@@ -189,8 +189,8 @@
                                         </div>
                                         <div class="flex flex-col min-w-0 text-left">
                                             <span @click='openCalendarModal(@json($report))' class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ $empName }}</span>
-                                            <div class="flex flex-col gap-0.5 mt-0.5">
-                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] inline-block w-max">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
+                                            <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                                <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-semibold text-slate-600 dark:text-slate-300 shrink-0">{{ $report['employee']['unit']['name'] ?? ($report['employee']['unit_name'] ?? '-') }}</span>
                                                 <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate" title="{{ $report['employee']['position'] ?? '-' }}">{{ $report['employee']['position'] ?? '-' }}</span>
                                             </div>
                                         </div>
@@ -271,8 +271,10 @@
                                             $inStr = '-';
                                             $outStr = '-';
                                         } else {
-                                            $inStr = !empty($detail['check_in']) ? $detail['check_in'] : 'Tidak Hadir';
-                                            $outStr = !empty($detail['check_out']) ? $detail['check_out'] : '-';
+                                            $inRaw = !empty($detail['check_in']) ? $detail['check_in'] : 'Tidak Hadir';
+                                            $inStr = (strlen($inRaw) > 5 && !in_array($inRaw, ['Tidak Hadir', 'REWARD', 'DINAS'])) ? substr($inRaw, 0, 5) : $inRaw;
+                                            $outRaw = !empty($detail['check_out']) ? $detail['check_out'] : '-';
+                                            $outStr = (strlen($outRaw) > 5 && !in_array($outRaw, ['REWARD', 'DINAS', '-'])) ? substr($outRaw, 0, 5) : $outRaw;
                                         }
 
                                         $cellData = [
@@ -460,10 +462,10 @@
             <!-- Backdrop -->
             <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity"></div>
 
-            <!-- Modal Wrapper -->
+                     <!-- Modal Wrapper -->
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 <div @click.outside="showCalendarModal = false"
-                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-200 dark:border-slate-800"
+                     class="relative transform overflow-hidden rounded-xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200 dark:border-slate-800"
                      x-transition:enter="transition ease-out  transform scale-95"
                      x-transition:enter-start="transform scale-95 opacity-0"
                      x-transition:enter-end="transform scale-100 opacity-100"
@@ -472,14 +474,20 @@
                      x-transition:leave-end="transform scale-95 opacity-0">
                      
                     <!-- Modal Header -->
-                    <div class="border-b border-slate-100 dark:border-slate-800/60 px-5 py-4 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
-                        <div class="flex flex-col">
-                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rincian Uang Kehadiran Harian</span>
-                            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5" x-text="selectedReport ? selectedReport.employee.name : ''"></h3>
+                    <div class="border-b border-slate-100 dark:border-slate-800/60 px-5 py-3.5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30 gap-3">
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rincian Uang Kehadiran Harian</span>
+                            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5 truncate" x-text="selectedReport ? selectedReport.employee.name : ''"></h3>
                         </div>
-                        <button type="button" @click="showCalendarModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-355 cursor-pointer">
-                            <i data-lucide="x" class="w-5 h-5"></i>
-                        </button>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="text-right px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs">
+                                <span class="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block leading-none">Total Uang Kehadiran</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight leading-tight block mt-0.5" x-text="selectedReport ? 'Rp ' + Number(selectedReport.bonus_nominal || 0).toLocaleString('id-ID') : 'Rp 0'"></span>
+                            </div>
+                            <button type="button" @click="showCalendarModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Modal Body -->
@@ -541,23 +549,23 @@
                                             <template x-if="selectedReport && selectedReport.daily_details[day.dateStr]">
                                                 <div class="w-full">
                                                     <template x-if="selectedReport.daily_details[day.dateStr].bonus_nominal > 0">
-                                                        <div class="w-full py-0.5 text-center bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded text-[7px] font-bold"
-                                                             x-text="(selectedReport.daily_details[day.dateStr].bonus_nominal >= 1000) ? (selectedReport.daily_details[day.dateStr].bonus_nominal / 1000) + 'k' : selectedReport.daily_details[day.dateStr].bonus_nominal"></div>
+                                                        <div class="w-full py-0.5 text-center bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded text-[8px] font-extrabold tracking-tight"
+                                                             x-text="'Rp ' + (selectedReport.daily_details[day.dateStr].bonus_nominal >= 1000 ? (selectedReport.daily_details[day.dateStr].bonus_nominal / 1000) + 'k' : selectedReport.daily_details[day.dateStr].bonus_nominal)"></div>
                                                     </template>
                                                     <template x-if="!selectedReport.daily_details[day.dateStr].bonus_nominal || selectedReport.daily_details[day.dateStr].bonus_nominal <= 0">
-                                                        <div class="w-full py-0.5">
+                                                        <div class="w-full py-0.5 text-center">
                                                             <template x-if="day.dateStr > new Date().toLocaleDateString('en-CA')">
-                                                                <div class="text-center text-slate-300 dark:text-slate-700 rounded text-[7px] font-medium">-</div>
+                                                                <div class="text-slate-300 dark:text-slate-700 rounded text-[8px] font-medium">-</div>
                                                             </template>
                                                             <template x-if="day.dateStr <= new Date().toLocaleDateString('en-CA')">
-                                                                <div class="w-full py-0.5 text-center bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded text-[7px] font-bold">0k</div>
+                                                                <div class="bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded text-[8px] font-bold">Rp 0</div>
                                                             </template>
                                                         </div>
                                                     </template>
                                                 </div>
                                             </template>
                                             <template x-if="day.isCurrentMonth && (!selectedReport || !selectedReport.daily_details[day.dateStr])">
-                                                <div class="text-center text-slate-400 dark:text-slate-500 text-[7px] font-bold">OFF</div>
+                                                <div class="w-full py-0.5 text-center text-slate-400 dark:text-slate-500 rounded text-[8px] font-bold">Rp 0</div>
                                             </template>
                                         </div>
                                     </div>
@@ -661,20 +669,20 @@
                     <div class="flex flex-col bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2 border border-slate-100 dark:border-slate-800 text-center">
                         <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Masuk</span>
                         <span class="font-extrabold text-[13px] tracking-tight"
-                              :class="matrixTooltip.data?.is_late ? 'text-amber-600 dark:text-amber-400' : 'text-slate-800 dark:text-slate-100'"
+                              :class="(matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-') ? (matrixTooltip.data?.is_late ? 'text-amber-600 dark:text-amber-400' : 'text-slate-800 dark:text-slate-100') : 'text-slate-800 dark:text-slate-100'"
                               x-text="matrixTooltip.data?.check_in || '-'">
                         </span>
-                        <template x-if="matrixTooltip.data?.is_late">
+                        <template x-if="matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && matrixTooltip.data?.is_late && matrixTooltip.data?.late_minutes > 0">
                             <span class="text-[8px] font-bold text-amber-700 bg-amber-100 dark:bg-amber-950/60 dark:text-amber-300 px-1.5 py-0.5 rounded-md mt-1 mx-auto leading-none"
                                   x-text="'Telat ' + matrixTooltip.data?.late_minutes + ' mnt'">
                             </span>
                         </template>
-                        <template x-if="!matrixTooltip.data?.is_late && matrixTooltip.data?.early_minutes > 0">
+                        <template x-if="matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && !matrixTooltip.data?.is_late && matrixTooltip.data?.early_minutes > 0">
                             <span class="text-[8px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-1.5 py-0.5 rounded-md mt-1 mx-auto leading-none"
                                   x-text="'Awal ' + matrixTooltip.data?.early_minutes + ' mnt'">
                             </span>
                         </template>
-                        <template x-if="!matrixTooltip.data?.is_late && (!matrixTooltip.data?.early_minutes || matrixTooltip.data?.early_minutes <= 0) && matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && matrixTooltip.data?.check_in !== 'Tidak Hadir'">
+                        <template x-if="matrixTooltip.data?.check_in && matrixTooltip.data?.check_in !== '-' && matrixTooltip.data?.check_in !== 'Tidak Hadir' && !matrixTooltip.data?.is_late && (!matrixTooltip.data?.early_minutes || matrixTooltip.data?.early_minutes <= 0)">
                             <span class="text-[8px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-1.5 py-0.5 rounded-md mt-1 mx-auto leading-none">
                                 Tepat Waktu
                             </span>
@@ -708,7 +716,6 @@
                             Uang Kehadiran
                         </div>
                         <div class="text-[9px] text-slate-400 dark:text-slate-500 font-medium truncate max-w-[190px]">
-                            <span x-text="matrixTooltip.data?.tier_level ? 'Tier ' + matrixTooltip.data.tier_level + ' • ' : ''"></span>
                             <span x-text="cleanSchemaName(matrixTooltip.data?.schema_name) || 'Skema Uang Kehadiran'"></span>
                         </div>
                     </div>
@@ -1082,9 +1089,8 @@
 
                 // 5. Uang Kehadiran
                 const nominal = detail.bonus_nominal || 0;
-                const tierStr = detail.tier_level ? ` (Tier ${detail.tier_level})` : '';
                 if (nominal > 0) {
-                    lines.push('💰 Uang Kehadiran : Rp ' + Number(nominal).toLocaleString('id-ID') + tierStr);
+                    lines.push('💰 Uang Kehadiran : Rp ' + Number(nominal).toLocaleString('id-ID'));
                 } else {
                     lines.push('💰 Uang Kehadiran : Rp 0' + (isFuture ? '' : ' (Tidak Dapat)'));
                 }

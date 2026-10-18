@@ -398,7 +398,7 @@ class PkgIntegrationApiController extends Controller
                         $presentDays++;
                         $actualIn = Carbon::parse($checkInLog);
                         if ($actualIn->gt($expectedIn)) {
-                            $lateMinutesTotal += $actualIn->diffInMinutes($expectedIn);
+                            $lateMinutesTotal += (int) abs($actualIn->diffInMinutes($expectedIn));
                         }
                     }
                 }

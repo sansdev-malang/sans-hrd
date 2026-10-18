@@ -37,7 +37,7 @@ class AttendanceBonusReportController extends Controller
         $startDateReq = $startDate->format('Y-m-d');
         $endDateReq = $endDate->format('Y-m-d');
 
-        // 2. Fetch Active Global Bonus Schema (prefer active regular/late_tolerance schema as fallback for non-picket shifts)
+        // Fetch Active Global Bonus Schema as default fallback
         $activeSchema = BonusSchema::with('tiers')
             ->where('is_active', true)
             ->where(function($q) {
@@ -47,12 +47,10 @@ class AttendanceBonusReportController extends Controller
             ->first()
             ?: BonusSchema::with('tiers')->where('is_active', true)->first();
 
-        $allBonusSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
-
-        // 3. Fetch Employees (Filter by unit if needed)
+        // Fetch Employees
         $rawEmployees = $this->service->getAllEmployees();
         
-        // Extract unique positions (jabatan) from raw employee data, filtered by unit if specified
+        // Extract unique positions
         $filteredEmployeesForPos = collect($rawEmployees);
         if (!empty($unitId)) {
             $filteredEmployeesForPos = $filteredEmployeesForPos->filter(fn($emp) => ($emp['unit_id'] ?? '') == $unitId);
@@ -102,525 +100,8 @@ class AttendanceBonusReportController extends Controller
             });
         }
 
-        // 4. Pre-fetch related data to avoid N+1 query problem during calculations
-        $uids = $employeesCollection->pluck('zkteco_uid')->filter()->toArray();
-        $employeeIds = $employeesCollection->pluck('id')->filter()->toArray();
-
-        // Pre-fetch Attendance Logs for this month
-        $attendanceLogs = AttendanceLog::whereIn('uid', $uids)
-            ->whereBetween('timestamp', [$startDate->format('Y-m-d 00:00:00'), $endDate->format('Y-m-d 23:59:59')])
-            ->get()
-            ->groupBy(function($log) {
-                return $log->uid . '_' . Carbon::parse($log->timestamp)->format('Y-m-d');
-            });
-
-        // Pre-fetch Assigned Shifts
-        $assignedShifts = EmployeeWorkingShift::with(['workingShift.details'])
-            ->whereIn('employee_id', $employeeIds)
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->where('start_date', '<=', $endDate->format('Y-m-d'))
-                      ->where(function($q) use ($startDate) {
-                          $q->whereNull('end_date')
-                            ->orWhere('end_date', '>=', $startDate->format('Y-m-d'));
-                      });
-            })
-            ->get()
-            ->groupBy(function($shift) {
-                return $shift->school_unit_id . '_' . $shift->employee_id;
-            })
-            ->map(function($group) {
-                return $group->sort(function($a, $b) {
-                    $scoreA = ($a->roster_name !== null && $a->roster_name !== '') ? 3 : ($a->end_date !== null ? 2 : 1);
-                    $scoreB = ($b->roster_name !== null && $b->roster_name !== '') ? 3 : ($b->end_date !== null ? 2 : 1);
-                    if ($scoreA !== $scoreB) {
-                        return $scoreB <=> $scoreA; // Descending
-                    }
-                    $dateA = $a->start_date instanceof \Carbon\Carbon ? $a->start_date->format('Y-m-d') : substr($a->start_date, 0, 10);
-                    $dateB = $b->start_date instanceof \Carbon\Carbon ? $b->start_date->format('Y-m-d') : substr($b->start_date, 0, 10);
-                    if ($dateA !== $dateB) {
-                        return strcmp($dateB, $dateA); // Descending
-                    }
-                    return $b->id <=> $a->id; // Descending
-                });
-            });
-
-        // Pre-fetch Holidays & Holiday Rewards
-        $holidays = \App\Models\Holiday::all();
-        $holidayAdjustments = \App\Models\HolidayAdjustment::all();
-        $holidayRewards = \App\Models\HolidayReward::where('end_date', '>=', $startDate->format('Y-m-d'))
-            ->where('start_date', '<=', $endDate->format('Y-m-d'))
-            ->get();
-        $schoolUnitsList = \App\Models\SchoolUnit::all();
-        $unitHolidays = [];
-        $unitHolidays[''] = [];
-        foreach ($holidays as $h) {
-            if ($h->is_global) {
-                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
-            }
-        }
-        foreach ($holidayAdjustments as $adj) {
-            if (is_null($adj->school_unit_id)) {
-                $origStr = $adj->original_date->format('Y-m-d');
-                $adjStr = $adj->adjusted_date->format('Y-m-d');
-                if (isset($unitHolidays[''][$origStr])) {
-                    unset($unitHolidays[''][$origStr]);
-                }
-                $unitHolidays[''][$adjStr] = true;
-            }
-        }
-        foreach ($schoolUnitsList as $unitModel) {
-            $uId = $unitModel->id;
-            $unitHolidays[$uId] = [];
-            foreach ($holidays as $h) {
-                if ($h->is_global) {
-                    $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
-                }
-            }
-            foreach ($holidayAdjustments as $adj) {
-                if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
-                    $origStr = $adj->original_date->format('Y-m-d');
-                    $adjStr = $adj->adjusted_date->format('Y-m-d');
-                    if (isset($unitHolidays[$uId][$origStr])) {
-                        unset($unitHolidays[$uId][$origStr]);
-                    }
-                    $unitHolidays[$uId][$adjStr] = true;
-                }
-            }
-        }
-
-        // Pre-fetch Leave Requests (Approved)
-        $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
-            ->where('status', 'Approved')
-            ->where(function($query) use ($startDate, $endDate) {
-                $query->where('start_date', '<=', $endDate->format('Y-m-d'))
-                      ->where('end_date', '>=', $startDate->format('Y-m-d'));
-            })
-            ->get()
-            ->groupBy(function($leave) {
-                return $leave->school_unit_id . '_' . $leave->employee_id;
-            });
-
-        // Pre-fetch Picket Schedules & Swaps
-        $picketData = $this->getPicketDataIndexed($startDateReq, $endDateReq);
-        $picketSchedulesMap = $picketData['schedulesMap'];
-        $picketSwapOverrides = $picketData['swapOverrides'];
-        $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
-        $globalPicketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
-        
-        $unitPicketEffectiveDates = [];
-        foreach ($schoolUnitsList as $su) {
-            $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
-        }
-
-        $picketBonusSchemaId = Setting::get('picket_bonus_schema_id');
-        $picketBonusSchema = $picketBonusSchemaId ? $allBonusSchemas->get($picketBonusSchemaId) : null;
-        if (!$picketBonusSchema) {
-            $picketBonusSchema = $allBonusSchemas->first(function($s) {
-                return $s->is_active && ($s->calculation_mode === 'early_arrival' || str_contains(strtolower($s->name), 'piket'));
-            });
-        }
-
-        // 5. Calculate Attendance Report
-        $reports = [];
-
-        foreach ($employeesCollection as $emp) {
-            $uid = $emp['zkteco_uid'] ?? null;
-            $empId = $emp['id'] ?? null;
-            $unit = $emp['unit_id'] ?? null;
-
-            if (!$uid || !$empId) continue;
-
-            $totalPresent = 0;
-            $totalLateMinutes = 0;
-            $totalAbsent = 0;
-            $totalBonusNominal = 0;
-            $dailyDetails = [];
-
-            // Loop through each day of the month
-            $currentDate = $startDate->copy();
-            while ($currentDate <= $endDate) {
-                $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeek; // 1 (Mon) - 7 (Sun)
-
-                // Check Reward Holiday for this employee on this date
-                $isRewardHoliday = false;
-                $rewardHolidayName = null;
-                foreach ($holidayRewards as $hr) {
-                    if ($hr->appliesToDate($dateStr) && $hr->appliesToEmployee($unit, $empId)) {
-                        $isRewardHoliday = true;
-                        $rewardHolidayName = $hr->name;
-                        break;
-                    }
-                }
-
-                // Skip Holidays only for non-shift workers (unless it is a Reward Holiday)
-                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
-                $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false);
-                if ($isHoliday && !$isRewardHoliday) {
-                    $isShiftOnDate = false;
-                    $shiftKey = $unit . '_' . $empId;
-                    if (isset($assignedShifts[$shiftKey])) {
-                        foreach ($assignedShifts[$shiftKey] as $assignment) {
-                            $assignStartDate = substr($assignment->start_date, 0, 10);
-                            $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
-                            if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
-                                if ($assignment->workingShift->is_shift) {
-                                    $isShiftOnDate = true;
-                                }
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!$isShiftOnDate) {
-                        $currentDate->addDay();
-                        continue;
-                    }
-                }
-
-                // Skip Leaves (except Dinas, those getting presence bonus, or those requiring attendance)
-                $isOnLeave = false;
-                $leaveType = null;
-                $getsBonus = false;
-                $hasRequiresAttendanceLeave = false;
-                $activeLeave = null;
-                $leaveKey = $unit . '_' . $empId;
-                if (isset($leaves[$leaveKey])) {
-                    foreach ($leaves[$leaveKey] as $leave) {
-                        $leaveStart = substr($leave->start_date, 0, 10);
-                        $leaveEnd = substr($leave->end_date, 0, 10);
-                        if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
-                            $isOnLeave = true;
-                            $leaveType = $leave->type_name;
-                            $getsBonus = $leave->gets_presence_bonus || ($leaveType === 'Dinas') || ($leave->status_code === 'H');
-                            $hasRequiresAttendanceLeave = (bool) $leave->requires_attendance;
-                            $activeLeave = $leave;
-                            break;
-                        }
-                    }
-                }
-                if ($isOnLeave && !$getsBonus && !$hasRequiresAttendanceLeave && !$isRewardHoliday) {
-                    $currentDate->addDay();
-                    continue;
-                }
-
-                // Check Shift Assignment
-                $hasShiftToday = false;
-                $shiftStartTime = null;
-                $shiftEndTime = null;
-                $shiftName = null;
-                $shiftKey = $unit . '_' . $empId;
-                $activeAssignmentOnDate = null;
-
-                if (isset($assignedShifts[$shiftKey])) {
-                    foreach ($assignedShifts[$shiftKey] as $assignment) {
-                        $assignStartDate = substr($assignment->start_date, 0, 10);
-                        $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
-                        if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
-                            $activeAssignmentOnDate = $assignment;
-                            // Find detail for this day of week
-                            $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
-                            if ($detail && !$detail->is_off) {
-                                $hasShiftToday = true;
-                                $shiftStartTime = $detail->start_time;
-                                $shiftEndTime = $detail->end_time;
-                                $shiftName = $assignment->workingShift->name;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                // Check Picket Duty for this employee on this date
-                $isPicketToday = false;
-                $picketAreaName = null;
-                $picketStartTime = '06:30:00';
-
-                // Picket integration takes effect starting from unit-specific effective date
-                $unitEffectiveDate = $unitPicketEffectiveDates[$unit] ?? $globalPicketEffectiveDate;
-                if ($dateStr >= $unitEffectiveDate) {
-                    $swapKey = $unit . '_' . $empId . '_' . $dateStr;
-                    if (isset($picketSwapOverrides[$swapKey])) {
-                        if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
-                            $isPicketToday = true;
-                            $picketAreaName = $picketSwapOverrides[$swapKey]['picket_area_name'] ?? 'Tukar Piket';
-                            $picketStartTime = $picketSwapOverrides[$swapKey]['start_time'] ?? '06:30:00';
-                        }
-                    } else {
-                        $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
-                        if (isset($picketSchedulesMap[$routineKey])) {
-                            $sched = $picketSchedulesMap[$routineKey];
-                            $schedStart = $sched['start_date'] ?? '2026-07-01';
-                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
-                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
-                                $isPicketToday = true;
-                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
-                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
-                            }
-                        }
-                    }
-                }
-
-                if ($hasShiftToday || $isRewardHoliday) {
-                    $shiftStartTime = $shiftStartTime ?: '07:00:00';
-                    $shiftEndTime = $shiftEndTime ?: '15:00:00';
-                    $shiftName = $shiftName ?: 'Shift Reguler';
-                    // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
-                    if ($isPicketToday) {
-                        $shiftStartTime = $picketStartTime;
-                    }
-
-                    $currentSchema = null;
-                    if ($isPicketToday && $picketBonusSchema) {
-                        // KELAS PIKET: Menggunakan Skema Khusus Piket (Mode Hadir Lebih Awal / early_arrival)
-                        $currentSchema = $picketBonusSchema;
-                    } else {
-                        // KELAS REGULER: Menggunakan Skema Shift Kerja (Mode Toleransi Keterlambatan / late_tolerance)
-                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
-                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
-                        }
-                        if (!$currentSchema && !empty($emp['unit_name'])) {
-                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
-                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
-                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
-                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
-                            });
-                        }
-                        if (!$currentSchema) {
-                            $currentSchema = $activeSchema;
-                        }
-                    }
-
-                    $dailyLateMinutes = 0;
-                    $earlyMinutes = 0;
-                    $dailyStatus = 'Absent';
-                    $dailyCheckIn = null;
-                    $dailyCheckOut = null;
-                    $dailyBonus = 0;
-                    $dailyTierLevel = null;
-
-                    // Check Attendance, Dinas/getsBonus, or Reward Holiday
-                    $logKey = $uid . '_' . $dateStr;
-                    $isKedinasan = false;
-                    if ($isOnLeave && $activeLeave) {
-                        $ltLower = strtolower($leaveType ?? $activeLeave->type ?? $activeLeave->type_name ?? '');
-                        if (str_contains($ltLower, 'dinas') || str_contains($ltLower, 'kedinasan')) {
-                            $isKedinasan = true;
-                        }
-                    }
-                    $isDinas = ($isOnLeave && $getsBonus && (!$hasRequiresAttendanceLeave || $isKedinasan));
-
-                    if (isset($attendanceLogs[$logKey]) || $isDinas || $isRewardHoliday) {
-                        if ($isRewardHoliday) {
-                            $dailyStatus = 'Reward Libur';
-                            $dailyCheckIn = 'REWARD';
-                            $dailyCheckOut = 'REWARD';
-                            $dailyLateMinutes = 0;
-                            $earlyMinutes = 0;
-                        } elseif ($isKedinasan) {
-                            $dailyStatus = ($leaveType ?: 'Dinas');
-                            if (isset($attendanceLogs[$logKey])) {
-                                $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
-                                $firstCheckIn = $sortedLogs->first();
-                                $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
-                                if ($sortedLogs->count() > 1) {
-                                    $lastLog = $sortedLogs->last();
-                                    $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes(Carbon::parse($firstCheckIn->timestamp));
-                                    $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
-                                } else {
-                                    $dailyCheckOut = '-';
-                                }
-                            } else {
-                                $dailyCheckIn = 'DINAS';
-                                $dailyCheckOut = 'DINAS';
-                            }
-                            $dailyLateMinutes = 0;
-                            $earlyMinutes = 0;
-                        } elseif ($isDinas) {
-                            $dailyStatus = ($leaveType ?: 'Dinas');
-                            if (isset($attendanceLogs[$logKey])) {
-                                $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
-                                $firstCheckIn = $sortedLogs->first();
-                                $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
-                                if ($sortedLogs->count() > 1) {
-                                    $lastLog = $sortedLogs->last();
-                                    $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes(Carbon::parse($firstCheckIn->timestamp));
-                                    $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
-                                } else {
-                                    $dailyCheckOut = '-';
-                                }
-                            } else {
-                                $dailyCheckIn = 'DINAS';
-                                $dailyCheckOut = 'DINAS';
-                            }
-                            $dailyLateMinutes = 0;
-                            $earlyMinutes = 0;
-                        } else {
-                            $dailyStatus = 'Present';
-                        }
-                        $totalPresent++;
-                        
-                        // Calculate Early / Late
-                        if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday && !$isKedinasan) {
-                            $sortedLogs = collect($attendanceLogs[$logKey])->sortBy('timestamp');
-                            $firstCheckIn = $sortedLogs->first();
-                            $checkInCarbon = Carbon::parse($firstCheckIn->timestamp);
-                            $expectedStart = Carbon::parse($dateStr . ' ' . $shiftStartTime);
-                            $dailyCheckIn = $checkInCarbon->format('H:i:s');
-
-                            if ($sortedLogs->count() > 1) {
-                                $lastLog = $sortedLogs->last();
-                                $diff = Carbon::parse($lastLog->timestamp)->diffInMinutes($checkInCarbon);
-                                $dailyCheckOut = ($diff >= 15) ? Carbon::parse($lastLog->timestamp)->format('H:i:s') : '-';
-                            } else {
-                                $dailyCheckOut = '-';
-                            }
-
-                            $isForgiven = $hasRequiresAttendanceLeave && $activeLeave && (!$activeLeave->gets_presence_bonus && $activeLeave->status_code !== 'H');
-
-                            if ($isForgiven) {
-                                $dailyLateMinutes = 0;
-                                $earlyMinutes = 0;
-                            } else {
-                                $checkInMin = $checkInCarbon->copy()->second(0);
-                                $expectedMin = $expectedStart->copy()->second(0);
-
-                                if ($checkInMin->gt($expectedMin)) {
-                                    $diff = (int) $expectedMin->diffInMinutes($checkInMin);
-                                    $dailyLateMinutes = $diff;
-                                    $totalLateMinutes += $diff;
-                                    $earlyMinutes = 0;
-                                } else {
-                                    $earlyMinutes = (int) $checkInMin->diffInMinutes($expectedMin);
-                                    $dailyLateMinutes = 0;
-                                }
-                            }
-                        } elseif (!$isRewardHoliday && ($isDinas || $isKedinasan)) {
-                            $dailyLateMinutes = 0;
-                            $earlyMinutes = 0;
-                            if (!$dailyCheckIn) {
-                                $dailyCheckIn = 'DINAS';
-                                $dailyCheckOut = 'DINAS';
-                            }
-                        }
-
-                        // Calculate Daily Bonus
-                        $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
-
-                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
-                            if ($isRewardHoliday || $isDinas || $isKedinasan) {
-                                // Full bonus for Reward Holiday or Dinas / Kedinasan (otomatis mendapat bonus kehadiran tertinggi tanpa terpengaruh menit keterlambatan)
-                                $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
-                                if ($bestTier) {
-                                    $dailyBonus = $bestTier->nominal;
-                                    $dailyTierLevel = $bestTier->tier_level;
-                                }
-                            } elseif ($schemaMode === 'early_arrival') {
-                                if ($dailyLateMinutes > 0) {
-                                    // Pegawai hadir tetapi scan setelah jam mulai: berikan tier dasar terendah jika ada (min_early_minutes == 0)
-                                    $baseTier = $currentSchema->tiers->first(function($t) {
-                                        return ($t->min_early_minutes ?? 0) == 0;
-                                    });
-                                    if ($baseTier && $baseTier->nominal > 0) {
-                                        $dailyBonus = $baseTier->nominal;
-                                        $dailyTierLevel = $baseTier->tier_level;
-                                    } else {
-                                        $dailyBonus = 0;
-                                        $dailyTierLevel = null;
-                                    }
-                                } else {
-                                    // Early arrival: find tiers where min_early_minutes <= earlyMinutes
-                                    $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
-                                        return ($tier->min_early_minutes ?? 0) <= $earlyMinutes;
-                                    })->sortByDesc('nominal');
-
-                                    if ($qualifyingTiers->count() > 0) {
-                                        $bestTier = $qualifyingTiers->first();
-                                        $dailyBonus = $bestTier->nominal;
-                                        $dailyTierLevel = $bestTier->tier_level;
-                                    }
-                                }
-                            } else {
-                                // Legacy: late tolerance
-                                $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
-                                    return $dailyLateMinutes <= $tier->max_late_minutes;
-                                })->sortByDesc('nominal');
-
-                                if ($qualifyingTiers->count() > 0) {
-                                    $bestTier = $qualifyingTiers->first();
-                                    $dailyBonus = $bestTier->nominal;
-                                    $dailyTierLevel = $bestTier->tier_level;
-                                }
-                            }
-                        }
-
-                        $totalBonusNominal += $dailyBonus;
-                    } else {
-                        $now = \Carbon\Carbon::now('Asia/Jakarta');
-                        $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
-                        
-                        if ($now->lessThan($shiftStartDateTime)) {
-                            $dailyStatus = 'Pending';
-                        } else {
-                            $totalAbsent++;
-                        }
-                    }
-
-                    $dailyDetails[$dateStr] = [
-                        'date' => $dateStr,
-                        'shift_name' => $shiftName,
-                        'shift_start' => $shiftStartTime,
-                        'shift_end' => $shiftEndTime,
-                        'check_in' => $dailyCheckIn,
-                        'check_out' => $dailyCheckOut,
-                        'late_minutes' => $dailyLateMinutes,
-                        'early_minutes' => $earlyMinutes,
-                        'status' => $dailyStatus,
-                        'bonus_nominal' => $dailyBonus,
-                        'tier_level' => $dailyTierLevel,
-                        'calculation_mode' => $currentSchema ? ($currentSchema->calculation_mode ?? 'early_arrival') : 'early_arrival',
-                        'schema_name' => $currentSchema ? $currentSchema->name : null,
-                        'is_picket' => $isPicketToday,
-                        'picket_area' => $picketAreaName,
-                        'picket_start' => $isPicketToday ? $picketStartTime : null,
-                        'is_reward_holiday' => $isRewardHoliday,
-                        'reward_name' => $rewardHolidayName,
-                    ];
-                } else {
-                    $dailyDetails[$dateStr] = [
-                        'date' => $dateStr,
-                        'shift_name' => $shiftName,
-                        'shift_start' => null,
-                        'shift_end' => null,
-                        'check_in' => null,
-                        'check_out' => null,
-                        'late_minutes' => 0,
-                        'early_minutes' => 0,
-                        'status' => 'Off',
-                        'bonus_nominal' => 0,
-                        'tier_level' => null,
-                        'calculation_mode' => null,
-                        'schema_name' => null,
-                        'is_picket' => false,
-                        'picket_area' => null,
-                        'picket_start' => null,
-                        'is_reward_holiday' => false,
-                        'reward_name' => null,
-                    ];
-                }
-
-                $currentDate->addDay();
-            }
-
-            $reports[] = [
-                'employee' => $emp,
-                'total_present' => $totalPresent,
-                'total_late_minutes' => $totalLateMinutes,
-                'total_absent' => $totalAbsent,
-                'bonus_nominal' => $totalBonusNominal,
-                'daily_details' => $dailyDetails,
-            ];
-        }
+        // Calculate attendance and bonus data with cross-day night shift matching
+        $reports = $this->calculateBonusReportData($startDate, $endDate, $employeesCollection, $cutoffDate);
 
         // Convert array to a length-aware paginator for the view
         $total = count($reports);
@@ -643,7 +124,7 @@ class AttendanceBonusReportController extends Controller
         return view('bonus-reports.index', compact('paginatedReports', 'schoolUnits', 'activeSchema', 'month', 'startDateReq', 'endDateReq', 'cutoffDate', 'totalSemuaBonus', 'positions', 'position'));
     }
 
-        public function export(Request $request)
+    public function export(Request $request)
     {
         $cutoffDate = (int) Setting::get('payroll_cutoff_date', 25);
         $month = $request->query('month');
@@ -657,17 +138,6 @@ class AttendanceBonusReportController extends Controller
         
         $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
         $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
-
-        $activeSchema = BonusSchema::with('tiers')
-            ->where('is_active', true)
-            ->where(function($q) {
-                $q->where('calculation_mode', 'late_tolerance')
-                  ->orWhereNull('calculation_mode');
-            })
-            ->first()
-            ?: BonusSchema::with('tiers')->where('is_active', true)->first();
-
-        $allBonusSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
 
         $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees)->sort(function ($a, $b) {
@@ -703,438 +173,10 @@ class AttendanceBonusReportController extends Controller
             return back()->with('error', 'Tidak ada data pegawai untuk diekspor pada filter ini.');
         }
 
-        $employeeIds = $employeesCollection->pluck('id')->toArray();
-        $uids = $employeesCollection->pluck('zkteco_uid')->filter()->toArray();
+        // Calculate attendance and bonus data with cross-day night shift matching
+        $reports = $this->calculateBonusReportData($startDate, $endDate, $employeesCollection, $cutoffDate);
+        $totalSemuaBonus = collect($reports)->sum('bonus_nominal');
 
-        $attendanceLogs = collect();
-        if (!empty($uids)) {
-            $attendanceLogs = \App\Models\AttendanceLog::whereIn('uid', $uids)
-                ->whereBetween('timestamp', [$startDate, $endDate])
-                ->get()
-                ->groupBy(function($log) {
-                    return $log->uid . '_' . \Carbon\Carbon::parse($log->timestamp)->format('Y-m-d');
-                });
-        }
-
-        $assignedShifts = \App\Models\EmployeeWorkingShift::with(['workingShift', 'workingShift.details'])
-            ->whereIn('employee_id', $employeeIds)
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->where('start_date', '<=', $endDate->format('Y-m-d'))
-                      ->where(function($q) use ($startDate) {
-                          $q->whereNull('end_date')
-                            ->orWhere('end_date', '>=', $startDate->format('Y-m-d'));
-                      });
-            })
-            ->get()
-            ->groupBy(function($shift) {
-                return $shift->school_unit_id . '_' . $shift->employee_id;
-            })
-            ->map(function($group) {
-                return $group->sort(function($a, $b) {
-                    $scoreA = ($a->roster_name !== null && $a->roster_name !== '') ? 3 : ($a->end_date !== null ? 2 : 1);
-                    $scoreB = ($b->roster_name !== null && $b->roster_name !== '') ? 3 : ($b->end_date !== null ? 2 : 1);
-                    if ($scoreA !== $scoreB) {
-                        return $scoreB <=> $scoreA; // Descending
-                    }
-                    $dateA = $a->start_date instanceof \Carbon\Carbon ? $a->start_date->format('Y-m-d') : substr($a->start_date, 0, 10);
-                    $dateB = $b->start_date instanceof \Carbon\Carbon ? $b->start_date->format('Y-m-d') : substr($b->start_date, 0, 10);
-                    if ($dateA !== $dateB) {
-                        return strcmp($dateB, $dateA); // Descending
-                    }
-                    return $b->id <=> $a->id; // Descending
-                });
-            });
-
-        $holidays = \App\Models\Holiday::all();
-        $holidayAdjustments = \App\Models\HolidayAdjustment::all();
-        $holidayRewards = \App\Models\HolidayReward::where('end_date', '>=', $startDate->format('Y-m-d'))
-            ->where('start_date', '<=', $endDate->format('Y-m-d'))
-            ->get();
-        $schoolUnitsList = \App\Models\SchoolUnit::all();
-        $unitHolidays = [];
-        $unitHolidays[''] = [];
-        foreach ($holidays as $h) {
-            if ($h->is_global) {
-                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
-            }
-        }
-        foreach ($holidayAdjustments as $adj) {
-            if (is_null($adj->school_unit_id)) {
-                $origStr = $adj->original_date->format('Y-m-d');
-                $adjStr = $adj->adjusted_date->format('Y-m-d');
-                if (isset($unitHolidays[''][$origStr])) {
-                    unset($unitHolidays[''][$origStr]);
-                }
-                $unitHolidays[''][$adjStr] = true;
-            }
-        }
-        foreach ($schoolUnitsList as $unitModel) {
-            $uId = $unitModel->id;
-            $unitHolidays[$uId] = [];
-            foreach ($holidays as $h) {
-                if ($h->is_global) {
-                    $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
-                }
-            }
-            foreach ($holidayAdjustments as $adj) {
-                if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
-                    $origStr = $adj->original_date->format('Y-m-d');
-                    $adjStr = $adj->adjusted_date->format('Y-m-d');
-                    if (isset($unitHolidays[$uId][$origStr])) {
-                        unset($unitHolidays[$uId][$origStr]);
-                    }
-                    $unitHolidays[$uId][$adjStr] = true;
-                }
-            }
-        }
-
-        $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
-            ->where('status', 'Approved')
-            ->where(function($query) use ($startDate, $endDate) {
-                $query->where('start_date', '<=', $endDate->format('Y-m-d'))
-                      ->where('end_date', '>=', $startDate->format('Y-m-d'));
-            })
-            ->get()
-            ->groupBy(function($leave) {
-                return $leave->school_unit_id . '_' . $leave->employee_id;
-            });
-
-        // Pre-fetch Picket Schedules & Swaps
-        $picketData = $this->getPicketDataIndexed($startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
-        $picketSchedulesMap = $picketData['schedulesMap'];
-        $picketSwapOverrides = $picketData['swapOverrides'];
-        $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
-        $globalPicketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
-
-        $unitPicketEffectiveDates = [];
-        foreach ($schoolUnitsList as $su) {
-            $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
-        }
-
-        $picketBonusSchemaId = Setting::get('picket_bonus_schema_id');
-        $picketBonusSchema = $picketBonusSchemaId ? $allBonusSchemas->get($picketBonusSchemaId) : null;
-        if (!$picketBonusSchema) {
-            $picketBonusSchema = $allBonusSchemas->first(function($s) {
-                return $s->is_active && ($s->calculation_mode === 'early_arrival' || str_contains(strtolower($s->name), 'piket'));
-            });
-        }
-
-        $reports = [];
-        $totalSemuaBonus = 0;
-
-        foreach ($employeesCollection as $emp) {
-            $uid = $emp['zkteco_uid'] ?? null;
-            $empId = $emp['id'] ?? null;
-            $unit = $emp['unit_id'] ?? null;
-
-            if (!$uid || !$empId) continue;
-
-            $totalPresent = 0;
-            $totalLateMinutes = 0;
-            $totalAbsent = 0;
-            $totalBonusNominal = 0;
-            $dailyDetails = [];
-
-            $currentDate = $startDate->copy();
-            
-            while ($currentDate <= $endDate) {
-                $dateStr = $currentDate->format('Y-m-d');
-                $dayOfWeek = $currentDate->dayOfWeek;
-
-                // Check Reward Holiday for this employee on this date
-                $isRewardHoliday = false;
-                $rewardHolidayName = null;
-                foreach ($holidayRewards as $hr) {
-                    if ($hr->appliesToDate($dateStr) && $hr->appliesToEmployee($unit, $empId)) {
-                        $isRewardHoliday = true;
-                        $rewardHolidayName = $hr->name;
-                        break;
-                    }
-                }
-
-                // Skip Holidays only for non-shift workers (unless it is a Reward Holiday)
-                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
-                $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false);
-                if ($isHoliday && !$isRewardHoliday) {
-                    $isShiftOnDate = false;
-                    $shiftKey = $unit . '_' . $empId;
-                    if (isset($assignedShifts[$shiftKey])) {
-                        foreach ($assignedShifts[$shiftKey] as $assignment) {
-                            $assignStartDate = substr($assignment->start_date, 0, 10);
-                            $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
-                            if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
-                                if ($assignment->workingShift->is_shift) {
-                                    $isShiftOnDate = true;
-                                }
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!$isShiftOnDate) {
-                        $currentDate->addDay();
-                        continue;
-                    }
-                }
-
-                // Skip Leaves (except Dinas, those getting presence bonus, or those requiring attendance)
-                $isOnLeave = false;
-                $leaveType = null;
-                $getsBonus = false;
-                $hasRequiresAttendanceLeave = false;
-                $activeLeave = null;
-                $leaveKey = $unit . '_' . $empId;
-                if (isset($leaves[$leaveKey])) {
-                    foreach ($leaves[$leaveKey] as $leave) {
-                        $leaveStart = substr($leave->start_date, 0, 10);
-                        $leaveEnd = substr($leave->end_date, 0, 10);
-                        if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
-                            $isOnLeave = true;
-                            $leaveType = $leave->type_name;
-                            $getsBonus = $leave->gets_presence_bonus || ($leaveType === 'Dinas') || ($leave->status_code === 'H');
-                            $hasRequiresAttendanceLeave = (bool) $leave->requires_attendance;
-                            $activeLeave = $leave;
-                            break;
-                        }
-                    }
-                }
-                if ($isOnLeave && !$getsBonus && !$hasRequiresAttendanceLeave && !$isRewardHoliday) {
-                    $currentDate->addDay();
-                    continue;
-                }
-
-                $hasShiftToday = false;
-                $shiftStartTime = null;
-                $shiftKey = $unit . '_' . $empId;
-                $activeAssignmentOnDate = null;
-
-                if (isset($assignedShifts[$shiftKey])) {
-                    foreach ($assignedShifts[$shiftKey] as $assignment) {
-                        $assignStartDate = substr($assignment->start_date, 0, 10);
-                        $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
-                        if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
-                            $activeAssignmentOnDate = $assignment;
-                            $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
-                            if ($detail && !$detail->is_off) {
-                                $hasShiftToday = true;
-                                $shiftStartTime = $detail->start_time;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                // Check Picket Duty for this employee on this date
-                $isPicketToday = false;
-                $picketAreaName = null;
-                $picketStartTime = '06:30:00';
-
-                // Picket integration takes effect starting from unit-specific effective date
-                $unitEffectiveDate = $unitPicketEffectiveDates[$unit] ?? $globalPicketEffectiveDate;
-                if ($dateStr >= $unitEffectiveDate) {
-                    $swapKey = $unit . '_' . $empId . '_' . $dateStr;
-                    if (isset($picketSwapOverrides[$swapKey])) {
-                        if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
-                            $isPicketToday = true;
-                            $picketAreaName = $picketSwapOverrides[$swapKey]['picket_area_name'] ?? 'Tukar Piket';
-                            $picketStartTime = $picketSwapOverrides[$swapKey]['start_time'] ?? '06:30:00';
-                        }
-                    } else {
-                        $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
-                        if (isset($picketSchedulesMap[$routineKey])) {
-                            $sched = $picketSchedulesMap[$routineKey];
-                            $schedStart = $sched['start_date'] ?? '2026-07-01';
-                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
-                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
-                                $isPicketToday = true;
-                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
-                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
-                            }
-                        }
-                    }
-                }
-
-                if ($hasShiftToday || $isRewardHoliday) {
-                    $shiftStartTime = $shiftStartTime ?: '07:00:00';
-                    // If teacher is on picket duty, baseline shift arrival time becomes picket start time (06:30:00)
-                    if ($isPicketToday) {
-                        $shiftStartTime = $picketStartTime;
-                    }
-
-                    $currentSchema = null;
-                    if ($isPicketToday && $picketBonusSchema) {
-                        // KELAS PIKET: Menggunakan Skema Khusus Piket (Mode Hadir Lebih Awal / early_arrival)
-                        $currentSchema = $picketBonusSchema;
-                    } else {
-                        // KELAS REGULER: Menggunakan Skema Shift Kerja (Mode Toleransi Keterlambatan / late_tolerance)
-                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
-                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
-                        }
-                        if (!$currentSchema && !empty($emp['unit_name'])) {
-                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
-                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
-                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
-                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
-                            });
-                        }
-                        if (!$currentSchema) {
-                            $currentSchema = $activeSchema;
-                        }
-                    }
-
-                    $dailyLateMinutes = 0;
-                    $earlyMinutes = 0;
-                    $dailyBonus = 0;
-                    $dailyStatus = 'Absent';
-                    $dailyCheckIn = null;
-                    
-                    $logKey = $uid . '_' . $dateStr;
-                    $isKedinasan = false;
-                    if ($isOnLeave && $activeLeave) {
-                        $ltLower = strtolower($leaveType ?? $activeLeave->type ?? $activeLeave->type_name ?? '');
-                        if (str_contains($ltLower, 'dinas') || str_contains($ltLower, 'kedinasan')) {
-                            $isKedinasan = true;
-                        }
-                    }
-                    $isDinas = ($isOnLeave && $getsBonus && (!$hasRequiresAttendanceLeave || $isKedinasan));
-
-                    if (isset($attendanceLogs[$logKey]) || $isDinas || $isRewardHoliday) {
-                        if ($isRewardHoliday) {
-                            $dailyStatus = 'Reward Libur';
-                            $dailyCheckIn = 'REWARD';
-                            $dailyLateMinutes = 0;
-                            $earlyMinutes = 0;
-                        } elseif ($isKedinasan) {
-                            $dailyStatus = ($leaveType ?: 'Dinas');
-                            if (isset($attendanceLogs[$logKey])) {
-                                $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
-                                $dailyCheckIn = Carbon::parse($firstCheckIn->timestamp)->format('H:i:s');
-                            } else {
-                                $dailyCheckIn = 'DINAS';
-                            }
-                            $dailyLateMinutes = 0;
-                            $earlyMinutes = 0;
-                        } elseif ($isDinas) {
-                            $dailyStatus = ($leaveType ?: 'Dinas');
-                            $dailyCheckIn = 'DINAS';
-                            $dailyLateMinutes = 0;
-                            $earlyMinutes = 0;
-                        } else {
-                            $dailyStatus = 'Present';
-                        }
-                        $totalPresent++;
-                        
-                        if (isset($attendanceLogs[$logKey]) && !$isDinas && !$isRewardHoliday && !$isKedinasan) {
-                            $firstCheckIn = collect($attendanceLogs[$logKey])->sortBy('timestamp')->first();
-                            $checkInCarbon = \Carbon\Carbon::parse($firstCheckIn->timestamp);
-                            $expectedStart = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime);
-                            $dailyCheckIn = $checkInCarbon->format('H:i:s');
-
-                            $isForgiven = $hasRequiresAttendanceLeave && $activeLeave && (!$activeLeave->gets_presence_bonus && $activeLeave->status_code !== 'H');
-
-                            if ($isForgiven) {
-                                $dailyLateMinutes = 0;
-                                $earlyMinutes = 0;
-                            } else {
-                                $checkInMin = $checkInCarbon->copy()->second(0);
-                                $expectedMin = $expectedStart->copy()->second(0);
-
-                                if ($checkInMin->gt($expectedMin)) {
-                                    $diff = (int) $expectedMin->diffInMinutes($checkInMin);
-                                    $dailyLateMinutes = $diff;
-                                    $totalLateMinutes += $diff;
-                                    $earlyMinutes = 0;
-                                } else {
-                                    $earlyMinutes = (int) $checkInMin->diffInMinutes($expectedMin);
-                                    $dailyLateMinutes = 0;
-                                }
-                            }
-                        } elseif (!$isRewardHoliday && ($isDinas || $isKedinasan)) {
-                            $dailyLateMinutes = 0;
-                            $earlyMinutes = 0;
-                            if (!$dailyCheckIn) {
-                                $dailyCheckIn = 'DINAS';
-                            }
-                        }
-
-                        $schemaMode = $currentSchema->calculation_mode ?? 'early_arrival';
-
-                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
-                            if ($isRewardHoliday || $isDinas || $isKedinasan) {
-                                $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
-                                if ($bestTier) {
-                                    $dailyBonus = $bestTier->nominal;
-                                }
-                            } elseif ($schemaMode === 'early_arrival') {
-                                if ($dailyLateMinutes > 0) {
-                                    $baseTier = $currentSchema->tiers->first(function($t) {
-                                        return ($t->min_early_minutes ?? 0) == 0;
-                                    });
-                                    if ($baseTier && $baseTier->nominal > 0) {
-                                        $dailyBonus = $baseTier->nominal;
-                                    } else {
-                                        $dailyBonus = 0;
-                                    }
-                                } else {
-                                    $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
-                                        return ($tier->min_early_minutes ?? 0) <= $earlyMinutes;
-                                    })->sortByDesc('nominal');
-
-                                    if ($qualifyingTiers->count() > 0) {
-                                        $bestTier = $qualifyingTiers->first();
-                                        $dailyBonus = $bestTier->nominal;
-                                    }
-                                }
-                            } else {
-                                $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
-                                    return $dailyLateMinutes <= $tier->max_late_minutes;
-                                })->sortByDesc('nominal');
-
-                                if ($qualifyingTiers->count() > 0) {
-                                    $bestTier = $qualifyingTiers->first();
-                                    $dailyBonus = $bestTier->nominal;
-                                }
-                            }
-                        }
-                        $totalBonusNominal += $dailyBonus;
-                    } else {
-                        $now = \Carbon\Carbon::now('Asia/Jakarta');
-                        $shiftStartDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
-                        
-                        if ($now->lessThan($shiftStartDateTime)) {
-                            // still pending
-                        } else {
-                            $totalAbsent++;
-                        }
-                    }
-
-                    $dailyDetails[$dateStr] = [
-                        'status' => $dailyStatus,
-                        'bonus_nominal' => $dailyBonus,
-                        'early_minutes' => $earlyMinutes,
-                        'late_minutes' => $dailyLateMinutes,
-                        'is_picket' => $isPicketToday,
-                        'picket_area' => $picketAreaName,
-                        'picket_start' => $isPicketToday ? $picketStartTime : null,
-                        'is_reward_holiday' => $isRewardHoliday,
-                        'reward_name' => $rewardHolidayName,
-                    ];
-                }
-
-                $currentDate->addDay();
-            }
-
-            $totalSemuaBonus += $totalBonusNominal;
-            $reports[] = [
-                'employee' => $emp,
-                'total_present' => $totalPresent,
-                'total_late_minutes' => $totalLateMinutes,
-                'total_absent' => $totalAbsent,
-                'bonus_nominal' => $totalBonusNominal,
-                'daily_details' => $dailyDetails,
-            ];
-        }
-        
         $periodeStr = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
 
         $dates = [];
@@ -1146,7 +188,7 @@ class AttendanceBonusReportController extends Controller
 
         $unitName = 'Semua_Unit';
         if ($unitId) {
-            $unitObj = \App\Models\SchoolUnit::find($unitId);
+            $unitObj = SchoolUnit::find($unitId);
             if ($unitObj) {
                 $unitName = str_replace(' ', '_', $unitObj->name);
             }
@@ -1258,6 +300,544 @@ class AttendanceBonusReportController extends Controller
     }
 
     /**
+     * Calculate Attendance Bonus Report data with shift window matching (handles cross-day night shifts).
+     */
+    private function calculateBonusReportData(Carbon $startDate, Carbon $endDate, $employeesCollection, int $cutoffDate): array
+    {
+        $startDateReq = $startDate->format('Y-m-d');
+        $endDateReq = $endDate->format('Y-m-d');
+
+        $allBonusSchemas = BonusSchema::with('tiers')->get()->keyBy('id');
+        $activeSchema = BonusSchema::with('tiers')
+            ->where('is_active', true)
+            ->where(function($q) {
+                $q->where('calculation_mode', 'late_tolerance')
+                  ->orWhereNull('calculation_mode');
+            })
+            ->first()
+            ?: BonusSchema::with('tiers')->where('is_active', true)->first();
+
+        $picketBonusSchemaId = Setting::get('picket_bonus_schema_id');
+        $picketBonusSchema = $picketBonusSchemaId ? $allBonusSchemas->get($picketBonusSchemaId) : null;
+        if (!$picketBonusSchema) {
+            $picketBonusSchema = $allBonusSchemas->first(function($s) {
+                return $s->is_active && ($s->calculation_mode === 'early_arrival' || str_contains(strtolower($s->name), 'piket'));
+            });
+        }
+
+        $employeeIds = $employeesCollection->pluck('id')->filter()->toArray();
+        $uids = $employeesCollection->pluck('zkteco_uid')->filter()->toArray();
+
+        // 1. Fetch Attendance Logs spanning -1 day 12:00 to +1 day 12:00 for cross-day / night shifts
+        $logsData = AttendanceLog::whereIn('uid', $uids)
+            ->whereBetween('timestamp', [
+                $startDate->copy()->subDay()->format('Y-m-d 12:00:00'),
+                $endDate->copy()->addDay()->format('Y-m-d 12:00:00')
+            ])
+            ->get(['uid', 'timestamp']);
+
+        $attendanceLogs = [];
+        foreach ($logsData as $log) {
+            $tsStr = $log->timestamp instanceof Carbon ? $log->timestamp->format('Y-m-d H:i:s') : (string) $log->timestamp;
+            $attendanceLogs[(string)$log->uid][] = $tsStr;
+        }
+        foreach ($attendanceLogs as &$uLogs) {
+            sort($uLogs);
+        }
+        unset($uLogs);
+
+        // 2. Pre-fetch Assigned Shifts
+        $assignedShifts = EmployeeWorkingShift::with(['workingShift.details'])
+            ->whereIn('employee_id', $employeeIds)
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->where('start_date', '<=', $endDate->format('Y-m-d'))
+                      ->where(function($q) use ($startDate) {
+                          $q->whereNull('end_date')
+                            ->orWhere('end_date', '>=', $startDate->format('Y-m-d'));
+                      });
+            })
+            ->get()
+            ->groupBy(function($shift) {
+                return $shift->school_unit_id . '_' . $shift->employee_id;
+            })
+            ->map(function($group) {
+                return $group->sort(function($a, $b) {
+                    $scoreA = ($a->roster_name !== null && $a->roster_name !== '') ? 3 : ($a->end_date !== null ? 2 : 1);
+                    $scoreB = ($b->roster_name !== null && $b->roster_name !== '') ? 3 : ($b->end_date !== null ? 2 : 1);
+                    if ($scoreA !== $scoreB) {
+                        return $scoreB <=> $scoreA;
+                    }
+                    $dateA = $a->start_date instanceof Carbon ? $a->start_date->format('Y-m-d') : substr($a->start_date, 0, 10);
+                    $dateB = $b->start_date instanceof Carbon ? $b->start_date->format('Y-m-d') : substr($b->start_date, 0, 10);
+                    if ($dateA !== $dateB) {
+                        return strcmp($dateB, $dateA);
+                    }
+                    return $b->id <=> $a->id;
+                });
+            });
+
+        // 3. Pre-fetch Holidays
+        $holidays = \App\Models\Holiday::all();
+        $holidayAdjustments = \App\Models\HolidayAdjustment::all();
+        $holidayRewards = \App\Models\HolidayReward::where('end_date', '>=', $startDate->format('Y-m-d'))
+            ->where('start_date', '<=', $endDate->format('Y-m-d'))
+            ->get();
+        $schoolUnitsList = SchoolUnit::all();
+        $unitHolidays = [];
+        $unitHolidays[''] = [];
+        foreach ($holidays as $h) {
+            if ($h->is_global) {
+                $unitHolidays[''][$h->original_date->format('Y-m-d')] = true;
+            }
+        }
+        foreach ($holidayAdjustments as $adj) {
+            if (is_null($adj->school_unit_id)) {
+                $origStr = $adj->original_date->format('Y-m-d');
+                $adjStr = $adj->adjusted_date->format('Y-m-d');
+                if (isset($unitHolidays[''][$origStr])) {
+                    unset($unitHolidays[''][$origStr]);
+                }
+                $unitHolidays[''][$adjStr] = true;
+            }
+        }
+        foreach ($schoolUnitsList as $unitModel) {
+            $uId = $unitModel->id;
+            $unitHolidays[$uId] = [];
+            foreach ($holidays as $h) {
+                if ($h->is_global) {
+                    $unitHolidays[$uId][$h->original_date->format('Y-m-d')] = true;
+                }
+            }
+            foreach ($holidayAdjustments as $adj) {
+                if (is_null($adj->school_unit_id) || $adj->school_unit_id == $uId) {
+                    $origStr = $adj->original_date->format('Y-m-d');
+                    $adjStr = $adj->adjusted_date->format('Y-m-d');
+                    if (isset($unitHolidays[$uId][$origStr])) {
+                        unset($unitHolidays[$uId][$origStr]);
+                    }
+                    $unitHolidays[$uId][$adjStr] = true;
+                }
+            }
+        }
+
+        // 4. Pre-fetch Leaves
+        $leaves = \App\Models\LeaveRequest::whereIn('employee_id', $employeeIds)
+            ->where('status', 'Approved')
+            ->where(function($query) use ($startDate, $endDate) {
+                $query->where('start_date', '<=', $endDate->format('Y-m-d'))
+                      ->where('end_date', '>=', $startDate->format('Y-m-d'));
+            })
+            ->get()
+            ->groupBy(function($leave) {
+                return $leave->school_unit_id . '_' . $leave->employee_id;
+            });
+
+        // 5. Pre-fetch Picket Schedules & Swaps
+        $picketData = $this->getPicketDataIndexed($startDateReq, $endDateReq);
+        $picketSchedulesMap = $picketData['schedulesMap'];
+        $picketSwapOverrides = $picketData['swapOverrides'];
+        $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
+        $globalPicketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+        
+        $unitPicketEffectiveDates = [];
+        foreach ($schoolUnitsList as $su) {
+            $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
+        }
+
+        $reports = [];
+
+        foreach ($employeesCollection as $emp) {
+            $uid = $emp['zkteco_uid'] ?? null;
+            $empId = $emp['id'] ?? null;
+            $unit = $emp['unit_id'] ?? null;
+
+            if (!$uid || !$empId) continue;
+
+            $userLogs = $attendanceLogs[(string)$uid] ?? [];
+
+            $totalPresent = 0;
+            $totalLateMinutes = 0;
+            $totalAbsent = 0;
+            $totalBonusNominal = 0;
+            $dailyDetails = [];
+
+            $currentDate = $startDate->copy();
+            while ($currentDate <= $endDate) {
+                $dateStr = $currentDate->format('Y-m-d');
+                $dayOfWeek = $currentDate->dayOfWeek; // 0 (Sun) - 6 (Sat)
+
+                // Check Reward Holiday
+                $isRewardHoliday = false;
+                $rewardHolidayName = null;
+                foreach ($holidayRewards as $hr) {
+                    if ($hr->appliesToDate($dateStr) && $hr->appliesToEmployee($unit, $empId)) {
+                        $isRewardHoliday = true;
+                        $rewardHolidayName = $hr->name;
+                        break;
+                    }
+                }
+
+                // Skip Holidays only for non-shift workers
+                $empUnitKey = ($unit && isset($unitHolidays[$unit])) ? $unit : '';
+                $isHoliday = ($unitHolidays[$empUnitKey][$dateStr] ?? false);
+                if ($isHoliday && !$isRewardHoliday) {
+                    $isShiftOnDate = false;
+                    $shiftKey = $unit . '_' . $empId;
+                    if (isset($assignedShifts[$shiftKey])) {
+                        foreach ($assignedShifts[$shiftKey] as $assignment) {
+                            $assignStartDate = substr($assignment->start_date, 0, 10);
+                            $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                            if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                                if ($assignment->workingShift->is_shift) {
+                                    $isShiftOnDate = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!$isShiftOnDate) {
+                        $currentDate->addDay();
+                        continue;
+                    }
+                }
+
+                // Check Leaves
+                $isOnLeave = false;
+                $leaveType = null;
+                $getsBonus = false;
+                $hasRequiresAttendanceLeave = false;
+                $activeLeave = null;
+                $leaveKey = $unit . '_' . $empId;
+                if (isset($leaves[$leaveKey])) {
+                    foreach ($leaves[$leaveKey] as $leave) {
+                        $leaveStart = substr($leave->start_date, 0, 10);
+                        $leaveEnd = substr($leave->end_date, 0, 10);
+                        if ($dateStr >= $leaveStart && $dateStr <= $leaveEnd) {
+                            $isOnLeave = true;
+                            $leaveType = $leave->type_name;
+                            $getsBonus = $leave->gets_presence_bonus || ($leaveType === 'Dinas') || ($leave->status_code === 'H');
+                            $hasRequiresAttendanceLeave = (bool) $leave->requires_attendance;
+                            $activeLeave = $leave;
+                            break;
+                        }
+                    }
+                }
+                if ($isOnLeave && !$getsBonus && !$hasRequiresAttendanceLeave && !$isRewardHoliday) {
+                    $currentDate->addDay();
+                    continue;
+                }
+
+                // Check Shift Assignment
+                $hasShiftToday = false;
+                $shiftStartTime = null;
+                $shiftEndTime = null;
+                $shiftName = null;
+                $shiftKey = $unit . '_' . $empId;
+                $activeAssignmentOnDate = null;
+
+                if (isset($assignedShifts[$shiftKey])) {
+                    foreach ($assignedShifts[$shiftKey] as $assignment) {
+                        $assignStartDate = substr($assignment->start_date, 0, 10);
+                        $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
+                        if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
+                            $activeAssignmentOnDate = $assignment;
+                            $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
+                            if ($detail && !$detail->is_off) {
+                                $hasShiftToday = true;
+                                $shiftStartTime = $detail->start_time;
+                                $shiftEndTime = $detail->end_time;
+                                $shiftName = $assignment->workingShift->name;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // Check Picket Duty
+                $isPicketToday = false;
+                $picketAreaName = null;
+                $picketStartTime = '06:30:00';
+
+                $unitEffectiveDate = $unitPicketEffectiveDates[$unit] ?? $globalPicketEffectiveDate;
+                if ($dateStr >= $unitEffectiveDate) {
+                    $swapKey = $unit . '_' . $empId . '_' . $dateStr;
+                    if (isset($picketSwapOverrides[$swapKey])) {
+                        if ($picketSwapOverrides[$swapKey]['action'] === 'assigned') {
+                            $isPicketToday = true;
+                            $picketAreaName = $picketSwapOverrides[$swapKey]['picket_area_name'] ?? 'Tukar Piket';
+                            $picketStartTime = $picketSwapOverrides[$swapKey]['start_time'] ?? '06:30:00';
+                        }
+                    } else {
+                        $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
+                        if (isset($picketSchedulesMap[$routineKey])) {
+                            $sched = $picketSchedulesMap[$routineKey];
+                            $schedStart = $sched['start_date'] ?? '2026-07-01';
+                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
+                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
+                                $isPicketToday = true;
+                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
+                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                            }
+                        }
+                    }
+                }
+
+                if ($hasShiftToday || $isRewardHoliday) {
+                    $shiftStartTime = $shiftStartTime ?: '07:00:00';
+                    $shiftEndTime = $shiftEndTime ?: '15:00:00';
+                    $shiftName = $shiftName ?: 'Shift Reguler';
+                    if ($isPicketToday) {
+                        $shiftStartTime = $picketStartTime;
+                    }
+
+                    // Shift windows (handling cross-day night shifts)
+                    $isNightShift = $shiftStartTime > $shiftEndTime;
+                    $expectedIn = Carbon::parse($dateStr . ' ' . $shiftStartTime);
+                    $expectedOut = Carbon::parse($dateStr . ' ' . $shiftEndTime);
+                    if ($isNightShift) {
+                        $expectedOut->addDay();
+                    }
+
+                    $inStart = $expectedIn->copy()->subHours(6);
+                    $inEnd = $expectedIn->copy()->addHours(6);
+                    $outStart = $expectedOut->copy()->subHours(6);
+                    $outEnd = $expectedOut->copy()->addHours(6);
+
+                    $checkInLog = null;
+                    $checkOutLog = null;
+
+                    foreach ($userLogs as $tsStr) {
+                        $ts = Carbon::parse($tsStr);
+                        if ($ts->between($inStart, $inEnd)) {
+                            if (!$checkInLog || $ts < Carbon::parse($checkInLog)) {
+                                $checkInLog = $tsStr;
+                            }
+                        }
+                        if ($ts->between($outStart, $outEnd)) {
+                            if (!$checkOutLog || $ts > Carbon::parse($checkOutLog)) {
+                                $checkOutLog = $tsStr;
+                            }
+                        }
+                    }
+
+                    // Disambiguation
+                    if ($checkInLog && $checkOutLog && $checkInLog === $checkOutLog) {
+                        $diffIn = abs(Carbon::parse($checkInLog)->diffInMinutes($expectedIn));
+                        $diffOut = abs(Carbon::parse($checkOutLog)->diffInMinutes($expectedOut));
+                        if ($diffIn < $diffOut) {
+                            $checkOutLog = null;
+                        } else {
+                            $checkInLog = null;
+                        }
+                    }
+
+                    if ($checkInLog && $checkOutLog && $checkInLog !== $checkOutLog) {
+                        if (Carbon::parse($checkInLog)->diffInHours(Carbon::parse($checkOutLog)) < 2) {
+                            $diffIn = abs(Carbon::parse($checkInLog)->diffInMinutes($expectedIn));
+                            $diffOut = abs(Carbon::parse($checkOutLog)->diffInMinutes($expectedOut));
+                            if ($diffIn < $diffOut) {
+                                $checkOutLog = null;
+                            } else {
+                                $checkInLog = null;
+                            }
+                        }
+                    }
+
+                    $currentSchema = null;
+                    if ($isPicketToday && $picketBonusSchema) {
+                        $currentSchema = $picketBonusSchema;
+                    } else {
+                        if ($activeAssignmentOnDate && $activeAssignmentOnDate->bonus_schema_id) {
+                            $currentSchema = $allBonusSchemas->get($activeAssignmentOnDate->bonus_schema_id);
+                        }
+                        if (!$currentSchema && !empty($emp['unit_name'])) {
+                            $currentSchema = $allBonusSchemas->first(function($s) use ($emp) {
+                                return strtolower(trim($s->name)) === strtolower(trim($emp['unit_name']))
+                                    || str_contains(strtolower($emp['unit_name']), strtolower($s->name))
+                                    || str_contains(strtolower($s->name), strtolower($emp['unit_name']));
+                            });
+                        }
+                        if (!$currentSchema) {
+                            $currentSchema = $activeSchema;
+                        }
+                    }
+
+                    $dailyLateMinutes = 0;
+                    $earlyMinutes = 0;
+                    $dailyStatus = 'Absent';
+                    $dailyCheckIn = null;
+                    $dailyCheckOut = null;
+                    $dailyBonus = 0;
+                    $dailyTierLevel = null;
+
+                    $isKedinasan = false;
+                    if ($isOnLeave && $activeLeave) {
+                        $ltLower = strtolower($leaveType ?? $activeLeave->type ?? $activeLeave->type_name ?? '');
+                        if (str_contains($ltLower, 'dinas') || str_contains($ltLower, 'kedinasan')) {
+                            $isKedinasan = true;
+                        }
+                    }
+                    $isDinas = ($isOnLeave && $getsBonus && (!$hasRequiresAttendanceLeave || $isKedinasan));
+
+                    if ($checkInLog || $checkOutLog || $isDinas || $isRewardHoliday) {
+                        if ($isRewardHoliday) {
+                            $dailyStatus = 'Reward Libur';
+                            $dailyCheckIn = 'REWARD';
+                            $dailyCheckOut = 'REWARD';
+                        } elseif ($isKedinasan || $isDinas) {
+                            $dailyStatus = ($leaveType ?: 'Dinas');
+                            $dailyCheckIn = $checkInLog ? substr($checkInLog, 11, 5) : 'DINAS';
+                            $dailyCheckOut = $checkOutLog ? substr($checkOutLog, 11, 5) : ($checkInLog ? '-' : 'DINAS');
+                        } else {
+                            $dailyStatus = 'Present';
+                            $dailyCheckIn = $checkInLog ? substr($checkInLog, 11, 5) : 'Tidak Hadir';
+                            $dailyCheckOut = $checkOutLog ? substr($checkOutLog, 11, 5) : '-';
+                        }
+                        $totalPresent++;
+
+                        // Calculate Early / Late
+                        if ($checkInLog && !$isDinas && !$isRewardHoliday && !$isKedinasan) {
+                            $checkInCarbon = Carbon::parse($checkInLog);
+                            $isForgiven = $hasRequiresAttendanceLeave && $activeLeave && (!$activeLeave->gets_presence_bonus && $activeLeave->status_code !== 'H');
+
+                            if ($isForgiven) {
+                                $dailyLateMinutes = 0;
+                                $earlyMinutes = 0;
+                            } else {
+                                $checkInMin = $checkInCarbon->copy()->second(0);
+                                $expectedMin = $expectedIn->copy()->second(0);
+
+                                if ($checkInMin->gt($expectedMin)) {
+                                    $diff = (int) $expectedMin->diffInMinutes($checkInMin);
+                                    $dailyLateMinutes = $diff;
+                                    $totalLateMinutes += $diff;
+                                    $earlyMinutes = 0;
+                                } else {
+                                    $earlyMinutes = (int) $checkInMin->diffInMinutes($expectedMin);
+                                    $dailyLateMinutes = 0;
+                                }
+                            }
+                        }
+
+                        // Calculate Daily Bonus
+                        $schemaMode = $currentSchema ? ($currentSchema->calculation_mode ?? 'early_arrival') : 'early_arrival';
+
+                        if ($currentSchema && $currentSchema->tiers->count() > 0) {
+                            if ($isRewardHoliday || $isDinas || $isKedinasan) {
+                                $bestTier = $currentSchema->tiers->sortByDesc('nominal')->first();
+                                if ($bestTier) {
+                                    $dailyBonus = $bestTier->nominal;
+                                    $dailyTierLevel = $bestTier->tier_level;
+                                }
+                            } elseif ($checkInLog) {
+                                if ($schemaMode === 'early_arrival') {
+                                    if ($dailyLateMinutes > 0) {
+                                        $baseTier = $currentSchema->tiers->first(function($t) {
+                                            return ($t->min_early_minutes ?? 0) == 0;
+                                        });
+                                        if ($baseTier && $baseTier->nominal > 0) {
+                                            $dailyBonus = $baseTier->nominal;
+                                            $dailyTierLevel = $baseTier->tier_level;
+                                        }
+                                    } else {
+                                        $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($earlyMinutes) {
+                                            return ($tier->min_early_minutes ?? 0) <= $earlyMinutes;
+                                        })->sortByDesc('nominal');
+
+                                        if ($qualifyingTiers->count() > 0) {
+                                            $bestTier = $qualifyingTiers->first();
+                                            $dailyBonus = $bestTier->nominal;
+                                            $dailyTierLevel = $bestTier->tier_level;
+                                        }
+                                    }
+                                } else {
+                                    $qualifyingTiers = $currentSchema->tiers->filter(function($tier) use ($dailyLateMinutes) {
+                                        return $dailyLateMinutes <= $tier->max_late_minutes;
+                                    })->sortByDesc('nominal');
+
+                                    if ($qualifyingTiers->count() > 0) {
+                                        $bestTier = $qualifyingTiers->first();
+                                        $dailyBonus = $bestTier->nominal;
+                                        $dailyTierLevel = $bestTier->tier_level;
+                                    }
+                                }
+                            }
+                        }
+
+                        $totalBonusNominal += $dailyBonus;
+                    } else {
+                        $now = Carbon::now('Asia/Jakarta');
+                        $shiftStartDateTime = Carbon::parse($dateStr . ' ' . $shiftStartTime, 'Asia/Jakarta');
+                        
+                        if ($now->lessThan($shiftStartDateTime)) {
+                            $dailyStatus = 'Pending';
+                        } else {
+                            $dailyStatus = 'Absent';
+                            $totalAbsent++;
+                        }
+                    }
+
+                    $dailyDetails[$dateStr] = [
+                        'date' => $dateStr,
+                        'shift_name' => $shiftName,
+                        'shift_start' => substr($shiftStartTime, 0, 5),
+                        'shift_end' => substr($shiftEndTime, 0, 5),
+                        'check_in' => $dailyCheckIn,
+                        'check_out' => $dailyCheckOut,
+                        'late_minutes' => $dailyLateMinutes,
+                        'early_minutes' => $earlyMinutes,
+                        'status' => $dailyStatus,
+                        'bonus_nominal' => $dailyBonus,
+                        'tier_level' => $dailyTierLevel,
+                        'calculation_mode' => $currentSchema ? ($currentSchema->calculation_mode ?? 'early_arrival') : 'early_arrival',
+                        'schema_name' => $currentSchema ? $currentSchema->name : null,
+                        'is_picket' => $isPicketToday,
+                        'picket_area' => $picketAreaName,
+                        'picket_start' => $isPicketToday ? substr($picketStartTime, 0, 5) : null,
+                        'is_reward_holiday' => $isRewardHoliday,
+                        'reward_name' => $rewardHolidayName,
+                    ];
+                } else {
+                    $dailyDetails[$dateStr] = [
+                        'date' => $dateStr,
+                        'shift_name' => $shiftName,
+                        'shift_start' => null,
+                        'shift_end' => null,
+                        'check_in' => null,
+                        'check_out' => null,
+                        'late_minutes' => 0,
+                        'early_minutes' => 0,
+                        'status' => 'Off',
+                        'bonus_nominal' => 0,
+                        'tier_level' => null,
+                        'calculation_mode' => null,
+                        'schema_name' => null,
+                        'is_picket' => false,
+                        'picket_area' => null,
+                        'picket_start' => null,
+                        'is_reward_holiday' => false,
+                        'reward_name' => null,
+                    ];
+                }
+
+                $currentDate->addDay();
+            }
+
+            $reports[] = [
+                'employee' => $emp,
+                'total_present' => $totalPresent,
+                'total_late_minutes' => $totalLateMinutes,
+                'total_absent' => $totalAbsent,
+                'bonus_nominal' => $totalBonusNominal,
+                'daily_details' => $dailyDetails,
+            ];
+        }
+
+        return $reports;
+    }
+
+    /**
      * Fetch and index picket schedules and swaps across all school units.
      */
     private function getPicketDataIndexed(string $startDateReq, string $endDateReq): array
@@ -1313,4 +893,3 @@ class AttendanceBonusReportController extends Controller
         ];
     }
 }
-
