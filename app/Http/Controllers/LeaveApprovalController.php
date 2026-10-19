@@ -233,6 +233,8 @@ class LeaveApprovalController extends Controller
             'status' => 'required|in:Pending,Approved,Rejected',
             'notes' => 'nullable|string|max:255',
             'type' => 'required|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $leave = LeaveRequest::findOrFail($id);
@@ -240,16 +242,25 @@ class LeaveApprovalController extends Controller
 
         try {
             // Send new decision to unit API
-            $response = Http::timeout(3)->withHeaders([
-                'X-API-TOKEN' => $unit->api_token,
-                'Accept' => 'application/json',
-            ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', [
+            $payload = [
                 'leave_id' => $leave->remote_leave_id ?? $leave->employee_id,
                 'status' => $validated['status'],
                 'notes' => $validated['notes'] ?? '',
                 'type' => $validated['type'],
                 'processed_by' => auth()->user()->name . ' (HRD Pusat)',
-            ]);
+            ];
+
+            if (!empty($validated['start_date'])) {
+                $payload['start_date'] = $validated['start_date'];
+            }
+            if (!empty($validated['end_date'])) {
+                $payload['end_date'] = $validated['end_date'];
+            }
+
+            $response = Http::timeout(3)->withHeaders([
+                'X-API-TOKEN' => $unit->api_token,
+                'Accept' => 'application/json',
+            ])->post(rtrim($unit->api_url, '/') . '/leave-requests/decision', $payload);
 
             if ($response->successful()) {
                 $typeLower = strtolower($validated['type']);
@@ -265,12 +276,21 @@ class LeaveApprovalController extends Controller
                     $statusCode = 'I';
                 }
 
-                $leave->update([
+                $updateData = [
                     'status' => $validated['status'],
                     'notes' => $validated['notes'],
                     'status_code' => $statusCode,
                     'gets_presence_bonus' => $getsPresenceBonus,
-                ]);
+                ];
+
+                if (!empty($validated['start_date'])) {
+                    $updateData['start_date'] = $validated['start_date'];
+                }
+                if (!empty($validated['end_date'])) {
+                    $updateData['end_date'] = $validated['end_date'];
+                }
+
+                $leave->update($updateData);
 
                 return redirect()->back()
                     ->with('success', 'Keputusan izin berhasil diperbarui.');

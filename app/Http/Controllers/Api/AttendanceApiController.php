@@ -534,13 +534,7 @@ class AttendanceApiController extends Controller
                         $isKedinasanLeave = str_contains(strtolower($originalType), 'dinas') || str_contains(strtolower($originalType), 'kedinasan');
                         $isLateForLeave = false;
                         if (!$isKedinasanLeave && !empty($checkInLog)) {
-                            if ($activeLeave->status === 'Approved') {
-                                if ($hasRequiresAttendanceLeave && ($activeLeave->gets_presence_bonus || $activeLeave->status_code === 'H')) {
-                                    $isLateForLeave = $isLate;
-                                }
-                            } else {
-                                $isLateForLeave = $isLate;
-                            }
+                            $isLateForLeave = $isLate;
                         }
 
                         $dailyDetails[$dateStr] = [
