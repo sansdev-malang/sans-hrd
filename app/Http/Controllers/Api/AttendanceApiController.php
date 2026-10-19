@@ -242,6 +242,7 @@ class AttendanceApiController extends Controller
                 $isRedLate = false;
                 $lateMinutes = 0;
                 $earlyMinutes = 0;
+                $shiftName = null;
 
                 // Check Picket Duty for this employee on this date
                 $isPicketToday = false;
@@ -261,13 +262,18 @@ class AttendanceApiController extends Controller
                     } else {
                         $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
                         if (isset($picketSchedulesMap[$routineKey])) {
-                            $sched = $picketSchedulesMap[$routineKey];
-                            $schedStart = $sched['start_date'] ?? '2026-07-01';
-                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
-                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
-                                $isPicketToday = true;
-                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
-                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                            $schedList = isset($picketSchedulesMap[$routineKey]['day_of_week']) 
+                                ? [$picketSchedulesMap[$routineKey]] 
+                                : $picketSchedulesMap[$routineKey];
+                            foreach ($schedList as $sched) {
+                                $schedStart = !empty($sched['start_date']) ? substr($sched['start_date'], 0, 10) : null;
+                                $schedEnd = !empty($sched['end_date']) ? substr($sched['end_date'], 0, 10) : null;
+                                if ((!$schedStart || $dateStr >= $schedStart) && (!$schedEnd || $dateStr <= $schedEnd)) {
+                                    $isPicketToday = true;
+                                    $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
+                                    $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                                    break;
+                                }
                             }
                         }
                     }
@@ -338,6 +344,7 @@ class AttendanceApiController extends Controller
                         $assignEndDate = $assignment->end_date ? substr($assignment->end_date, 0, 10) : null;
                         if ($dateStr >= $assignStartDate && (!$assignEndDate || $dateStr <= $assignEndDate)) {
                             $activeAssignmentOnDate = $assignment;
+                            $shiftName = $assignment->workingShift->name ?? 'Reguler';
                             $detail = $assignment->workingShift->details->where('day_of_week', $dayOfWeek)->first();
                             if ($detail) {
                                 if ($detail->is_off) {
@@ -964,13 +971,18 @@ class AttendanceApiController extends Controller
                     } else {
                         $routineKey = $unit . '_' . $empId . '_' . $dayOfWeek;
                         if (isset($picketSchedulesMap[$routineKey])) {
-                            $sched = $picketSchedulesMap[$routineKey];
-                            $schedStart = $sched['start_date'] ?? '2026-07-01';
-                            $schedEnd = $sched['end_date'] ?? '2027-06-30';
-                            if ($dateStr >= $schedStart && (!$schedEnd || $dateStr <= $schedEnd)) {
-                                $isPicketToday = true;
-                                $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
-                                $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                            $schedList = isset($picketSchedulesMap[$routineKey]['day_of_week']) 
+                                ? [$picketSchedulesMap[$routineKey]] 
+                                : $picketSchedulesMap[$routineKey];
+                            foreach ($schedList as $sched) {
+                                $schedStart = !empty($sched['start_date']) ? substr($sched['start_date'], 0, 10) : null;
+                                $schedEnd = !empty($sched['end_date']) ? substr($sched['end_date'], 0, 10) : null;
+                                if ((!$schedStart || $dateStr >= $schedStart) && (!$schedEnd || $dateStr <= $schedEnd)) {
+                                    $isPicketToday = true;
+                                    $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
+                                    $picketStartTime = $sched['start_time'] ?? '06:30:00';
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1292,12 +1304,19 @@ class AttendanceApiController extends Controller
         $startDateReq = $startDate->format('Y-m-d');
         $endDateReq = $endDate->format('Y-m-d');
 
-        // Fetch employees
+        // Fetch employees (strictly exclude Tukang from attendance percentage calculations)
         $rawEmployees = $this->service->getAllEmployees();
         $employeesCollection = collect($rawEmployees)
             ->filter(function ($emp) {
-                $pos = strtolower(trim($emp['position'] ?? $emp['subject_position'] ?? ''));
-                return $pos !== 'tukang' && !str_contains($pos, 'tukang');
+                $pos = strtolower(trim((string)($emp['position'] ?? $emp['subject_position'] ?? '')));
+                $type = strtolower(trim((string)($emp['employee_type']['name'] ?? $emp['employee_type']['code'] ?? (is_string($emp['employee_type'] ?? null) ? $emp['employee_type'] : ''))));
+                $code = strtolower(trim((string)($emp['employee_type']['code'] ?? '')));
+                $name = strtolower(trim((string)($emp['name'] ?? '')));
+
+                if (str_contains($pos, 'tukang') || str_contains($type, 'tukang') || $type === 'tkg' || $code === 'tkg' || str_contains($name, 'tukang')) {
+                    return false;
+                }
+                return true;
             });
 
         if (!empty($unitParam)) {
@@ -1426,6 +1445,13 @@ class AttendanceApiController extends Controller
 
         // Pre-fetch Picket Schedules & Swaps
         $picketData = $this->getPicketDataIndexed($startDateReq, $endDateReq);
+        $defaultPicketEffectiveDate = Carbon::parse('2026-10-01')->subMonth()->setDay($cutoffDate + 1)->format('Y-m-d');
+        $globalPicketEffectiveDate = Setting::get('picket_bonus_effective_date', $defaultPicketEffectiveDate);
+
+        $unitPicketEffectiveDates = [];
+        foreach ($schoolUnitsList as $su) {
+            $unitPicketEffectiveDates[$su->id] = Setting::get('picket_effective_date_' . $su->id, $globalPicketEffectiveDate);
+        }
 
         $reports = [];
         $totalAllWorkDays = 0;
@@ -1560,7 +1586,8 @@ class AttendanceApiController extends Controller
                 // Check Picket Duty (Overrides start time to 06:30)
                 $isPicketToday = false;
                 $picketAreaName = null;
-                if (!empty($unit) && !empty($empId)) {
+                $unitEffectiveDate = $unitPicketEffectiveDates[$unit] ?? $globalPicketEffectiveDate;
+                if (!empty($unit) && !empty($empId) && $dateStr >= $unitEffectiveDate) {
                     $overrideKey = $unit . '_' . $empId . '_' . $dateStr;
                     if (isset($picketData['swapOverrides'][$overrideKey])) {
                         $ov = $picketData['swapOverrides'][$overrideKey];
@@ -1571,8 +1598,18 @@ class AttendanceApiController extends Controller
                     } else {
                         $schedKey = $unit . '_' . $empId . '_' . $dayOfWeek1to6;
                         if (isset($picketData['schedulesMap'][$schedKey])) {
-                            $isPicketToday = true;
-                            $picketAreaName = $picketData['schedulesMap'][$schedKey]['picket_area_name'] ?? 'Area Piket';
+                            $schedList = isset($picketData['schedulesMap'][$schedKey]['day_of_week']) 
+                                ? [$picketData['schedulesMap'][$schedKey]] 
+                                : $picketData['schedulesMap'][$schedKey];
+                            foreach ($schedList as $sched) {
+                                $schedStart = !empty($sched['start_date']) ? substr($sched['start_date'], 0, 10) : null;
+                                $schedEnd = !empty($sched['end_date']) ? substr($sched['end_date'], 0, 10) : null;
+                                if ((!$schedStart || $dateStr >= $schedStart) && (!$schedEnd || $dateStr <= $schedEnd)) {
+                                    $isPicketToday = true;
+                                    $picketAreaName = $sched['picket_area_name'] ?? 'Area Piket';
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -1956,6 +1993,7 @@ class AttendanceApiController extends Controller
             'summary' => [
                 'total_employees' => count($reports),
                 'average_percentage' => $unitAverage,
+                'unit_average_percentage' => $unitAverage,
                 'count_green' => $countGreen,
                 'count_yellow' => $countYellow,
                 'count_red' => $countRed,
@@ -1968,6 +2006,7 @@ class AttendanceApiController extends Controller
                 'waspada_staff_count' => $totalWaspadaStaff,
                 'kritis_staff_count' => $totalKritisStaff,
                 'total_late_events' => $totalLateEvents,
+                'total_late_count' => $totalLateEvents,
                 'total_late_minutes' => $totalLateMinutesAll,
             ],
             'positions' => $positions,
@@ -2264,7 +2303,7 @@ class AttendanceApiController extends Controller
         $schedulesMap = [];
         foreach ($schedules as $ps) {
             $pKey = ($ps['school_unit_id'] ?? '') . '_' . ($ps['employee_id'] ?? '') . '_' . ($ps['day_of_week'] ?? '');
-            $schedulesMap[$pKey] = $ps;
+            $schedulesMap[$pKey][] = $ps;
         }
 
         $swapOverrides = [];

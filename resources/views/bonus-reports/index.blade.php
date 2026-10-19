@@ -517,10 +517,7 @@
                                 <!-- Grid Tanggal -->
                             <div class="grid grid-cols-7 gap-1">
                                 <template x-for="day in calendarDays" :key="day.dateStr">
-                                    <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between relative cursor-pointer"
-                                         @mouseenter="showMatrixTooltipFromModal($event, day)"
-                                         @mouseleave="hideMatrixTooltip()"
-                                         @click.stop="toggleMatrixTooltipFromModal($event, day)"
+                                    <div class="aspect-square border border-slate-100 dark:border-slate-800/40 rounded-lg p-0.5 flex flex-col justify-between relative cursor-default"
                                          :class="[
                                              day.isCurrentMonth ? (day.dateStr && new Date(day.dateStr).getDay() === 0 ? 'bg-red-50/50 dark:bg-red-950/15' : 'bg-white dark:bg-slate-900') : 'bg-slate-50/50 dark:bg-slate-950/20 opacity-40',
                                              (selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket) ? 'border-amber-400 dark:border-amber-500/80 ring-1 ring-amber-400/30' : ''
@@ -578,7 +575,6 @@
                     <div class="border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 px-5 py-3 flex flex-row items-center justify-between gap-4">
                         <div class="flex flex-wrap gap-2.5 text-[9px] md:text-xs">
                             <span class="font-bold text-slate-700 dark:text-slate-300">Ringkasan:</span>
-                            <span class="text-slate-600 dark:text-slate-400">Total: <strong class="text-emerald-650 dark:text-emerald-400" x-text="formatRupiah(stats.totalBonus)"></strong></span>
                             <span class="text-slate-600 dark:text-slate-400">Dapat Uang Kehadiran: <strong class="text-indigo-650 dark:text-indigo-400 font-bold" x-text="stats.bonusDays + ' Hari'"></strong></span>
                         </div>
                         <button type="button" @click="showCalendarModal = false" class="w-full sm:w-auto h-7 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg transition-colors cursor-pointer">

@@ -46,12 +46,19 @@ class AttendancePercentageReportController extends Controller
             $endDateReq = $endDate->format('Y-m-d');
         }
 
-        // Fetch all active employees (excluding Tukang from attendance percentage reports)
+        // Fetch all active employees (strictly exclude Tukang from attendance percentage reports)
         $rawEmployees = $this->service->getAllEmployees();
         $allEmployeesCollection = collect($rawEmployees)
             ->filter(function ($emp) {
-                $pos = strtolower(trim($emp['position'] ?? $emp['subject_position'] ?? ''));
-                return $pos !== 'tukang' && !str_contains($pos, 'tukang');
+                $pos = strtolower(trim((string)($emp['position'] ?? $emp['subject_position'] ?? '')));
+                $type = strtolower(trim((string)($emp['employee_type']['name'] ?? $emp['employee_type']['code'] ?? (is_string($emp['employee_type'] ?? null) ? $emp['employee_type'] : ''))));
+                $code = strtolower(trim((string)($emp['employee_type']['code'] ?? '')));
+                $name = strtolower(trim((string)($emp['name'] ?? '')));
+
+                if (str_contains($pos, 'tukang') || str_contains($type, 'tukang') || $type === 'tkg' || $code === 'tkg' || str_contains($name, 'tukang')) {
+                    return false;
+                }
+                return true;
             })
             ->sort(function ($a, $b) {
                 $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');

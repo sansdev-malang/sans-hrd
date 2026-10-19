@@ -11,7 +11,7 @@
         <div id="payslip-report-container" class="space-y-6">
 
         <!-- FILTERS & CONTROLS -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm w-full text-left">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm w-full text-left">
             <form method="GET" action="{{ route('payslips.index') }}" id="payslip-filter-form" data-no-loader="true" class="space-y-4">
                 <input type="hidden" name="unit_id" id="filter-unit-id" value="{{ request('unit_id', $unitId) }}">
 
@@ -121,7 +121,7 @@
         @endphp
 
         <!-- MAIN TABLE WITH INTEGRATED PERIOD HEADER -->
-        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden w-full p-0">
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden w-full p-0">
             <!-- Integrated Card Header -->
             <div class="px-5 py-3.5 bg-gradient-to-r from-slate-50 via-indigo-50/20 to-slate-50 dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left">
                 <div class="flex items-center gap-3">
@@ -165,8 +165,8 @@
             </div>
 
             <div class="overflow-x-auto" id="payslip-table-scroll-container" style="max-height: calc(100vh - 250px); overflow-y: auto;">
-                <table class="w-full text-sm text-left" id="payslip-main-table">
-                    <thead class="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 uppercase font-semibold border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
+                <table class="w-full text-xs text-left" id="payslip-main-table">
+                    <thead class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-[#0d0d10] uppercase font-bold tracking-wider border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20 shadow-xs">
                         <tr>
                             <th class="px-5 py-3.5 min-w-[210px]">Profil Pegawai</th>
                             <th class="px-4 py-3.5 min-w-[110px]">Periode</th>

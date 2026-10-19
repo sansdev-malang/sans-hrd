@@ -765,10 +765,7 @@
                         <!-- Calendar Grid -->
                         <div class="grid grid-cols-7 gap-1">
                             <template x-for="day in calendarDays" :key="day.dateStr">
-                                <div class="aspect-square border rounded-lg p-1 sm:p-1.5 flex flex-col justify-between cursor-pointer transition-colors hover:ring-1 hover:ring-indigo-400/50 relative"
-                                     @mouseenter="showMatrixTooltipFromModal($event, day)"
-                                     @mouseleave="hideMatrixTooltip()"
-                                     @click.stop="toggleMatrixTooltipFromModal($event, day)"
+                                <div class="aspect-square border rounded-lg p-1 sm:p-1.5 flex flex-col justify-between transition-colors hover:ring-1 hover:ring-indigo-400/50 relative"
                                      :class="[
                                          (selectedReport && selectedReport.daily_details[day.dateStr] && selectedReport.daily_details[day.dateStr].is_picket) 
                                              ? 'border-amber-400 dark:border-amber-500/80 ring-1 ring-amber-400/30 bg-amber-50/20 dark:bg-amber-950/15' 
@@ -920,7 +917,6 @@
                         <!-- Stats Grid -->
                         <div class="flex flex-wrap gap-2.5 text-[9px] md:text-xs">
                             <span class="font-bold text-slate-700 dark:text-slate-350">Ringkasan:</span>
-                            <span class="text-slate-600 dark:text-slate-400">Total Uang: <strong class="text-emerald-600 dark:text-emerald-400 font-mono font-bold" x-text="'Rp ' + Number(selectedReport.total_bonus_nominal || stats.totalBonus || 0).toLocaleString('id-ID')"></strong></span>
                             <span class="text-slate-600 dark:text-slate-400">Hadir: <strong class="text-emerald-650 dark:text-emerald-405" x-text="stats.hadir"></strong></span>
                             <template x-if="stats.reward > 0">
                                 <span class="text-slate-600 dark:text-slate-400">Reward: <strong class="text-emerald-600 dark:text-emerald-400" x-text="stats.reward"></strong></span>
