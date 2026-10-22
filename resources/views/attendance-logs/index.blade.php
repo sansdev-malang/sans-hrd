@@ -971,21 +971,7 @@
                 </div>
             </div>
 
-            <!-- Status Row -->
-            <div class="flex items-center justify-between gap-3 mb-2.5">
-                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">Status Kehadiran</span>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-xs"
-                      :class="{
-                          'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60': matrixTooltip.data?.status_color === 'emerald',
-                          'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60': matrixTooltip.data?.status_color === 'amber',
-                          'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/60': matrixTooltip.data?.status_color === 'rose',
-                          'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60': matrixTooltip.data?.status_color === 'blue',
-                          'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/60': matrixTooltip.data?.status_color === 'purple',
-                          'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700': matrixTooltip.data?.status_color === 'slate'
-                      }"
-                      x-text="matrixTooltip.data?.status">
-                </span>
-            </div>
+
 
             <!-- Shift & Jadwal Info -->
             <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 mb-2.5 rounded-xl border text-[10px]"

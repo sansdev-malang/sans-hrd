@@ -190,6 +190,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
     Route::delete('/profile/photo', [ProfileController::class, 'destroyPhoto'])->name('profile.photo.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Impersonation Routes
+    Route::post('/impersonate/{id}', [\App\Http\Controllers\ImpersonateController::class, 'enter'])->whereNumber('id')->name('impersonate.start');
+    Route::match(['get', 'post'], '/impersonate/leave', [\App\Http\Controllers\ImpersonateController::class, 'leave'])->name('impersonate.leave');
 });
 
 require __DIR__.'/auth.php';
