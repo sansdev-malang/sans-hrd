@@ -47,7 +47,7 @@ class AttendancePercentageReportController extends Controller
         }
 
         // Fetch all active employees (strictly exclude Tukang from attendance percentage reports)
-        $rawEmployees = $this->service->getAllEmployees();
+        $rawEmployees = $this->service->getAllEmployees(true);
         $allEmployeesCollection = collect($rawEmployees)
             ->filter(function ($emp) {
                 $pos = strtolower(trim((string)($emp['position'] ?? $emp['subject_position'] ?? '')));

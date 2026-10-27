@@ -83,6 +83,23 @@ class EmployeeController extends Controller
             }
         }
 
+        // Apply status filter (Active, Leave, Inactive)
+        $status = $request->query('status');
+        if (!empty($status)) {
+            $statusLower = strtolower($status);
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($statusLower) {
+                $rawStatus = strtolower(trim((string)($emp['status'] ?? 'active')));
+                if ($statusLower === 'active') {
+                    return in_array($rawStatus, ['active', 'aktif', '1', 'true']);
+                } elseif ($statusLower === 'leave') {
+                    return in_array($rawStatus, ['leave', 'cuti']);
+                } elseif ($statusLower === 'inactive') {
+                    return in_array($rawStatus, ['inactive', 'nonaktif', '0', 'false']);
+                }
+                return $rawStatus === $statusLower;
+            });
+        }
+
         // Sort by unit name, then alphabetically by employee name (A-Z)
         $employeesCollection = $employeesCollection->sort(function ($a, $b) {
             $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
@@ -123,6 +140,7 @@ class EmployeeController extends Controller
             'devices' => $devices,
             'positions' => $positions,
             'position' => $position,
+            'status' => $status,
             'unitCounts' => $unitCounts,
             'rawEmployees' => $rawEmployees,
         ]);
@@ -160,6 +178,22 @@ class EmployeeController extends Controller
             $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
                 $empPos = $emp['position'] ?? $emp['subject_position'] ?? '';
                 return $empPos == $position;
+            });
+        }
+
+        $status = $request->query('status');
+        if (!empty($status)) {
+            $statusLower = strtolower($status);
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($statusLower) {
+                $rawStatus = strtolower(trim((string)($emp['status'] ?? 'active')));
+                if ($statusLower === 'active') {
+                    return in_array($rawStatus, ['active', 'aktif', '1', 'true']);
+                } elseif ($statusLower === 'leave') {
+                    return in_array($rawStatus, ['leave', 'cuti']);
+                } elseif ($statusLower === 'inactive') {
+                    return in_array($rawStatus, ['inactive', 'nonaktif', '0', 'false']);
+                }
+                return $rawStatus === $statusLower;
             });
         }
 
@@ -289,6 +323,22 @@ class EmployeeController extends Controller
             $employeesCollection = $employeesCollection->filter(function ($emp) use ($position) {
                 $empPos = $emp['position'] ?? $emp['subject_position'] ?? '';
                 return $empPos == $position;
+            });
+        }
+
+        $status = $request->query('status');
+        if (!empty($status)) {
+            $statusLower = strtolower($status);
+            $employeesCollection = $employeesCollection->filter(function ($emp) use ($statusLower) {
+                $rawStatus = strtolower(trim((string)($emp['status'] ?? 'active')));
+                if ($statusLower === 'active') {
+                    return in_array($rawStatus, ['active', 'aktif', '1', 'true']);
+                } elseif ($statusLower === 'leave') {
+                    return in_array($rawStatus, ['leave', 'cuti']);
+                } elseif ($statusLower === 'inactive') {
+                    return in_array($rawStatus, ['inactive', 'nonaktif', '0', 'false']);
+                }
+                return $rawStatus === $statusLower;
             });
         }
 
@@ -462,6 +512,7 @@ class EmployeeController extends Controller
 
         if ($response->successful()) {
             \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
+            \Illuminate\Support\Facades\Cache::forget('hrd_employees_all');
             // If zkteco_uid is provided, queue ADMS commands for selected devices
             $zkteco_uid = $request->input('zkteco_uid');
             $device_ids = $request->input('zkteco_device_ids', []);
@@ -632,6 +683,7 @@ class EmployeeController extends Controller
 
         if ($response->successful()) {
             \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
+            \Illuminate\Support\Facades\Cache::forget('hrd_employees_all');
             // If zkteco_uid is provided, queue ADMS commands for selected devices
             $zkteco_uid = $request->input('zkteco_uid');
             $device_ids = $request->input('zkteco_device_ids', []);
@@ -688,6 +740,7 @@ class EmployeeController extends Controller
 
         if ($deleteResponse->successful()) {
             \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
+            \Illuminate\Support\Facades\Cache::forget('hrd_employees_all');
             // Jika berhasil dihapus di aplikasi, antrekan perintah hapus ke mesin
             if ($zkteco_uid) {
                 $mappings = EmployeeDeviceMapping::where('zkteco_uid', $zkteco_uid)->get();
@@ -893,6 +946,7 @@ class EmployeeController extends Controller
 
         if ($importedCount > 0) {
             \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
+            \Illuminate\Support\Facades\Cache::forget('hrd_employees_all');
             $msg = "$importedCount pegawai berhasil diimpor.";
             if (count($errors) > 0) {
                 return redirect()->back()->with('success', $msg)->with('import_errors', $errors);
@@ -935,6 +989,7 @@ class EmployeeController extends Controller
     public function triggerSync(Request $request)
     {
         \Illuminate\Support\Facades\Cache::forget('sd_employees_all');
+        \Illuminate\Support\Facades\Cache::forget('hrd_employees_all');
         return redirect()->back()->with('success', 'Cache data pegawai dibersihkan. Menarik ulang data pegawai dari seluruh unit sekolah secara instan.');
     }
 }

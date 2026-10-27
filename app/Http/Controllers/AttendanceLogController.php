@@ -38,7 +38,7 @@ class AttendanceLogController extends Controller
 
     private function generateReportsData($startDate, $endDate, $search = null, $unitId = null, $position = null)
     {
-        $rawEmployees = collect($this->service->getAllEmployees());
+        $rawEmployees = collect($this->service->getAllEmployees(true));
 
         if (!empty($unitId)) {
             $rawEmployees = $rawEmployees->filter(fn($e) => isset($e['unit_id']) && $e['unit_id'] == $unitId);
@@ -738,7 +738,7 @@ class AttendanceLogController extends Controller
         $position = $request->query('position');
 
         // Extract unique positions (jabatan) from raw employee data using the renamed service method, filtered by unit if specified
-        $rawEmployeesForPos = $this->service->getAllEmployees();
+        $rawEmployeesForPos = $this->service->getAllEmployees(true);
         $filteredEmployeesForPos = collect($rawEmployeesForPos);
         if (!empty($unitId)) {
             $filteredEmployeesForPos = $filteredEmployeesForPos->filter(fn($e) => isset($e['unit_id']) && $e['unit_id'] == $unitId);

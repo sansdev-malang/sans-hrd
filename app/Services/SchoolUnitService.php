@@ -10,12 +10,14 @@ class SchoolUnitService
 {
     /**
      * Get employees from all active school units.
+     *
+     * @param bool $onlyActive If true, filters only active employees.
      */
-    public function getAllEmployees(): array
+    public function getAllEmployees(bool $onlyActive = false): array
     {
-        return \Illuminate\Support\Facades\Cache::remember('sd_employees_all', 86400, function() {
+        $allEmployees = \Illuminate\Support\Facades\Cache::remember('hrd_employees_all', 86400, function() {
             $activeUnits = SchoolUnit::where('is_active', true)->get();
-            $allEmployees = [];
+            $result = [];
 
             if ($activeUnits->isEmpty()) {
                 return [];
@@ -49,24 +51,40 @@ class SchoolUnitService
                         $emp['unit_url'] = $baseUrl;
                     }
 
-                    // Filter only active employees (Active / Aktif)
-                    $employees = array_values(array_filter($employees, function ($emp) {
-                        if (!isset($emp['status']) || $emp['status'] === null || $emp['status'] === '') {
-                            return true;
-                        }
-                        $status = strtolower(trim((string)$emp['status']));
-                        return in_array($status, ['active', 'aktif', '1', 'true']);
-                    }));
-
-                    $allEmployees = array_merge($allEmployees, $employees);
+                    $result = array_merge($result, $employees);
                 } else {
                     $status = $response instanceof \Illuminate\Http\Client\Response ? $response->status() : 'Error/Timeout';
                     Log::error("Failed to fetch employees from unit {$unit->name}. Status: {$status}");
                 }
             }
 
-            return $allEmployees;
+            return $result;
         });
+
+        // Strictly active only
+        if ($onlyActive === 'active_only') {
+            return array_values(array_filter($allEmployees, function ($emp) {
+                if (!isset($emp['status']) || $emp['status'] === null || $emp['status'] === '') {
+                    return true;
+                }
+                $status = strtolower(trim((string)$emp['status']));
+                return in_array($status, ['active', 'aktif', '1', 'true']);
+            }));
+        }
+
+        // When $onlyActive is true (or 'current'), include both Active and Leave (Cuti) employees,
+        // and strictly exclude Inactive (Nonaktif) employees who have resigned/inactive.
+        if ($onlyActive === true || $onlyActive === 'current') {
+            return array_values(array_filter($allEmployees, function ($emp) {
+                if (!isset($emp['status']) || $emp['status'] === null || $emp['status'] === '') {
+                    return true;
+                }
+                $status = strtolower(trim((string)$emp['status']));
+                return !in_array($status, ['inactive', 'nonaktif', '0', 'false']);
+            }));
+        }
+
+        return $allEmployees;
     }
 
     /**

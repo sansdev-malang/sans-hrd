@@ -40,8 +40,8 @@ class EmployeeWorkingShiftController extends Controller
         }
         $assignments = $query->orderBy('start_date', 'desc')->get();
 
-        // Get employees from the service to map names
-        $employees = $this->unitService->getAllEmployees();
+        // Get employees from the service to map names (active only for shift mapping)
+        $employees = $this->unitService->getAllEmployees(true);
         $employeeMap = collect($employees)->keyBy(function ($item) {
             return $item['unit_id'] . '-' . $item['id'];
         })->toArray();
@@ -453,13 +453,13 @@ class EmployeeWorkingShiftController extends Controller
             if ($response->successful()) {
                 $employees = $response->json('data') ?? [];
                 
-                // Filter only active employees (Active / Aktif)
+                // Exclude only inactive employees (keep Active and Leave/Cuti)
                 $employees = array_values(array_filter($employees, function ($emp) {
                     if (!isset($emp['status']) || $emp['status'] === null || $emp['status'] === '') {
                         return true;
                     }
                     $status = strtolower(trim((string)$emp['status']));
-                    return in_array($status, ['active', 'aktif', '1', 'true']);
+                    return !in_array($status, ['inactive', 'nonaktif', '0', 'false']);
                 }));
                 
                 $month = $request->query('month');
@@ -686,7 +686,7 @@ class EmployeeWorkingShiftController extends Controller
         $daysInMonth = \Carbon\Carbon::create($year, $month, 1)->daysInMonth;
 
         $unitService = app(\App\Services\SchoolUnitService::class);
-        $allEmployees = $unitService->getAllEmployees();
+        $allEmployees = $unitService->getAllEmployees(true);
         $rawEmployees = array_filter($allEmployees, function($emp) use ($selectedUnitId) {
             return $emp['unit_id'] == $selectedUnitId;
         });
@@ -779,7 +779,7 @@ class EmployeeWorkingShiftController extends Controller
             $unit = \App\Models\SchoolUnit::find($selectedUnitId);
             if ($unit) {
                 try {
-                    $allEmployees = $this->unitService->getAllEmployees();
+                    $allEmployees = $this->unitService->getAllEmployees(true);
                     $rawEmployees = array_values(array_filter($allEmployees, function($emp) use ($selectedUnitId) {
                         return (int)($emp['unit_id'] ?? 0) === (int)$selectedUnitId;
                     }));
@@ -1180,7 +1180,7 @@ class EmployeeWorkingShiftController extends Controller
         $shifts = $this->assignShiftColors($shifts);
         $daysInMonth = \Carbon\Carbon::create($year, $month)->daysInMonth;
         
-        $allEmployees = $this->unitService->getAllEmployees();
+        $allEmployees = $this->unitService->getAllEmployees(true);
         $rawEmployees = array_filter($allEmployees, function($emp) use ($unitId) {
             return $emp['unit_id'] == $unitId;
         });

@@ -47,8 +47,8 @@ class AttendanceBonusReportController extends Controller
             ->first()
             ?: BonusSchema::with('tiers')->where('is_active', true)->first();
 
-        // Fetch Employees
-        $rawEmployees = $this->service->getAllEmployees();
+        // Fetch Employees (active only for bonus calculation)
+        $rawEmployees = $this->service->getAllEmployees(true);
         
         // Extract unique positions
         $filteredEmployeesForPos = collect($rawEmployees);
@@ -139,7 +139,7 @@ class AttendanceBonusReportController extends Controller
         $endDate = $monthCarbon->copy()->setDay($cutoffDate)->endOfDay();
         $startDate = $monthCarbon->copy()->subMonth()->setDay($cutoffDate + 1)->startOfDay();
 
-        $rawEmployees = $this->service->getAllEmployees();
+        $rawEmployees = $this->service->getAllEmployees(true);
         $employeesCollection = collect($rawEmployees)->sort(function ($a, $b) {
             $unitCompare = strcmp($a['unit_name'] ?? '', $b['unit_name'] ?? '');
             if ($unitCompare !== 0) {

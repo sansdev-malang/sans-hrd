@@ -22,8 +22,8 @@ class DashboardController extends Controller
     {
         $date = $request->input('date', Carbon::today()->toDateString());
 
-        // Fetch data from all school unit APIs
-        $sdEmployees = $this->schoolService->getAllEmployees();
+        // Fetch data from all school unit APIs (only active employees for daily attendance dashboard)
+        $sdEmployees = $this->schoolService->getAllEmployees(true);
         $sdAttendances = $this->schoolService->getAllAttendances($date);
 
         // Fetch logs from local ZKTeco records for this date
@@ -193,7 +193,17 @@ class DashboardController extends Controller
                         $alpa++;
                     }
                 } else {
-                    $alpa++;
+                    $empStatus = strtolower(trim((string)($emp['status'] ?? 'active')));
+                    if (in_array($empStatus, ['leave', 'cuti'])) {
+                        $attendanceMap[$uniqueKey] = [
+                            'status' => 'Leave',
+                            'clock_in' => null,
+                            'clock_out' => null,
+                        ];
+                        $izin++;
+                    } else {
+                        $alpa++;
+                    }
                 }
             }
         }

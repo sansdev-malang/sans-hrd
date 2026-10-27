@@ -136,7 +136,16 @@
                         @endforeach
                     </select>
 
-                    @if(request()->anyFilled(['search', 'unit', 'position']) || request()->filled('per_page') && request('per_page') != 50)
+                    <!-- Status -->
+                    <select name="status" onchange="triggerFilterForm(this)"
+                        class="h-9 pl-2.5 pr-8 flex-1 sm:flex-initial sm:w-36 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap">
+                        <option value="">Semua Status</option>
+                        <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Aktif</option>
+                        <option value="Leave" {{ request('status') == 'Leave' ? 'selected' : '' }}>Cuti</option>
+                        <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Nonaktif</option>
+                    </select>
+
+                    @if(request()->anyFilled(['search', 'unit', 'position', 'status']) || request()->filled('per_page') && request('per_page') != 50)
                         <a href="{{ route('employees.index') }}" data-no-loader="true" class="h-9 px-3 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg transition-colors reset-filter-btn" title="Reset Filter">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </a>
@@ -253,9 +262,12 @@
                                     </td>
                                 @endif
                                 <td class="px-3 md:px-6 py-3 md:py-4">
-                                    @if(($emp['status'] ?? '') == 'Active')
+                                    @php
+                                        $s = strtolower(trim((string)($emp['status'] ?? 'active')));
+                                    @endphp
+                                    @if(in_array($s, ['active', 'aktif', '1', 'true']))
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-lime-50 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400 border border-lime-200/50 dark:border-lime-800/40">Aktif</span>
-                                    @elseif(($emp['status'] ?? '') == 'Leave')
+                                    @elseif(in_array($s, ['leave', 'cuti']))
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">Cuti</span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200/50 dark:border-red-800/40">Nonaktif</span>
@@ -508,6 +520,17 @@
                                         <div class="min-w-0">
                                             <span class="block text-slate-400 text-[9px] uppercase font-semibold">Status Pegawai</span>
                                             <span class="font-bold text-slate-900 dark:text-slate-100 block" x-text="selectedEmp ? (selectedEmp.employment_status || '-') : '-'"></span>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <span class="block text-slate-400 text-[9px] uppercase font-semibold">Status Keaktifan</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold mt-0.5"
+                                                :class="{
+                                                    'bg-lime-50 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400 border border-lime-200/50 dark:border-lime-800/40': selectedEmp && ['active', 'aktif', '1', 'true'].includes((selectedEmp.status || 'active').toLowerCase()),
+                                                    'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40': selectedEmp && ['leave', 'cuti'].includes((selectedEmp.status || '').toLowerCase()),
+                                                    'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200/50 dark:border-red-800/40': selectedEmp && !['active', 'aktif', '1', 'true', 'leave', 'cuti'].includes((selectedEmp.status || '').toLowerCase())
+                                                }"
+                                                x-text="selectedEmp ? (['active', 'aktif', '1', 'true'].includes((selectedEmp.status || 'active').toLowerCase()) ? 'Aktif' : (['leave', 'cuti'].includes((selectedEmp.status || '').toLowerCase()) ? 'Cuti' : 'Nonaktif')) : '-'">
+                                            </span>
                                         </div>
                                         <div class="min-w-0">
                                             <span class="block text-slate-400 text-[9px] uppercase font-semibold">Jabatan</span>

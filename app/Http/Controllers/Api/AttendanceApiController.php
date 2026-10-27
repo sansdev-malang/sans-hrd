@@ -1298,8 +1298,8 @@ class AttendanceApiController extends Controller
         $startDateReq = $startDate->format('Y-m-d');
         $endDateReq = $endDate->format('Y-m-d');
 
-        // Fetch employees (strictly exclude Tukang from attendance percentage calculations)
-        $rawEmployees = $this->service->getAllEmployees();
+        // Fetch employees (strictly exclude Tukang from attendance percentage calculations, active only)
+        $rawEmployees = $this->service->getAllEmployees(true);
         $employeesCollection = collect($rawEmployees)
             ->filter(function ($emp) {
                 $pos = strtolower(trim((string)($emp['position'] ?? $emp['subject_position'] ?? '')));

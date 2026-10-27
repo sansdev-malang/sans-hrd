@@ -29,7 +29,7 @@ class HolidayController extends Controller
         $units = SchoolUnit::where('is_active', true)->orderBy('name')->get();
         $unitsMap = $units->keyBy('id');
         $adjustments = HolidayAdjustment::with(['holiday', 'schoolUnit'])->orderBy('original_date', 'desc')->get();
-        $rawEmployees = $this->schoolUnitService->getAllEmployees();
+        $rawEmployees = $this->schoolUnitService->getAllEmployees(true);
 
         // Index raw employees for fast lookup
         $employeesMap = [];

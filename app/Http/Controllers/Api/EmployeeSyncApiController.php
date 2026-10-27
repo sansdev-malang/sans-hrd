@@ -20,6 +20,7 @@ class EmployeeSyncApiController extends Controller
 
         try {
             Cache::forget('sd_employees_all');
+            Cache::forget('hrd_employees_all');
 
             Log::info('Employee cache cleared via webhook trigger from school unit', [
                 'school_unit_id' => $unitId,

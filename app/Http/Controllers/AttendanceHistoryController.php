@@ -45,7 +45,7 @@ class AttendanceHistoryController extends Controller
         $selectedStatus = $request->query('status'); // Hadir, Terlambat, Alfa, Sakit, Izin, Cuti, Dinas
 
         // Get unique positions from raw employee data using the renamed service method
-        $rawEmployees = collect($this->service->getAllEmployees());
+        $rawEmployees = collect($this->service->getAllEmployees(true));
         
         $unitPositions = [];
         $unitPositions[''] = $rawEmployees
@@ -754,7 +754,7 @@ class AttendanceHistoryController extends Controller
         $selectedStatus = $request->query('status');
 
         // Fetch employees list using the renamed service method
-        $rawEmployees = collect($this->service->getAllEmployees());
+        $rawEmployees = collect($this->service->getAllEmployees(true));
         if (!empty($unitId)) {
             $rawEmployees = $rawEmployees->filter(fn($emp) => ($emp['unit_id'] ?? '') == $unitId);
         }

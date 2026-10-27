@@ -38,8 +38,8 @@ class PayslipController extends Controller
         $position = $request->query('position');
         $search = $request->query('search');
 
-        // Fetch all employees from units
-        $allEmployees = $this->schoolUnitService->getAllEmployees(); 
+        // Fetch all active employees from units for payslips
+        $allEmployees = $this->schoolUnitService->getAllEmployees(true); 
         
         $employeesCollection = collect($allEmployees);
 
