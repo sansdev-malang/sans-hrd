@@ -58,6 +58,7 @@ class EmployeeController extends Controller
                 return str_contains(strtolower($emp['name'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['email'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['nuptk_nip_nik'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['niy'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['subject_position'] ?? ''), strtolower($search));
             });
         }
@@ -157,6 +158,7 @@ class EmployeeController extends Controller
                 return str_contains(strtolower($emp['name'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['email'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['nuptk_nip_nik'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['niy'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['subject_position'] ?? ''), strtolower($search));
             });
         }
@@ -302,6 +304,7 @@ class EmployeeController extends Controller
                 return str_contains(strtolower($emp['name'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['email'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['nuptk_nip_nik'] ?? ''), strtolower($search))
+                    || str_contains(strtolower($emp['niy'] ?? ''), strtolower($search))
                     || str_contains(strtolower($emp['subject_position'] ?? ''), strtolower($search));
             });
         }

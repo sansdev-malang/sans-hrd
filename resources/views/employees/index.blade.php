@@ -188,6 +188,7 @@
                         <tr class="border-b border-slate-200 dark:border-slate-800">
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-14">No</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[200px]">Nama Lengkap</th>
+                            <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-28 whitespace-nowrap">NIY</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Unit</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[120px] whitespace-nowrap">Tipe Pegawai</th>
                             <th class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 px-3 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider min-w-[240px]">Jabatan</th>
@@ -229,6 +230,9 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td class="px-3 md:px-6 py-3 md:py-4 font-mono text-slate-700 dark:text-slate-300 text-xs whitespace-nowrap">
+                                    {{ $emp['niy'] ?? '-' }}
+                                </td>
                                 <td class="px-3 md:px-6 py-3 md:py-4">
                                      @if(str_contains(strtolower($emp['unit_name']), 'paud'))
                                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border border-teal-200/50 dark:border-teal-800/40 uppercase">{{ $emp['unit_name'] }}</span>
@@ -238,7 +242,7 @@
                                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/40 uppercase">{{ $emp['unit_name'] }}</span>
                                      @else
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 uppercase tracking-wider">{{ $emp['unit_name'] }}</span>
-                                    @endif
+                                     @endif
                                 </td>
                                 <td class="px-3 md:px-6 py-3 md:py-4 text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">
                                     {{ $emp['employee_type']['name'] ?? 'Pegawai' }}
@@ -288,7 +292,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ auth()->user()->role === 'super_admin' ? 9 : 8 }}" class="px-6 py-12 text-center text-slate-400">
+                                <td colspan="{{ auth()->user()->role === 'super_admin' ? 10 : 9 }}" class="px-6 py-12 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <i data-lucide="users-2" class="w-8 h-8 text-slate-300 dark:text-slate-700"></i>
                                         <p class="text-xs">Tidak ada data pegawai yang dapat ditampilkan.</p>
