@@ -514,6 +514,14 @@ class AttendanceLogController extends Controller
                             }
                         }
 
+                        $earlyCheckoutMinutes = 0;
+                        if ($checkOutLog) {
+                            $checkOutCarbon = \Carbon\Carbon::parse($checkOutLog);
+                            if ($checkOutCarbon->second(0)->lessThan($expectedOut->copy()->second(0))) {
+                                $earlyCheckoutMinutes = (int) $checkOutCarbon->diffInMinutes($expectedOut);
+                            }
+                        }
+
                         $dailyDetails[$dateStr] = [
                             'status' => 'Hadir',
                             'check_in' => $checkInLog ? substr($checkInLog, 11, 5) : null,
@@ -522,6 +530,8 @@ class AttendanceLogController extends Controller
                             'is_red_late' => $isRedLate,
                             'late_minutes' => $lateMinutes,
                             'early_minutes' => $earlyMinutes,
+                            'is_early_checkout' => $earlyCheckoutMinutes > 0,
+                            'early_checkout_minutes' => $earlyCheckoutMinutes,
                             'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
                             'shift_start' => $shiftStartTime,
                             'shift_end' => $shiftEndTime,
@@ -605,6 +615,8 @@ class AttendanceLogController extends Controller
                             'is_red_late' => ($isLateForLeave && $isRedLate),
                             'late_minutes' => $isLateForLeave ? $lateMinutes : 0,
                             'early_minutes' => !empty($checkInLog) ? $earlyMinutes : 0,
+                            'is_early_checkout' => !empty($checkOutLog) && $earlyCheckoutMinutes > 0,
+                            'early_checkout_minutes' => !empty($checkOutLog) ? $earlyCheckoutMinutes : 0,
                             'shift_name' => $shiftName ?? ($isShiftWorker ? 'Shift' : 'Reguler'),
                             'shift_start' => $shiftStartTime,
                             'shift_end' => $shiftEndTime,
